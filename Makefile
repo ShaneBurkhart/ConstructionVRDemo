@@ -4,7 +4,7 @@ NAME=construction-vr-demo
 all: run
 
 run:
-	docker run --rm --name ${NAME} -p 4567:4567 --env-file user.env ${IMAGE_TAG}
+	docker run -d --rm --name ${NAME} -p 4567:4567 --env-file user.env ${IMAGE_TAG}
 
 build:
 	 docker build -t ${IMAGE_TAG} -f Dockerfile .
