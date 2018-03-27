@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://s3-us-west-2.amazonaws.com/construction-vr/src/build/vrview.min.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-2.2.4.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+      crossorigin="anonymous"></script>
+
+    <style>
+      * { box-sizing: border-box; }
+
+      #floor-plan-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 80px 0;
+      }
+
+      #floor-plan-container .unit-floor-plans .unit-option img  {
+        width: 100%;;
+        height: auto;
+        max-width: 200px;
+      }
+
+      #floor-plan-container .unit-floor-plans .unit-option {
+        display: inline-block;
+        cursor: pointer;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+
+      #floor-plan-container .unit-floor-plans .unit-option.selected {
+        border: 1px solid #cccccc;
+      }
+
+      #floor-plan-container .unit-floor-plans {
+        text-align: center;
+      }
+
+      #floor-plan-container .floor-plan {
+        width: 100%;
+        height: auto;
+        margin-bottom: 30px;
+        position: relative;
+      }
+
+      #floor-plan-container .floor-plan img {
+        width: 100%;
+      }
+
+      #floor-plan-container .floor-plan .point {
+        background-color: #cc00cc;
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        margin-left: -8px;
+        margin-top: -8px;
+        border-radius: 50%;
+        z-index: 1;
+        cursor: pointer;
+
+        -webkit-box-shadow: 0px 0px 5px 3px rgba(255,255,255,0.65);
+        -moz-box-shadow: 0px 0px 5px 3px rgba(255,255,255,0.65);
+        box-shadow: 0px 0px 5px 3px rgba(255,255,255,0.65);
+      }
+
+      #floor-plan-container .floor-plan .point:hover {
+        background-color: blue;
+        width: 30px;
+        height: 30px;
+        margin-left: -16px;
+        margin-top: -16px;
+      }
+
+      #floor-plan-container select {
+        display: none;
+      }
+
+      #vr-view {
+        width: 100%;
+      }
+
+      #vr-view iframe {
+        width: 100%;
+        height: 400px;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      @media (max-width: 768px) {
+        #floor-plan-container select {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id='floor-plan-container'>
+      <div class="unit-floor-plans">
+        <h3 class="text-center">Select a floor plan to view.</h3>
+      </div>
+
+      <div class="floor-plan-container">
+        <h2 class="text-center"></h2>
+        <div class="floor-plan">
+          <img src="" >
+        </div>
+      </div>
+
+      <select></select>
+
+      <div class="text-center">
+        <h2 class="text-center">Take a look around...</h2>
+        <p class="">Click and drag to look around the room.</p>
+      </div>
+
+      <div id="vr-view"></div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        var PROJECT = "Walnut St";
+
+        var _units = {};
+        var _panoramaRenderings = {};
+        var _vrView = null;
+        var $pointsSelect = $('#floor-plan-container select');
+        var $unitFloorPlans = $('#floor-plan-container .unit-floor-plans');
+        var $floorPlan = $('#floor-plan-container .floor-plan');
+        var $floorPlanImg = $('#floor-plan-container .floor-plan img');
+        var $floorPlanHeader = $('#floor-plan-container .floor-plan-container h2');
+
+        function showVRImage(imageUrl) {
+          if (!_vrView) {
+            _vrView = new VRView.Player('#vr-view', {
+              image: imageUrl,
+              is_stereo: true
+            });
+          } else {
+            _vrView.setContent({
+              image: imageUrl,
+              is_stereo: true
+            });
+          }
+        }
+
+        function getUnitsUrl() {
+          var formula = encodeURIComponent('(FIND("' + PROJECT + '", {Project}))');
+          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Units?maxRecords=3&view=Walnut%20St&filterByFormula=" + formula;
+        }
+
+        function getPanoramaRenderingsUrl(record_ids) {
+          var formulaParts = [];
+          record_ids = record_ids || [];
+
+          for(var i = 0; i < record_ids.length; i++ ) {
+            formulaParts.push('FIND("' + record_ids[i] + '", {Record ID})');
+          }
+
+          var formula = 'OR(' + formulaParts.join(',') + ')';
+          console.log(formula);
+          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Panorama%20Renderings?filterByFormula=" + encodeURIComponent(formula);
+        }
+
+        function getUnits(done) {
+          $.ajax(getUnitsUrl(), {
+            accepts: "application/json",
+            headers: { "Authorization": "Bearer " }
+          }).then(function (results) { done(results.records); });
+        }
+
+        function getPanoramaRendering(record_id, done) { getPanoramaRenderings([ record_id ], done); }
+
+        function getPanoramaRenderings(record_ids, done) {
+          $.ajax(getPanoramaRenderingsUrl(record_ids), {
+            accepts: "application/json",
+            headers: { "Authorization": "Bearer keyc0gFTmMlQpoKsm" }
+          }).then(function (results) { done(results.records); });
+        }
+
+        function showUnitOptions(units) {
+          var unitOptions = [];
+
+          for(var key in units) {
+            var unit = units[key];
+
+            unitOptions.push([
+              "<div class='unit-option' data-id='" + unit["id"] + "'>",
+                "<img src='" + unit.fields["S3 Floor Plan URL"] + "'>",
+                "<p>" + unit.fields["Name"] + "</p>",
+              "</div>",
+            ].join(""));
+          }
+
+          $unitFloorPlans.find(".unit-option").remove();
+          $unitFloorPlans.append(unitOptions.join(""));
+        }
+
+        function renderPoints(panoramaRenderings) {
+          var newPoints = [];
+          $floorPlan.find(".point").remove();
+
+          for(var i = 0; i < panoramaRenderings.length; i++) {
+            var panoramaRendering = panoramaRenderings[i];
+            var id = panoramaRendering["id"];
+            var fpLeft = panoramaRendering.fields["Floor Plan X"];
+            var fpTop = panoramaRendering.fields["Floor Plan Y"];
+
+            newPoints.push("<div class='point' data-id='" + id + "' style='top: " + fpTop + "%; left: " + fpLeft + "%;'></div>");
+          }
+
+          $floorPlan.append(newPoints.join(""));
+        }
+
+        function renderPointsSelect(panoramaRenderings) {
+          var newPoints = [];
+          $pointsSelect.empty();
+
+          for(var i = 0; i < panoramaRenderings.length; i++) {
+            var panoramaRendering = panoramaRenderings[i];
+            var prId = panoramaRendering["id"];
+            var prName = panoramaRendering.fields["Name"];
+
+            newPoints.push("<option value='" + prId + "'>" + prName + "</option>");
+          }
+
+          $pointsSelect.append(newPoints.join(""));
+        }
+
+        function showUnit(unit) {
+          var fields = unit.fields
+          var floorPlanName = fields["Name"];
+          var floorPlanURL = fields["S3 Floor Plan URL"];
+          var panoramaRenderingIDs = fields["Panorama Renderings"] || [];
+
+          $floorPlanHeader.text("Floor plan for " + floorPlanName);
+          $floorPlanImg.attr("src", floorPlanURL);
+
+          var isLoaded = true;
+          for(var i = 0; i < panoramaRenderingIDs.length; i++ ) {
+            console.log(panoramaRenderingIDs[i]);
+            if (!_panoramaRenderings[panoramaRenderingIDs[i]]) {
+              isLoaded = false;
+              break;
+            }
+          }
+
+          console.log("Is unit loaded: " + isLoaded);
+
+          if (!isLoaded) {
+            if (panoramaRenderingIDs.length) {
+              getPanoramaRenderings(panoramaRenderingIDs, function (panoramaRenderings) {
+                updateStore(_panoramaRenderings, panoramaRenderings);
+                var panoramaRendering = panoramaRenderings[0];
+
+                showVRImage(panoramaRendering.fields["S3 Image URL"]);
+                renderPoints(panoramaRenderings);
+                renderPointsSelect(panoramaRenderings);
+              });
+            } else {
+              // TODO Show a no renderings found message.
+              renderPoints([]);
+              renderPointsSelect([]);
+            }
+          } else {
+            if (panoramaRenderingIDs.length) {
+              // Records already loaded so just show them.
+              var panoramaRenderingId = panoramaRenderingIDs[0];
+              var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
+              var unitPanoramaRenderings = [];
+
+              for(var i = 0; i < panoramaRenderingIDs.length; i++ ) {
+                unitPanoramaRenderings.push(_panoramaRenderings[panoramaRenderingIDs[i]]);
+              }
+
+              console.log(unitPanoramaRenderings);
+
+              showVRImage(panoramaRendering.fields["S3 Image URL"]);
+              renderPoints(unitPanoramaRenderings);
+              renderPointsSelect(unitPanoramaRenderings);
+            } else {
+              // TODO show a no renderings message.
+              renderPoints([]);
+              renderPointsSelect([]);
+            }
+          }
+        }
+
+        // Indexes newArray by the record id and updates in store.
+        function updateStore(store, newArray) {
+          for(var i = 0; i < newArray.length; i++) {
+            var item = newArray[i];
+            store[item["id"]] = item;
+          }
+        }
+
+        getUnits(function (units) {
+          updateStore(_units, units);
+          showUnitOptions(_units);
+          showUnit(units[0]);
+        });
+
+        $floorPlan.on("click", ".point", function (e) {
+          var $this = $(this);
+          var panoramaRenderingId = $this.data("id");
+          var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
+
+          showVRImage(panoramaRendering.fields["S3 Image URL"]);
+        });
+
+        $pointsSelect.change(function (e) {
+          var $this = $(this);
+          var panoramaRenderingId = $this.val();
+          var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
+
+          showVRImage(panoramaRendering.fields["S3 Image URL"]);
+        });
+
+        // Uncomment for placing coordinates of panorama renderings.
+        $floorPlanImg.click(function (e) {
+          var $this = $(this);
+          var offset = $this.offset();
+          var clickImgLeft = e.pageX - offset.left;
+          var clickImgTop = e.pageY - offset.top;
+          var imgWidth = $this.width();
+          var imgHeight = $this.height();
+
+          var centerLeft = Math.round(clickImgLeft / imgWidth * 10000) / 100;
+          var centerTop = Math.round(clickImgTop / imgHeight * 10000) / 100;
+          console.log("Center Left: " + centerLeft + "%");
+          console.log("Center Top: " + centerTop + "%");
+          console.log(centerLeft + "\t" + centerTop);
+        });
+
+        $unitFloorPlans.on("click", ".unit-option", function (e) {
+          var $this = $(this);
+          var unit = _units[$this.data("id")];
+
+          $this.parent().find('.unit-option.selected').removeClass('selected');
+          $this.addClass('selected');
+
+          showUnit(unit);
+        });
+      });
+    </script>
+  </body>
+</html>
