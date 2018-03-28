@@ -108,6 +108,10 @@
     :javascript
       $(document).ready(function () {
         var PROJECT = "Walnut St";
+        var BG_LOADING_LIMIT = 1;
+        var _bgLoadingQueue = [];
+        var _currentBgLoading = [];
+        var _bgLoaded = [];
 
         var _units = {};
         var _panoramaRenderings = {};
@@ -117,6 +121,49 @@
         var $floorPlan = $('#floor-plan-container .floor-plan');
         var $floorPlanImg = $('#floor-plan-container .floor-plan img');
         var $floorPlanHeader = $('#floor-plan-container .floor-plan-container h2');
+
+        function queueImageLoading(src) {
+          if (!src) return;
+          // If is loading, is in queue or is loaded, no need to do anything.
+          if (_bgLoadingQueue.includes(src) || _currentBgLoading.includes(src) || _bgLoaded.includes(src)) return;
+
+          console.log("Currently loading: " + _currentBgLoading.length);
+          // If we are already at or above our limit, add to queue.
+          if (_currentBgLoading.length >= BG_LOADING_LIMIT) {
+            console.log("Queuing: " + src);
+            _bgLoadingQueue.push(src);
+            return;
+          }
+
+          var curImg = new Image();
+
+          curImg.onload = function () {
+            console.log("Loaded: " + src);
+            if (_bgLoaded.indexOf(src) < 0) _bgLoaded.push(src);
+
+            // Remove src from current loading
+            var currentIndex = _currentBgLoading.indexOf(src);
+            if (currentIndex > -1) _currentBgLoading.splice(currentIndex, 1);
+
+            // Load up next image
+            var nextSrc = _bgLoadingQueue.shift();
+            if (nextSrc) queueImageLoading(nextSrc);
+          }
+
+          console.log("Kickoff: " + src);
+          // Keep track of what's loading
+          _currentBgLoading.push(src);
+          curImg.src = src;
+        }
+
+        function bgLoadPanoramaRenderings(panoramaRenderings) {
+          panoramaRenderings = panoramaRenderings || [];
+
+          for(var i = 0; i < panoramaRenderings.length; i++) {
+            var rendering = panoramaRenderings[i];
+            queueImageLoading(rendering.fields["S3 Image URL"]);
+          }
+        }
 
         function showVRImage(imageUrl) {
           if (!_vrView) {
@@ -240,8 +287,10 @@
               getPanoramaRenderings(panoramaRenderingIDs, function (panoramaRenderings) {
                 updateStore(_panoramaRenderings, panoramaRenderings);
                 var panoramaRendering = panoramaRenderings[0];
+                var panoramaRenderingSrc = panoramaRendering.fields["S3 Image URL"];
 
-                showVRImage(panoramaRendering.fields["S3 Image URL"]);
+                bgLoadPanoramaRenderings(panoramaRenderings);
+                showVRImage(panoramaRenderingSrc);
                 renderPoints(panoramaRenderings);
                 renderPointsSelect(panoramaRenderings);
               });
