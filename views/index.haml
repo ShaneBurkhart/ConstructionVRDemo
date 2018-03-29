@@ -3,8 +3,15 @@
   %head
     %meta(name="viewport" content="width=device-width, initial-scale=1")
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+
     %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/src/build/vrview.min.js"}
+
     %script{:crossorigin => "anonymous", :integrity => "sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=", :src => "https://code.jquery.com/jquery-2.2.4.min.js"}
+    %link(rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/construction-vr/libs/dropdown.min.css")
+    %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/libs/dropdown.min.js", type: "text/javascript"}
+    %link(rel="stylesheet" href="https://s3-us-west-2.amazonaws.com/construction-vr/libs/transition.min.css")
+    %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/libs/transition.min.js", type: "text/javascript"}
+
     :css
       * { box-sizing: border-box; }
 
@@ -71,8 +78,13 @@
         margin-top: -16px;
       }
 
-      #floor-plan-container select {
+      #floor-plan-container #floor-plan-panorama-rendering {
         display: none;
+        width: 100%;
+      }
+
+      #floor-plan-container #floor-plan-panorama-rendering .menu {
+        max-height: none;
       }
 
       #vr-view {
@@ -89,7 +101,11 @@
       }
 
       @media (max-width: 768px) {
-        #floor-plan-container select {
+        body {
+          margin 3%;
+        }
+
+        #floor-plan-container #floor-plan-panorama-rendering {
           display: block;
         }
       }
@@ -101,12 +117,20 @@
         %h2.text-center
         .floor-plan
           %img{:src => ""}/
-      %select
+
+      .ui.selection.dropdown#floor-plan-panorama-rendering
+        %input{name: "panorama-rendering", :type => "hidden"}/
+        %i.dropdown.icon
+        .text
+        .menu
+
       .text-center
         %h2.text-center Take a look around...
         %p Click and drag to look around the room.
+
       #vr-view
     :javascript
+
       $(document).ready(function () {
         var PROJECT = "Walnut St";
         var BG_LOADING_LIMIT = 1;
@@ -117,7 +141,9 @@
         var _units = {};
         var _panoramaRenderings = {};
         var _vrView = null;
-        var $pointsSelect = $('#floor-plan-container select');
+        var $pointsSelect = $('#floor-plan-container #floor-plan-panorama-rendering');
+        var $pointsSelectInput = $pointsSelect.find('input');
+        var $pointsSelectMenu = $pointsSelect.find('.menu');
         var $unitFloorPlans = $('#floor-plan-container .unit-floor-plans');
         var $floorPlan = $('#floor-plan-container .floor-plan');
         var $floorPlanImg = $('#floor-plan-container .floor-plan img');
@@ -128,7 +154,6 @@
           // If is loading, is in queue or is loaded, no need to do anything.
           if (_bgLoadingQueue.includes(src) || _currentBgLoading.includes(src) || _bgLoaded.includes(src)) return;
 
-          console.log("Currently loading: " + _currentBgLoading.length);
           // If we are already at or above our limit, add to queue.
           if (_currentBgLoading.length >= BG_LOADING_LIMIT) {
             console.log("Queuing: " + src);
@@ -167,24 +192,19 @@
         }
 
         function showVRImage(imageUrl, previewUrl) {
+          var options = { image: imageUrl, is_stereo: true };
+          if (previewUrl) options.preview = previewUrl;
+
           if (!_vrView) {
-            _vrView = new VRView.Player('#vr-view', {
-              image: imageUrl,
-              preview: previewUrl,
-              is_stereo: true
-            });
+            _vrView = new VRView.Player('#vr-view', options);
           } else {
-            _vrView.setContent({
-              image: imageUrl,
-              preview: previewUrl,
-              is_stereo: true
-            });
+            _vrView.setContent(options);
           }
         }
 
         function getUnitsUrl() {
           var formula = encodeURIComponent('(FIND("' + PROJECT + '", {Project}))');
-          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Units?maxRecords=3&view=Walnut%20St&filterByFormula=" + formula;
+          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Units?maxRecords=20&view=Walnut%20St&filterByFormula=" + formula;
         }
 
         function getPanoramaRenderingsUrl(record_ids) {
@@ -196,8 +216,7 @@
           }
 
           var formula = 'OR(' + formulaParts.join(',') + ')';
-          console.log(formula);
-          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Panorama%20Renderings?filterByFormula=" + encodeURIComponent(formula);
+          return "https://api.airtable.com/v0/appTAmLzyXUW1RxaH/Panorama%20Renderings?maxRecords=100&filterByFormula=" + encodeURIComponent(formula);
         }
 
         function getUnits(done) {
@@ -250,19 +269,29 @@
           $floorPlan.append(newPoints.join(""));
         }
 
-        function renderPointsSelect(panoramaRenderings) {
+        function renderPointsSelect(panoramaRenderings, initValue) {
           var newPoints = [];
-          $pointsSelect.empty();
+          var initPanoramaRendering = null;
+          $pointsSelectMenu.empty();
+          $pointsSelect.dropdown('clear');
 
           for(var i = 0; i < panoramaRenderings.length; i++) {
             var panoramaRendering = panoramaRenderings[i];
             var prId = panoramaRendering["id"];
             var prName = panoramaRendering.fields["Name"];
 
-            newPoints.push("<option value='" + prId + "'>" + prName + "</option>");
+            // Find the selected panorama rendering to show the name.
+            if (panoramaRendering["id"] === initValue) initPanoramaRendering = panoramaRendering;
+
+            newPoints.push("<div class='item' data-value='" + prId + "'>" + prName + "</div>");
           }
 
-          $pointsSelect.append(newPoints.join(""));
+          $pointsSelectMenu.append(newPoints.join(""));
+          $pointsSelect.dropdown();
+          if (initPanoramaRendering) {
+            $pointsSelect.dropdown('set value', initPanoramaRendering["id"]);
+            $pointsSelect.dropdown('set text', initPanoramaRendering.fields["Name"]);
+          }
         }
 
         function showUnit(unit) {
@@ -276,14 +305,11 @@
 
           var isLoaded = true;
           for(var i = 0; i < panoramaRenderingIDs.length; i++ ) {
-            console.log(panoramaRenderingIDs[i]);
             if (!_panoramaRenderings[panoramaRenderingIDs[i]]) {
               isLoaded = false;
               break;
             }
           }
-
-          console.log("Is unit loaded: " + isLoaded);
 
           if (!isLoaded) {
             if (panoramaRenderingIDs.length) {
@@ -295,7 +321,8 @@
                 bgLoadPanoramaRenderings(panoramaRenderings);
                 showVRImage(panoramaRenderingSrc);
                 renderPoints(panoramaRenderings);
-                renderPointsSelect(panoramaRenderings);
+
+                renderPointsSelect(panoramaRenderings, panoramaRendering["id"]);
               });
             } else {
               // TODO Show a no renderings found message.
@@ -312,8 +339,6 @@
               for(var i = 0; i < panoramaRenderingIDs.length; i++ ) {
                 unitPanoramaRenderings.push(_panoramaRenderings[panoramaRenderingIDs[i]]);
               }
-
-              console.log(unitPanoramaRenderings);
 
               showVRImage(panoramaRendering.fields["S3 Image URL"]);
               renderPoints(unitPanoramaRenderings);
@@ -348,7 +373,7 @@
           showVRImage(panoramaRendering.fields["S3 Image URL"]);
         });
 
-        $pointsSelect.change(function (e) {
+        $pointsSelectInput.change(function (e) {
           var $this = $(this);
           var panoramaRenderingId = $this.val();
           var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
