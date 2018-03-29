@@ -1,6 +1,7 @@
 !!!
 %html
   %head
+    %meta(name="viewport" content="width=device-width, initial-scale=1")
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
     %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/src/build/vrview.min.js"}
     %script{:crossorigin => "anonymous", :integrity => "sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=", :src => "https://code.jquery.com/jquery-2.2.4.min.js"}
@@ -165,15 +166,17 @@
           }
         }
 
-        function showVRImage(imageUrl) {
+        function showVRImage(imageUrl, previewUrl) {
           if (!_vrView) {
             _vrView = new VRView.Player('#vr-view', {
               image: imageUrl,
+              preview: previewUrl,
               is_stereo: true
             });
           } else {
             _vrView.setContent({
               image: imageUrl,
+              preview: previewUrl,
               is_stereo: true
             });
           }
