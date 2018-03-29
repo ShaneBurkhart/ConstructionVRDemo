@@ -191,6 +191,14 @@
           }
         }
 
+        function showPanoramaRendering(panoramaRendering) {
+          if (!panoramaRendering) return;
+          var panoramaRenderingSrc = panoramaRendering.fields["S3 Image URL"];
+          var panoramaRenderingPreview = panoramaRendering.fields["S3 Preview Image URL"];
+
+          showVRImage(panoramaRenderingSrc, panoramaRenderingPreview);
+        }
+
         function showVRImage(imageUrl, previewUrl) {
           var options = { image: imageUrl, is_stereo: true };
           if (previewUrl) options.preview = previewUrl;
@@ -316,10 +324,9 @@
               getPanoramaRenderings(panoramaRenderingIDs, function (panoramaRenderings) {
                 updateStore(_panoramaRenderings, panoramaRenderings);
                 var panoramaRendering = panoramaRenderings[0];
-                var panoramaRenderingSrc = panoramaRendering.fields["S3 Image URL"];
 
-                bgLoadPanoramaRenderings(panoramaRenderings);
-                showVRImage(panoramaRenderingSrc);
+                //bgLoadPanoramaRenderings(panoramaRenderings);
+                showPanoramaRendering(panoramaRendering);
                 renderPoints(panoramaRenderings);
 
                 renderPointsSelect(panoramaRenderings, panoramaRendering["id"]);
@@ -340,7 +347,7 @@
                 unitPanoramaRenderings.push(_panoramaRenderings[panoramaRenderingIDs[i]]);
               }
 
-              showVRImage(panoramaRendering.fields["S3 Image URL"]);
+              showPanoramaRendering(panoramaRendering);
               renderPoints(unitPanoramaRenderings);
               renderPointsSelect(unitPanoramaRenderings);
             } else {
@@ -370,7 +377,7 @@
           var panoramaRenderingId = $this.data("id");
           var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
 
-          showVRImage(panoramaRendering.fields["S3 Image URL"]);
+          showPanoramaRendering(panoramaRendering);
         });
 
         $pointsSelectInput.change(function (e) {
@@ -378,7 +385,7 @@
           var panoramaRenderingId = $this.val();
           var panoramaRendering = _panoramaRenderings[panoramaRenderingId];
 
-          showVRImage(panoramaRendering.fields["S3 Image URL"]);
+          showPanoramaRendering(panoramaRendering);
         });
 
         // Uncomment for placing coordinates of panorama renderings.
