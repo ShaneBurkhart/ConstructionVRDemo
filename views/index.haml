@@ -200,7 +200,7 @@
         }
 
         function showVRImage(imageUrl, previewUrl) {
-          var options = { image: imageUrl, is_stereo: true };
+          var options = { image: imageUrl, is_stereo: true, is_vr_off: true };
           if (previewUrl) options.preview = previewUrl;
 
           if (!_vrView) {
