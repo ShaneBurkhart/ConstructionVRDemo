@@ -1,15 +1,4 @@
-!!!
-%html
-  %head
-    %meta(name="viewport" content="width=device-width, initial-scale=1")
-    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-
-    %script{:crossorigin => "anonymous", :integrity => "sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=", :src => "https://code.jquery.com/jquery-2.2.4.min.js"}
-    %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/libs/marzipano.js", type: "text/javascript"}
-    %script(src="/script.js")
-
-    %link(rel="stylesheet" href="/style.css")
-
-  %body
-    - projects.each do |project|
-      %a{ href: "/project/#{project.id}" }= project["Name"]
+.container
+  %h1 All Projects
+  - projects.each do |project|
+    %a{ href: "/project/#{project.id}" }= project["Name"]

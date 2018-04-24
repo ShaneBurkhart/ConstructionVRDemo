@@ -1,5 +1,31 @@
 * { box-sizing: border-box; }
 
+.large-container {
+    margin: auto;
+    max-width: 1000px;
+}
+
+.container {
+    margin: auto;
+    max-width: 700px;
+}
+
+#pano-window {
+    width: 100%;
+    padding-bottom: 50%;
+    min-height: 300px;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+#feedback-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+}
+
+
+
 #panorama-points-container {
 width: 100%;
 height: 90px;

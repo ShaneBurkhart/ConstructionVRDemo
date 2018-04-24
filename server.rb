@@ -52,7 +52,7 @@ get '/project/:id' do
   return "Not found" if user.nil?
 
   project = Project.find(params[:id])
-  return "Not found" if project.nil? or project.belongs_to_user?(user)
+  return "Not found" if project.nil? or !project.belongs_to_user?(user)
 
   haml :project, locals: { project: project }
 end
@@ -62,7 +62,7 @@ get '/unit/:id' do
   return "Not found" if user.nil?
 
   unit = Unit.find(params[:id])
-  return "Not found" if unit.nil? or unit.project.belongs_to_user?(user)
+  return "Not found" if unit.nil? or !unit.project.belongs_to_user?(user)
 
   haml :unit, locals: { unit: unit }
 end
@@ -72,9 +72,22 @@ get '/pano/:id' do
   return "Not found" if user.nil?
 
   pano = Pano.find(params[:id])
-  return "Not found" if pano.nil? or pano.unit.project.belongs_to_user?(user)
+  return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
 
   haml :pano, locals: { pano: pano }
+end
+
+post '/pano/:id/feedback' do
+  user = current_user
+  return "Not found" if user.nil?
+
+  pano = Pano.find(params[:id])
+  return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
+
+  feedback = Feedback.new "Pano" => [pano.id], "User" => [user.id], "Notes" => params["notes"]
+  feedback.create
+
+  redirect "/pano/#{pano.id}"
 end
 
 class User < Airrecord::Table
@@ -101,11 +114,11 @@ class Project < Airrecord::Table
   has_many :units, class: "Unit", column: "Units"
 
   def viewers
-    return User.all(filter: "(FIND(\"#{self.id}\", {Viewer Projects}))") || []
+    return User.all(filter: "(FIND(\"#{self.id}\", {Viewer Project IDs}))") || []
   end
 
   def editors
-    return User.all(filter: "(FIND(\"#{self.id}\", {Editor Projects}))") || []
+    return User.all(filter: "(FIND(\"#{self.id}\", {Editor Project IDs}))") || []
   end
 
   def users
@@ -113,11 +126,11 @@ class Project < Airrecord::Table
   end
 
   def belongs_to_user?(user)
-    return self.users.include?(user)
+    return !!self.users.find { |u| return user.id == u.id }
   end
 
   def units
-    return Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))") || []
+    return Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
   end
 end
 
@@ -130,7 +143,7 @@ class Unit < Airrecord::Table
   end
 
   def panos
-    return Pano.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))") || []
+    return Pano.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { Name: "asc" }) || []
   end
 end
 
@@ -141,4 +154,13 @@ class Pano < Airrecord::Table
   def unit
     return Unit.all(filter: "(FIND(\"#{self.id}\", {Pano IDs}))").first
   end
+
+  def feedbacks
+    return Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))")
+  end
+end
+
+class Feedback < Airrecord::Table
+  self.base_key = AIRTABLES_APP_ID
+  self.table_name = "Feedback"
 end

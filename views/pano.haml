@@ -1,15 +1,15 @@
-!!!
-%html
-  %head
-    %meta(name="viewport" content="width=device-width, initial-scale=1")
-    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+.large-container
+  %h1= pano["Name"]
+  %p
+    %a{ href: "/unit/#{pano["Unit ID"].first}" } Back to Unit
 
-    %script{:crossorigin => "anonymous", :integrity => "sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=", :src => "https://code.jquery.com/jquery-2.2.4.min.js"}
-    %script{:src => "https://s3-us-west-2.amazonaws.com/construction-vr/libs/marzipano.js", type: "text/javascript"}
-    %script(src="/script.js")
+  #pano-window
 
-    %link(rel="stylesheet" href="/style.css")
+.container
+  %form{ action: "/pano/#{pano.id}/feedback", method: "post"}
+    %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+    %button#feedback-submit Submit Feedback
 
-  %body
-    %h1= pano["Name"]
-
+  %h2 Recent Feedback
+  - pano.feedbacks.each do |feedback|
+    %p= feedback["Notes"]
