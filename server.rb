@@ -84,7 +84,12 @@ post '/pano/:id/feedback' do
   pano = Pano.find(params[:id])
   return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
 
-  feedback = Feedback.new "Pano" => [pano.id], "User" => [user.id], "Notes" => params["notes"]
+  feedback = Feedback.new(
+    "Pano" => [pano.id],
+    "User" => [user.id],
+    "Notes" => params["notes"],
+    "View Parameters" => params["viewParameters"]
+  )
   feedback.create
 
   redirect "/pano/#{pano.id}"

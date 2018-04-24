@@ -69,11 +69,14 @@ $(document).ready(function () {
     $.ajax({
       type: "POST",
       url: "/pano/" + _panoId + "/feedback",
-      data: { notes: feedbackText },
+      data: {
+        notes: feedbackText,
+        viewParameters: JSON.stringify(view.parameters()),
+      },
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           $fullscreenFeedbackInput.val("");
-          $feedbackToggleButton.text("Hide Feedback");
+          $feedbackToggleButton.text("Give Feedback");
           $fullscreenFeedbackContainer.removeClass("open");
         }
 
