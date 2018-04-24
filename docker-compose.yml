@@ -1,0 +1,14 @@
+web:
+    image: shaneburkhart/construction-vr-demo
+    ports:
+        - "4567:4567"
+    links:
+        - redis
+    volumes:
+        - .:/app
+    env_file:
+        - user.env
+    command: "rerun ruby server.rb"
+
+redis:
+    image: redis:3.2
