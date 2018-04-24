@@ -3,13 +3,35 @@
   %p
     %a{ href: "/unit/#{pano["Unit ID"].first}" } Back to Unit
 
+  %p
+    %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
+
   #pano-window
+    .controls
+      %a.feedback-toggle Give Feedback
+      %a.fullscreen-toggle Exit
+    .fullscreen-feedback
+      .container{ style: "height: 100%; position: relative;" }
+        %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
+        %button#fullscreen-feedback-submit Submit Feedback
 
 .container
   %form{ action: "/pano/#{pano.id}/feedback", method: "post"}
     %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
     %button#feedback-submit Submit Feedback
 
+  %br
+
   %h2 Recent Feedback
+
   - pano.feedbacks.each do |feedback|
-    %p= feedback["Notes"]
+    %hr
+    .feedback
+      %p
+        %strong= feedback["User Name"].first
+        = "(#{feedback['Created At'].strftime('%b %e, %Y')})"
+      %p= feedback["Notes"]
+
+:javascript
+  var _panoImageURL = "#{pano_image['url']}";
+  var _panoId = "#{pano.id}";

@@ -74,7 +74,7 @@ get '/pano/:id' do
   pano = Pano.find(params[:id])
   return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
 
-  haml :pano, locals: { pano: pano }
+  haml :pano, locals: { pano: pano, pano_image: pano["Image"].first || {} }
 end
 
 post '/pano/:id/feedback' do
@@ -156,7 +156,7 @@ class Pano < Airrecord::Table
   end
 
   def feedbacks
-    return Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))")
+    return Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))", sort: { "Created At": "desc"})
   end
 end
 
