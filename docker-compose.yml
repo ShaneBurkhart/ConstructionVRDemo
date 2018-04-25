@@ -8,7 +8,7 @@ web:
         - .:/app
     env_file:
         - user.env
-    command: "rerun ruby server.rb"
+    command: "rerun --background ruby server.rb"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo

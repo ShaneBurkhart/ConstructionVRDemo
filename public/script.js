@@ -46,6 +46,8 @@ $(document).ready(function () {
     } else {
       $feedbackToggleButton.text("Hide Feedback");
       $fullscreenFeedbackContainer.addClass("open");
+      // focus input when opening the feedback container.
+      setTimeout(function () { $fullscreenFeedbackInput.focus(); }, 0);
     }
   });
 

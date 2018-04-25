@@ -127,11 +127,11 @@ class Project < Airrecord::Table
   end
 
   def users
-    return viewers + editors
+    return (viewers + editors).uniq { |i| i.id }
   end
 
   def belongs_to_user?(user)
-    return !!self.users.find { |u| return user.id == u.id }
+    return !!self.users.find { |u| user.id == u.id }
   end
 
   def units
