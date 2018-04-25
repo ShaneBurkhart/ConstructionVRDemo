@@ -1,5 +1,6 @@
 $(document).ready(function () {
   var $fullscreenButton = $(".fullscreen-toggle");
+  var $logCoordButton = $(".log-coord");
   var panoElement = document.getElementById('pano-window');
   var $panoElement = $('#pano-window');
   var $feedbackToggleButton = $('#pano-window .controls .feedback-toggle');
@@ -61,6 +62,11 @@ $(document).ready(function () {
     viewer.updateSize();
   });
 
+  $logCoordButton.click(function () {
+    console.log(JSON.stringify(view.parameters()));
+    console.log(JSON.stringify(view.parameters()));
+  });
+
   var isRequesting = false;
   var submitFeedback = function (feedbackText) {
     if (isRequesting) return;
@@ -70,7 +76,7 @@ $(document).ready(function () {
 
     $.ajax({
       type: "POST",
-      url: "/pano/" + _panoId + "/feedback",
+      url: "/project/" + _accessToken + "/pano/" + _panoId + "/feedback",
       data: {
         notes: feedbackText,
         viewParameters: JSON.stringify(view.parameters()),

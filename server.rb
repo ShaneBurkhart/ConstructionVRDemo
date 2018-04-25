@@ -41,6 +41,7 @@ end
 
 get '/project/:access_token/pano/:id' do
   access_token = params[:access_token]
+  is_debug_mode = !!params[:debug]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
@@ -50,7 +51,8 @@ get '/project/:access_token/pano/:id' do
   haml :pano, locals: {
     pano: pano,
     pano_image: pano["Image"].first || {},
-    access_token: access_token
+    access_token: access_token,
+    is_debug_mode: is_debug_mode
   }
 end
 

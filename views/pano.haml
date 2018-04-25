@@ -5,6 +5,8 @@
 
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
+    - if is_debug_mode
+      %a.button.log-coord{ href: "#" } Log Coords
 
   #pano-window
     .controls
@@ -16,7 +18,7 @@
         %button#fullscreen-feedback-submit Submit Feedback
 
 .container
-  %form{ action: "/pano/#{pano.id}/feedback", method: "post"}
+  %form{ action: "/project/#{access_token}/pano/#{pano.id}/feedback", method: "post"}
     %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
     %button#feedback-submit Submit Feedback
 
@@ -34,3 +36,5 @@
 :javascript
   var _panoImageURL = "#{pano_image['url']}";
   var _panoId = "#{pano.id}";
+  var _accessToken = "#{access_token}";
+  var _isDebugMode = #{is_debug_mode};
