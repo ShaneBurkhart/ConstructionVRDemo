@@ -1,12 +1,9 @@
 .container
   %h1= project["Name"]
 
-  %p
-    %a{ href: "/projects" } Back to Projects Dashboard
-
   %hr
 
   - project.units.each do |unit|
     %p
-      %a{ href: "/unit/#{unit.id}" }= unit["Name"]
+      %a{ href: "/project/#{access_token}/unit/#{unit.id}" }= unit["Name"]
 

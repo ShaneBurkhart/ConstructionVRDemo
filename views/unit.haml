@@ -1,10 +1,10 @@
 .container
   %h1= unit["Name"]
   %p
-    %a{ href: "/project/#{unit["Project ID"].first}" } Back to Project
+    %a{ href: "/project/#{access_token}" } Back to Project
 
   %hr
 
   - unit.panos.each do |pano|
     %p
-      %a{ href: "/pano/#{pano.id}" }= pano["Name"]
+      %a{ href: "/project/#{access_token}/pano/#{pano.id}" }= pano["Name"]

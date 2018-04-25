@@ -1,7 +1,7 @@
 .large-container
   %h1= pano["Name"]
   %p
-    %a{ href: "/unit/#{pano["Unit ID"].first}" } Back to Unit
+    %a{ href: "/project/#{access_token}/unit/#{pano["Unit ID"].first}" } Back to Unit
 
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
@@ -28,8 +28,7 @@
     %hr
     .feedback
       %p
-        %strong= feedback["User Name"].first
-        = "(#{feedback['Created At'].strftime('%b %e, %Y')})"
+        %strong= "#{feedback['Created At'].strftime('%b %e, %Y')}"
       %p= feedback["Notes"]
 
 :javascript

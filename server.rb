@@ -14,128 +14,74 @@ set :bind, '0.0.0.0'
 
 use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
 
-def find_user_by_access_token(access_token)
+def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""
-
-  records = User.all filter: "(FIND(\"#{access_token}\", {Access Token}))"
-
+  records = Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
   return records.first
 end
 
-def current_user
-  user_id = session["user_id"]
-  return nil if user_id.nil? or user_id == ""
-  return User.find user_id
-end
-
-# Log user in with their access token (UUID).
-get '/login/:access_token' do
+get '/project/:access_token' do
   access_token = params[:access_token]
-  user = find_user_by_access_token(access_token)
-  return "Not found" if user.nil?
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
 
-  session["user_id"] = user.id
-
-  redirect "/projects"
+  haml :project, locals: { project: project, access_token: access_token }
 end
 
-# List projects for current user
-get '/projects' do
-  user = current_user
-  return "Not found" if user.nil?
-
-  haml :projects, locals: { projects: user.projects }
-end
-
-get '/project/:id' do
-  user = current_user
-  return "Not found" if user.nil?
-
-  project = Project.find(params[:id])
-  return "Not found" if project.nil? or !project.belongs_to_user?(user)
-
-  haml :project, locals: { project: project }
-end
-
-get '/unit/:id' do
-  user = current_user
-  return "Not found" if user.nil?
+get '/project/:access_token/unit/:id' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
 
   unit = Unit.find(params[:id])
-  return "Not found" if unit.nil? or !unit.project.belongs_to_user?(user)
+  return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
 
-  haml :unit, locals: { unit: unit }
+  haml :unit, locals: { unit: unit, access_token: access_token }
 end
 
-get '/pano/:id' do
-  user = current_user
-  return "Not found" if user.nil?
+get '/project/:access_token/pano/:id' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
 
   pano = Pano.find(params[:id])
-  return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
+  return "Not found" if pano.nil? or !pano.unit.belongs_to_project?(project)
 
-  haml :pano, locals: { pano: pano, pano_image: pano["Image"].first || {} }
+  haml :pano, locals: {
+    pano: pano,
+    pano_image: pano["Image"].first || {},
+    access_token: access_token
+  }
 end
 
-post '/pano/:id/feedback' do
-  user = current_user
-  return "Not found" if user.nil?
+post '/project/:access_token/pano/:id/feedback' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
 
   pano = Pano.find(params[:id])
-  return "Not found" if pano.nil? or !pano.unit.project.belongs_to_user?(user)
+  return "Not found" if pano.nil? or !pano.unit.belongs_to_project?(project)
 
   feedback = Feedback.new(
     "Pano" => [pano.id],
-    "User" => [user.id],
     "Notes" => params["notes"],
     "View Parameters" => params["viewParameters"]
   )
   feedback.create
 
-  redirect "/pano/#{pano.id}"
-end
-
-class User < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
-  self.table_name = "Users"
-
-  def viewer_projects
-    return Project.all(filter: "(FIND(\"#{self.id}\", {Viewer IDs}))") || []
-  end
-
-  def editor_projects
-    return Project.all(filter: "(FIND(\"#{self.id}\", {Editor IDs}))") || []
-  end
-
-  def projects
-    return (viewer_projects + editor_projects).uniq { |i| i.id }
-  end
+  redirect "/project/#{access_token}/pano/#{pano.id}"
 end
 
 class Project < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Projects"
 
-  has_many :units, class: "Unit", column: "Units"
-
-  def viewers
-    return User.all(filter: "(FIND(\"#{self.id}\", {Viewer Project IDs}))") || []
-  end
-
-  def editors
-    return User.all(filter: "(FIND(\"#{self.id}\", {Editor Project IDs}))") || []
-  end
-
-  def users
-    return (viewers + editors).uniq { |i| i.id }
-  end
-
-  def belongs_to_user?(user)
-    return !!self.users.find { |u| user.id == u.id }
-  end
-
   def units
-    return Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
+    if @units.nil?
+      @units = Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
+    end
+
+    return @units
   end
 end
 
@@ -143,12 +89,25 @@ class Unit < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Units"
 
+  def belongs_to_project?(project)
+    return false if project.nil?
+    self.project.id == project.id
+  end
+
   def project
-    return Project.all(filter: "(FIND(\"#{self.id}\", {Unit IDs}))").first
+    if @project.nil?
+      @project = Project.all(filter: "(FIND(\"#{self.id}\", {Unit IDs}))").first
+    end
+
+    return @project
   end
 
   def panos
-    return Pano.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { Name: "asc" }) || []
+    if @panos.nil?
+      @panos = Pano.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { Name: "asc" }) || []
+    end
+
+    return @panos
   end
 end
 
@@ -157,11 +116,19 @@ class Pano < Airrecord::Table
   self.table_name = "Panos"
 
   def unit
-    return Unit.all(filter: "(FIND(\"#{self.id}\", {Pano IDs}))").first
+    if @unit.nil?
+      @unit = Unit.all(filter: "(FIND(\"#{self.id}\", {Pano IDs}))").first
+    end
+
+    return @unit
   end
 
   def feedbacks
-    return Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))", sort: { "Created At": "desc"})
+    if @feedbacks.nil?
+      @feedbacks = Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))", sort: { "Created At": "desc"})
+    end
+
+    return @feedbacks
   end
 end
 
