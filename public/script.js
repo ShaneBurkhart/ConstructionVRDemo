@@ -8,6 +8,9 @@ $(document).ready(function () {
   var $panoPreviews = $('#pano-previews .pano-preview');
   var $fullscreenSubmitFeedback = $("#fullscreen-feedback-submit");
   var $fullscreenFeedbackInput = $("#fullscreen-feedback-input");
+  var $feedbackInput = $("#feedback-input");
+  var $submitFeedback = $("#feedback-submit");
+  var $feedbacks = $("#feedbacks");
 
   var viewerOpts = {
     controls: {
@@ -122,14 +125,29 @@ $(document).ready(function () {
     _currentPano.scene.hotspotContainer().createHotspot(element, { yaw: yaw, pitch: pitch });
   });
 
+  function addFeedbackToList(feedbackText, panoName) {
+    var $feedbackTemplate = $("#feedback-template .feedback");
+    var $newFeedback = $feedbackTemplate.clone();
+
+    $newFeedback.find(".notes").html(feedbackText.replace(/\n/g, "<br>"));
+    $newFeedback.find(".pano_name").text(panoName);
+    $newFeedback.find(".created_at").text("(now)");
+
+    $feedbacks.prepend($newFeedback);
+    $feedbacks.prepend($("<hr>"));
+  }
+
   var isRequesting = false;
   var submitFeedback = function (feedbackText) {
     if (isRequesting) return;
     isRequesting = true;
     $fullscreenFeedbackInput.prop("disabled", true);
     $fullscreenFeedbackInput.addClass("disabled");
+    $feedbackInput.prop("disabled", true);
+    $feedbackInput.addClass("disabled");
 
     var panoId = _currentPano.data["Record ID"];
+    var panoName = _currentPano.data["Name"];
 
     $.ajax({
       type: "POST",
@@ -141,12 +159,17 @@ $(document).ready(function () {
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           $fullscreenFeedbackInput.val("");
+          $feedbackInput.val("");
           $feedbackToggleButton.text("Give Feedback");
           $fullscreenFeedbackContainer.removeClass("open");
+
+          addFeedbackToList(feedbackText, panoName);
         }
 
         $fullscreenFeedbackInput.removeClass("disabled");
         $fullscreenFeedbackInput.prop("disabled", false);
+        $feedbackInput.removeClass("disabled");
+        $feedbackInput.prop("disabled", false);
         isRequesting = false;
       },
     });
@@ -154,6 +177,13 @@ $(document).ready(function () {
 
   $fullscreenSubmitFeedback.click(function () {
     var feedbackText = $fullscreenFeedbackInput.val();
+    if (!feedbackText.length) return;
+
+    submitFeedback(feedbackText);
+  });
+
+  $submitFeedback.click(function () {
+    var feedbackText = $feedbackInput.val();
     if (!feedbackText.length) return;
 
     submitFeedback(feedbackText);

@@ -40,6 +40,7 @@ get '/project/:access_token/unit/:id' do
 
   haml :unit, locals: {
     unit: unit,
+    feedbacks: unit.feedbacks,
     unit_pano_data: unit.pano_data,
     access_token: access_token,
     is_debug_mode: is_debug_mode
@@ -102,6 +103,14 @@ class Unit < Airrecord::Table
     return @panos
   end
 
+  def feedbacks
+    if @feedbacks.nil?
+      @feedbacks = Feedback.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc"})
+    end
+
+    return @feedbacks
+  end
+
   def pano_data
     panos = self.panos
 
@@ -125,14 +134,6 @@ class Pano < Airrecord::Table
     end
 
     return @unit
-  end
-
-  def feedbacks
-    if @feedbacks.nil?
-      @feedbacks = Feedback.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))", sort: { "Created At": "desc"})
-    end
-
-    return @feedbacks
   end
 
   def link_hotspots

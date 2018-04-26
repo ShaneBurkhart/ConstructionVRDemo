@@ -1,3 +1,5 @@
+%script(src="/script.js")
+
 .large-container
   %p
     %a{ href: "/project/#{access_token}" } Back to all Units
@@ -36,13 +38,27 @@
         .name= pano["Name"]
 
 .container
-  %form{ action: "/project/#{access_token}/pano/#{}/feedback", method: "post"}
-    %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
-    %button#feedback-submit Submit Feedback
+  %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+  %button#feedback-submit Submit Feedback
 
   %br
 
   %h2 Recent Feedback
+  #feedbacks
+    #feedback-template{ style: "display: none;" }
+      .feedback
+        %p
+          %strong.pano_name
+          %span.created_at
+        %p.notes
+
+    - feedbacks.each do |feedback|
+      %hr
+      .feedback
+        %p
+          %strong.unit_name= feedback["Pano Name"].first
+          %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y')})"
+        %p.notes= feedback["Notes"].gsub("\n", "<br>")
 
 :javascript
   var _panoData = #{unit_pano_data.to_json};
