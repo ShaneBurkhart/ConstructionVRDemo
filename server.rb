@@ -30,27 +30,17 @@ end
 
 get '/project/:access_token/unit/:id' do
   access_token = params[:access_token]
+  is_debug_mode = !!params[:debug]
+
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
   unit = Unit.find(params[:id])
   return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
 
-  haml :unit, locals: { unit: unit, access_token: access_token }
-end
-
-get '/project/:access_token/pano/:id' do
-  access_token = params[:access_token]
-  is_debug_mode = !!params[:debug]
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-
-  pano = Pano.find(params[:id])
-  return "Not found" if pano.nil? or !pano.unit.belongs_to_project?(project)
-
-  haml :pano, locals: {
-    pano: pano,
-    pano_image: pano["Image"].first || {},
+  haml :unit, locals: {
+    unit: unit,
+    unit_pano_data: unit.pano_data,
     access_token: access_token,
     is_debug_mode: is_debug_mode
   }
@@ -71,7 +61,7 @@ post '/project/:access_token/pano/:id/feedback' do
   )
   feedback.create
 
-  redirect "/project/#{access_token}/pano/#{pano.id}"
+  redirect "/project/#{access_token}/unit/#{pano.unit.id}"
 end
 
 class Project < Airrecord::Table
@@ -111,6 +101,18 @@ class Unit < Airrecord::Table
 
     return @panos
   end
+
+  def pano_data
+    panos = self.panos
+
+    return panos.map do |pano|
+      fields = pano.fields
+      link_hotspots = pano.link_hotspots.map{ |lh| lh.fields }
+
+      fields["link_hotspots"] = link_hotspots
+      next fields
+    end
+  end
 end
 
 class Pano < Airrecord::Table
@@ -132,9 +134,22 @@ class Pano < Airrecord::Table
 
     return @feedbacks
   end
+
+  def link_hotspots
+    if @link_hotspots.nil?
+      @link_hotspots = LinkHotspots.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))")
+    end
+
+    return @link_hotspots
+  end
 end
 
 class Feedback < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Feedback"
+end
+
+class LinkHotspots < Airrecord::Table
+  self.base_key = AIRTABLES_APP_ID
+  self.table_name = "Link Hotspots"
 end

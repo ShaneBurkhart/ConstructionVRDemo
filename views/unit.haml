@@ -1,10 +1,50 @@
-.container
-  %h1= unit["Name"]
+.large-container
   %p
-    %a{ href: "/project/#{access_token}" } Back to Project
+    %a{ href: "/project/#{access_token}" } Back to all Units
 
   %hr
 
-  - unit.panos.each do |pano|
-    %p
-      %a{ href: "/project/#{access_token}/pano/#{pano.id}" }= pano["Name"]
+
+  .row
+    .third
+      %h1= unit["Name"]
+      %ul
+        - (unit["Details"] || "").split("\n").each do |detail|
+          %li= detail
+    .two-third
+      %img{ src: unit["Floor Plan Image"][0]["url"] }
+
+  %p
+    %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
+    - if is_debug_mode
+      %a.button.log-coord{ href: "#" } Log Coords
+
+  #pano-window
+    - if is_debug_mode
+      .debug-center-window
+    .controls
+      %a.feedback-toggle Give Feedback
+      %a.fullscreen-toggle Exit
+    .fullscreen-feedback
+      .container{ style: "height: 100%; position: relative;" }
+        %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
+        %button#fullscreen-feedback-submit Submit Feedback
+
+  #pano-previews
+    - unit_pano_data.each do |pano|
+      .pano-preview{ data: { id: pano["Record ID"] }}
+        .name= pano["Name"]
+
+.container
+  %form{ action: "/project/#{access_token}/pano/#{}/feedback", method: "post"}
+    %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+    %button#feedback-submit Submit Feedback
+
+  %br
+
+  %h2 Recent Feedback
+
+:javascript
+  var _panoData = #{unit_pano_data.to_json};
+  var _accessToken = "#{access_token}";
+  var _isDebugMode = #{is_debug_mode};
