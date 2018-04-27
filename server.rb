@@ -43,7 +43,8 @@ get '/project/:access_token/unit/:id' do
     feedbacks: unit.feedbacks,
     unit_pano_data: unit.pano_data,
     access_token: access_token,
-    is_debug_mode: is_debug_mode
+    is_debug_mode: is_debug_mode,
+    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
   }
 end
 

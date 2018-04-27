@@ -33,6 +33,10 @@
     float: left;
 }
 
+.hidden {
+    display: none !important;
+}
+
 img {
     max-width: 100%;
 }
@@ -113,7 +117,7 @@ img {
 #pano-window.fullscreen .fullscreen-feedback textarea.disabled, textarea#feedback-input.disabled {
     background-color: #cccccc;
 }
-#pano-window.fullscreen .fullscreen-feedback button {
+#pano-window.fullscreen .fullscreen-feedback .button-wrapper {
     display: block;
     position: absolute;
     right: 10px;

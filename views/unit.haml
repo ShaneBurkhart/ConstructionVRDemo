@@ -33,7 +33,9 @@
     .fullscreen-feedback
       .container{ style: "height: 100%; position: relative;" }
         %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
-        %button#fullscreen-feedback-submit Submit Feedback
+        .button-wrapper
+          %button.feedback-add-file#fullscreen-feedback-add-file Add File
+          %button#fullscreen-feedback-submit Submit Feedback
 
   #pano-previews
     - unit_pano_data.each do |pano|
@@ -42,6 +44,7 @@
 
 .container
   %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+  %button.feedback-add-file#feedback-add-file Add File
   %button#feedback-submit Submit Feedback
 
   %br
@@ -62,6 +65,8 @@
           %strong.unit_name= feedback["Pano Name"].first
           %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y')})"
         %p.notes= feedback["Notes"].gsub("\n", "<br>")
+
+%input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
 
 - if is_debug_mode
   :javascript
@@ -87,3 +92,84 @@
   var _panoData = #{unit_pano_data.to_json};
   var _accessToken = "#{access_token}";
   var _isDebugMode = #{is_debug_mode};
+
+  function randId() {
+    return 'xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  $(document).ready(function () {
+    var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";
+    var $feedbackFileUpload = $("#feedback-file-upload");
+    var $fullscreenFeedbackContainer = $('#pano-window .fullscreen-feedback');
+    var $fullscreenFeedbackInput = $("#fullscreen-feedback-input");
+    var $feedbackFileButtons = $(".feedback-add-file");
+    var $feedbackInput = $("#feedback-input");
+
+    var $fullscreenSubmitFeedback = $("#fullscreen-feedback-submit");
+    var $submitFeedback = $("#feedback-submit");
+
+    AWS.config.update({
+      region: "us-west-2",
+      credentials: new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: AWS_IDENTITY_POOL_ID,
+      })
+    });
+
+    var s3 = new AWS.S3({ params: { Bucket: "construction-vr" } });
+
+    var isUploading = false;
+    $feedbackFileUpload.change(function () {
+      if (isUploading) return;
+      isUploading = true;
+      $fullscreenSubmitFeedback.addClass("hidden");
+      $submitFeedback.addClass("hidden");
+      $feedbackFileButtons.text("Uploading...");
+      $fullscreenFeedbackInput.prop("disabled", true);
+      $fullscreenFeedbackInput.addClass("disabled");
+      $feedbackInput.prop("disabled", true);
+      $feedbackInput.addClass("disabled");
+
+      var $this = $(this);
+      var files = $this.get(0).files;
+      if (!files.length) return alert('Please choose a file to upload first.');
+
+      var file = files[0];
+      var fileName = randId() + "_" + file.name.replace(/\s+/g,"_");
+
+      s3.upload({
+        Key: "feedback_uploads/" + fileName, Body: file, ACL: 'public-read'
+      }, function(err, data) {
+        if (err) return alert('There was an error uploading your photo: ', err.message);
+
+        var uploadLocation = data["Location"];
+        var fullscreenText = $fullscreenFeedbackInput.val() || "";
+        var text = $feedbackInput.val() || "";
+
+        if (fullscreenText.length) fullscreenText += "\n\n";
+        if (text.length) text += "\n\n";
+
+        fullscreenText += uploadLocation;
+        text += uploadLocation;
+
+        $fullscreenFeedbackInput.val(fullscreenText);
+        $feedbackInput.val(text);
+
+        $fullscreenFeedbackInput.removeClass("disabled");
+        $fullscreenFeedbackInput.prop("disabled", false);
+        $feedbackInput.removeClass("disabled");
+        $feedbackInput.prop("disabled", false);
+        $fullscreenSubmitFeedback.removeClass("hidden");
+        $submitFeedback.removeClass("hidden");
+        $feedbackFileButtons.text("Add File");
+        isUploading = false;
+      });
+    });
+
+    $feedbackFileButtons.click(function () {
+      if (isUploading) return;
+      $feedbackFileUpload.click();
+    });
+  });

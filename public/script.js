@@ -12,6 +12,7 @@ $(document).ready(function () {
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
   var $unitFloorPlan = $("#unit-floor-plan");
+  var $feedbackFileButtons = $(".feedback-add-file");
 
   var viewerOpts = {
     controls: {
@@ -60,7 +61,6 @@ $(document).ready(function () {
   function createLinkHotspotElement(label, destId) {
     return $("<div><div class='link-hotspot' data-id='" + destId + "'>" + label + "</div></div>");
   }
-
 
   function showLinkHotspots() {
     var panoData = _currentPano.data;
@@ -150,6 +150,9 @@ $(document).ready(function () {
     $fullscreenFeedbackInput.addClass("disabled");
     $feedbackInput.prop("disabled", true);
     $feedbackInput.addClass("disabled");
+    $feedbackFileButtons.addClass("hidden");
+    $fullscreenSubmitFeedback.text("Submitting...");
+    $submitFeedback.text("Submitting...");
 
     var panoId = _currentPano.data["Record ID"];
     var panoName = _currentPano.data["Name"];
@@ -171,6 +174,9 @@ $(document).ready(function () {
           addFeedbackToList(feedbackText, panoName);
         }
 
+        $fullscreenSubmitFeedback.text("Submit Feedback");
+        $submitFeedback.text("Submit Feedback");
+        $feedbackFileButtons.removeClass("hidden");
         $fullscreenFeedbackInput.removeClass("disabled");
         $fullscreenFeedbackInput.prop("disabled", false);
         $feedbackInput.removeClass("disabled");
