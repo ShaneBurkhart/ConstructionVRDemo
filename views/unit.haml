@@ -142,7 +142,18 @@
       s3.upload({
         Key: "feedback_uploads/" + fileName, Body: file, ACL: 'public-read'
       }, function(err, data) {
-        if (err) return alert('There was an error uploading your photo: ', err.message);
+        if (err) {
+          // Dup cleanup.  Yuck!
+          $fullscreenFeedbackInput.removeClass("disabled");
+          $fullscreenFeedbackInput.prop("disabled", false);
+          $feedbackInput.removeClass("disabled");
+          $feedbackInput.prop("disabled", false);
+          $fullscreenSubmitFeedback.removeClass("hidden");
+          $submitFeedback.removeClass("hidden");
+          $feedbackFileButtons.text("Add File");
+          isUploading = false;
+          return alert('There was an error uploading your photo: ', err.message);
+        }
 
         var uploadLocation = data["Location"];
         var fullscreenText = $fullscreenFeedbackInput.val() || "";
