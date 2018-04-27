@@ -11,6 +11,7 @@ $(document).ready(function () {
   var $feedbackInput = $("#feedback-input");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
+  var $unitFloorPlan = $("#unit-floor-plan");
 
   var viewerOpts = {
     controls: {
@@ -56,6 +57,11 @@ $(document).ready(function () {
     updatePanoPreviews();
   }
 
+  function createLinkHotspotElement(label, destId) {
+    return $("<div><div class='link-hotspot' data-id='" + destId + "'>" + label + "</div></div>");
+  }
+
+
   function showLinkHotspots() {
     var panoData = _currentPano.data;
     var linkHotspots = panoData["link_hotspots"];
@@ -63,7 +69,8 @@ $(document).ready(function () {
     for (var key in linkHotspots) {
       var hotspot = linkHotspots[key];
       var destinationRecordId = hotspot["Destination Pano"][0];
-      var $element = $("<div data-id='" + destinationRecordId + "' style='background-color: black; height: 10px; width: 10px; cursor: pointer;'/>");
+      var destinationName = hotspot["Destination Pano Name"][0];
+      var $element = createLinkHotspotElement(destinationName, destinationRecordId);
 
       // This copies the variable so we can use it later without it changing.
       function addClickListener(destPanoId) {
@@ -119,10 +126,8 @@ $(document).ready(function () {
     var viewParams = view.parameters();
     var yaw = viewParams["yaw"];
     var pitch = viewParams["pitch"];
-    var element = $("<div style='background-color: black; height: 10px; width: 10px;'/>").get(0);
 
     console.log(yaw + "\t" + pitch);
-    _currentPano.scene.hotspotContainer().createHotspot(element, { yaw: yaw, pitch: pitch });
   });
 
   function addFeedbackToList(feedbackText, panoName) {
@@ -193,5 +198,11 @@ $(document).ready(function () {
     var $this = $(this);
     var destPanoId = $this.data("id");
     switchToPanoId(destPanoId);
+  });
+
+  $unitFloorPlan.find(".label").click(function () {
+    var $this = $(this);
+    var panoId = $this.data("id");
+    switchToPanoId(panoId);
   });
 });

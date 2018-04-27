@@ -6,7 +6,6 @@
 
   %hr
 
-
   .row
     .third
       %h1= unit["Name"]
@@ -14,8 +13,12 @@
         - (unit["Details"] || "").split("\n").each do |detail|
           %li= detail
     .two-third
-      %img{ src: unit["Floor Plan Image"][0]["url"] }
-
+      #unit-floor-plan
+        %img{ src: unit["Floor Plan Image"][0]["url"] }
+        - unit_pano_data.each do |pano|
+          - if pano["Floor Plan Label X"]
+            .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}= pano["Name"]
+      %span * hover floor plan to show labels
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
     - if is_debug_mode
@@ -59,6 +62,26 @@
           %strong.unit_name= feedback["Pano Name"].first
           %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y')})"
         %p.notes= feedback["Notes"].gsub("\n", "<br>")
+
+- if is_debug_mode
+  :javascript
+    $(document).ready(function () {
+      var $unitFloorPlan = $("#unit-floor-plan img");
+
+      $unitFloorPlan.click(function (e) {
+        var $this = $(this);
+        var pageX = e.pageX;
+        var pageY = e.pageY;
+        var offset = $this.offset();
+        var width = $this.width();
+        var height = $this.height();
+
+        var percentX = 100 * (pageX - offset.left) / width;
+        var percentY = 100 * (pageY - offset.top) / height;
+
+        console.log(percentX + "\t" + percentY);
+      });
+    });
 
 :javascript
   var _panoData = #{unit_pano_data.to_json};

@@ -8,7 +8,7 @@
       .unit-preview{ data: { href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } }
         .image-wrapper
           %img{ src: unit["Floor Plan Image"][0]["url"] }
-          .name= unit["Name"]
+        .name= unit["Name"]
 
 :javascript
   $(document).ready(function () {
@@ -16,7 +16,8 @@
 
     $unitPreviews.click(function (e) {
       e.preventDefault();
-      var unitHref = $unitPreviews.data("href");
+      var $this = $(this);
+      var unitHref = $this.data("href");
       window.location.href = unitHref;
     });
   });

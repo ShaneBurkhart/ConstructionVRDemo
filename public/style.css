@@ -37,6 +37,28 @@ img {
     max-width: 100%;
 }
 
+#unit-floor-plan {
+    position: relative;
+}
+
+#unit-floor-plan .label {
+    display: block;
+    opacity: 0.2;
+    color: white;
+    background-color: #333333;
+    padding: 4px 8px;
+    border: 1px solid #cccccc;
+    position: absolute;
+    cursor: pointer;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
+}
+
+#unit-floor-plan:hover .label {
+    opacity: 1;
+}
+
 #pano-window {
     width: 100%;
     padding-bottom: 50%;
@@ -110,6 +132,19 @@ button, .button, #pano-window.fullscreen .controls a {
     -moz-appearance: none;
 }
 
+#pano-window .link-hotspot {
+    color: white;
+    background-color: #333333;
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 14px;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
+}
+
 #feedback-input {
     width: 100%;
     height: 150px;
@@ -124,9 +159,6 @@ button, .button, #pano-window.fullscreen .controls a {
 
 #pano-previews .pano-preview {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     float: left;
     width: 100px;
     height: 50px;
@@ -149,8 +181,14 @@ button, .button, #pano-window.fullscreen .controls a {
 }
 
 #pano-previews .pano-preview .name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     font-size: 14px;
     color: white;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
 }
 
 #unit-previews {
@@ -170,11 +208,16 @@ button, .button, #pano-window.fullscreen .controls a {
     height: 200px;
 }
 
-.unit-preview .image-wrapper .name {
+.unit-preview .image-wrapper img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
+}
+
+.unit-preview .name {
     background-color: rgba(0,0,0,.7);
     text-align: center;
     padding: 4px 0px;
