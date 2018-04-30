@@ -14,11 +14,12 @@
           %li= detail
     .two-third
       #unit-floor-plan
-        %img{ src: unit["Floor Plan Image"][0]["url"] }
-        - unit_pano_data.each do |pano|
-          - if pano["Floor Plan Label X"]
-            .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}= pano["Name"]
-      %span * hover floor plan to show labels
+        .floor-plan-wrapper
+          %img{ src: unit["Floor Plan Image"][0]["url"] }
+          - unit_pano_data.each do |pano|
+            - if pano["Floor Plan Label X"]
+              .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}= pano["Name"]
+        %p * hover floor plan to show labels
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
     - if is_debug_mode

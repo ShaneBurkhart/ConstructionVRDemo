@@ -42,10 +42,23 @@ img {
 }
 
 #unit-floor-plan {
-    position: relative;
+    text-align: center;
 }
 
-#unit-floor-plan .label {
+#unit-floor-plan .floor-plan-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#unit-floor-plan p {
+    margin-top: 0;
+}
+
+#unit-floor-plan .floor-plan-wrapper img {
+    max-height: 400px;
+}
+
+#unit-floor-plan .floor-plan-wrapper .label {
     display: block;
     opacity: 0.2;
     color: white;
