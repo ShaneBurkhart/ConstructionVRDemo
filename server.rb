@@ -98,7 +98,7 @@ class Unit < Airrecord::Table
 
   def panos
     if @panos.nil?
-      @panos = Pano.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Order Priority": "asc" }) || []
+      @panos = Pano.all(filter: "(FIND(\"#{self.id}\", ARRAYJOIN({Unit ID})))", sort: { "Order Priority": "asc" }) || []
     end
 
     return @panos
