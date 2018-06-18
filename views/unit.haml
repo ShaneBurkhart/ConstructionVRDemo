@@ -64,7 +64,7 @@
       .feedback
         %p
           %strong.unit_name= feedback["Pano Name"].first
-          %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y')})"
+          %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y %l:%M%P')})"
         %p.notes= feedback["Notes"].gsub("\n", "<br>")
 
 %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
