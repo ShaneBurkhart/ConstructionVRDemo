@@ -171,7 +171,8 @@ $(document).ready(function () {
 
     var jpegBase64 = viewer.stage().takeSnapshot();
     var jpegData = dataURItoBlob(jpegBase64);
-    var filePath = "feedback_perspectives/" + randId() + "_" + panoId + "_" + panoName.replace(/\s+/g,"_")  + ".jpeg";
+    var fileName = randId() + "_" + panoId + "_" + panoName.replace(/\s+/g,"_")  + ".jpeg";
+    var filePath = "feedback_perspectives/" + fileName;
 
     uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
       $.ajax({
@@ -180,7 +181,7 @@ $(document).ready(function () {
         data: {
           notes: feedbackText,
           viewParameters: JSON.stringify(view.parameters()),
-          screenshot: [{ url: s3Url }],
+          screenshot: { filename: fileName, url: s3Url },
         },
         complete: function (xhr, status) {
           if (xhr.status === 200) {
@@ -239,24 +240,6 @@ $(document).ready(function () {
   $feedbackPerspectiveLinks.click(function (e) {
     e.preventDefault();
     var $this = $(this);
-    var perspective = $this.attr('data-perspective');
-    var panoId = $this.attr('data-pano-id');
-    var p;
-
-    try {
-        p = JSON.parse(perspective);
-    } catch(e) {
-        console.log(e);
-    }
-
-    if (p) {
-      switchToPanoId(panoId);
-      view.setParameters(p);
-      anchorJump("pano-window");
-
-      var jpegImage = viewer.stage().takeSnapshot();
-      console.log(jpegImage);
-    }
   });
 
   var isUploading = false;

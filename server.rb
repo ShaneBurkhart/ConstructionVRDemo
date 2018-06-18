@@ -56,10 +56,14 @@ post '/project/:access_token/pano/:id/feedback' do
   pano = Pano.find(params[:id])
   return "Not found" if pano.nil? or !pano.unit.belongs_to_project?(project)
 
+  screenshot = params[:screenshot]
+  return "Not found" if screenshot.nil?
+
   feedback = Feedback.new(
     "Pano" => [pano.id],
     "Notes" => params["notes"],
-    "View Parameters" => params["viewParameters"]
+    "View Parameters" => params["viewParameters"],
+    "Screenshot" => [{ url: screenshot[:url], filename: screenshot[:filename] }]
   )
   feedback.create
 
