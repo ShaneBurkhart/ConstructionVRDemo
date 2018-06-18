@@ -169,34 +169,46 @@ $(document).ready(function () {
     var panoId = _currentPano.data["Record ID"];
     var panoName = _currentPano.data["Name"];
 
-    $.ajax({
-      type: "POST",
-      url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
-      data: {
-        notes: feedbackText,
-        viewParameters: JSON.stringify(view.parameters()),
-      },
-      complete: function (xhr, status) {
-        if (xhr.status === 200) {
-          $fullscreenFeedbackInput.val("");
-          $feedbackInput.val("");
-          $feedbackToggleButton.text("Give Feedback");
-          $fullscreenFeedbackContainer.removeClass("open");
+    var jpegBase64 = viewer.stage().takeSnapshot();
+    var jpegData = dataURItoBlob(jpegBase64);
+    var filePath = "feedback_perspectives/" + randId() + "_" + panoId + "_" + panoName.replace(/\s+/g,"_")  + ".jpeg";
 
-          addFeedbackToList(feedbackText, panoName);
-        }
+    uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
+      $.ajax({
+        type: "POST",
+        url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
+        data: {
+          notes: feedbackText,
+          viewParameters: JSON.stringify(view.parameters()),
+          screenshot: [{ url: s3Url }],
+        },
+        complete: function (xhr, status) {
+          if (xhr.status === 200) {
+            $fullscreenFeedbackInput.val("");
+            $feedbackInput.val("");
+            $feedbackToggleButton.text("Give Feedback");
+            $fullscreenFeedbackContainer.removeClass("open");
 
-        $fullscreenSubmitFeedback.text("Submit Feedback");
-        $submitFeedback.text("Submit Feedback");
-        $feedbackFileButtons.removeClass("hidden");
-        $fullscreenFeedbackInput.removeClass("disabled");
-        $fullscreenFeedbackInput.prop("disabled", false);
-        $feedbackInput.removeClass("disabled");
-        $feedbackInput.prop("disabled", false);
-        isRequesting = false;
-      },
+            addFeedbackToList(feedbackText, panoName);
+          }
+
+          $fullscreenSubmitFeedback.text("Submit Feedback");
+          $submitFeedback.text("Submit Feedback");
+          $feedbackFileButtons.removeClass("hidden");
+          $fullscreenFeedbackInput.removeClass("disabled");
+          $fullscreenFeedbackInput.prop("disabled", false);
+          $feedbackInput.removeClass("disabled");
+          $feedbackInput.prop("disabled", false);
+          isRequesting = false;
+        },
+      });
     });
   };
+
+  $feedbackFileButtons.click(function () {
+    if (isUploading) return;
+    $feedbackFileUpload.click();
+  });
 
   $fullscreenSubmitFeedback.click(function () {
     var feedbackText = $fullscreenFeedbackInput.val();
@@ -241,56 +253,11 @@ $(document).ready(function () {
       switchToPanoId(panoId);
       view.setParameters(p);
       anchorJump("pano-window");
+
       var jpegImage = viewer.stage().takeSnapshot();
       console.log(jpegImage);
     }
   });
-
-  function updateFileUI (isUpload) {
-    if (isUpload) {
-      $fullscreenSubmitFeedback.addClass("hidden");
-      $submitFeedback.addClass("hidden");
-      $feedbackFileButtons.text("Uploading...");
-      $fullscreenFeedbackInput.prop("disabled", true);
-      $fullscreenFeedbackInput.addClass("disabled");
-      $feedbackInput.prop("disabled", true);
-      $feedbackInput.addClass("disabled");
-    } else {
-      $fullscreenFeedbackInput.removeClass("disabled");
-      $fullscreenFeedbackInput.prop("disabled", false);
-      $feedbackInput.removeClass("disabled");
-      $feedbackInput.prop("disabled", false);
-      $fullscreenSubmitFeedback.removeClass("hidden");
-      $submitFeedback.removeClass("hidden");
-      $feedbackFileButtons.text("Add File");
-    }
-  }
-
-  function anchorJump(hash){
-      var url = location.href;
-      location.href = "#" + hash;
-      // Change history back to original URL.
-      history.replaceState(null, null, url);
-  }
-
-  function randId() {
-    return 'xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-  function uploadToS3(file, fileName, callback) {
-    s3.upload({
-      Key: "feedback_uploads/" + fileName, Body: file, ACL: 'public-read'
-    }, function (err, data) {
-      if (err) return callback(err, null);
-
-      var uploadLocation = data["Location"];
-      callback(null, uploadLocation);
-    });
-
-  }
 
   var isUploading = false;
   $feedbackFileUpload.change(function () {
@@ -303,9 +270,9 @@ $(document).ready(function () {
     if (!files.length) return alert('Please choose a file to upload first.');
 
     var file = files[0];
-    var fileName = randId() + "_" + file.name.replace(/\s+/g,"_");
+    var filePath = "feedback_uploads/" + randId() + "_" + file.name.replace(/\s+/g,"_");
 
-    uploadToS3(file, fileName, function(err, uploadLocation) {
+    uploadToS3(file, filePath, {}, function(err, uploadLocation) {
       if (err) {
         updateFileUI(false);
         isUploading = false;
@@ -329,8 +296,62 @@ $(document).ready(function () {
     });
   });
 
-  $feedbackFileButtons.click(function () {
-    if (isUploading) return;
-    $feedbackFileUpload.click();
-  });
+  function updateFileUI (isUpload) {
+    if (isUpload) {
+      $fullscreenSubmitFeedback.addClass("hidden");
+      $submitFeedback.addClass("hidden");
+      $feedbackFileButtons.text("Uploading...");
+      $fullscreenFeedbackInput.prop("disabled", true);
+      $fullscreenFeedbackInput.addClass("disabled");
+      $feedbackInput.prop("disabled", true);
+      $feedbackInput.addClass("disabled");
+    } else {
+      $fullscreenFeedbackInput.removeClass("disabled");
+      $fullscreenFeedbackInput.prop("disabled", false);
+      $feedbackInput.removeClass("disabled");
+      $feedbackInput.prop("disabled", false);
+      $fullscreenSubmitFeedback.removeClass("hidden");
+      $submitFeedback.removeClass("hidden");
+      $feedbackFileButtons.text("Add File");
+    }
+  }
+
+  function uploadToS3(data, filePath, opts, callback) {
+    opts = opts || {};
+    opts["Key"] = filePath;
+    opts["Body"] = data;
+    opts["ACL"] = 'public-read';
+
+    s3.upload(opts, function (err, data) {
+      if (err) return callback(err, null);
+
+      var uploadLocation = data["Location"];
+      callback(null, uploadLocation);
+    });
+  }
+
+  function anchorJump(hash){
+      var url = location.href;
+      location.href = "#" + hash;
+      // Change history back to original URL.
+      history.replaceState(null, null, url);
+  }
+
+  function randId() {
+    return 'xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function dataURItoBlob(dataURI) {
+      var binary = atob(dataURI.split(',')[1]);
+      var array = [];
+
+      for(var i = 0; i < binary.length; i++) {
+          array.push(binary.charCodeAt(i));
+      }
+
+      return new Blob([new Uint8Array(array)], { type: 'image/jpeg' });
+  }
 });
