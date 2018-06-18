@@ -13,6 +13,17 @@ $(document).ready(function () {
   var $feedbacks = $("#feedbacks");
   var $unitFloorPlan = $("#unit-floor-plan");
   var $feedbackFileButtons = $(".feedback-add-file");
+  var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
+  var $feedbackFileUpload = $("#feedback-file-upload");
+
+  AWS.config.update({
+    region: "us-west-2",
+    credentials: new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: AWS_IDENTITY_POOL_ID,
+    })
+  });
+
+  var s3 = new AWS.S3({ params: { Bucket: "construction-vr" } });
 
   var viewerOpts = {
     controls: {
@@ -20,6 +31,7 @@ $(document).ready(function () {
     },
     stage: {
       width: 100,
+      preserveDrawingBuffer: true,
     }
   };
 
@@ -210,5 +222,115 @@ $(document).ready(function () {
     var $this = $(this);
     var panoId = $this.data("id");
     switchToPanoId(panoId);
+  });
+
+  $feedbackPerspectiveLinks.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var perspective = $this.attr('data-perspective');
+    var panoId = $this.attr('data-pano-id');
+    var p;
+
+    try {
+        p = JSON.parse(perspective);
+    } catch(e) {
+        console.log(e);
+    }
+
+    if (p) {
+      switchToPanoId(panoId);
+      view.setParameters(p);
+      anchorJump("pano-window");
+      var jpegImage = viewer.stage().takeSnapshot();
+      console.log(jpegImage);
+    }
+  });
+
+  function updateFileUI (isUpload) {
+    if (isUpload) {
+      $fullscreenSubmitFeedback.addClass("hidden");
+      $submitFeedback.addClass("hidden");
+      $feedbackFileButtons.text("Uploading...");
+      $fullscreenFeedbackInput.prop("disabled", true);
+      $fullscreenFeedbackInput.addClass("disabled");
+      $feedbackInput.prop("disabled", true);
+      $feedbackInput.addClass("disabled");
+    } else {
+      $fullscreenFeedbackInput.removeClass("disabled");
+      $fullscreenFeedbackInput.prop("disabled", false);
+      $feedbackInput.removeClass("disabled");
+      $feedbackInput.prop("disabled", false);
+      $fullscreenSubmitFeedback.removeClass("hidden");
+      $submitFeedback.removeClass("hidden");
+      $feedbackFileButtons.text("Add File");
+    }
+  }
+
+  function anchorJump(hash){
+      var url = location.href;
+      location.href = "#" + hash;
+      // Change history back to original URL.
+      history.replaceState(null, null, url);
+  }
+
+  function randId() {
+    return 'xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function uploadToS3(file, fileName, callback) {
+    s3.upload({
+      Key: "feedback_uploads/" + fileName, Body: file, ACL: 'public-read'
+    }, function (err, data) {
+      if (err) return callback(err, null);
+
+      var uploadLocation = data["Location"];
+      callback(null, uploadLocation);
+    });
+
+  }
+
+  var isUploading = false;
+  $feedbackFileUpload.change(function () {
+    if (isUploading) return;
+    isUploading = true;
+    updateFileUI(true);
+
+    var $this = $(this);
+    var files = $this.get(0).files;
+    if (!files.length) return alert('Please choose a file to upload first.');
+
+    var file = files[0];
+    var fileName = randId() + "_" + file.name.replace(/\s+/g,"_");
+
+    uploadToS3(file, fileName, function(err, uploadLocation) {
+      if (err) {
+        updateFileUI(false);
+        isUploading = false;
+        return alert('There was an error uploading your photo: ', err.message);
+      }
+
+      var fullscreenText = $fullscreenFeedbackInput.val() || "";
+      var text = $feedbackInput.val() || "";
+
+      if (fullscreenText.length) fullscreenText += "\n\n";
+      if (text.length) text += "\n\n";
+
+      fullscreenText += uploadLocation;
+      text += uploadLocation;
+
+      $fullscreenFeedbackInput.val(fullscreenText);
+      $feedbackInput.val(text);
+
+      updateFileUI(false);
+      isUploading = false;
+    });
+  });
+
+  $feedbackFileButtons.click(function () {
+    if (isUploading) return;
+    $feedbackFileUpload.click();
   });
 });
