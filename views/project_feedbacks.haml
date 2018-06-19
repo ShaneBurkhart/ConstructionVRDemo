@@ -13,7 +13,7 @@
 
     %h2{ id: "#{u.id}" }= u["Name"]
 
-    - u.feedbacks.each do |f|
+    - u.feedbacks.reverse.each do |f|
       - next if f["Screenshot"].nil?
 
       %img{ src: f["Screenshot"][0]["url"] }
