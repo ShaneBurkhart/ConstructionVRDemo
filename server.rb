@@ -21,11 +21,25 @@ def find_project_by_access_token(access_token)
 end
 
 get '/project/:access_token' do
+  is_debug_mode = !!params[:debug]
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  haml :project, locals: { project: project, access_token: access_token }
+  haml :project, locals: {
+    project: project,
+    access_token: access_token,
+    is_debug_mode: is_debug_mode,
+  }
+end
+
+get '/project/:access_token/feedbacks' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @units = project.units
+  haml :project_feedbacks
 end
 
 get '/project/:access_token/unit/:id' do

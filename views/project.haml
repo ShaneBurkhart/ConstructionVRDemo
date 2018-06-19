@@ -1,6 +1,9 @@
 .container
   %h1= project["Name"]
 
+  - if is_debug_mode
+    %a{ href: "/project/#{access_token}/feedbacks" } All Feedbacks
+
   %hr
 
   #unit-previews
