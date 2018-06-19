@@ -1,0 +1,101 @@
+.large-container
+  %div{ id: "pano-window" }
+
+  :javascript
+    var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";
+
+    AWS.config.update({
+      region: "us-west-2",
+      credentials: new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: AWS_IDENTITY_POOL_ID,
+      })
+    });
+
+    var s3 = new AWS.S3({ params: { Bucket: "construction-vr" } });
+
+    var perspective = #{@feedback["View Parameters"]};
+    var feedbackId = "#{@feedback.id}";
+    var panoId = "#{@feedback.pano.id}";
+    var panoName = "#{@feedback.pano['Name']}";
+
+    var viewerOpts = {
+      stage: {
+        width: 100,
+        preserveDrawingBuffer: true,
+      }
+    };
+
+    var panoElement = document.getElementById('pano-window');
+    var viewer = new Marzipano.Viewer(panoElement, viewerOpts)
+    var levels = [
+      { width: 4096 },
+    ];
+
+    var geometry = new Marzipano.EquirectGeometry(levels);
+    var limiter = Marzipano.util.compose(
+      Marzipano.RectilinearView.limit.vfov(0.698131111111111, 2.09439333333333),
+      Marzipano.RectilinearView.limit.hfov(0.698131111111111, 2.09439333333333),
+      Marzipano.RectilinearView.limit.pitch(-Math.PI/2, Math.PI/2)
+    );
+
+    var view = new Marzipano.RectilinearView({ fov: 2.094 }, limiter);
+    var source = Marzipano.ImageUrlSource.fromString("#{@feedback.pano['Image'][0]['url']}");
+
+    var scene = viewer.createScene({ source: source, geometry: geometry, view: view })
+    scene.switchTo();
+
+    view.setParameters(perspective);
+
+    function uploadToS3(data, filePath, opts, callback) {
+      opts = opts || {};
+      opts["Key"] = filePath;
+      opts["Body"] = data;
+      opts["ACL"] = 'public-read';
+
+      s3.upload(opts, function (err, data) {
+        if (err) return callback(err, null);
+
+        var uploadLocation = data["Location"];
+        callback(null, uploadLocation);
+      });
+    }
+
+    setTimeout(function () {
+      var jpegBase64 = viewer.stage().takeSnapshot();
+      var jpegData = dataURItoBlob(jpegBase64);
+      var fileName = randId() + "_" + panoId + "_" + panoName.replace(/\s+/g,"_")  + ".jpeg";
+      var filePath = "feedback_perspectives/" + fileName;
+
+      uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
+        $.ajax({
+          type: "POST",
+          url: "/fix_feedback/" + feedbackId,
+          data: {
+            screenshot: { filename: fileName, url: s3Url },
+          },
+          complete: function (xhr, status) {
+            if (xhr.status === 200) {
+              location.href = "/fix_feedback";
+            }
+          },
+        });
+      });
+    }, 2000)
+
+    function randId() {
+      return 'xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function dataURItoBlob(dataURI) {
+        var binary = atob(dataURI.split(',')[1]);
+        var array = [];
+
+        for(var i = 0; i < binary.length; i++) {
+            array.push(binary.charCodeAt(i));
+        }
+
+        return new Blob([new Uint8Array(array)], { type: 'image/jpeg' });
+    }

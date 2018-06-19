@@ -70,6 +70,31 @@ post '/project/:access_token/pano/:id/feedback' do
   redirect "/project/#{access_token}/unit/#{pano.unit.id}"
 end
 
+# DEVELOPMENT USE ONLY!
+# USED FOR GENERATING MISSING FEEDBACK IMAGES
+# Uncomment to use.
+#get '/fix_feedback' do
+  #return "Not found" if
+  #@feedbacks = Feedback.all(filter: '{Screenshot} = ""') || []
+  #return "Done." if @feedbacks.count == 0
+  #@feedback = @feedbacks.first
+
+  #haml :fix_feedback, locals: { feedbacks: @feedbacks, aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"] }
+#end
+
+#post '/fix_feedback/:id' do
+  #feedback = Feedback.find(params[:id])
+  #return "Not found" if feedback.nil?
+
+  #screenshot = params[:screenshot]
+  #return "Not found" if screenshot.nil?
+
+  #feedback["Screenshot"] = [{ url: screenshot[:url], filename: screenshot[:filename] }]
+  #feedback.save
+
+  #return 200
+#end
+
 class Project < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Projects"
@@ -153,6 +178,15 @@ end
 class Feedback < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Feedback"
+
+  def pano
+    if @pano.nil?
+      @pano = Pano.find(self["Pano"].first)
+    end
+
+    return @pano
+  end
+
 end
 
 class LinkHotspots < Airrecord::Table
