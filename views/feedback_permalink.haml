@@ -8,7 +8,7 @@
     var _accessToken = "#{access_token}";
     var _permalinkId = "#{@feedback_permalink.id}";
 
-    var updateChecked = _.debounce(sendUpdates, 500);
+    var updateChecked = _.debounce(sendUpdates, 300);
 
     function sendUpdates() {
       var checkedData = _.clone(RECENTLY_CHECKED);
