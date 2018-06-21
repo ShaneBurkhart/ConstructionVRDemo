@@ -33,7 +33,7 @@ end
 get '/api/project/:ps_access_token/renderings' do
   ps_access_token = params[:ps_access_token]
   project = find_project_by_plansource_access_token(ps_access_token)
-  return [] if project.nil?
+  return { renderings: [] }.to_json if project.nil?
 
   renderings = project.units.map { |u| {
     name: u["Name"],
