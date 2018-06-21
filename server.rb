@@ -32,7 +32,7 @@ end
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   ps_access_token = params[:ps_access_token]
-  project = find_project_by_plansource_access_token(access_token)
+  project = find_project_by_plansource_access_token(ps_access_token)
   return [] if project.nil?
 
   return project.units.map { |u| {
