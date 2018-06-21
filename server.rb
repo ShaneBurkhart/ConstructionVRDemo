@@ -40,7 +40,7 @@ get '/api/project/:ps_access_token/renderings' do
     url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
   }}
 
-  return { renderings: renderings.to_json }
+  return { renderings: renderings }.to_json
 end
 
 get '/project/:access_token' do
