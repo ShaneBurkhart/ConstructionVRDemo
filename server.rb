@@ -23,6 +23,24 @@ def find_project_by_access_token(access_token)
   return records.first
 end
 
+def find_project_by_plansource_access_token(ps_access_token)
+  return false if ps_access_token.nil? or ps_access_token == ""
+  records = Project.all(filter: "(FIND(\"#{ps_access_token}\", {PlanSource Access Token}))") || []
+  return records.first
+end
+
+# ps_access_token is PlanSource access token. We use that to authenticate the job.
+get '/api/project/:ps_access_token/renderings' do
+  ps_access_token = params[:ps_access_token]
+  project = find_project_by_plansource_access_token(access_token)
+  return [] if project.nil?
+
+  return project.units.map { |u| {
+    name: u["Name"],
+    url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
+  }}
+end
+
 get '/project/:access_token' do
   is_debug_mode = !!params[:debug]
   access_token = params[:access_token]
