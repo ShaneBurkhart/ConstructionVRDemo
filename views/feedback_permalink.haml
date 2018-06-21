@@ -5,16 +5,12 @@
   $(document).ready(function () {
     // index => is_checked
     var RECENTLY_CHECKED = {};
-    var IS_REQUESTING = false;
     var _accessToken = "#{access_token}";
     var _permalinkId = "#{@feedback_permalink.id}";
 
     var updateChecked = _.debounce(sendUpdates, 500);
 
     function sendUpdates() {
-      if (IS_REQUESTING) return;
-      IS_REQUESTING = true;
-
       var checkedData = _.clone(RECENTLY_CHECKED);
       RECENTLY_CHECKED = {};
 
@@ -23,7 +19,6 @@
         url: "/project/" + _accessToken + "/feedbacks/permalinks/" + _permalinkId + "/update",
         data: { updates: checkedData },
         complete: function (xhr, status) {
-          IS_REQUESTING = false;
           if (Object.keys(RECENTLY_CHECKED).length) updateChecked();
         }
       });
