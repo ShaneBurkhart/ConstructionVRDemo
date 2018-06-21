@@ -3,6 +3,9 @@ require "haml"
 require "airrecord"
 require "redis-store"
 require 'redis-rack'
+require 'redcarpet'
+
+MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
 # docker needs stdout to sync to get logs.
 $stdout.sync = true
@@ -39,7 +42,119 @@ get '/project/:access_token/feedbacks' do
   return "Not found" if project.nil?
 
   @units = project.units
-  haml :project_feedbacks
+  haml :project_feedbacks, locals: {
+    access_token: access_token,
+  }
+end
+
+get '/project/:access_token/feedbacks/permalinks' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @feedback_permalinks = FeedbackPermalink.all(filter: "{Project ID} = '#{project.id}'", sort: { "Created At": "desc" })
+  haml :feedback_permalinks, locals: {
+    access_token: access_token,
+  }
+end
+
+post '/project/:access_token/feedbacks/permalinks' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  markdown = params[:markdown]
+  feedbackPermalink = FeedbackPermalink.new("Project" => [project.id], "Markdown" => markdown)
+  feedbackPermalink.create
+
+  redirect "/project/#{access_token}/feedbacks/permalinks"
+end
+
+get '/project/:access_token/feedbacks/permalinks/new' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @units = project.units
+  haml :new_feedback_permalink, locals: {
+    access_token: access_token,
+  }
+end
+
+get '/project/:access_token/feedbacks/permalinks/:id' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @feedback_permalink = FeedbackPermalink.find(params[:id])
+  return "Not found" if @feedback_permalink.nil?
+
+  raw_markdown = @feedback_permalink["Markdown"]
+  @js_safe_markdown = @feedback_permalink["Markdown"].gsub(/\n/, "\\n")
+  pre_render_markdown = raw_markdown.gsub(/\[(x| )\]/).with_index do |match, index|
+    checked = match =~ /x/ ? true : false
+    if checked
+      next "<input id='#{index}' type='checkbox' checked='true'>"
+    else
+      next "<input id='#{index}' type='checkbox'>"
+    end
+  end
+
+  @markdown_html = MARKDOWN.render(pre_render_markdown)
+  haml :feedback_permalink, locals: {
+    access_token: access_token,
+  }
+end
+
+get '/feedback_permalink/:id' do
+  @feedback_permalink = FeedbackPermalink.find(params[:id])
+  return "Not found" if @feedback_permalink.nil?
+
+  project = @feedback_permalink.project
+  return "Not found" if project.nil?
+
+  raw_markdown = @feedback_permalink["Markdown"]
+  @js_safe_markdown = @feedback_permalink["Markdown"].gsub(/\n/, "\\n")
+  pre_render_markdown = raw_markdown.gsub(/\[(x| )\]/).with_index do |match, index|
+    checked = match =~ /x/ ? true : false
+    if checked
+      next "<input id='#{index}' type='checkbox' checked='true'>"
+    else
+      next "<input id='#{index}' type='checkbox'>"
+    end
+  end
+
+  @markdown_html = MARKDOWN.render(pre_render_markdown)
+  haml :feedback_permalink, locals: {
+    access_token: project["Access Token"],
+  }
+end
+
+post '/project/:access_token/feedbacks/permalinks/:id/update' do
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @feedback_permalink = FeedbackPermalink.find(params[:id])
+  return "Not found" if @feedback_permalink.nil?
+
+  updates = params["updates"]
+  raw_markdown = @feedback_permalink["Markdown"]
+  pre_render_markdown = raw_markdown.gsub(/\[(x| )\]/).with_index do |match, index|
+    result = updates["#{index}"]
+    next match if result.nil?
+
+    if result == "true"
+      next "[x]"
+    else
+      next "[ ]"
+    end
+  end
+
+  @feedback_permalink["Markdown"] = pre_render_markdown
+  @feedback_permalink.save
+
+  MARKDOWN.render(pre_render_markdown)
 end
 
 get '/project/:access_token/unit/:id' do
@@ -200,7 +315,19 @@ class Feedback < Airrecord::Table
 
     return @pano
   end
+end
 
+class FeedbackPermalink < Airrecord::Table
+  self.base_key = AIRTABLES_APP_ID
+  self.table_name = "Feedback Permalinks"
+
+  def project
+    if @project.nil?
+      @project = Project.find(self["Project"].first)
+    end
+
+    return @project
+  end
 end
 
 class LinkHotspots < Airrecord::Table

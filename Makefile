@@ -17,4 +17,4 @@ ps:
 	docker-compose ps
 
 logs:
-	docker-compose logs -f
+	docker-compose -p ${NAME} logs -f

@@ -4,9 +4,9 @@ GEM
     airrecord (0.2.4)
       faraday (~> 0.10)
       net-http-persistent (~> 2.9)
-    faraday (0.15.0)
+    faraday (0.15.2)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.23)
+    ffi (1.9.25)
     haml (5.0.4)
       temple (>= 0.8.0)
       tilt
@@ -18,12 +18,13 @@ GEM
     mustermann (1.0.2)
     net-http-persistent (2.9.4)
     pug (0.2.2)
-    rack (2.0.4)
-    rack-protection (2.0.1)
+    rack (2.0.5)
+    rack-protection (2.0.3)
       rack
     rb-fsevent (0.10.3)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
+    redcarpet (3.4.0)
     redis (4.0.1)
     redis-rack (2.0.4)
       rack (>= 1.5, < 3)
@@ -33,10 +34,10 @@ GEM
     rerun (0.13.0)
       listen (~> 3.0)
     ruby_dep (1.5.0)
-    sinatra (2.0.1)
+    sinatra (2.0.3)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.1)
+      rack-protection (= 2.0.3)
       tilt (~> 2.0)
     temple (0.8.0)
     tilt (2.0.8)
@@ -48,6 +49,7 @@ DEPENDENCIES
   airrecord
   haml
   pug
+  redcarpet
   redis-rack
   redis-store
   rerun
