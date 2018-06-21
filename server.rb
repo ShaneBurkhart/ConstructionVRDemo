@@ -31,7 +31,8 @@ end
 
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
-  ps_access_token = params[:ps_access_token]
+  # We have to escape slashes so now we unescape to check against airtables.
+  ps_access_token = params[:ps_access_token].gsub("%2F", "/")
   project = find_project_by_plansource_access_token(ps_access_token)
   return { renderings: [] }.to_json if project.nil?
 

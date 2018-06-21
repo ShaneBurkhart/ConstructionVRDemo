@@ -18,3 +18,13 @@ ps:
 
 logs:
 	docker-compose -p ${NAME} logs -f
+
+prod:
+	git checkout master
+	git pull origin master
+	$(MAKE) build
+	$(MAKE) run
+
+deploy_prod:
+	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVR; make prod;"
+
