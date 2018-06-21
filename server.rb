@@ -35,10 +35,12 @@ get '/api/project/:ps_access_token/renderings' do
   project = find_project_by_plansource_access_token(ps_access_token)
   return [] if project.nil?
 
-  return project.units.map { |u| {
+  renderings = project.units.map { |u| {
     name: u["Name"],
     url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
-  }}.to_json
+  }}
+
+  return { renderings: renderings.to_json }
 end
 
 get '/project/:access_token' do
