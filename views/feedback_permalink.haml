@@ -9,7 +9,7 @@
     var _accessToken = "#{access_token}";
     var _permalinkId = "#{@feedback_permalink.id}";
 
-    var updateChecked = _.debounce(sendUpdates, 1000);
+    var updateChecked = _.debounce(sendUpdates, 500);
 
     function sendUpdates() {
       if (IS_REQUESTING) return;
