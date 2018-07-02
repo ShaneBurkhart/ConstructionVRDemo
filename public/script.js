@@ -1,6 +1,7 @@
 $(document).ready(function () {
   var $fullscreenButton = $(".fullscreen-toggle");
   var $logCoordButton = $(".log-coord");
+  var $setLinkHotspotButton = $(".set-link-hotspot");
   var panoElement = document.getElementById('pano-window');
   var $panoElement = $('#pano-window');
   var $feedbackToggleButton = $('#pano-window .controls .feedback-toggle');
@@ -15,6 +16,8 @@ $(document).ready(function () {
   var $feedbackFileButtons = $(".feedback-add-file");
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
   var $feedbackFileUpload = $("#feedback-file-upload");
+
+  var IS_PICKING_LINK_HOTSPOT = false;
 
   AWS.config.update({
     region: "us-west-2",
@@ -142,6 +145,20 @@ $(document).ready(function () {
     console.log(yaw + "\t" + pitch);
   });
 
+  $setLinkHotspotButton.click(function (e) {
+    e.preventDefault();
+
+    var viewParams = view.parameters();
+    var yaw = viewParams["yaw"];
+    var pitch = viewParams["pitch"];
+
+    $setLinkHotspotButton.attr('data-yaw', yaw);
+    $setLinkHotspotButton.attr('data-pitch', pitch);
+
+    IS_PICKING_LINK_HOTSPOT = true;
+    $panoPreviews.addClass('select-pano');
+  });
+
   function addFeedbackToList(feedbackText, panoName) {
     var $feedbackTemplate = $("#feedback-template .feedback");
     var $newFeedback = $feedbackTemplate.clone();
@@ -153,6 +170,24 @@ $(document).ready(function () {
     $feedbacks.prepend($newFeedback);
     $feedbacks.prepend($("<hr>"));
   }
+
+  var updateLinkHotspot = function(pano_id, dest_pano_id, yaw, pitch) {
+    $.ajax({
+      type: "POST",
+      url: "/admin/linked_hotspot/set",
+      data: {
+        pano_id: pano_id,
+        dest_pano_id: dest_pano_id,
+        yaw: yaw,
+        pitch: pitch,
+      },
+      complete: function (xhr, status) {
+        if (xhr.status === 200) {
+          console.log("Hotspot Updated.");
+        }
+      },
+    });
+  };
 
   var isRequesting = false;
   var submitFeedback = function (feedbackText) {
@@ -228,7 +263,19 @@ $(document).ready(function () {
   $panoPreviews.click(function () {
     var $this = $(this);
     var destPanoId = $this.data("id");
-    switchToPanoId(destPanoId);
+
+    if (IS_PICKING_LINK_HOTSPOT) {
+      var currentPanoId = _currentPano.data["Record ID"];
+      var yaw = $setLinkHotspotButton.attr('data-yaw');
+      var pitch = $setLinkHotspotButton.attr('data-pitch');
+
+      updateLinkHotspot(currentPanoId, destPanoId, yaw, pitch);
+
+      $panoPreviews.removeClass('select-pano');
+      IS_PICKING_LINK_HOTSPOT = false;
+    } else {
+      switchToPanoId(destPanoId);
+    }
   });
 
   $unitFloorPlan.find(".label").click(function () {

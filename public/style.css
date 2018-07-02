@@ -198,6 +198,14 @@ button, .button, #pano-window.fullscreen .controls a {
     background-color: #555555;
 }
 
+#pano-previews .pano-preview.select-pano {
+    background-color: #800080;
+}
+
+#pano-previews .pano-preview.select-pano:hover {
+    background-color: #b300b2;
+}
+
 #pano-previews .pano-preview .name {
     position: absolute;
     top: 50%;

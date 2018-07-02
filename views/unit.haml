@@ -22,7 +22,9 @@
         %p * hover floor plan to show labels
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
-    - if is_debug_mode
+    - if is_admin_mode
+      %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
+    - elsif is_debug_mode
       %a.button.log-coord{ href: "#" } Log Coords
 
   #pano-window

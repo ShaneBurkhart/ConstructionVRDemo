@@ -29,6 +29,12 @@ def find_project_by_plansource_access_token(ps_access_token)
   return records.first
 end
 
+def find_project_by_admin_access_token(admin_access_token)
+  return false if admin_access_token.nil? or admin_access_token == ""
+  records = Project.all(filter: "(FIND(\"#{admin_access_token}\", {Admin Access Token}))") || []
+  return records.first
+end
+
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.
@@ -44,8 +50,43 @@ get '/api/project/:ps_access_token/renderings' do
   return { renderings: renderings }.to_json
 end
 
+get '/admin/login/:admin_token' do
+  admin_token = params[:admin_token]
+  project = find_project_by_admin_access_token(admin_token)
+  return "Not found" if project.nil?
+
+  # Log in user so we don't have to specify debug mode and can update
+  # linked hotspots in the app.
+  session[:is_admin] = true
+
+  redirect "/project/#{project["Access Token"]}"
+end
+
+post '/admin/linked_hotspot/set' do
+  is_admin = session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  pano_id = params[:pano_id]
+  dest_pano_id = params[:dest_pano_id]
+  yaw = params[:yaw]
+  pitch = params[:pitch]
+
+  hotspot = LinkHotspots.all(filter: "AND({Pano} = '#{pano_id}', {Destination Pano} = '#{dest_pano_id}')").first
+
+  if hotspot.nil?
+    hotspot = LinkHotspots.new("Pano" => [pano_id], "Destination Pano" => [dest_pano_id], "Yaw" => yaw, "Pitch" => pitch)
+    hotspot.create
+  else
+    hotspot["Yaw"] = yaw
+    hotspot["Pitch"] = pitch
+    hotspot.save
+  end
+
+  return { hotspot: hotspot }.to_json
+end
+
 get '/project/:access_token' do
-  is_debug_mode = !!params[:debug]
+  is_debug_mode = !!params[:debug] || session[:is_admin]
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -180,7 +221,8 @@ end
 
 get '/project/:access_token/unit/:id' do
   access_token = params[:access_token]
-  is_debug_mode = !!params[:debug]
+  is_debug_mode = !!params[:debug] || session[:is_admin]
+  is_admin_mode = session[:is_admin]
 
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -194,6 +236,7 @@ get '/project/:access_token/unit/:id' do
     unit_pano_data: unit.pano_data,
     access_token: access_token,
     is_debug_mode: is_debug_mode,
+    is_admin_mode: is_admin_mode,
     aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
   }
 end
