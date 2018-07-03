@@ -63,7 +63,7 @@ get '/admin/login/:admin_token' do
 end
 
 post '/admin/linked_hotspot/set' do
-  is_admin = session[:is_admin]
+  is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
 
   pano_id = params[:pano_id]
@@ -86,7 +86,7 @@ post '/admin/linked_hotspot/set' do
 end
 
 get '/project/:access_token' do
-  is_debug_mode = !!params[:debug] || session[:is_admin]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -221,8 +221,8 @@ end
 
 get '/project/:access_token/unit/:id' do
   access_token = params[:access_token]
-  is_debug_mode = !!params[:debug] || session[:is_admin]
-  is_admin_mode = session[:is_admin]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
 
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
