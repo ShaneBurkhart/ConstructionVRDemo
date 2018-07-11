@@ -1,0 +1,145 @@
+%script(src="/script.js")
+
+.container
+  %h1= @procurement_form["Name"]
+
+  %p Jump To
+
+  %hr
+
+  %h2 Plans &amp; Elevations
+  %h4.bold Upload any files that we would need.
+  %p.header These files should include things like:
+  %ul
+    %li Floor plans (CAD or PDF).
+    %li Window schedule and locations.
+    %li Door schedule, locations, and door swings.
+    %li Kitchen and bathroom vanity elevations.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file.upload-button Add File
+    %span.file-uploading-message Uploading. Please wait...
+    %textarea.procurement-input{ placeholder: "Enter information here...", data: { name: "Plans" } }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold What is the ceiling height?
+  %p If it varies, make sure it is specified in the plans/CAD files you upload and specify the file it is in here.
+
+  %h4.bold What color should the walls be?
+  %p Specify a wall color name or describe the color you want.  If you have any accent colors, specify those as well.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold What styles, colors and locations for trim &amp; moulding?
+  %p Specify where any trim or moulding should go as well as the style and colors for each.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold What styles, colors and locations for flooring?
+  %p Specify where each flooring type should go as well as the style and colors.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold What style and colors for doors?
+  %p We’ll be able to get locations and sizes of doors from your plans.  If not, make sure it’s included here.  Also make sure door swings are included.  We also need the door styles as well as colors.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold What window style? Pane type? Trim? Sill? Colors?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+
+  %h4.bold Blinds/curtains style? Color?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Light fixture style? Color? Lighting plan?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Closet shelving type? Locations? Color?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Bathroom countertop style?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Bathroom sink style?
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Kitchen cabinet color?
+  %p If you didn’t add kitchen elevation above, you can do that here.  Also make sure cabinet depths are specified somewhere.  Specify the cabinet colors you are looking for as well.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Kitchen countertop type?  Color?
+  %p Specify the kitchen countertop type and color.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Kitchen sink style?
+  %p If not specified in the plans or kitchen elevation, describe the styles here.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold Appliance style?
+  %p If not specified in the plans or elevations, describe the styles here.  Typically fridge, washer & dryer, and dishwasher styles need to be specified.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+  %h4.bold General decoration style?
+  %p This is entirely optional and we will fill in decoration and furniture as well.  We’ll match the furniture layout in any of the files above or uploaded here.  And fill in some extras.
+  %p.small.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+  %p
+    %button.procurement-add-file Add File
+    %textarea.procurement-input{ placeholder: "Enter information here..." }
+    %input.hidden.procurement-file-input{ type: "file" }
+
+
+:javascript
+  var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";

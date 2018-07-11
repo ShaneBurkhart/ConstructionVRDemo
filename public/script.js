@@ -17,6 +17,10 @@ $(document).ready(function () {
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
   var $feedbackFileUpload = $("#feedback-file-upload");
 
+  // Procurement Forms
+  var $procurementFileButtons = $(".procurement-add-file");
+  var $procurementFileInputs = $(".procurement-file-input");
+
   var IS_PICKING_LINK_HOTSPOT = false;
 
   AWS.config.update({
@@ -28,42 +32,45 @@ $(document).ready(function () {
 
   var s3 = new AWS.S3({ params: { Bucket: "construction-vr" } });
 
-  var viewerOpts = {
-    controls: {
-      mouseViewMode: 'drag'    // drag|qtvr
-    },
-    stage: {
-      width: 100,
-      preserveDrawingBuffer: true,
-    }
-  };
-
-  var viewer = new Marzipano.Viewer(panoElement, viewerOpts)
-
-  var levels = [
-    { width: 4096 },
-  ];
-
-  var geometry = new Marzipano.EquirectGeometry(levels);
-  var limiter = Marzipano.util.compose(
-    Marzipano.RectilinearView.limit.vfov(0.698131111111111, 2.09439333333333),
-    Marzipano.RectilinearView.limit.hfov(0.698131111111111, 2.09439333333333),
-    Marzipano.RectilinearView.limit.pitch(-Math.PI/2, Math.PI/2)
-  );
-  var view = new Marzipano.RectilinearView({ fov: 2.094 }, limiter);
-
+  var viewer, view;
   var _currentPano = null;
   var _panos = {};
 
-  for (var key in _panoData) {
-    var data = _panoData[key];
-    var source = Marzipano.ImageUrlSource.fromString(data["Image"][0]["url"]);
-    var recordId = data["Record ID"];
-
-    _panos[recordId] = {
-      data: data,
-      scene: viewer.createScene({ source: source, geometry: geometry, view: view }),
+  function initViewer() {
+    var viewerOpts = {
+      controls: {
+        mouseViewMode: 'drag'    // drag|qtvr
+      },
+      stage: {
+        width: 100,
+        preserveDrawingBuffer: true,
+      }
     };
+
+    viewer = new Marzipano.Viewer(panoElement, viewerOpts)
+
+    var levels = [
+      { width: 4096 },
+    ];
+
+    var geometry = new Marzipano.EquirectGeometry(levels);
+    var limiter = Marzipano.util.compose(
+      Marzipano.RectilinearView.limit.vfov(0.698131111111111, 2.09439333333333),
+      Marzipano.RectilinearView.limit.hfov(0.698131111111111, 2.09439333333333),
+      Marzipano.RectilinearView.limit.pitch(-Math.PI/2, Math.PI/2)
+    );
+    view = new Marzipano.RectilinearView({ fov: 2.094 }, limiter);
+
+    for (var key in _panoData) {
+      var data = _panoData[key];
+      var source = Marzipano.ImageUrlSource.fromString(data["Image"][0]["url"]);
+      var recordId = data["Record ID"];
+
+      _panos[recordId] = {
+        data: data,
+        scene: viewer.createScene({ source: source, geometry: geometry, view: view }),
+      };
+    }
   }
 
   function switchToPanoId(panoId) {
@@ -109,9 +116,12 @@ $(document).ready(function () {
     });
   }
 
-  // Show first pano
-  switchToPanoId(_panoData[0]["Record ID"]);
-
+  // Only init if we have a pano element.
+  if (panoElement) {
+    initViewer();
+    // Show first pano
+    switchToPanoId(_panoData[0]["Record ID"]);
+  }
 
   $feedbackToggleButton.click(function () {
     if ($fullscreenFeedbackContainer.hasClass("open")) {
@@ -323,6 +333,44 @@ $(document).ready(function () {
 
       updateFileUI(false);
       isUploading = false;
+    });
+  });
+
+  $procurementFileButtons.click(function () {
+    var $this = $(this);
+    var $fileInput = $this.parent().find(".procurement-file-input");
+    if ($fileInput.hasClass("uploading")) return;
+    $fileInput.click();
+  });
+
+  $procurementFileInputs.change(function () {
+    var $this = $(this);
+    var $parent = $this.parent();
+    var $textarea = $parent.find(".procurement-input");
+    if ($parent.hasClass("uploading")) return;
+    $parent.addClass("uploading");
+
+    var files = $this.get(0).files;
+    if (!files.length) return alert('Please choose a file to upload first.');
+
+    var file = files[0];
+    var filePath = "procurement_uploads/" + randId() + "_" + file.name.replace(/\s+/g,"_");
+
+    uploadToS3(file, filePath, {}, function(err, uploadLocation) {
+      if (err) {
+        $parent.removeClass('uploading');
+        return alert('There was an error uploading your photo: ', err.message);
+      }
+
+      var text = $textarea.val() || "";
+
+      if (text.length) text += "\n\n";
+      text += uploadLocation;
+
+      console.log(text);
+      $textarea.val(text);
+
+      $parent.removeClass('uploading');
     });
   });
 

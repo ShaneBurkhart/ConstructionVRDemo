@@ -86,7 +86,7 @@ post '/admin/linked_hotspot/set' do
 end
 
 get '/project/:access_token' do
-  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -94,8 +94,37 @@ get '/project/:access_token' do
   haml :project, locals: {
     project: project,
     access_token: access_token,
-    is_debug_mode: is_debug_mode,
+    is_admin_mode: is_admin_mode,
   }
+end
+
+get '/project/:access_token/procurement_forms' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+  return "Not found" if !is_admin_mode
+
+  haml :project_procurement_forms, locals: {
+    project: project,
+    access_token: access_token,
+  }
+end
+
+get '/procurement_forms/:access_token' do
+  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
+  return "Not found" if @procurement_form.nil?
+
+  haml :project_procurement_form, locals: {
+    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
+  }
+end
+
+post '/procurement_forms/:access_token/update' do
+  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
+  return "Not found" if @procurement_form.nil?
+
+  haml :project_procurement_form, locals: { }
 end
 
 get '/project/:access_token/feedbacks' do
@@ -299,6 +328,14 @@ class Project < Airrecord::Table
 
     return @units
   end
+
+  def procurement_forms
+    if @procurement_forms.nil?
+      @procurement_forms = ProcurementForm.all(filter: "{Project ID} = '#{self.id}'", sort: { "Created At" => "desc" })
+    end
+
+    return @procurement_forms
+  end
 end
 
 class Unit < Airrecord::Table
@@ -397,4 +434,16 @@ end
 class LinkHotspots < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Link Hotspots"
+end
+
+class ProcurementForm < Airrecord::Table
+  self.base_key = AIRTABLES_APP_ID
+  self.table_name = "Procurement Forms"
+
+
+  def self.find_by_access_token(access_token)
+    return false if access_token.nil? or access_token == ""
+    records = ProcurementForm.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
+    return records.first
+  end
 end

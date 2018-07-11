@@ -1,0 +1,10 @@
+.container
+  %p
+    %a{ href: "/project/#{access_token}/procurement_forms/new" } Create Procurement Form
+
+  %hr
+
+  - project.procurement_forms.each do |procurement_form|
+    %p
+      %a{ href: "/procurement_forms/#{procurement_form["Access Token"]}" }= procurement_form["Name"]
+
