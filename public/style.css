@@ -13,6 +13,7 @@ body {
     min-height: 100%;
     padding: 10px 20px;
     box-sizing: border-box;
+    position: relative;
 }
 
 *, *:before, *:after {
@@ -345,6 +346,15 @@ button, .button, #pano-window.fullscreen .controls a {
 .file-uploading-message { display: none; }
 .uploading .upload-button { display: none; }
 .uploading .file-uploading-message { display: block; }
+
+.save-status {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #aaaaaa;
+    background-color: #dddddd;
+    padding: 10px 20px;
+}
 
 @media only screen and (max-width: 750px) {
     .half, .third, .two-third {

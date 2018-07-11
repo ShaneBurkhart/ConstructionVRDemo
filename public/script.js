@@ -20,6 +20,8 @@ $(document).ready(function () {
   // Procurement Forms
   var $procurementFileButtons = $(".procurement-add-file");
   var $procurementFileInputs = $(".procurement-file-input");
+  var $procurementInputs = $(".procurement-input");
+  var $saveStatus = $(".save-status");
 
   var IS_PICKING_LINK_HOTSPOT = false;
 
@@ -336,6 +338,36 @@ $(document).ready(function () {
     });
   });
 
+  var _isUpdatingProcurementForm = false;
+  function sendProcurementUpdates() {
+    if (_isUpdatingProcurementForm) return debouncedSendProcurementUpdates();
+    _isUpdatingProcurementForm = true;
+
+    var toUpdate = _.clone(_procurementValsToUpdate);
+    _procurementValsToUpdate = {};
+
+    $.ajax({
+      type: "POST",
+      url: "/procurement_forms/" + _procurementFormAccessToken + "/update",
+      data: { updates: toUpdate },
+      complete: function (xhr, status) {
+        // Update UI
+        _isUpdatingProcurementForm = false;
+        $saveStatus.text("Saved!");
+      }
+    });
+  }
+
+  var debouncedSendProcurementUpdates = _.debounce(sendProcurementUpdates, 300);
+  var _procurementValsToUpdate = {};
+
+  function updateProcurementSection(name, val) {
+    _procurementValsToUpdate[name] = val;
+
+    $saveStatus.text("Updating...");
+    debouncedSendProcurementUpdates();
+  }
+
   $procurementFileButtons.click(function () {
     var $this = $(this);
     var $fileInput = $this.parent().find(".procurement-file-input");
@@ -367,11 +399,20 @@ $(document).ready(function () {
       if (text.length) text += "\n\n";
       text += uploadLocation;
 
-      console.log(text);
       $textarea.val(text);
+      // Not sure that change gets triggered on manual updates.
+      updateProcurementSection($textarea.attr("data-name"), text);
 
       $parent.removeClass('uploading');
     });
+  });
+
+  $procurementInputs.on("input", function () {
+    $this = $(this);
+    var name = $this.attr("data-name");
+    var val = $this.val();
+
+    updateProcurementSection(name, val);
   });
 
   function updateFileUI (isUpload) {

@@ -124,7 +124,14 @@ post '/procurement_forms/:access_token/update' do
   @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
   return "Not found" if @procurement_form.nil?
 
-  haml :project_procurement_form, locals: { }
+  updates = params["updates"]
+  updates.each do |key, val|
+    @procurement_form[key] = val
+  end
+
+  @procurement_form.save
+
+  return 200
 end
 
 get '/project/:access_token/feedbacks' do
