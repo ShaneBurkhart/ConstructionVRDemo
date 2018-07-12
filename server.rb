@@ -111,11 +111,29 @@ get '/project/:access_token/procurement_forms' do
   }
 end
 
+get '/project/:access_token/procurement_forms/:id/edit' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+  return "Not found" if !is_admin_mode
+
+  @procurement_form = ProcurementForm.find(params[:id])
+  return "Not found" if @procurement_form.nil?
+
+  haml :edit_project_procurement_form, locals: {
+    project: project,
+    access_token: access_token,
+    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
+  }
+end
+
 get '/procurement_forms/:access_token' do
   @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
   return "Not found" if @procurement_form.nil?
 
   haml :project_procurement_form, locals: {
+    markdown: MARKDOWN,
     aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
   }
 end

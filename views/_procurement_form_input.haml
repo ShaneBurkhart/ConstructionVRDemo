@@ -1,0 +1,7 @@
+%p.italic You can also upload files below. A link will be added to the text area.  Please describe each file.
+%p
+  %button.procurement-add-file.upload-button Add File
+  %span.file-uploading-message Uploading. Please wait...
+  %textarea.procurement-input{ placeholder: "Enter information here...", data: { name: name } }
+    = @procurement_form[name]
+  %input.hidden.procurement-file-input{ type: "file" }
