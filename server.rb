@@ -139,6 +139,9 @@ get '/procurement_forms/:access_token' do
 end
 
 post '/procurement_forms/:access_token/update' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
+
   @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
   return "Not found" if @procurement_form.nil?
 
