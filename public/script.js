@@ -2,6 +2,7 @@ $(document).ready(function () {
   var $fullscreenButton = $(".fullscreen-toggle");
   var $logCoordButton = $(".log-coord");
   var $setLinkHotspotButton = $(".set-link-hotspot");
+  var $setInitialYawButton = $(".set-initial-yaw");
   var panoElement = document.getElementById('pano-window');
   var $panoElement = $('#pano-window');
   var $feedbackToggleButton = $('#pano-window .controls .feedback-toggle');
@@ -78,6 +79,7 @@ $(document).ready(function () {
   function switchToPanoId(panoId) {
     _currentPano = _panos[panoId];
     _currentPano.scene.switchTo();
+    _currentPano.scene.lookTo({ yaw: _currentPano.data["Initial Yaw"] || 0, pitch: 0 });
     showLinkHotspots();
     updatePanoPreviews();
   }
@@ -171,6 +173,15 @@ $(document).ready(function () {
     $panoPreviews.addClass('select-pano');
   });
 
+  $setInitialYawButton.click(function (e) {
+    e.preventDefault();
+
+    var viewParams = view.parameters();
+    var yaw = viewParams["yaw"];
+
+    updateInitialYaw(_currentPano.data["Record ID"], yaw);
+  });
+
   function addFeedbackToList(feedbackText, panoName) {
     var $feedbackTemplate = $("#feedback-template .feedback");
     var $newFeedback = $feedbackTemplate.clone();
@@ -196,6 +207,19 @@ $(document).ready(function () {
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           console.log("Hotspot Updated.");
+        }
+      },
+    });
+  };
+
+  var updateInitialYaw = function(pano_id, yaw) {
+    $.ajax({
+      type: "POST",
+      url: "/admin/pano/initial_yaw/set",
+      data: { pano_id: pano_id, yaw: yaw },
+      complete: function (xhr, status) {
+        if (xhr.status === 200) {
+          console.log("Initial Yaw Updated.");
         }
       },
     });

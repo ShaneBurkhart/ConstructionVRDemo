@@ -85,6 +85,22 @@ post '/admin/linked_hotspot/set' do
   return { hotspot: hotspot }.to_json
 end
 
+post '/admin/pano/initial_yaw/set' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  pano_id = params[:pano_id]
+  yaw = params[:yaw]
+
+  pano = Pano.find(pano_id)
+  return "Not found" if pano.nil?
+
+  pano["Initial Yaw"] = yaw
+  pano.save
+
+  return { pano: pano }.to_json
+end
+
 get '/project/:access_token' do
   is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]
