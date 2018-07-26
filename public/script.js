@@ -78,7 +78,7 @@ $(document).ready(function () {
 
   function switchToPanoId(panoId) {
     _currentPano = _panos[panoId];
-    _currentPano.scene.switchTo();
+    _currentPano.scene.switchTo({ transitionDuration: 300 });
     _currentPano.scene.lookTo({ yaw: _currentPano.data["Initial Yaw"] || 0, pitch: 0 });
     showLinkHotspots();
     updatePanoPreviews();

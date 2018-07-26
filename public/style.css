@@ -236,6 +236,15 @@ button, .button, #pano-window.fullscreen .controls a {
     -moz-appearance: none;
 }
 
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 #pano-window .link-hotspot {
     color: white;
     background-color: #333333;
@@ -247,6 +256,12 @@ button, .button, #pano-window.fullscreen .controls a {
     -ms-transform: translate(-50%, -50%); /* IE 9 */
     -webkit-transform: translate(-50%, -50%); /* Safari */
     transform: translate(-50%, -50%);
+
+    opacity: 1;
+    animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 1000ms;
 }
 
 #pano-previews {

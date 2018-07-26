@@ -23,7 +23,6 @@
   %p
     %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
     - if is_admin_mode
-      %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
       %a.button.set-initial-yaw{ href: "#" } Set Initial Yaw
     - elsif is_debug_mode
       %a.button.log-coord{ href: "#" } Log Coords
@@ -41,6 +40,9 @@
           %button.feedback-add-file#fullscreen-feedback-add-file Add File
           %button#fullscreen-feedback-submit Submit Feedback
 
+  - if is_admin_mode
+    %p
+      %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
   #pano-previews
     - unit_pano_data.each do |pano|
       .pano-preview{ data: { id: pano["Record ID"] }}
