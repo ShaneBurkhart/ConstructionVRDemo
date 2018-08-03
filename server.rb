@@ -44,6 +44,7 @@ get '/api/project/:ps_access_token/renderings' do
 
   renderings = project.units.map { |u| {
     name: u["Name"],
+    updated_at: u["Updated At"],
     url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
   }}
 
