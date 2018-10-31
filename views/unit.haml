@@ -31,14 +31,16 @@
     - if is_debug_mode
       .debug-center-window
     .controls
-      %a.feedback-toggle Give Feedback
+      - if is_admin_mode
+        %a.feedback-toggle Give Feedback
       %a.fullscreen-toggle Exit
-    .fullscreen-feedback
-      .container{ style: "height: 100%; position: relative;" }
-        %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
-        .button-wrapper
-          %button.feedback-add-file#fullscreen-feedback-add-file Add File
-          %button#fullscreen-feedback-submit Submit Feedback
+    - if is_admin_mode
+      .fullscreen-feedback
+        .container{ style: "height: 100%; position: relative;" }
+          %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
+          .button-wrapper
+            %button.feedback-add-file#fullscreen-feedback-add-file Add File
+            %button#fullscreen-feedback-submit Submit Feedback
 
   - if is_admin_mode
     %p
@@ -48,33 +50,34 @@
       .pano-preview{ data: { id: pano["Record ID"] }}
         .name= pano["Name"]
 
-.container
-  %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
-  %button.feedback-add-file#feedback-add-file Add File
-  %button#feedback-submit Submit Feedback
+- if is_admin_mode
+  .container
+    %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+    %button.feedback-add-file#feedback-add-file Add File
+    %button#feedback-submit Submit Feedback
 
-  %br
-  %br
+    %br
+    %br
 
-  %h2 Recent Feedback
-  #feedbacks
-    #feedback-template{ style: "display: none;" }
-      .feedback
-        %p
-          %strong.pano_name
-          %span.created_at
-        %p.notes
+    %h2 Recent Feedback
+    #feedbacks
+      #feedback-template{ style: "display: none;" }
+        .feedback
+          %p
+            %strong.pano_name
+            %span.created_at
+          %p.notes
 
-    - feedbacks.each do |feedback|
-      %hr
-      .feedback
-        %p
-          %a.perspective-link{ href: "#", data: { "pano-id": feedback["Pano ID"].first, perspective: feedback["View Parameters"] } }
-            %strong.unit_name>= feedback["Pano Name"].first
-          %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y %l:%M%P')})"
-        %p.notes= feedback["Notes"].gsub("\n", "<br>")
+      - feedbacks.each do |feedback|
+        %hr
+        .feedback
+          %p
+            %a.perspective-link{ href: "#", data: { "pano-id": feedback["Pano ID"].first, perspective: feedback["View Parameters"] } }
+              %strong.unit_name>= feedback["Pano Name"].first
+            %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y %l:%M%P')})"
+          %p.notes= feedback.notes_html
 
-%input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
+  %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
 
 - if is_debug_mode
   :javascript

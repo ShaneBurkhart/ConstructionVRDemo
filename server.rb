@@ -455,6 +455,13 @@ class Feedback < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID
   self.table_name = "Feedback"
 
+  def notes_html
+    # We get the raw "Notes" value from fields so it isn't type cast
+    notes = self.fields["Notes"] || ""
+    notes = notes.gsub("\n", "<br>")
+    notes
+  end
+
   def pano
     if @pano.nil?
       @pano = Pano.find(self["Pano"].first)

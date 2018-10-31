@@ -31,7 +31,7 @@
     .feedback
       %p
         %strong= "#{feedback['Created At'].strftime('%b %e, %Y')}"
-      %p= feedback["Notes"]
+      %p= feedback.notes_html
 
 :javascript
   var _panoImageURL = "#{pano_image['url']}";

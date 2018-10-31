@@ -22,6 +22,6 @@
       - next if f["Screenshot"].nil?
 
       %img{ src: f["Screenshot"][0]["url"] }
-      %p= f["Notes"]
+      %p= f.notes_html
 
       %br
