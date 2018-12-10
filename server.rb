@@ -49,7 +49,15 @@ get '/api/project/:ps_access_token/renderings' do
     url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
   }}
 
-  return { renderings: renderings }.to_json
+  finishes_url = nil
+  if !project["Finish Selections App ID"].nil?
+    finishes_url = "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/finishes",
+  end
+
+  return {
+    renderings: renderings,
+    finish_selections_url: finishes_url,
+  }.to_json
 end
 
 get '/admin/login/:admin_token' do
