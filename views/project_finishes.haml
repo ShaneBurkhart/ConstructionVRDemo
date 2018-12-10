@@ -4,12 +4,12 @@
   %table
     %thead
       %tr
-        %th{ style: "width: 160px;" } Type
-        %th{ style: "width: 100px;" } Location
-        %th{ style: "width: 100px;" } Room
-        %th{ style: "width: 200px;" } Option Name
-        %th Option Info
-        %th{ style: "width: 300px;" } Option Image
+        %th{ style: "width: 13%;" } Type
+        %th{ style: "width: 7%;" } Location
+        %th{ style: "width: 9%;" } Room
+        %th{ style: "width: 15%;" } Option Name
+        %th{ style: "width: 22%;" } Option Info
+        %th{ style: "width: 34%;" } Option Image
     %tbody
       - finishes.each do |finish|
         %tr
@@ -17,7 +17,7 @@
           %td= finish["Location"]
           %td= finish["Room"]
           %td= finish["Option Names"].first
-          %td
+          %td{ style: "font-size: 14px;" }
             - if !finish["Option Info"].nil?
               = finish["Option Info"].first
           %td
@@ -26,16 +26,24 @@
 
 :css
   @media print {
-      table {page-break-after: always;}
+    body { font-size: 14px; }
+    table { page-break-inside:auto; page-break-after: always;}
+    tr { page-break-inside:avoid; page-break-after:auto }
   }
 
   img {
-    max-height: 150px;
+    max-height: 225px;
+    display: block;
+  }
+
+  tbody td, tbody tr {
+    height: 225px;
   }
 
   table {
     table-layout: fixed;
     border-collapse: collapse;
+    border-spacing: 0;
     width: 100%;
   }
 
@@ -52,6 +60,3 @@
     height: 30px;
   }
 
-  tbody tr, tbody tr td {
-    height: 150px;
-  }
