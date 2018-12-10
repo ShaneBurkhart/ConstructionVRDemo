@@ -116,6 +116,21 @@ get '/project/:access_token' do
   }
 end
 
+get '/project/:access_token/finishes' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+  return "Not found" if !is_admin_mode
+
+  @finishes = ProjectFinishSelections.finishes_for_project_app_id(project["Finish Selections App ID"])
+
+  haml :project_finishes, locals: {
+    project: project,
+    access_token: access_token,
+  }
+end
+
 get '/project/:access_token/procurement_forms' do
   is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]
@@ -362,6 +377,33 @@ end
 
   #return 200
 #end
+
+class ProjectFinishSelections < Airrecord::Table
+  self.table_name = "Selections"
+
+  def self.finishes_for_project_app_id(app_id)
+    views = [
+      "Walls & Millwork",
+      "Flooring",
+      "Light Fixtures",
+      "Plumbing Fixtures & Acc.",
+      "Shelving",
+      "Blinds",
+      "Mirrors",
+      "Appliances",
+      "Furniture",
+      "Cabinets & Countertops"
+    ]
+    finishes = {}
+    self.base_key = app_id
+
+    views.each do |view|
+      finishes[view] = self.all(view: view)
+    end
+
+    return finishes
+  end
+end
 
 class Project < Airrecord::Table
   self.base_key = AIRTABLES_APP_ID

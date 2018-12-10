@@ -1,0 +1,57 @@
+- @finishes.each do |category, finishes|
+  %h2= category
+
+  %table
+    %thead
+      %tr
+        %th{ style: "width: 160px;" } Type
+        %th{ style: "width: 100px;" } Location
+        %th{ style: "width: 100px;" } Room
+        %th{ style: "width: 200px;" } Option Name
+        %th Option Info
+        %th{ style: "width: 300px;" } Option Image
+    %tbody
+      - finishes.each do |finish|
+        %tr
+          %td= finish["Type"]
+          %td= finish["Location"]
+          %td= finish["Room"]
+          %td= finish["Option Names"].first
+          %td
+            - if !finish["Option Info"].nil?
+              = finish["Option Info"].first
+          %td
+            - if !finish["Option Images"].nil?
+              %img{ src: finish["Option Images"].first["url"] }
+
+:css
+  @media print {
+      table {page-break-after: always;}
+  }
+
+  img {
+    max-height: 150px;
+  }
+
+  table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table, th, td {
+    border: 1px solid black;
+    word-wrap: break-word;
+  }
+
+  td {
+    padding: 1px 10px;
+  }
+
+  thead tr {
+    height: 30px;
+  }
+
+  tbody tr, tbody tr td {
+    height: 150px;
+  }
