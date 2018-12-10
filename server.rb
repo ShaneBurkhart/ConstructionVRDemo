@@ -129,7 +129,6 @@ get '/project/:access_token/finishes' do
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
-  return "Not found" if !is_admin_mode
 
   @finishes = ProjectFinishSelections.finishes_for_project_app_id(project["Finish Selections App ID"])
 
