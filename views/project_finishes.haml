@@ -17,9 +17,9 @@
           %td= finish["Location"]
           %td= finish["Room"]
           %td= finish["Option Names"].first
-          %td{ style: "font-size: 14px;" }
+          %td
             - if !finish["Option Info"].nil?
-              = finish["Option Info"].first
+              = markdown.render(finish["Option Info"].first)
           %td
             - if !finish["Option Images"].nil?
               %img{ src: finish["Option Images"].first["url"] }
@@ -54,6 +54,11 @@
 
   td {
     padding: 1px 10px;
+  }
+
+  td * {
+    font-size: 14px;
+    line-height: 1.2;
   }
 
   thead tr {

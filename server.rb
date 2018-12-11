@@ -133,6 +133,7 @@ get '/project/:access_token/finishes' do
   @finishes = ProjectFinishSelections.finishes_for_project_app_id(project["Finish Selections App ID"])
 
   haml :project_finishes, locals: {
+    markdown: MARKDOWN,
     project: project,
     access_token: access_token,
   }
