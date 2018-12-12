@@ -18,8 +18,10 @@
           %td= finish["Room"]
           %td= finish["Option Names"].first
           %td
-            - if !finish["Option Info"].nil?
-              = markdown.render(finish["Option Info"].first)
+            - if !finish["Option Info"].nil? or !finish["Notes"].nil?
+              - notes = finish["Notes"] || ""
+              - info = finish["Option Info"] || [""]
+              = markdown.render("#{notes}\n#{info.first}")
           %td
             - if !finish["Option Images"].nil?
               %img{ src: finish["Option Images"].first["url"] }
