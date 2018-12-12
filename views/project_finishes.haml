@@ -21,7 +21,7 @@
             - if !finish["Option Info"].nil? or !finish["Notes"].nil?
               - notes = finish["Notes"] || ""
               - info = finish["Option Info"] || [""]
-              = markdown.render("#{notes}\n#{info.first}")
+              = markdown.render("#{notes}\n\n#{info.first}")
           %td
             - if !finish["Option Images"].nil?
               %img{ src: finish["Option Images"].first["url"] }
