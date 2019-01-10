@@ -400,7 +400,8 @@ class ProjectFinishSelections < Airrecord::Table
       "Mirrors",
       "Appliances",
       "Furniture",
-      "Cabinets & Countertops"
+      "Cabinets & Countertops",
+      "Exterior"
     ]
     finishes = {}
     self.base_key = app_id
