@@ -10,7 +10,8 @@ MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 # docker needs stdout to sync to get logs.
 $stdout.sync = true
 
-AIRTABLES_APP_ID = "appTAmLzyXUW1RxaH"
+RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
+FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
 Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 
 set :bind, '0.0.0.0'
@@ -130,7 +131,7 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @finishes = ProjectFinishSelections.finishes_for_project_app_id(project["Finish Selections App ID"])
+  @finishes = ProjectFinishSelections.finishes_for_project(project)
 
   haml :project_finishes, locals: {
     markdown: MARKDOWN,
@@ -387,9 +388,10 @@ end
 #end
 
 class ProjectFinishSelections < Airrecord::Table
-  self.table_name = "Selections"
+  self.base_key = FINISHES_AIRTABLE_APP_ID
 
-  def self.finishes_for_project_app_id(app_id)
+  def self.finishes_for_project(project)
+    return {} if project.nil?
     views = [
       "Walls & Millwork",
       "Flooring",
@@ -405,7 +407,7 @@ class ProjectFinishSelections < Airrecord::Table
       "Misc"
     ]
     finishes = {}
-    self.base_key = app_id
+    self.table_name = project["Finish Selections Table Name"]
 
     views.each do |view|
       finishes[view] = self.all(view: view)
@@ -416,7 +418,7 @@ class ProjectFinishSelections < Airrecord::Table
 end
 
 class Project < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Projects"
 
   def units
@@ -437,7 +439,7 @@ class Project < Airrecord::Table
 end
 
 class Unit < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Units"
 
   def belongs_to_project?(project)
@@ -483,7 +485,7 @@ class Unit < Airrecord::Table
 end
 
 class Pano < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Panos"
 
   def unit
@@ -504,7 +506,7 @@ class Pano < Airrecord::Table
 end
 
 class Feedback < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Feedback"
 
   def notes_html
@@ -524,7 +526,7 @@ class Feedback < Airrecord::Table
 end
 
 class FeedbackPermalink < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Feedback Permalinks"
 
   def project
@@ -537,12 +539,12 @@ class FeedbackPermalink < Airrecord::Table
 end
 
 class LinkHotspots < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Link Hotspots"
 end
 
 class ProcurementForm < Airrecord::Table
-  self.base_key = AIRTABLES_APP_ID
+  self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Procurement Forms"
 
 
