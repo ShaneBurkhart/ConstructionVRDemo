@@ -36,6 +36,13 @@ def find_project_by_admin_access_token(admin_access_token)
   return records.first
 end
 
+get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
+  s = params[:s] || ""
+  haml :component_search, locals: {
+      finish_options: FinishOptions.search_for_component(s)
+  }
+end
+
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.
@@ -386,6 +393,16 @@ end
 
   #return 200
 #end
+
+class FinishOptions < Airrecord::Table
+  self.base_key = FINISHES_AIRTABLE_APP_ID
+  self.table_name = "Finish Options"
+
+  def self.search_for_component(s)
+    # Implement search later
+    FinishOptions.all view: "Has Model"
+  end
+end
 
 class ProjectFinishSelections < Airrecord::Table
   self.base_key = FINISHES_AIRTABLE_APP_ID
