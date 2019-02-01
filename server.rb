@@ -565,6 +565,14 @@ class Pano < Airrecord::Table
   end
 end
 
+class PanoVersion < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Pano Versions"
+
+  belongs_to :unit_version, class: "UnitVersion", column: "Unit Version"
+  has_many :feedbacks, class: "Feedback", column: "Feedback"
+end
+
 class UnitVersion < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Unit Versions"
@@ -572,16 +580,8 @@ class UnitVersion < Airrecord::Table
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
 
   def feedbacks
-      pano_versions.map { |pv| pv.feedbacks }.flatten
+      self.pano_versions.map { |pv| pv.feedbacks }.flatten
   end
-end
-
-class PanoVersion < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Pano Versions"
-
-  belongs_to :unit_version, class: "UnitVersion", column: "Unit Version"
-  has_many :feedbacks, class: "Feedback", column: "Feedback"
 end
 
 class Feedback < Airrecord::Table
