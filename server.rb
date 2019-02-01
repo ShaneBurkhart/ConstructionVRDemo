@@ -336,10 +336,23 @@ get '/project/:access_token/unit/:id' do
   unit = Unit.find(params[:id])
   return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
 
+  @version_id = (unit["Current Version"] || [])[0]
+  @version_id = params[:version] if is_admin_mode and !params[:version].nil?
+  version = UnitVersion.find(@version_id)
+  version = nil if version.nil? or version.id.nil?
+  feedbacks = []
+
+  # Backwards compatibility
+  if !version.nil?
+    unit["Floor Plan Image"] = version["Floor Plan Image"]
+    feedbacks = version.feedbacks
+  end
+
   haml :unit, locals: {
     unit: unit,
-    feedbacks: unit.feedbacks,
-    unit_pano_data: unit.pano_data,
+    unit_versions: unit.versions,
+    feedbacks: feedbacks,
+    unit_pano_data: unit.pano_data(version),
     access_token: access_token,
     is_debug_mode: is_debug_mode,
     is_admin_mode: is_admin_mode,
@@ -348,18 +361,27 @@ get '/project/:access_token/unit/:id' do
 end
 
 post '/project/:access_token/pano/:id/feedback' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
   pano = Pano.find(params[:id])
   return "Not found" if pano.nil? or !pano.unit.belongs_to_project?(project)
+  unit = pano.unit
+
+  unit_version_id = params["unitVersionId"] || unit["Current Version"][0]
+
+  pano_version = PanoVersion.all(filter: "AND({Pano ID} = '#{pano.id}', {Unit Version ID} = '#{unit_version_id}')").first
+  return "Not found" if pano_version.nil?
 
   screenshot = params[:screenshot]
   return "Not found" if screenshot.nil?
 
   feedback = Feedback.new(
-    "Pano" => [pano.id],
+    "Pano Version" => [pano_version.id],
     "Notes" => params["notes"],
     "View Parameters" => params["viewParameters"],
     "Screenshot" => [{ url: screenshot[:url], filename: screenshot[:filename] }]
@@ -480,6 +502,14 @@ class Unit < Airrecord::Table
     return @panos
   end
 
+  def versions
+    if @versions.nil?
+      @versions = UnitVersion.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc"})
+    end
+
+    return @versions
+  end
+
   def feedbacks
     if @feedbacks.nil?
       @feedbacks = Feedback.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc"})
@@ -488,12 +518,22 @@ class Unit < Airrecord::Table
     return @feedbacks
   end
 
-  def pano_data
+  def pano_data(version)
     panos = self.panos
+    current_version_panos = []
+
+    if !version.nil?
+        current_version = version
+        current_version_panos = current_version.pano_versions
+    end
 
     return panos.map do |pano|
+      pano_version = current_version_panos.find { |p| p["Pano"][0] == pano.id }
       fields = pano.fields
       link_hotspots = pano.link_hotspots.map{ |lh| lh.fields }
+
+      # Backwards compatibility
+      pano["Image"] = pano_version["Image"] unless pano_version.nil?
 
       fields["link_hotspots"] = link_hotspots
       next fields
@@ -522,23 +562,36 @@ class Pano < Airrecord::Table
   end
 end
 
+class UnitVersion < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Unit Versions"
+
+  has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
+
+  def feedbacks
+      self.pano_versions.map { |pv| pv.feedbacks }.flatten
+  end
+end
+
+class PanoVersion < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Pano Versions"
+
+  belongs_to :unit_version, class: "UnitVersion", column: "Unit Version"
+  has_many :feedbacks, class: "Feedback", column: "Feedback"
+end
+
 class Feedback < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Feedback"
+
+  belongs_to :pano_version, class: "PanoVersion", column: "Pano Version"
 
   def notes_html
     # We get the raw "Notes" value from fields so it isn't type cast
     notes = self.fields["Notes"] || ""
     notes = notes.gsub("\n", "<br>")
     notes
-  end
-
-  def pano
-    if @pano.nil?
-      @pano = Pano.find(self["Pano"].first)
-    end
-
-    return @pano
   end
 end
 

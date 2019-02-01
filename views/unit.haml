@@ -6,6 +6,19 @@
 
   %hr
 
+  - if is_admin_mode
+    %p
+      Versions:
+    %ul
+      - unit_versions.each do |uv|
+        %li
+          - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
+          - label += " (Current)" if uv.id == unit["Current Version"][0]
+          %b= "Viewing: " if uv.id == @version_id
+          %a{ href: "?version=#{uv.id}" }= label
+
+    %hr
+
   .row
     .third
       %h1= unit["Name"]
@@ -72,9 +85,9 @@
         %hr
         .feedback
           %p
-            %a.perspective-link{ href: "#", data: { "pano-id": feedback["Pano ID"].first, perspective: feedback["View Parameters"] } }
+            %a.perspective-link{ href: "#", data: { "pano-version-id": feedback["Pano Version"].first, perspective: feedback["View Parameters"] } }
               %strong.unit_name>= feedback["Pano Name"].first
-            %span.created_at= "(#{feedback['Created At'].strftime('%b %e, %Y %l:%M%P')})"
+            %span.created_at= "(#{Time.parse(feedback['Created At']).strftime('%b %e, %Y %l:%M%P')})"
           %p.notes= feedback.notes_html
 
   %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
@@ -101,6 +114,7 @@
 
 :javascript
   var _panoData = #{unit_pano_data.to_json};
+  var _unitVersionId = "#{@version_id}";
   var _accessToken = "#{access_token}";
   var _isDebugMode = #{is_debug_mode};
   var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";

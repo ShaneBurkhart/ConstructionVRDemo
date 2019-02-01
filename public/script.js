@@ -250,6 +250,7 @@ $(document).ready(function () {
         type: "POST",
         url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
         data: {
+          unitVersionId: _unitVersionId,
           notes: feedbackText,
           viewParameters: JSON.stringify(view.parameters()),
           screenshot: { filename: fileName, url: s3Url },
