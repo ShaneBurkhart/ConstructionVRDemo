@@ -338,9 +338,12 @@ get '/project/:access_token/unit/:id' do
 
   @version_id = (unit["Current Version"] || [])[0]
   @version_id = params[:version] if is_admin_mode and !params[:version].nil?
-  version = UnitVersion.find(@version_id)
-  version = nil if version.nil? or version.id.nil?
   feedbacks = []
+
+  if !@version_id.nil?
+      version = UnitVersion.find(@version_id)
+      version = nil if version.nil? or version.id.nil?
+  end
 
   # Backwards compatibility
   if !version.nil?
