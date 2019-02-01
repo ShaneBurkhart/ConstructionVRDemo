@@ -573,6 +573,7 @@ class UnitVersion < Airrecord::Table
 
   def feedbacks
       self.pano_versions.map { |pv| pv.feedbacks }.flatten
+
   end
 end
 
