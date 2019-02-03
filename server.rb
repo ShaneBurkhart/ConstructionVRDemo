@@ -513,14 +513,6 @@ class Unit < Airrecord::Table
     return @versions
   end
 
-  def feedbacks
-    if @feedbacks.nil?
-      @feedbacks = Feedback.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc"})
-    end
-
-    return @feedbacks
-  end
-
   def pano_data(version)
     panos = self.panos
     current_version_panos = []

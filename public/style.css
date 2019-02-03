@@ -369,6 +369,11 @@ button, .button, #pano-window.fullscreen .controls a {
     padding: 10px 20px;
 }
 
+@media print {
+    .hide-print { display: none; }
+    .break-after { page-break-after: always; }
+}
+
 @media only screen and (max-width: 750px) {
     .half, .third, .two-third {
         width: 100%;

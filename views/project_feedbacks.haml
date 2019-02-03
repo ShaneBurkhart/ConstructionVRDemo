@@ -1,27 +1,50 @@
 .container
-  %p
-    %a{ href: "/project/#{access_token}/feedbacks/permalinks" } Permalinks
-  %p
-    %a{ href: "/project/#{access_token}/feedbacks/permalinks/new" } Create Permalink
-
-  %h2 Jump to Unit
-
-  - @units.each do |u|
-    - next if u.feedbacks.count == 0
+  .header.hide-print
     %p
-      %a{ href: "##{u.id}" }= u["Name"]
+      %a{ href: "/project/#{access_token}/feedbacks/permalinks" } Permalinks
+    %p
+      %a{ href: "/project/#{access_token}/feedbacks/permalinks/new" } Create Permalink
 
-  %hr
+    %hr
+
+    %h2 Jump to Unit
+
+    - @units.each do |u|
+      - next if u.versions.count == 0
+      %p
+        %a{ href: "##{u.id}" }= u["Name"]
+
+    %hr
 
   - @units.each do |u|
-    - next if u.feedbacks.count == 0
+    .unit.break-after
+      - next if u.versions.count == 0
+      %h2{ id: "#{u.id}" }= u["Name"]
 
-    %h2{ id: "#{u.id}" }= u["Name"]
+      - u.versions.each do |v|
+        - t = Time.parse(v["Created At"]).strftime('%b %e, %Y')
+        %p.hide-print
+          %a.toggle-visible{ href: "#" } Show
+          = " - #{t}"
 
-    - u.feedbacks.reverse.each do |f|
-      - next if f["Screenshot"].nil?
+        .feedbacks{ style: "display: none;" }
+          %h3= t
 
-      %img{ src: f["Screenshot"][0]["url"] }
-      %p= f.notes_html
+          - v.feedbacks.reverse.each do |f|
+            - next if f["Screenshot"].nil?
 
-      %br
+            %img{ src: f["Screenshot"][0]["url"] }
+            %p= f.notes_html
+
+            %br
+
+:javascript
+  $(document).ready(function () {
+    $(".toggle-visible").click(function (e) {
+        var $this = $(this);
+        e.preventDefault();
+
+        $this.parent().parent().find(".feedbacks").toggle();
+        $this.text($this.text() == "Show" ? "Hide" : "Show");
+    });
+  });
