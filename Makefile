@@ -9,6 +9,9 @@ run:
 build:
 	 docker build -t ${IMAGE_TAG} -f Dockerfile .
 
+c:
+	docker-compose -p ${NAME} run --rm web /bin/bash
+
 clean:
 	docker-compose -p ${NAME} down || true
 	docker-compose -p ${NAME} rm -f || true
