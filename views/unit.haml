@@ -28,7 +28,7 @@
     .two-third
       #unit-floor-plan
         .floor-plan-wrapper
-          %img{ src: unit["Floor Plan Image"][0]["url"] }
+          %img{ src: unit["Floor Plan Image URL"] }
           - unit_pano_data.each do |pano|
             - if pano["Floor Plan Label X"]
               .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}= pano["Name"]

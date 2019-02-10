@@ -12,7 +12,7 @@
     - units.each do |unit|
       .unit-preview{ data: { href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } }
         .image-wrapper
-          %img{ src: unit["Floor Plan Image"][0]["url"] }
+          %img{ src: unit["Floor Plan Image URL"] }
         .name= unit["Name"]
 
 :javascript

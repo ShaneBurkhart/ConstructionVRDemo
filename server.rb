@@ -57,13 +57,13 @@ get '/api/project/:ps_access_token/renderings' do
 
     # Backwards compatibility
     if !version.nil?
-      u["Floor Plan Image"] = version["Floor Plan Image"]
+      u["Floor Plan Image URL"] = version["Floor Plan Image URL"]
     end
 
     {
       name: u["Name"],
       updated_at: u["Updated At"],
-      floor_plan_url: u["Floor Plan Image"][0]["url"],
+      floor_plan_url: u["Floor Plan Image URL"],
       url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
     }
   end
@@ -147,7 +147,7 @@ get '/project/:access_token' do
 
       # Backwards compatibility
       if !version.nil?
-        unit["Floor Plan Image"] = version["Floor Plan Image"]
+        unit["Floor Plan Image URL"] = version["Floor Plan Image URL"]
       end
   end
 
@@ -374,7 +374,7 @@ get '/project/:access_token/unit/:id' do
 
   # Backwards compatibility
   if !version.nil?
-    unit["Floor Plan Image"] = version["Floor Plan Image"]
+    unit["Floor Plan Image URL"] = version["Floor Plan Image URL"]
     feedbacks = version.feedbacks
   end
 
