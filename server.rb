@@ -50,12 +50,26 @@ get '/api/project/:ps_access_token/renderings' do
   project = find_project_by_plansource_access_token(ps_access_token)
   return { renderings: [] }.to_json if project.nil?
 
-  renderings = project.units.map { |u| {
-    name: u["Name"],
-    updated_at: u["Updated At"],
-    floor_plan_url: u["Floor Plan Image"][0]["url"],
-    url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
-  }}
+  renderings = project.units.map do |u|
+    @version_id = (u["Current Version"] || [])[0]
+
+    if !@version_id.nil?
+        version = UnitVersion.find(@version_id)
+        version = nil if version.nil? or version.id.nil?
+    end
+
+    # Backwards compatibility
+    if !version.nil?
+      u["Floor Plan Image"] = version["Floor Plan Image"]
+    end
+
+    {
+      name: u["Name"],
+      updated_at: u["Updated At"],
+      floor_plan_url: u["Floor Plan Image"][0]["url"],
+      url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
+    }
+  end
 
   finishes_url = nil
   if !project["Finish Selections App ID"].nil?
@@ -125,8 +139,24 @@ get '/project/:access_token' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
+  units = project.units
+  units.each do |unit|
+      @version_id = (unit["Current Version"] || [])[0]
+
+      if !@version_id.nil?
+          version = UnitVersion.find(@version_id)
+          version = nil if version.nil? or version.id.nil?
+      end
+
+      # Backwards compatibility
+      if !version.nil?
+        unit["Floor Plan Image"] = version["Floor Plan Image"]
+      end
+  end
+
   haml :project, locals: {
     project: project,
+    units: units,
     access_token: access_token,
     is_admin_mode: is_admin_mode,
   }
