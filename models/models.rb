@@ -113,7 +113,7 @@ class Unit < Airrecord::Table
       link_hotspots = pano.link_hotspots.map{ |lh| lh.fields }
 
       # Backwards compatibility
-      pano["Image"] = pano_version["Image"] unless pano_version.nil?
+      pano["Image URL"] = pano_version["Image URL"] unless pano_version.nil?
 
       fields["link_hotspots"] = link_hotspots
       next fields

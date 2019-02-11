@@ -14,8 +14,8 @@ Aws.config.update({
 })
 s3 = Aws::S3::Resource.new(region: REGION)
 
-FLOOR_PLAN_IMAGES_KEY_PREFIX = "floor_plan_images"
-PANO_IMAGES_KEY_PREFIX = "pano_images"
+FLOOR_PLAN_IMAGES_KEY_PREFIX = "floor-plans"
+PANO_IMAGES_KEY_PREFIX = "panos"
 
 # To Convert
 # Unit - Floor Plan Image -> Floor Plan Image URL
@@ -36,7 +36,7 @@ PANO_IMAGES_KEY_PREFIX = "pano_images"
 
     key = "#{FLOOR_PLAN_IMAGES_KEY_PREFIX}/#{SecureRandom.uuid}.png"
     obj = s3.bucket(BUCKET).object(key)
-    obj.upload_file(f_name)
+    obj.upload_file(f_name, { acl: 'public-read' })
 
     File.delete(f_name)
 

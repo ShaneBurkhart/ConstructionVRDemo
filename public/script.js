@@ -66,7 +66,7 @@ $(document).ready(function () {
 
     for (var key in _panoData) {
       var data = _panoData[key];
-      var source = Marzipano.ImageUrlSource.fromString(data["Image"][0]["url"]);
+      var source = Marzipano.ImageUrlSource.fromString(data["Image URL"]);
       var recordId = data["Record ID"];
 
       _panos[recordId] = {
