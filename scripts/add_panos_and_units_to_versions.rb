@@ -4,7 +4,7 @@ require "./models/models.rb"
   # No image, no version
   next if unit["Floor Plan Image URL"].nil?
   # If current version for unit, don't add
-  next if (unit["Current Version"] || []).first.nil?
+  next unless (unit["Current Version"] || []).first.nil?
 
   unit_version = UnitVersion.new({
     "Floor Plan Image URL": unit["Floor Plan Image URL"],
