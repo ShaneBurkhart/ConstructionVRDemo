@@ -1,0 +1,14 @@
+%h1 #{unit["Name"]} - Feedback Feed
+
+- versions.each_with_index do |version, i|
+  %h3 Version #{i+1}
+  %p= "Created at " + Time.parse(version["Created At"]).strftime('%l:%M%P - %b %e, %Y')
+
+  - version.feedbacks.each do |f|
+    - if !f["Screenshot"].nil?
+      %a{ href: f["Screenshot"][0]["url"], target: "_blank" }
+        %img{ src: f["Screenshot"][0]["url"], style: "width: 300px;" }
+      %p= f["Pano Name"].first
+    %p= f.notes_html
+    %hr
+

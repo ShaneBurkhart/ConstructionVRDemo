@@ -11,6 +11,9 @@ $(document).ready(function () {
   var $fullscreenSubmitFeedback = $("#fullscreen-feedback-submit");
   var $fullscreenFeedbackInput = $("#fullscreen-feedback-input");
   var $feedbackInput = $("#feedback-input");
+  var $feedbackInput = $("#feedback-input");
+  var $feedbackSaveLocationInput = $("#feedback-save-location");
+  var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
   var $unitFloorPlan = $("#unit-floor-plan");
@@ -244,38 +247,51 @@ $(document).ready(function () {
     var jpegData = dataURItoBlob(jpegBase64);
     var fileName = randId() + "_" + panoId + "_" + panoName.replace(/\s+/g,"_")  + ".jpeg";
     var filePath = "feedback_perspectives/" + fileName;
+    var data = {
+      unitVersionId: _unitVersionId,
+      notes: feedbackText,
+      isFix: $feedbackIsFixInput.is(":checked"),
+    }
+    var onComplete = function (xhr, status) {
+      if (xhr.status === 200) {
+        $fullscreenFeedbackInput.val("");
+        $feedbackInput.val("");
+        $feedbackToggleButton.text("Give Feedback");
+        $fullscreenFeedbackContainer.removeClass("open");
 
-    uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
+        addFeedbackToList(feedbackText, panoName);
+      }
+
+      $fullscreenSubmitFeedback.text("Submit Feedback");
+      $submitFeedback.text("Submit Feedback");
+      $feedbackFileButtons.removeClass("hidden");
+      $fullscreenFeedbackInput.removeClass("disabled");
+      $fullscreenFeedbackInput.prop("disabled", false);
+      $feedbackInput.removeClass("disabled");
+      $feedbackInput.prop("disabled", false);
+      isRequesting = false;
+    };
+
+    if ($feedbackSaveLocationInput.is(":checked")) {
+      uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
+        data.screenshot = { filename: fileName, url: s3Url }
+        data.viewParameters = JSON.stringify(view.parameters())
+
+        $.ajax({
+          type: "POST",
+          url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
+          data: data,
+          complete: onComplete,
+        });
+      });
+    } else {
       $.ajax({
         type: "POST",
         url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
-        data: {
-          unitVersionId: _unitVersionId,
-          notes: feedbackText,
-          viewParameters: JSON.stringify(view.parameters()),
-          screenshot: { filename: fileName, url: s3Url },
-        },
-        complete: function (xhr, status) {
-          if (xhr.status === 200) {
-            $fullscreenFeedbackInput.val("");
-            $feedbackInput.val("");
-            $feedbackToggleButton.text("Give Feedback");
-            $fullscreenFeedbackContainer.removeClass("open");
-
-            addFeedbackToList(feedbackText, panoName);
-          }
-
-          $fullscreenSubmitFeedback.text("Submit Feedback");
-          $submitFeedback.text("Submit Feedback");
-          $feedbackFileButtons.removeClass("hidden");
-          $fullscreenFeedbackInput.removeClass("disabled");
-          $fullscreenFeedbackInput.prop("disabled", false);
-          $feedbackInput.removeClass("disabled");
-          $feedbackInput.prop("disabled", false);
-          isRequesting = false;
-        },
+        data: data,
+        complete: onComplete,
       });
-    });
+    }
   };
 
   $feedbackFileButtons.click(function () {

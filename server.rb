@@ -390,6 +390,23 @@ get '/project/:access_token/unit/:id' do
   }
 end
 
+get '/project/:access_token/unit/:id/feedback_feed' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  unit = Unit.find(params[:id])
+  return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
+
+  haml :unit_feedback_feed, locals: {
+    unit: unit,
+    versions: unit.versions,
+  }
+end
+
 post '/project/:access_token/pano/:id/feedback' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
@@ -407,15 +424,20 @@ post '/project/:access_token/pano/:id/feedback' do
   pano_version = PanoVersion.all(filter: "AND({Pano ID} = '#{pano.id}', {Unit Version ID} = '#{unit_version_id}')").first
   return "Not found" if pano_version.nil?
 
+  is_fix = params["isFix"] == "true"
   screenshot = params[:screenshot]
-  return "Not found" if screenshot.nil?
 
   feedback = Feedback.new(
     "Pano Version" => [pano_version.id],
     "Notes" => params["notes"],
     "View Parameters" => params["viewParameters"],
-    "Screenshot" => [{ url: screenshot[:url], filename: screenshot[:filename] }]
+    "Is Fix" => is_fix == true ? true : nil
   )
+
+  if !screenshot.nil?
+    feedback["Screenshot"] = [{ url: screenshot[:url], filename: screenshot[:filename] }]
+  end
+
   feedback.create
 
   redirect "/project/#{access_token}/unit/#{pano.unit.id}"

@@ -92,7 +92,7 @@ class Unit < Airrecord::Table
 
   def versions
     if @versions.nil?
-      @versions = UnitVersion.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc"})
+      @versions = UnitVersion.all(filter: "(FIND(\"#{self.id}\", {Unit ID}))", sort: { "Created At": "desc" })
     end
 
     return @versions
@@ -157,7 +157,7 @@ class UnitVersion < Airrecord::Table
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
 
   def feedbacks
-      self.pano_versions.map { |pv| pv.feedbacks }.flatten
+    self.pano_versions.map { |pv| pv.feedbacks }.flatten.sort_by{ |f| f["Created At"] }
   end
 end
 
