@@ -1,3 +1,5 @@
+%script(src="/underscore.js")
+
 %h1 #{unit["Name"]} - Feedback Feed
 
 - versions.each_with_index do |version, i|
@@ -9,6 +11,32 @@
       %a{ href: f["Screenshot"][0]["url"], target: "_blank" }
         %img{ src: f["Screenshot"][0]["url"], style: "width: 300px;" }
       %p= f["Pano Name"].first
+    - else
+      %p Unit
+
+    - if f["Is Fix"]
+      %input.feedback-is-fixed{ type: "checkbox", data: { feedback_id: f.id } }
+
+    %p= Time.parse(f["Created At"]).strftime('%l:%M%P - %b %e, %Y')
     %p= f.notes_html
     %hr
 
+
+:javascript
+  $(document).ready(function () {
+    var _accessToken = "#{access_token}";
+
+    var $feedbackIsFixeds = $(".feedback-is-fixed");
+
+    $feedbackIsFixeds.click(_.debounce(function (e) {
+      var $this = $(this);
+      var feedbackId = $this.data("feedback-id");
+      var isChecked = $this.is(":checked");
+      var checked = isChecked == true ? "checked" : "unchecked"
+
+      $.ajax({
+        type: "POST",
+        url: "/project/" + _accessToken + "/feedback_feed/" + feedbackId + "/" + checked,
+      });
+    }, 250));
+  });

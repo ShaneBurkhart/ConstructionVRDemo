@@ -404,7 +404,26 @@ get '/project/:access_token/unit/:id/feedback_feed' do
   haml :unit_feedback_feed, locals: {
     unit: unit,
     versions: unit.versions,
+    access_token: access_token,
   }
+end
+
+post '/project/:access_token/feedback_feed/:id/:checked' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  is_checked = params[:checked] == "checked"
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  feedback = Feedback.find(params[:id])
+  return "Not found" if feedback.nil?
+
+  feedback["Is Done"] = is_checked == true ? true : nil
+  feedback.save
+
+  return {}
 end
 
 post '/project/:access_token/pano/:id/feedback' do
