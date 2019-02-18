@@ -69,7 +69,7 @@ get '/api/project/:ps_access_token/renderings' do
   end
 
   finishes_url = nil
-  if !project["Finish Selections App ID"].nil?
+  if !project["Finish Selections Table Name"].nil?
     finishes_url = "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/finishes"
   end
 
