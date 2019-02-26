@@ -27,7 +27,9 @@
           %td= finish["Type"]
           %td= finish["Location"]
           %td= finish["Room"]
-          %td= finish["Option Names"].first
+          %td
+            - if !finish["Option Names"].nil?
+              = finish["Option Names"].first
           %td
             - if !finish["Option Info"].nil? or !finish["Notes"].nil?
               - notes = finish["Notes"] || ""
