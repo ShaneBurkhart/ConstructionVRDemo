@@ -22,21 +22,22 @@
       %h2{ id: "#{u.id}" }= u["Name"]
 
       - u.versions.each do |v|
-        - t = Time.parse(v["Created At"]).strftime('%b %e, %Y')
-        %p.hide-print
-          %a.toggle-visible{ href: "#" } Show
-          = " - #{t}"
+        .version
+          - t = Time.parse(v["Created At"]).strftime('%b %e, %Y')
+          %p.hide-print
+            %a.toggle-visible{ href: "#" } Show
+            = " - #{t}"
 
-        .feedbacks{ style: "display: none;" }
-          %h3= t
+          .feedbacks{ style: "display: none;" }
+            %h3= t
 
-          - v.feedbacks.reverse.each do |f|
-            - next if f["Screenshot"].nil?
+            - v.feedbacks.reverse.each do |f|
+              - next if f["Screenshot"].nil?
 
-            %img{ src: f["Screenshot"][0]["url"] }
-            %p= f.notes_html
+              %img{ src: f["Screenshot"][0]["url"] }
+              %p= f.notes_html
 
-            %br
+              %br
 
 :javascript
   $(document).ready(function () {

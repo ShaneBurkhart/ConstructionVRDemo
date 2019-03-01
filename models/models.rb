@@ -4,6 +4,9 @@ RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
 FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
 Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 
+# For rendering some HTML
+MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
+
 class FinishOptions < Airrecord::Table
   self.base_key = FINISHES_AIRTABLE_APP_ID
   self.table_name = "Finish Options"
@@ -170,8 +173,7 @@ class Feedback < Airrecord::Table
   def notes_html
     # We get the raw "Notes" value from fields so it isn't type cast
     notes = self.fields["Notes"] || ""
-    notes = notes.gsub("\n", "<br>")
-    notes
+    MARKDOWN.render(notes)
   end
 end
 
