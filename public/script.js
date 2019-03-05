@@ -12,7 +12,6 @@ $(document).ready(function () {
   var $fullscreenFeedbackInput = $("#fullscreen-feedback-input");
   var $feedbackInput = $("#feedback-input");
   var $feedbackInput = $("#feedback-input");
-  var $feedbackSaveLocationInput = $("#feedback-save-location");
   var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
