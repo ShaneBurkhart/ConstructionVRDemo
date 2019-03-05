@@ -420,7 +420,7 @@ post '/project/:access_token/feedback_feed/:id/:checked' do
   feedback = Feedback.find(params[:id])
   return "Not found" if feedback.nil?
 
-  feedback["Is Done"] = is_checked == true ? true : nil
+  feedback["Fixed At"] = is_checked == true ? Time.now : nil
   feedback.save
 
   return {}

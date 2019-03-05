@@ -415,6 +415,67 @@ button, .button, #pano-window.fullscreen .controls a {
     padding: 10px 20px;
 }
 
+.version-wrapper {
+    padding: 10px 0;
+    background-color: #f5f5f5;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 30px;
+}
+
+.version-wrapper header {
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.version-wrapper h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.version-wrapper .created_at {
+    font-size: 14px;
+    color: #888888;
+    margin-bottom: 0;
+}
+
+.version-wrapper .to_complete {
+    font-size: 14px;
+    color: #444444;
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+.feedback-feed-item {
+    padding: 10px 20px;
+    border-top: 1px solid #888888;
+}
+
+.version-wrapper.completed, .feedback-feed-item.completed {
+    background-color: #d0f5d0;
+}
+
+.feedback-feed-item h4 {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+.feedback-feed-item .created_at {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 0;
+}
+
+.feedback-feed-item .feedback-image {
+    float: right;
+    padding-right: 20px;
+}
+
+.break {
+    float: none;
+    clear: both;
+}
+
 @media print {
     .hide-print { display: none; }
     .break-after { page-break-after: always; }

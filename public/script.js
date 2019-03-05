@@ -272,26 +272,17 @@ $(document).ready(function () {
       isRequesting = false;
     };
 
-    if ($feedbackSaveLocationInput.is(":checked")) {
-      uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
-        data.screenshot = { filename: fileName, url: s3Url }
-        data.viewParameters = JSON.stringify(view.parameters())
+    uploadToS3(jpegData, filePath, {}, function (err, s3Url) {
+      data.screenshot = { filename: fileName, url: s3Url }
+      data.viewParameters = JSON.stringify(view.parameters())
 
-        $.ajax({
-          type: "POST",
-          url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
-          data: data,
-          complete: onComplete,
-        });
-      });
-    } else {
       $.ajax({
         type: "POST",
         url: "/project/" + _accessToken + "/pano/" + panoId + "/feedback",
         data: data,
         complete: onComplete,
       });
-    }
+    });
   };
 
   $feedbackFileButtons.click(function () {

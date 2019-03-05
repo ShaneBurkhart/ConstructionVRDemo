@@ -1,4 +1,4 @@
-%script(src="/script.js?v=190222")
+%script(src="/script.js?v=190305")
 
 .large-container
   %p
@@ -9,6 +9,16 @@
   - if is_admin_mode
     %p
       %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
+
+    %p
+      Versions:
+    %ul
+      - unit_versions.each do |uv|
+        %li
+          - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
+          - label += " (Current)" if uv.id == unit["Current Version"][0]
+          %b= "Viewing: " if uv.id == @version_id
+          %a{ href: "?version=#{uv.id}" }= label
 
     %hr
 
@@ -60,7 +70,6 @@
 - if is_admin_mode
   .container
     %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
-    %input{id: "feedback-save-location", type: "checkbox", name: "save-screenshot", checked: true } Save location/screenshot?
     %input{id: "feedback-is-fix", type: "checkbox", name: "is-fix", checked: true } Fix?
     %br
     %button.feedback-add-file#feedback-add-file Add File

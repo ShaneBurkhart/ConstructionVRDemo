@@ -159,8 +159,16 @@ class UnitVersion < Airrecord::Table
 
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
 
+  def total_to_complete
+    self.feedbacks.reduce(0) { |m,o| next o["Is Fix"] ? m + 1 : m }
+  end
+
+  def total_completed
+    self.feedbacks.reduce(0) { |m,o| next o["Is Fix"] && !o["Fixed At"].nil? ? m + 1 : m }
+  end
+
   def feedbacks
-    self.pano_versions.map { |pv| pv.feedbacks }.flatten.sort_by{ |f| f["Created At"] }
+    self.pano_versions.map { |pv| pv.feedbacks }.flatten.sort_by{ |f| f["Created At"] }.reverse
   end
 end
 
