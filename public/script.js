@@ -15,6 +15,9 @@ $(document).ready(function () {
   var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
+  var $editFeedbackButtons = $("#feedbacks .feedback .edit-feedback");
+  var $cancelUpdateFeedbackButtons = $("#feedbacks .feedback .cancel-update-feedback");
+  var $updateFeedbackButtons = $("#feedbacks .feedback .update-feedback");
   var $unitFloorPlan = $("#unit-floor-plan");
   var $feedbackFileButtons = $(".feedback-add-file");
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
@@ -295,6 +298,49 @@ $(document).ready(function () {
     if (!feedbackText.length) return;
 
     submitFeedback(feedbackText);
+  });
+
+  var updateFeedback = _.debounce(function (feedbackId, data, callback) {
+    $.ajax({
+      type: "POST",
+      url: "/project/" + _accessToken + "/feedback_feed/" + feedbackId + "/update",
+      data: data,
+      complete: function (res) {
+        var d = JSON.parse(res.responseText);
+        if (callback) callback(d);
+      },
+    });
+  }, 750);
+
+  var toggleUpdateFeedback = function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $feedback = $this.closest(".feedback");
+    var $showNotes = $feedback.find(".show-notes");
+    var $editNotes = $feedback.find(".edit-notes");
+
+    $showNotes.toggle();
+    $editNotes.toggle();
+  };
+  $editFeedbackButtons.click(toggleUpdateFeedback);
+  $cancelUpdateFeedbackButtons.click(toggleUpdateFeedback);
+
+  $updateFeedbackButtons.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $feedback = $this.closest(".feedback");
+    var $showNotes = $feedback.find(".show-notes");
+    var $notes = $showNotes.find(".notes");
+    var $editNotes = $feedback.find(".edit-notes");
+    var $notesInput = $editNotes.find("textarea");
+    var feedbackId = $feedback.data("feedback-id");
+    var notes = $notesInput.val();
+
+    updateFeedback(feedbackId, { notes: notes }, function (f) {
+      $notes.html(f["Notes HTML"] || "");
+      $showNotes.toggle();
+      $editNotes.toggle();
+    });
   });
 
   $panoPreviews.click(function () {

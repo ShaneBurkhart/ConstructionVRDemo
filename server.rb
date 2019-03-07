@@ -3,6 +3,7 @@ require "haml"
 require "redis-store"
 require 'redis-rack'
 require 'redcarpet'
+require 'json'
 
 require './models/models.rb'
 
@@ -298,11 +299,10 @@ get '/project/:access_token/unit/:id/feedback_feed' do
   }
 end
 
-post '/project/:access_token/feedback_feed/:id/:checked' do
+post '/project/:access_token/feedback_feed/:id/update' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
-  is_checked = params[:checked] == "checked"
 
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -310,10 +310,20 @@ post '/project/:access_token/feedback_feed/:id/:checked' do
   feedback = Feedback.find(params[:id])
   return "Not found" if feedback.nil?
 
-  feedback["Fixed At"] = is_checked == true ? Time.now : nil
+  if !params[:checked].nil?
+    is_checked = params[:checked] == "checked"
+    feedback["Fixed At"] = is_checked == true ? Time.now : nil
+  end
+
+  feedback["Notes"] = params[:notes] unless params[:notes].nil?
+
   feedback.save
 
-  return {}
+  fields = feedback.fields
+  fields["Notes HTML"] = feedback.notes_html
+
+  content_type :json
+  return fields.to_json
 end
 
 post '/project/:access_token/pano/:id/feedback' do

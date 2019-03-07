@@ -1,3 +1,4 @@
+%script(src="/underscore.js")
 %script(src="/script.js?v=190306")
 
 .large-container
@@ -89,12 +90,19 @@
 
       - feedbacks.each do |feedback|
         %hr
-        .feedback
+        .feedback{ data: { feedback_id: feedback.id } }
           %p
             %a.perspective-link{ href: "#", data: { "pano-version-id": feedback["Pano Version"].first, perspective: feedback["View Parameters"] } }
               %strong.unit_name>= feedback["Pano Name"].first
             %span.created_at= "(#{Time.parse(feedback['Created At']).strftime('%b %e, %Y %l:%M%P')})"
-          %p.notes= feedback.notes_html
+          .show-notes
+            .notes= feedback.notes_html
+            %p
+              %a.edit-feedback{ href: "#" } Edit
+          .edit-notes{ style: "display: none;" }
+            %textarea= feedback["Notes"]
+            %button.update-feedback Update
+            %a.cancel-update-feedback{ href: "#" } Cancel
 
   %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
 

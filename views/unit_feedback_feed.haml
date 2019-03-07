@@ -54,10 +54,11 @@
         $this.text($this.text() == "Expand" ? "Collapse" : "Expand");
     });
 
-    var updateDB = _.debounce(function (feedbackId, checked) {
+    var updateDB = _.debounce(function (feedbackId, data) {
       $.ajax({
         type: "POST",
-        url: "/project/" + _accessToken + "/feedback_feed/" + feedbackId + "/" + checked,
+        url: "/project/" + _accessToken + "/feedback_feed/" + feedbackId + "/update",
+        data: data,
       });
     }, 750);
 
@@ -90,6 +91,6 @@
       }
 
       var checked = wasChecked == true ? "unchecked" : "checked"
-      updateDB(feedbackId, checked);
+      updateDB(feedbackId, { checked: checked });
     });
   });
