@@ -178,11 +178,18 @@ $(document).ready(function () {
     updateInitialYaw(_currentPano.data["Record ID"], yaw);
   });
 
-  function addFeedbackToList(feedbackId, feedbackText, feedbackHTML, panoName) {
+  function addFeedbackToList(feedback, panoName) {
+    var feedbackId = feedback["Record ID"]
+    var feedbackText = feedback["Notes"]
+    var feedbackHTML = feedback["Notes HTML"]
     var $feedbackTemplate = $("#feedback-template .feedback");
     var $newFeedback = $feedbackTemplate.clone();
+    var screenshotUrl = feedback["Screenshot"][0]["url"];
 
     $newFeedback.data("feedback-id", feedbackId);
+    $newFeedback.find(".feedback-image").attr("href", screenshotUrl);
+    $newFeedback.find(".feedback-image img").attr("src", screenshotUrl);
+    $newFeedback.find(".notes").html(feedbackHTML);
     $newFeedback.find(".notes").html(feedbackHTML);
     $newFeedback.find(".notes-input").val(feedbackText);
     $newFeedback.find(".pano_name").text(panoName);
@@ -255,7 +262,7 @@ $(document).ready(function () {
         $feedbackToggleButton.text("Give Feedback");
         $fullscreenFeedbackContainer.removeClass("open");
 
-        addFeedbackToList(feedback["Record ID"], feedback["Notes"], feedback["Notes HTML"], panoName);
+        addFeedbackToList(feedback, panoName);
       }
 
       $fullscreenSubmitFeedback.text("Submit Feedback");

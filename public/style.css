@@ -466,7 +466,7 @@ button, .button, #pano-window.fullscreen .controls a {
     margin-bottom: 0;
 }
 
-.feedback-feed-item .feedback-image {
+.feedback-feed-item .feedback-image, .feedback .feedback-image {
     float: right;
     padding-right: 20px;
 }

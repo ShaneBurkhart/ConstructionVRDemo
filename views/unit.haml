@@ -1,5 +1,5 @@
 %script(src="/underscore.js")
-%script(src="/script.js?v=190307")
+%script(src="/script.js?v=190308")
 
 .large-container
   %p
@@ -69,7 +69,7 @@
         .name= pano["Name"]
 
 - if is_admin_mode
-  .container
+  .large-container
     %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
     %input{id: "feedback-is-fix", type: "checkbox", name: "is-fix", checked: true } Fix?
     %br
@@ -87,7 +87,10 @@
             %strong.pano_name
             %span.created_at
           .show-notes
+            %a.feedback-image{ target: "_blank" }
+              %img{ style: "width: 300px;" }
             .notes
+            .break
             %p
               %a.edit-feedback{ href: "#" } Edit
           .edit-notes{ style: "display: none;" }
@@ -103,7 +106,11 @@
               %strong.unit_name>= feedback["Pano Name"].first
             %span.created_at= "(#{Time.parse(feedback['Created At']).strftime('%b %e, %Y %l:%M%P')})"
           .show-notes
+            - if !feedback["Screenshot"].nil?
+              %a.feedback-image{ href: feedback["Screenshot"][0]["url"], target: "_blank" }
+                %img{ src: feedback["Screenshot"][0]["url"], style: "width: 300px;" }
             .notes= feedback.notes_html
+            .break
             %p
               %a.edit-feedback{ href: "#" } Edit
           .edit-notes{ style: "display: none;" }
