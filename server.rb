@@ -359,7 +359,11 @@ post '/project/:access_token/pano/:id/feedback' do
 
   feedback.create
 
-  redirect "/project/#{access_token}/unit/#{pano.unit.id}"
+  fields = feedback.fields
+  fields["Notes HTML"] = feedback.notes_html
+
+  content_type :json
+  return fields.to_json
 end
 
 # DEVELOPMENT USE ONLY!

@@ -1,5 +1,5 @@
 %script(src="/underscore.js")
-%script(src="/script.js?v=190306")
+%script(src="/script.js?v=190307")
 
 .large-container
   %p
@@ -86,7 +86,14 @@
           %p
             %strong.pano_name
             %span.created_at
-          %p.notes
+          .show-notes
+            .notes
+            %p
+              %a.edit-feedback{ href: "#" } Edit
+          .edit-notes{ style: "display: none;" }
+            %textarea.notes-input
+            %button.update-feedback Update
+            %a.cancel-update-feedback{ href: "#" } Cancel
 
       - feedbacks.each do |feedback|
         %hr
@@ -100,7 +107,7 @@
             %p
               %a.edit-feedback{ href: "#" } Edit
           .edit-notes{ style: "display: none;" }
-            %textarea= feedback["Notes"]
+            %textarea.notes-input= feedback["Notes"]
             %button.update-feedback Update
             %a.cancel-update-feedback{ href: "#" } Cancel
 

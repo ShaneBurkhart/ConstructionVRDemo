@@ -15,9 +15,6 @@ $(document).ready(function () {
   var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
-  var $editFeedbackButtons = $("#feedbacks .feedback .edit-feedback");
-  var $cancelUpdateFeedbackButtons = $("#feedbacks .feedback .cancel-update-feedback");
-  var $updateFeedbackButtons = $("#feedbacks .feedback .update-feedback");
   var $unitFloorPlan = $("#unit-floor-plan");
   var $feedbackFileButtons = $(".feedback-add-file");
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
@@ -181,11 +178,13 @@ $(document).ready(function () {
     updateInitialYaw(_currentPano.data["Record ID"], yaw);
   });
 
-  function addFeedbackToList(feedbackText, panoName) {
+  function addFeedbackToList(feedbackId, feedbackText, feedbackHTML, panoName) {
     var $feedbackTemplate = $("#feedback-template .feedback");
     var $newFeedback = $feedbackTemplate.clone();
 
-    $newFeedback.find(".notes").html(feedbackText.replace(/\n/g, "<br>"));
+    $newFeedback.data("feedback-id", feedbackId);
+    $newFeedback.find(".notes").html(feedbackHTML);
+    $newFeedback.find(".notes-input").val(feedbackText);
     $newFeedback.find(".pano_name").text(panoName);
     $newFeedback.find(".created_at").text("(now)");
 
@@ -250,12 +249,13 @@ $(document).ready(function () {
     }
     var onComplete = function (xhr, status) {
       if (xhr.status === 200) {
+        var feedback = JSON.parse(xhr.responseText);
         $fullscreenFeedbackInput.val("");
         $feedbackInput.val("");
         $feedbackToggleButton.text("Give Feedback");
         $fullscreenFeedbackContainer.removeClass("open");
 
-        addFeedbackToList(feedbackText, panoName);
+        addFeedbackToList(feedback["Record ID"], feedback["Notes"], feedback["Notes HTML"], panoName);
       }
 
       $fullscreenSubmitFeedback.text("Submit Feedback");
@@ -322,10 +322,10 @@ $(document).ready(function () {
     $showNotes.toggle();
     $editNotes.toggle();
   };
-  $editFeedbackButtons.click(toggleUpdateFeedback);
-  $cancelUpdateFeedbackButtons.click(toggleUpdateFeedback);
 
-  $updateFeedbackButtons.click(function (e) {
+  $feedbacks.on("click", ".feedback .edit-feedback", toggleUpdateFeedback);
+  $feedbacks.on("click", ".feedback .cancel-update-feedback", toggleUpdateFeedback);
+  $feedbacks.on("click", ".feedback .update-feedback", function (e) {
     e.preventDefault();
     var $this = $(this);
     var $feedback = $this.closest(".feedback");
