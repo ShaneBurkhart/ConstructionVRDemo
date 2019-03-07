@@ -323,10 +323,14 @@ $(document).ready(function () {
     $editNotes.toggle();
   };
 
+  var isUpdating = false;
   $feedbacks.on("click", ".feedback .edit-feedback", toggleUpdateFeedback);
   $feedbacks.on("click", ".feedback .cancel-update-feedback", toggleUpdateFeedback);
   $feedbacks.on("click", ".feedback .update-feedback", function (e) {
     e.preventDefault();
+    if (isUpdating) return;
+    isUpdating = true;
+
     var $this = $(this);
     var $feedback = $this.closest(".feedback");
     var $showNotes = $feedback.find(".show-notes");
@@ -336,10 +340,16 @@ $(document).ready(function () {
     var feedbackId = $feedback.data("feedback-id");
     var notes = $notesInput.val();
 
+    $notesInput.prop("disabled", true);
+    $notesInput.addClass("disabled");
+
     updateFeedback(feedbackId, { notes: notes }, function (f) {
       $notes.html(f["Notes HTML"] || "");
       $showNotes.toggle();
       $editNotes.toggle();
+      $notesInput.prop("disabled", false);
+      $notesInput.removeClass("disabled");
+      isUpdating = false;
     });
   });
 

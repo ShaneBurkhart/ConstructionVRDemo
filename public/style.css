@@ -258,7 +258,7 @@ textarea {
     resize: none;
     padding: 5px;
 }
-#pano-window.fullscreen .fullscreen-feedback textarea.disabled, textarea#feedback-input.disabled {
+#pano-window.fullscreen .fullscreen-feedback textarea.disabled, textarea#feedback-input.disabled, textarea.disabled {
     background-color: #cccccc;
 }
 #pano-window.fullscreen .fullscreen-feedback .button-wrapper {
