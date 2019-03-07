@@ -1,13 +1,6 @@
 .container
   .header.hide-print
-    %p
-      %a{ href: "/project/#{access_token}/feedbacks/permalinks" } Permalinks
-    %p
-      %a{ href: "/project/#{access_token}/feedbacks/permalinks/new" } Create Permalink
-
-    %hr
-
-    %h2 Jump to Unit
+    %h3 Jump to Unit
 
     - @units.each do |u|
       - next if u.versions.count == 0
