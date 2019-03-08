@@ -1,44 +1,9 @@
 .container
-  .header.hide-print
-    %h3 Jump to Unit
+  .header
+    %h3 Feedback Feeds for #{project["Name"]}
 
     - @units.each do |u|
       - next if u.versions.count == 0
       %p
-        %a{ href: "##{u.id}" }= u["Name"]
+        %a{ href: "/project/#{access_token}/unit/#{u.id}/feedback_feed" }= u["Name"]
 
-    %hr
-
-  - @units.each do |u|
-    .unit.break-after
-      - next if u.versions.count == 0
-      %h2{ id: "#{u.id}" }= u["Name"]
-
-      - u.versions.each do |v|
-        .version
-          - t = Time.parse(v["Created At"]).strftime('%b %e, %Y')
-          %p.hide-print
-            %a.toggle-visible{ href: "#" } Show
-            = " - #{t}"
-
-          .feedbacks{ style: "display: none;" }
-            %h3= t
-
-            - v.feedbacks.reverse.each do |f|
-              - next if f["Screenshot"].nil?
-
-              %img{ src: f["Screenshot"][0]["url"] }
-              %p= f.notes_html
-
-              %br
-
-:javascript
-  $(document).ready(function () {
-    $(".toggle-visible").click(function (e) {
-        var $this = $(this);
-        e.preventDefault();
-
-        $this.parent().parent().find(".feedbacks").toggle();
-        $this.text($this.text() == "Show" ? "Hide" : "Show");
-    });
-  });

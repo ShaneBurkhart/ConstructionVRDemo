@@ -240,6 +240,7 @@ get '/project/:access_token/feedbacks' do
   @units = project.units
   haml :project_feedbacks, locals: {
     access_token: access_token,
+    project: project,
   }
 end
 
