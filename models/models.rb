@@ -1,4 +1,5 @@
 require "airrecord"
+require 'redcarpet'
 
 RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
 FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
