@@ -73,6 +73,8 @@ class Unit < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Units"
 
+  has_many :current_version, class: "UnitVersion", column: "Current Version"
+
   def belongs_to_project?(project)
     return false if project.nil?
     self.project.id == project.id
