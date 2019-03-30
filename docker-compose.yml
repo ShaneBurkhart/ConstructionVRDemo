@@ -22,5 +22,13 @@ web_prod:
         - user.env
     command: "ruby server.rb"
 
+testing_worker:
+    image: shaneburkhart/construction-vr-demo
+    volumes:
+        - .:/app
+    env_file:
+        - user.env
+    command: "ruby workers/skp_model_tester.rb"
+
 redis:
     image: redis:3.2
