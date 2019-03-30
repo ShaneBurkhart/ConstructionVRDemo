@@ -160,6 +160,7 @@ class UnitVersion < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Unit Versions"
 
+  has_one :unit, class: "Unit", column: "Unit"
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
 
   def total_to_complete
