@@ -1,5 +1,6 @@
 require 'open-uri'
 
+require "./util/slack.rb"
 require "./models/models.rb"
 
 def parse_model_data(raw_model_data)
@@ -16,7 +17,8 @@ def parse_model_data(raw_model_data)
     if line.start_with? "Scene:"
       parts = line.split(/:\s+/)
       if parts.length > 1
-        current_scene = { name: parts[1], layers: {} }
+        name = parts[1].strip
+        current_scene = { name: name, layers: {} }
         model_data[:scenes] << current_scene
       end
       next
@@ -44,16 +46,40 @@ def check_unit_version_model(unit_version)
   model_data = parse_model_data(unit_version["Model Data Output"])
   errors = []
 
-  fp_scene = model_data[:scenes].find { |scene| scene[:name] == "Floor Plan" }
+  fp_scene = model_data[:scenes].find { |scene| scene[:name].downcase == "floor plan" }
   errors << "Missing scene with name matching 'Floor Plan'. Make sure the name matches exactly :)" if fp_scene.nil?
 
   panos.each do |pano|
     name = pano["Name"]
-    scene = model_data[:scenes].find { |scene| scene[:name] == name }
+    scene = model_data[:scenes].find { |scene| scene[:name].downcase == name.downcase }
     errors << "Missing scene with name matching '#{name}'. Make sure the name matches exactly :)" if scene.nil?
   end
 
   return errors
+end
+
+def create_unit_version_error_notification_message(unit_version)
+  unit = unit_version.unit
+  project = unit.project
+
+  unit_name = unit["Name"]
+  project_name = project["Name"]
+  project_prod_link = project["Prod Link"]
+  unit_feedback_link = "#{project_prod_link}/unit/#{unit.id}/feedback_feed"
+
+  return "Oh no! Errors for #{unit_name} unit in #{project_name} <#{unit_feedback_link}|View Errors>"
+end
+
+def create_unit_version_success_notification_message(unit_version)
+  unit = unit_version.unit
+  project = unit.project
+
+  unit_name = unit["Name"]
+  project_name = project["Name"]
+  project_prod_link = project["Prod Link"]
+  unit_link = "#{project_prod_link}/unit/#{unit.id}"
+
+  return "Successfully rendered #{unit_name} unit in #{project_name} <#{unit_link}|View>"
 end
 
 loop do
@@ -61,9 +87,16 @@ loop do
 
   unit_versions.each do |unit_version|
     errors = check_unit_version_model(unit_version)
-    puts errors.inspect
 
-    unit_version["Errors"] = errors.join("\n") if errors.length
+    if errors.length
+      unit_version["Errors"] = errors.join("\n")
+      slack_message = create_unit_version_error_notification_message(unit_version)
+      send_slack_message_to_rendering_channel(slack_message)
+    else
+      slack_message = create_unit_version_success_notification_message(unit_version)
+      send_slack_message_to_rendering_channel(slack_message)
+    end
+
     unit_version["Tested At"] = Time.now
     unit_version.save
   end
