@@ -88,7 +88,7 @@ loop do
   unit_versions.each do |unit_version|
     errors = check_unit_version_model(unit_version)
 
-    if errors.length
+    if errors.length > 0
       unit_version["Errors"] = errors.join("\n")
       slack_message = create_unit_version_error_notification_message(unit_version)
       send_slack_message_to_rendering_channel(slack_message)
