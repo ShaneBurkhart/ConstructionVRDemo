@@ -43,6 +43,9 @@ def check_unit_version_model(unit_version)
   model_data = parse_model_data(unit_version["Model Data Output"])
   errors = []
 
+  fp_scene = model_data[:scenes].find { |scene| scene[:name] == "Floor Plan" }
+  errors << "Missing scene with name matching 'Floor Plan'. Make sure the name matches exactly :)" if fp_scene.nil?
+
   panos.each do |pano|
     name = pano["Name"]
     scene = model_data[:scenes].find { |scene| scene[:name] == name }

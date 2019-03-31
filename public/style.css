@@ -454,6 +454,14 @@ button, .button, #pano-window.fullscreen .controls a {
     background-color: #d0f5d0;
 }
 
+.version-wrapper.errors, .feedback-feed-item.errors {
+    background-color: #f5d0d0;
+}
+
+.version-wrapper.rendering, .feedback-feed-item.rendering {
+    background-color: #d0ecf5;
+}
+
 .feedback-feed-item h4 {
     margin: 0;
     padding: 0;

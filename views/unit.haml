@@ -18,8 +18,16 @@
         %li
           - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
           - label += " (Current)" if uv.id == unit["Current Version"][0]
-          %b= "Viewing: " if uv.id == @version_id
-          %a{ href: "?version=#{uv.id}" }= label
+          - label += " (Errors)" if uv.has_errors?
+          - label += " (Rendering)" if uv.is_rendering?
+          - if uv.id == @version_id
+            %b= "Viewing: "
+
+          - if uv.is_viewable?
+            %a{ href: "?version=#{uv.id}" }= label
+          - else
+            %span= label
+
 
     %hr
 

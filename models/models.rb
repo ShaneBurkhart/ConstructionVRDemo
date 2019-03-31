@@ -163,6 +163,18 @@ class UnitVersion < Airrecord::Table
   has_one :unit, class: "Unit", column: "Unit"
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
 
+  def is_viewable?
+    !self["Floor Plan Image URL"].nil?
+  end
+
+  def is_rendering?
+    !self.is_viewable? and !self.has_errors?
+  end
+
+  def has_errors?
+    !self["Errors"].nil?
+  end
+
   def total_to_complete
     self.feedbacks.reduce(0) { |m,o| next o["Is Fix"] ? m + 1 : m }
   end
