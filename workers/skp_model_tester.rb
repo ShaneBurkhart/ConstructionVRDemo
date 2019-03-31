@@ -67,7 +67,7 @@ def create_unit_version_error_notification_message(unit_version)
   project_prod_link = project["Prod Link"]
   unit_feedback_link = "#{project_prod_link}/unit/#{unit.id}/feedback_feed"
 
-  return "Oh no! Errors for #{unit_name} unit in #{project_name} <#{unit_feedback_link}|View Errors>"
+  return "Oh no! Errors for #{unit_name} unit in #{project_name}. Please fix and resubmit. <#{unit_feedback_link}|View Errors>"
 end
 
 def create_unit_version_success_notification_message(unit_version)
@@ -77,9 +77,9 @@ def create_unit_version_success_notification_message(unit_version)
   unit_name = unit["Name"]
   project_name = project["Name"]
   project_prod_link = project["Prod Link"]
-  unit_link = "#{project_prod_link}/unit/#{unit.id}"
+  unit_feedback_link = "#{project_prod_link}/unit/#{unit.id}/feedback_feed"
 
-  return "Successfully rendered #{unit_name} unit in #{project_name} <#{unit_link}|View>"
+  return "Successfully tested #{unit_name} unit in #{project_name}. Rendering will start soon. <#{unit_feedback_link}|Check Progress>"
 end
 
 loop do
