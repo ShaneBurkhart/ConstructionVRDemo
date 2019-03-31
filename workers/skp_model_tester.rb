@@ -11,6 +11,7 @@ def parse_model_data(raw_model_data)
     next unless line.strip.length
     next if line.include? "Model Layers:"
     next if line.include? "Scene Layers:"
+    next if line.include? "Scenes:"
 
     if line.start_with? "Scene:"
       parts = line.split(/:\s+/)
