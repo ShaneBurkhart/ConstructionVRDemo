@@ -9,7 +9,7 @@ def parse_model_data(raw_model_data)
   current_scene = nil
 
   lines.each do |line|
-    next unless line.strip.length
+    next unless line.strip.length > 0
     next if line.include? "Model Layers:"
     next if line.include? "Scene Layers:"
     next if line.include? "Scenes:"
@@ -26,7 +26,7 @@ def parse_model_data(raw_model_data)
 
     parts = line.split(/:\s+/)
     name = parts[0]
-    next if name.nil? or !name.length
+    next if name.nil? or name.length == 0
     visibility = -1
     visibility = parts[1].strip.to_i if parts.length > 1
 
