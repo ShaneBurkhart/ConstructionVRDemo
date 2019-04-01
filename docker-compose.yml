@@ -30,5 +30,13 @@ testing_worker:
         - user.env
     command: "ruby workers/skp_model_tester.rb"
 
+notification_worker:
+    image: shaneburkhart/construction-vr-demo
+    volumes:
+        - .:/app
+    env_file:
+        - user.env
+    command: "ruby workers/skp_rendering_notification.rb"
+
 redis:
     image: redis:3.2
