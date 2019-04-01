@@ -3,6 +3,10 @@
 .large-container
   %h1 #{unit["Name"]} - Feedback Feed
 
+  %a{ href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } Go to Unit Viewer
+
+  %hr
+
   - versions.each_with_index do |version, i|
     - total_completed = version.total_completed
     - total_to_complete = version.total_to_complete
