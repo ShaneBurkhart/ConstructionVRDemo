@@ -13,7 +13,7 @@ def create_unit_version_rendering_completed_notification_message(unit_version)
   unit_link = "#{project_prod_link}/unit/#{unit.id}"
   unit_feedback_link = "#{unit_link}/feedback_feed"
 
-  return "Done rendering #{unit_name} unit in #{project_name}. <#{unit_link}|View> | <#{unit_feedback_link}|Feedback>"
+  return "Done rendering #{unit_name} unit in #{project_name}. <#{unit_link}|View> - <#{unit_feedback_link}|Feedback>"
 end
 
 def send_update_hotspots_email_to_magic_team(unit_version)
