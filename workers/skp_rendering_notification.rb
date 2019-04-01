@@ -1,4 +1,5 @@
 require 'open-uri'
+require 'uri'
 
 require "./util/slack.rb"
 require "./models/models.rb"
@@ -10,10 +11,16 @@ def create_unit_version_rendering_completed_notification_message(unit_version)
   unit_name = unit["Name"]
   project_name = project["Name"]
   project_prod_link = project["Prod Link"]
-  unit_link = "#{project_prod_link}/unit/#{unit.id}"
-  unit_feedback_link = "#{unit_link}/feedback_feed"
+  project_prod_admin_link = project["Prod Admin Login Link"]
 
-  return "Done rendering #{unit_name} unit in #{project_name}. <#{unit_link}|View> - <#{unit_feedback_link}|Feedback>"
+  uri = URI::parse(project_prod_link)
+  project_prod_path = uri.path
+
+  unit_path = "#{project_prod_path}/unit/#{unit.id}?version=#{URI.encode_www_form_component(unit_version.id)}"
+  admin_link = "#{project_prod_admin_link}?redirect_to=#{URI.encode_www_form_component(unit_path)}"
+  unit_feedback_link = "#{project_prod_link}/unit/#{unit.id}/feedback_feed"
+
+  return "Done rendering #{unit_name} unit in #{project_name}. <#{admin_link}|View> - <#{unit_feedback_link}|Feedback>"
 end
 
 def send_update_hotspots_email_to_magic_team(unit_version)
