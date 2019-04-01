@@ -55,7 +55,8 @@ def check_unit_version_model(unit_version)
     errors << "Missing scene with name matching '#{name}'. Make sure the name matches exactly :)" if scene.nil?
   end
 
-  return errors
+  model_data[:errors] = errors
+  return model_data
 end
 
 def create_unit_version_error_notification_message(unit_version)
@@ -86,7 +87,10 @@ loop do
   unit_versions = UnitVersion.all(view: "To Test")
 
   unit_versions.each do |unit_version|
-    errors = check_unit_version_model(unit_version)
+    model_data = check_unit_version_model(unit_version)
+    errors = model_data[:errors]
+    screenshots = model_data[:scenes].select { |s| s[:name] == "Enscape View" }
+    screenshot_count = screenshots.nil? ? 0 : screenshots.length
 
     if errors.length > 0
       unit_version["Errors"] = errors.join("\n")
@@ -97,6 +101,7 @@ loop do
       send_slack_message_to_rendering_channel(slack_message)
     end
 
+    unit_version["Screenshot Count"] = screenshot_count
     unit_version["Tested At"] = Time.now
     unit_version.save
   end
