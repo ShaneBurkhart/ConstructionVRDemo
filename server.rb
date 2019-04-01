@@ -85,11 +85,14 @@ get '/admin/login/:admin_token' do
   project = find_project_by_admin_access_token(admin_token)
   return "Not found" if project.nil?
 
+  redirect_to = params[:redirect_to]
+  redirect_to = "/project/#{project["Access Token"]}" if redirect_to.nil? or redirect_to.length == 0
+
   # Log in user so we don't have to specify debug mode and can update
   # linked hotspots in the app.
   session[:is_admin] = true
 
-  redirect "/project/#{project["Access Token"]}"
+  redirect redirect_to
 end
 
 post '/admin/linked_hotspot/set' do
