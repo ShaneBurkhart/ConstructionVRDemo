@@ -26,14 +26,14 @@ class ProjectFinishSelections < Airrecord::Table
     views = [
       "Walls & Millwork",
       "Flooring",
+      "Cabinets & Countertops",
       "Light Fixtures",
-      "Plumbing Fixtures & Acc.",
-      "Shelving",
       "Blinds",
+      "Shelving",
+      "Plumbing Fixtures & Acc.",
       "Mirrors",
       "Appliances",
       "Furniture",
-      "Cabinets & Countertops",
       "Exterior",
       "Misc"
     ]
