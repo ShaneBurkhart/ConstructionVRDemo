@@ -109,8 +109,8 @@ class Unit < Airrecord::Table
     current_version_panos = []
 
     if !version.nil?
-        current_version = version
-        current_version_panos = current_version.pano_versions
+      current_version = version
+      current_version_panos = current_version.pano_versions
     end
 
     return panos.map do |pano|
@@ -148,6 +148,13 @@ class Pano < Airrecord::Table
   end
 end
 
+class ScreenshotVersion < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Screenshot Versions"
+
+  belongs_to :unit_version, class: "UnitVersion", column: "Unit Version"
+end
+
 class PanoVersion < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Pano Versions"
@@ -162,6 +169,7 @@ class UnitVersion < Airrecord::Table
 
   has_one :unit, class: "Unit", column: "Unit"
   has_many :pano_versions, class: "PanoVersion", column: "Pano Versions"
+  has_many :screenshot_versions, class: "ScreenshotVersion", column: "Screenshot Versions"
 
   def is_viewable?
     !self["Floor Plan Image URL"].nil?

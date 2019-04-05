@@ -46,87 +46,105 @@
               .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}
                 %span= pano["Name"]
         %p * hover floor plan to show labels
-  %p
-    %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
-    - if is_admin_mode
-      %a.button.set-initial-yaw{ href: "#" } Set Initial Yaw
-    - elsif is_debug_mode
-      %a.button.log-coord{ href: "#" } Log Coords
 
-  #pano-window
-    - if is_debug_mode
-      .debug-center-window
-    .controls
-      - if is_admin_mode
-        %a.feedback-toggle Give Feedback
-      %a.fullscreen-toggle Exit
-    - if is_admin_mode
-      .fullscreen-feedback
-        .container{ style: "height: 100%; position: relative;" }
-          %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
-          .button-wrapper
-            %button.feedback-add-file#fullscreen-feedback-add-file Add File
-            %button#fullscreen-feedback-submit Submit Feedback
-
-  - if is_admin_mode
+  - if !is_tour
     %p
-      %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
-  #pano-previews
-    - unit_pano_data.each do |pano|
-      .pano-preview{ data: { id: pano["Record ID"] }}
-        .name= pano["Name"]
+      %a.button.green{ href: "?show_tour=1&version=#{selected_version.id}" } Go to Virtual Tour
 
-- if is_admin_mode
-  .large-container
-    %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
-    %input{id: "feedback-is-fix", type: "checkbox", name: "is-fix", checked: true } Fix?
-    %br
-    %button.feedback-add-file#feedback-add-file Add File
-    %button#feedback-submit Submit Feedback
+    #screenshots
+      %h2 Interior Renderings
+      - selected_version.screenshot_versions.each do |sv|
+        %p
+          %img{ src: sv["Image URL"] }
 
-    %br
-    %br
+  - else
+    - if selected_version.screenshot_versions.length > 0
+      %p
+        %a.button.green{ href: "?version=#{selected_version.id}" } Go to Interior Renderings
 
-    %h2 Recent Feedback
-    #feedbacks
-      #feedback-template{ style: "display: none;" }
-        .feedback
-          %p
-            %strong.pano_name
-            %span.created_at
-          .show-notes
-            %a.feedback-image{ target: "_blank" }
-              %img{ style: "width: 300px;" }
-            .notes
-            .break
-            %p
-              %a.edit-feedback{ href: "#" } Edit
-          .edit-notes{ style: "display: none;" }
-            %textarea.notes-input
-            %button.update-feedback Update
-            %a.cancel-update-feedback{ href: "#" } Cancel
+    #virtual-tour
+      %h2 Virtual Tour
+      %p
+        %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
+        - if is_admin_mode
+          %a.button.set-initial-yaw{ href: "#" } Set Initial Yaw
+        - elsif is_debug_mode
+          %a.button.log-coord{ href: "#" } Log Coords
 
-      - feedbacks.each do |feedback|
-        %hr
-        .feedback{ data: { feedback_id: feedback.id } }
-          %p
-            %a.perspective-link{ href: "#", data: { "pano-version-id": feedback["Pano Version"].first, perspective: feedback["View Parameters"] } }
-              %strong.unit_name>= feedback["Pano Name"].first
-            %span.created_at= "(#{Time.parse(feedback['Created At']).strftime('%b %e, %Y %l:%M%P')})"
-          .show-notes
-            - if !feedback["Screenshot"].nil?
-              %a.feedback-image{ href: feedback["Screenshot"][0]["url"], target: "_blank" }
-                %img{ src: feedback["Screenshot"][0]["url"], style: "width: 300px;" }
-            .notes= feedback.notes_html
-            .break
-            %p
-              %a.edit-feedback{ href: "#" } Edit
-          .edit-notes{ style: "display: none;" }
-            %textarea.notes-input= feedback["Notes"]
-            %button.update-feedback Update
-            %a.cancel-update-feedback{ href: "#" } Cancel
+      #pano-window
+        - if is_debug_mode
+          .debug-center-window
+        .controls
+          - if is_admin_mode
+            %a.feedback-toggle Give Feedback
+          %a.fullscreen-toggle Exit
+        - if is_admin_mode
+          .fullscreen-feedback
+            .container{ style: "height: 100%; position: relative;" }
+              %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
+              .button-wrapper
+                %button.feedback-add-file#fullscreen-feedback-add-file Add File
+                %button#fullscreen-feedback-submit Submit Feedback
 
-  %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
+      - if is_admin_mode
+        %p
+          %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
+      #pano-previews
+        - unit_pano_data.each do |pano|
+          .pano-preview{ data: { id: pano["Record ID"] }}
+            .name= pano["Name"]
+
+      - if is_admin_mode
+        %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
+        %input{id: "feedback-is-fix", type: "checkbox", name: "is-fix", checked: true } Fix?
+        %br
+        %button.feedback-add-file#feedback-add-file Add File
+        %button#feedback-submit Submit Feedback
+
+        %br
+        %br
+
+        %h2 Recent Feedback
+        #feedbacks
+          #feedback-template{ style: "display: none;" }
+            .feedback
+              %p
+                %strong.pano_name
+                %span.created_at
+              .show-notes
+                %a.feedback-image{ target: "_blank" }
+                  %img{ style: "width: 300px;" }
+                .notes
+                .break
+                %p
+                  %a.edit-feedback{ href: "#" } Edit
+              .edit-notes{ style: "display: none;" }
+                %textarea.notes-input
+                %button.update-feedback Update
+                %a.cancel-update-feedback{ href: "#" } Cancel
+
+          - feedbacks.each do |feedback|
+            %hr
+            .feedback{ data: { feedback_id: feedback.id } }
+              %p
+                %a.perspective-link{ href: "#", data: { "pano-version-id": feedback["Pano Version"].first, perspective: feedback["View Parameters"] } }
+                  %strong.unit_name>= feedback["Pano Name"].first
+                %span.created_at= "(#{Time.parse(feedback['Created At']).strftime('%b %e, %Y %l:%M%P')})"
+              .show-notes
+                - if !feedback["Screenshot"].nil?
+                  %a.feedback-image{ href: feedback["Screenshot"][0]["url"], target: "_blank" }
+                    %img{ src: feedback["Screenshot"][0]["url"], style: "width: 300px;" }
+                .notes= feedback.notes_html
+                .break
+                %p
+                  %a.edit-feedback{ href: "#" } Edit
+              .edit-notes{ style: "display: none;" }
+                %textarea.notes-input= feedback["Notes"]
+                %button.update-feedback Update
+                %a.cancel-update-feedback{ href: "#" } Cancel
+
+      %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
+
 
 - if is_debug_mode
   :javascript

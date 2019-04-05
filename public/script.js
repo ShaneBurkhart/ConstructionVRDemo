@@ -19,6 +19,8 @@ $(document).ready(function () {
   var $feedbackFileButtons = $(".feedback-add-file");
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
   var $feedbackFileUpload = $("#feedback-file-upload");
+  var $virtualTourToggleButton = $(".virtual-tour-toggle");
+  var $virtualTourSection = $("#virtual-tour");
 
   var IS_PICKING_LINK_HOTSPOT = false;
 
@@ -122,6 +124,20 @@ $(document).ready(function () {
     // Show first pano
     switchToPanoId(_panoData[0]["Record ID"]);
   }
+
+  $virtualTourToggleButton.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var t = $this.text()
+
+    if (t.includes("Show")) {
+      $this.text("Hide Virtual Tour");
+    } else {
+      $this.text("Show Virtual Tour");
+    }
+
+    $virtualTourSection.toggle();
+  });
 
   $feedbackToggleButton.click(function () {
     if ($fullscreenFeedbackContainer.hasClass("open")) {

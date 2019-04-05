@@ -282,6 +282,10 @@ button, .button, #pano-window.fullscreen .controls a {
     -moz-appearance: none;
 }
 
+button.green, .button.green {
+    background-color: #22d640;
+}
+
 @keyframes fadeInOpacity {
 	0% {
 		opacity: 0;

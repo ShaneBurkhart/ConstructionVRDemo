@@ -251,6 +251,7 @@ get '/project/:access_token/unit/:id' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
+  is_tour = !!params[:show_tour]
 
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
@@ -273,12 +274,18 @@ get '/project/:access_token/unit/:id' do
     feedbacks = version.feedbacks
   end
 
+  if version.nil? or version.screenshot_versions.length == 0
+    is_tour = true
+  end
+
   haml :unit, locals: {
     unit: unit,
+    selected_version: version,
     unit_versions: unit.versions,
     feedbacks: feedbacks,
     unit_pano_data: unit.pano_data(version),
     access_token: access_token,
+    is_tour: is_tour,
     is_debug_mode: is_debug_mode,
     is_admin_mode: is_admin_mode,
     aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
