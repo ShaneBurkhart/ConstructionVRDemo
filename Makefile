@@ -1,3 +1,4 @@
+.PHONY: db
 NAME=construction-vr-demo
 IMAGE_TAG=shaneburkhart/${NAME}
 
@@ -8,6 +9,9 @@ run:
 
 build:
 	 docker build -t ${IMAGE_TAG} -f Dockerfile .
+
+db:
+	docker-compose -p ${NAME} run --rm web rake db:migrate
 
 c:
 	docker-compose -p ${NAME} run --rm web /bin/bash
@@ -29,6 +33,7 @@ prod:
 	git checkout master
 	git pull origin master
 	$(MAKE) build
+	$(MAKE) db
 	$(MAKE) run
 
 deploy_prod:
