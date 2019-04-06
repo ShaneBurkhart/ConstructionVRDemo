@@ -16,7 +16,7 @@ web_prod:
     ports:
         - "4567:4567"
     links:
-        - pg
+        - pg_prod
         - redis
     volumes:
         - .:/app
@@ -34,6 +34,17 @@ pg:
         - POSTGRES_DB=mydb
     volumes:
         - ./data/pg:/var/lib/postgresql/data
+
+pg_prod:
+    image: postgres
+    ports:
+        - "5432:5432"
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=mydb
+    volumes:
+        - /data/pg:/var/lib/postgresql/data
 
 testing_worker:
     image: shaneburkhart/construction-vr-demo
