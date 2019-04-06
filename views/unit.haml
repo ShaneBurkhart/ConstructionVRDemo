@@ -46,6 +46,15 @@
               .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}
                 %span= pano["Name"]
         %p * hover floor plan to show labels
+      - if is_admin_mode
+        %p
+          %a.button.set-floor-plan-hotspot{ href: "#" } Set Floor Plan Hotspot
+          %a.button.red.remove-floor-plan-hotspot{ href: "#" } Remove Floor Plan Hotspot
+        #floor-plan-hotspot-pano-previews.pano-previews
+          - unit_pano_data.each do |pano|
+            - next if pano["Name"].include? "Entry"
+            .pano-preview{ data: { id: pano["Record ID"] }}
+              .name= pano["Name"]
 
   - if !is_tour
     %p
@@ -89,7 +98,7 @@
       - if is_admin_mode
         %p
           %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
-      #pano-previews
+      #pano-previews.pano-previews
         - unit_pano_data.each do |pano|
           .pano-preview{ data: { id: pano["Record ID"] }}
             .name= pano["Name"]

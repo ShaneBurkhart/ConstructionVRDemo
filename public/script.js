@@ -1,6 +1,9 @@
 $(document).ready(function () {
   var $fullscreenButton = $(".fullscreen-toggle");
   var $logCoordButton = $(".log-coord");
+  var $setFloorPlanHotspotButton = $(".set-floor-plan-hotspot");
+  var $removeFloorPlanHotspotButton = $(".remove-floor-plan-hotspot");
+  var $floorPlanHotspotPanoPreviews = $('#floor-plan-hotspot-pano-previews .pano-preview');
   var $setLinkHotspotButton = $(".set-link-hotspot");
   var $setInitialYawButton = $(".set-initial-yaw");
   var panoElement = document.getElementById('pano-window');
@@ -15,7 +18,8 @@ $(document).ready(function () {
   var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
   var $feedbacks = $("#feedbacks");
-  var $unitFloorPlan = $("#unit-floor-plan");
+  var $unitFloorPlan = $("#unit-floor-plan img");
+  var $unitFloorPlanLabels = $("#unit-floor-plan .label");
   var $feedbackFileButtons = $(".feedback-add-file");
   var $feedbackPerspectiveLinks = $(".feedback .perspective-link");
   var $feedbackFileUpload = $("#feedback-file-upload");
@@ -23,6 +27,8 @@ $(document).ready(function () {
   var $virtualTourSection = $("#virtual-tour");
 
   var IS_PICKING_LINK_HOTSPOT = false;
+  // 0 = Nothing, 1 = Set, 2 = Remove
+  var FLOOR_PLAN_HOTSPOT_STATE = 0;
 
   AWS.config.update({
     region: "us-west-2",
@@ -161,6 +167,61 @@ $(document).ready(function () {
     viewer.updateSize();
   });
 
+  $setFloorPlanHotspotButton.click(function (e) {
+    e.preventDefault();
+    FLOOR_PLAN_HOTSPOT_STATE = 1;
+    $floorPlanHotspotPanoPreviews.addClass('select-pano');
+  });
+
+  $removeFloorPlanHotspotButton.click(function (e) {
+    e.preventDefault();
+    FLOOR_PLAN_HOTSPOT_STATE = 2;
+    $floorPlanHotspotPanoPreviews.addClass('select-pano');
+  });
+
+  $floorPlanHotspotPanoPreviews.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var panoId = $this.data("id");
+
+    // Clear any selected
+    $floorPlanHotspotPanoPreviews.removeClass('selected-pano');
+
+    if (FLOOR_PLAN_HOTSPOT_STATE == 1) {
+      // Set selected floor plan hotspot
+      $this.addClass('selected-pano');
+    } else if (FLOOR_PLAN_HOTSPOT_STATE == 2) {
+      // Remove selected floor plan hotspot
+      removeFloorPlanHotspot(panoId);
+
+      FLOOR_PLAN_HOTSPOT_STATE = 0;
+      $floorPlanHotspotPanoPreviews.removeClass("select-pano");
+      $floorPlanHotspotPanoPreviews.removeClass("selected-pano");
+    }
+  });
+
+  $unitFloorPlan.click(function (e) {
+    var selectedPano = $floorPlanHotspotPanoPreviews.filter(".selected-pano");
+    if (FLOOR_PLAN_HOTSPOT_STATE != 1 || !selectedPano.length) return;
+
+    var $this = $(this);
+    var panoId = selectedPano.data("id");
+    var pageX = e.pageX;
+    var pageY = e.pageY;
+    var offset = $this.offset();
+    var width = $this.width();
+    var height = $this.height();
+
+    var percentX = 100 * (pageX - offset.left) / width;
+    var percentY = 100 * (pageY - offset.top) / height;
+
+    updateFloorPlanHotspot(panoId, percentX, percentY);
+
+    FLOOR_PLAN_HOTSPOT_STATE = 0;
+    $floorPlanHotspotPanoPreviews.removeClass("select-pano");
+    $floorPlanHotspotPanoPreviews.removeClass("selected-pano");
+  });
+
   $logCoordButton.click(function (e) {
     e.preventDefault();
 
@@ -214,6 +275,47 @@ $(document).ready(function () {
     $feedbacks.prepend($newFeedback);
     $feedbacks.prepend($("<hr>"));
   }
+
+  var updateFloorPlanHotspot = function(pano_id, percentX, percentY) {
+    var label = $unitFloorPlanLabels.filter(".label[data-id='" + pano_id + "']");
+    if (label.length <= 0) {
+      label = $('<div class="label" data-id="' + pano_id + '"><span>*Refresh*</span></div>')
+      $unitFloorPlanLabels.parent().append(label);
+    }
+
+    label.css("left", percentX + "%");
+    label.css("top", percentY + "%");
+
+    $.ajax({
+      type: "POST",
+      url: "/admin/floor_plan_hotspot/set",
+      data: {
+        pano_id: pano_id,
+        percent_x: percentX,
+        percent_y: percentY,
+      },
+      complete: function (xhr, status) {
+        if (xhr.status === 200) {
+          console.log("Floor Plan Hotspot Updated.");
+        }
+      },
+    });
+  };
+
+  var removeFloorPlanHotspot = function(pano_id) {
+    $unitFloorPlanLabels.filter(".label[data-id='" + pano_id + "']").remove();
+
+    $.ajax({
+      type: "POST",
+      url: "/admin/floor_plan_hotspot/remove",
+      data: { pano_id: pano_id },
+      complete: function (xhr, status) {
+        if (xhr.status === 200) {
+          console.log("Floor Plan Hotspot Removed.");
+        }
+      },
+    });
+  };
 
   var updateLinkHotspot = function(pano_id, dest_pano_id, yaw, pitch) {
     $.ajax({
@@ -394,7 +496,7 @@ $(document).ready(function () {
     }
   });
 
-  $unitFloorPlan.find(".label").click(function () {
+  $unitFloorPlanLabels.click(function () {
     var $this = $(this);
     var panoId = $this.data("id");
     switchToPanoId(panoId);

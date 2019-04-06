@@ -286,6 +286,10 @@ button.green, .button.green {
     background-color: #22d640;
 }
 
+button.red, .button.red {
+    background-color: #d62020;
+}
+
 @keyframes fadeInOpacity {
 	0% {
 		opacity: 0;
@@ -314,12 +318,12 @@ button.green, .button.green {
 	animation-duration: 1000ms;
 }
 
-#pano-previews {
+.pano-previews {
     margin-bottom: 15px;
     overflow: hidden;
 }
 
-#pano-previews .pano-preview {
+.pano-previews .pano-preview {
     position: relative;
     float: left;
     width: 100px;
@@ -332,25 +336,26 @@ button.green, .button.green {
     text-align: center;
 }
 
-#pano-previews .pano-preview:hover {
+.pano-previews .pano-preview:hover {
     border: 1px solid #000000;
     background-color: #555555;
 }
 
-#pano-previews .pano-preview.selected {
+.pano-previews .pano-preview.selected {
     border: 1px solid #000000;
     background-color: #555555;
 }
 
-#pano-previews .pano-preview.select-pano {
+.pano-previews .pano-preview.select-pano {
     background-color: #800080;
 }
 
-#pano-previews .pano-preview.select-pano:hover {
+.pano-previews .pano-preview.select-pano:hover,
+.pano-previews .pano-preview.selected-pano {
     background-color: #b300b2;
 }
 
-#pano-previews .pano-preview .name {
+.pano-previews .pano-preview .name {
     position: absolute;
     top: 50%;
     left: 50%;

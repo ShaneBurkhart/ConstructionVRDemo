@@ -118,6 +118,39 @@ post '/admin/linked_hotspot/set' do
   return { hotspot: hotspot }.to_json
 end
 
+post '/admin/floor_plan_hotspot/set' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  pano_id = params[:pano_id]
+  percentX = params[:percent_x]
+  percentY = params[:percent_y]
+
+  pano = Pano.find(pano_id)
+  return {} if pano.nil?
+
+  pano["Floor Plan Label X"] = percentX
+  pano["Floor Plan Label Y"] = percentY
+  pano.save
+
+  return { pano: pano }.to_json
+end
+
+post '/admin/floor_plan_hotspot/remove' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  pano_id = params[:pano_id]
+  pano = Pano.find(pano_id)
+  return {} if pano.nil?
+
+  pano["Floor Plan Label X"] = nil
+  pano["Floor Plan Label Y"] = nil
+  pano.save
+
+  return { pano: pano }.to_json
+end
+
 post '/admin/pano/initial_yaw/set' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
