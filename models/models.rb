@@ -1,6 +1,8 @@
 require "airrecord"
 require 'redcarpet'
 
+require "./models/db_models.rb"
+
 RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
 FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
 Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
@@ -162,6 +164,10 @@ class PanoVersion < Airrecord::Table
   belongs_to :unit_version, class: "UnitVersion", column: "Unit Version"
   has_many :feedbacks, class: "Feedback", column: "Feedback"
   has_one :pano, class: "Pano", column: "Pano"
+
+  def link_hotspots
+    DBModels::LinkHotspot.where(pano_version_id: self.id)
+  end
 end
 
 class UnitVersion < Airrecord::Table
@@ -201,7 +207,7 @@ class UnitVersion < Airrecord::Table
 
     return pano_versions.map do |pano_version|
       pano = pano_version.pano
-      link_hotspots = pano.link_hotspots.map{ |lh| lh.fields }
+      link_hotspots = pano_version.link_hotspots.map{ |lh| lh.as_json }
 
       fields = pano_version.fields
       # Match the pano ID for backwards compatibility

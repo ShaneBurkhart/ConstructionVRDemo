@@ -98,17 +98,28 @@ $(document).ready(function () {
 
     for (var key in linkHotspots) {
       var hotspot = linkHotspots[key];
-      var destinationRecordId = hotspot["Destination Pano"][0];
-      var destinationName = hotspot["Destination Pano Name"][0];
-      var $element = createLinkHotspotElement(destinationName, destinationRecordId);
+      var destinationPanoVersionId = hotspot["destination_pano_version_id"];
+      var destinationPanoId = null;
+      var destinationName = null;
+
+      for (var pano_id in _panos) {
+        var pv = _panos[pano_id];
+        if (pv.data["Record ID"] == destinationPanoVersionId) {
+          destinationPanoId = pano_id;
+          destinationName = pv.data["Pano Name"][0];
+          break;
+        }
+      }
+      if (!destinationPanoId) continue;
+      var $element = createLinkHotspotElement(destinationName, destinationPanoId);
 
       // This copies the variable so we can use it later without it changing.
       function addClickListener(destPanoId) {
         $element.click(function () { switchToPanoId(destPanoId); });
       }
 
-      addClickListener(destinationRecordId);
-      _currentPano.scene.hotspotContainer().createHotspot($element.get(0), { yaw: hotspot["Yaw"], pitch: hotspot["Pitch"] });
+      addClickListener(destinationPanoId);
+      _currentPano.scene.hotspotContainer().createHotspot($element.get(0), { yaw: hotspot["yaw"], pitch: hotspot["pitch"] });
     }
   }
 
@@ -321,12 +332,15 @@ $(document).ready(function () {
   };
 
   var updateLinkHotspot = function(pano_id, dest_pano_id, yaw, pitch) {
+    var pano_version_id = _panos[pano_id].data["Record ID"];
+    var dest_pano_version_id = _panos[dest_pano_id].data["Record ID"];
+
     $.ajax({
       type: "POST",
       url: "/admin/linked_hotspot/set",
       data: {
-        pano_id: pano_id,
-        dest_pano_id: dest_pano_id,
+        pano_version_id: pano_version_id,
+        dest_pano_version_id: dest_pano_version_id,
         yaw: yaw,
         pitch: pitch,
       },
