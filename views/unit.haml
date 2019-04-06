@@ -43,18 +43,18 @@
           %img{ src: unit["Floor Plan Image URL"] }
           - unit_pano_data.each do |pano|
             - if pano["Floor Plan Label X"]
-              .label{ data: { id: pano["Record ID"] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}
-                %span= pano["Name"]
+              .label{ data: { id: pano["Pano ID"][0] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}
+                %span= pano["Pano Name"].first
         %p * hover floor plan to show labels
-      - if is_admin_mode
+      - if is_admin_mode and is_tour
         %p
           %a.button.set-floor-plan-hotspot{ href: "#" } Set Floor Plan Hotspot
           %a.button.red.remove-floor-plan-hotspot{ href: "#" } Remove Floor Plan Hotspot
         #floor-plan-hotspot-pano-previews.pano-previews
           - unit_pano_data.each do |pano|
-            - next if pano["Name"].include? "Entry"
-            .pano-preview{ data: { id: pano["Record ID"] }}
-              .name= pano["Name"]
+            - next if pano["Pano Name"].first.include? "Entry"
+            .pano-preview{ data: { id: pano["Pano ID"][0] }}
+              .name= pano["Pano Name"].first
 
   - if !is_tour
     %p
@@ -100,8 +100,8 @@
           %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
       #pano-previews.pano-previews
         - unit_pano_data.each do |pano|
-          .pano-preview{ data: { id: pano["Record ID"] }}
-            .name= pano["Name"]
+          .pano-preview{ data: { id: pano["Pano ID"][0] }}
+            .name= pano["Pano Name"][0]
 
       - if is_admin_mode
         %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }

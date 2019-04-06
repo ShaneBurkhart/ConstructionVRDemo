@@ -122,49 +122,49 @@ post '/admin/floor_plan_hotspot/set' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
 
-  pano_id = params[:pano_id]
+  pano_version_id = params[:pano_version_id]
   percentX = params[:percent_x]
   percentY = params[:percent_y]
 
-  pano = Pano.find(pano_id)
-  return {} if pano.nil?
+  pano_version = PanoVersion.find(pano_version_id)
+  return {} if pano_version.nil?
 
-  pano["Floor Plan Label X"] = percentX
-  pano["Floor Plan Label Y"] = percentY
-  pano.save
+  pano_version["Floor Plan Label X"] = percentX
+  pano_version["Floor Plan Label Y"] = percentY
+  pano_version.save
 
-  return { pano: pano }.to_json
+  return { pano_version: pano_version }.to_json
 end
 
 post '/admin/floor_plan_hotspot/remove' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
 
-  pano_id = params[:pano_id]
-  pano = Pano.find(pano_id)
-  return {} if pano.nil?
+  pano_version_id = params[:pano_version_id]
+  pano_version = PanoVersion.find(pano_version_id)
+  return {} if pano_version.nil?
 
-  pano["Floor Plan Label X"] = nil
-  pano["Floor Plan Label Y"] = nil
-  pano.save
+  pano_version["Floor Plan Label X"] = nil
+  pano_version["Floor Plan Label Y"] = nil
+  pano_version.save
 
-  return { pano: pano }.to_json
+  return { pano_version: pano_version }.to_json
 end
 
 post '/admin/pano/initial_yaw/set' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
 
-  pano_id = params[:pano_id]
+  pano_version_id = params[:pano_version_id]
   yaw = params[:yaw]
 
-  pano = Pano.find(pano_id)
-  return "Not found" if pano.nil?
+  pano_version = PanoVersion.find(pano_version_id)
+  return "Not found" if pano_version.nil?
 
-  pano["Initial Yaw"] = yaw
-  pano.save
+  pano_version["Initial Yaw"] = yaw
+  pano_version.save
 
-  return { pano: pano }.to_json
+  return { pano_version: pano_version }.to_json
 end
 
 get '/project/:access_token' do
@@ -316,7 +316,7 @@ get '/project/:access_token/unit/:id' do
     selected_version: version,
     unit_versions: unit.versions,
     feedbacks: feedbacks,
-    unit_pano_data: unit.pano_data(version),
+    unit_pano_data: version.pano_data,
     access_token: access_token,
     is_tour: is_tour,
     is_debug_mode: is_debug_mode,

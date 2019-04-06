@@ -71,7 +71,7 @@ $(document).ready(function () {
     for (var key in _panoData) {
       var data = _panoData[key];
       var source = Marzipano.ImageUrlSource.fromString(data["Image URL"]);
-      var recordId = data["Record ID"];
+      var recordId = data["Pano ID"][0];
 
       _panos[recordId] = {
         data: data,
@@ -120,7 +120,7 @@ $(document).ready(function () {
       var panoId = $this.data("id");
 
       if ($this.hasClass("selected")) $this.removeClass("selected");
-      if (panoId == panoData["Record ID"]) $this.addClass("selected");
+      if (panoId == panoData["Pano ID"][0]) $this.addClass("selected");
     });
   }
 
@@ -128,7 +128,7 @@ $(document).ready(function () {
   if (panoElement) {
     initViewer();
     // Show first pano
-    switchToPanoId(_panoData[0]["Record ID"]);
+    switchToPanoId(_panoData[0]["Pano ID"][0]);
   }
 
   $virtualTourToggleButton.click(function (e) {
@@ -252,7 +252,7 @@ $(document).ready(function () {
     var viewParams = view.parameters();
     var yaw = viewParams["yaw"];
 
-    updateInitialYaw(_currentPano.data["Record ID"], yaw);
+    updateInitialYaw(_currentPano.data["Pano ID"][0], yaw);
   });
 
   function addFeedbackToList(feedback, panoName) {
@@ -278,6 +278,8 @@ $(document).ready(function () {
 
   var updateFloorPlanHotspot = function(pano_id, percentX, percentY) {
     var label = $unitFloorPlanLabels.filter(".label[data-id='" + pano_id + "']");
+    var pano_version_id = _panos[pano_id].data["Record ID"];
+
     if (label.length <= 0) {
       label = $('<div class="label" data-id="' + pano_id + '"><span>*Refresh*</span></div>')
       $unitFloorPlanLabels.parent().append(label);
@@ -290,7 +292,7 @@ $(document).ready(function () {
       type: "POST",
       url: "/admin/floor_plan_hotspot/set",
       data: {
-        pano_id: pano_id,
+        pano_version_id: pano_version_id,
         percent_x: percentX,
         percent_y: percentY,
       },
@@ -304,11 +306,12 @@ $(document).ready(function () {
 
   var removeFloorPlanHotspot = function(pano_id) {
     $unitFloorPlanLabels.filter(".label[data-id='" + pano_id + "']").remove();
+    var pano_version_id = _panos[pano_id].data["Record ID"];
 
     $.ajax({
       type: "POST",
       url: "/admin/floor_plan_hotspot/remove",
-      data: { pano_id: pano_id },
+      data: { pano_version_id: pano_version_id },
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           console.log("Floor Plan Hotspot Removed.");
@@ -336,10 +339,12 @@ $(document).ready(function () {
   };
 
   var updateInitialYaw = function(pano_id, yaw) {
+    var pano_version_id = _panos[pano_id].data["Record ID"];
+
     $.ajax({
       type: "POST",
       url: "/admin/pano/initial_yaw/set",
-      data: { pano_id: pano_id, yaw: yaw },
+      data: { pano_version_id: pano_version_id, yaw: yaw },
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           console.log("Initial Yaw Updated.");
@@ -360,8 +365,8 @@ $(document).ready(function () {
     $fullscreenSubmitFeedback.text("Submitting...");
     $submitFeedback.text("Submitting...");
 
-    var panoId = _currentPano.data["Record ID"];
-    var panoName = _currentPano.data["Name"];
+    var panoId = _currentPano.data["Pano ID"][0];
+    var panoName = _currentPano.data["Pano Name"][0];
 
     var jpegBase64 = viewer.stage().takeSnapshot();
     var jpegData = dataURItoBlob(jpegBase64);
@@ -483,7 +488,7 @@ $(document).ready(function () {
     var destPanoId = $this.data("id");
 
     if (IS_PICKING_LINK_HOTSPOT) {
-      var currentPanoId = _currentPano.data["Record ID"];
+      var currentPanoId = _currentPano.data["Pano ID"][0];
       var yaw = $setLinkHotspotButton.attr('data-yaw');
       var pitch = $setLinkHotspotButton.attr('data-pitch');
 
