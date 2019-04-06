@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 
 gem 'sinatra'
+gem 'pg'
+gem 'activerecord'
+gem 'standalone_migrations'
 gem 'pug'
 gem 'haml'
 gem 'redcarpet'

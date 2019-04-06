@@ -1,4 +1,5 @@
 require "sinatra"
+require "active_record"
 require "haml"
 require "redis-store"
 require 'redis-rack'
@@ -6,6 +7,11 @@ require 'redcarpet'
 require 'json'
 
 require './models/models.rb'
+require './models/db_models.rb'
+
+db_file = File.join(File.expand_path('..', __FILE__), 'db', 'config.yml')
+db_config = YAML.load(File.read(db_file))
+ActiveRecord::Base.establish_connection(db_config["development"])
 
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
