@@ -12,6 +12,9 @@ build:
 c:
 	docker-compose -p ${NAME} run --rm web /bin/bash
 
+db_models:
+	docker-compose -p ${NAME} run --rm web irb -r ./models/db_models.rb
+
 clean:
 	docker-compose -p ${NAME} down || true
 	docker-compose -p ${NAME} rm -f || true

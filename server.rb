@@ -9,10 +9,6 @@ require 'json'
 require './models/models.rb'
 require './models/db_models.rb'
 
-db_file = File.join(File.expand_path('..', __FILE__), 'db', 'config.yml')
-db_config = YAML.load(File.read(db_file))
-ActiveRecord::Base.establish_connection(db_config["development"])
-
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
 # docker needs stdout to sync to get logs.
@@ -105,23 +101,33 @@ post '/admin/linked_hotspot/set' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?
 
-  pano_id = params[:pano_id]
-  dest_pano_id = params[:dest_pano_id]
+  pano_version_id = params[:pano_version_id]
+  dest_pano_version_id = params[:dest_pano_version_id]
   yaw = params[:yaw]
   pitch = params[:pitch]
 
-  hotspot = LinkHotspots.all(filter: "AND({Pano} = '#{pano_id}', {Destination Pano} = '#{dest_pano_id}')").first
+  hotspot = DBModels::LinkHotspot.where(
+    pano_version_id: pano_version_id,
+    destination_pano_version_id: dest_pano_version_id
+  ).first
 
   if hotspot.nil?
-    hotspot = LinkHotspots.new("Pano" => [pano_id], "Destination Pano" => [dest_pano_id], "Yaw" => yaw, "Pitch" => pitch)
-    hotspot.create
+    hotspot = DBModels::LinkHotspot.new(
+      pano_version_id: pano_version_id,
+      destination_pano_version_id: dest_pano_version_id,
+      yaw: yaw,
+      pitch: pitch
+    )
   else
-    hotspot["Yaw"] = yaw
-    hotspot["Pitch"] = pitch
-    hotspot.save
+    hotspot.yaw = yaw
+    hotspot.pitch = pitch
   end
 
-  return { hotspot: hotspot }.to_json
+  if hotspot.save
+    return { hotspot: hotspot }.to_json
+  else
+    return {}
+  end
 end
 
 post '/admin/floor_plan_hotspot/set' do
