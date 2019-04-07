@@ -11,7 +11,7 @@ build:
 	 docker build -t ${IMAGE_TAG} -f Dockerfile .
 
 db:
-	docker-compose -p ${NAME} run --rm web rake db:migrate
+	docker-compose -p ${NAME} run --rm web_prod rake db:migrate
 
 c:
 	docker-compose -p ${NAME} run --rm web /bin/bash
