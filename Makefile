@@ -33,6 +33,8 @@ prod:
 	git checkout master
 	git pull origin master
 	$(MAKE) build
+	$(MAKE) clean
+	$(MAKE) run
 	$(MAKE) db
 	$(MAKE) run
 
