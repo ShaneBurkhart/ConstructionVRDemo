@@ -18,8 +18,6 @@ web_prod:
     links:
         - pg
         - redis
-    volumes:
-        - .:/app
     env_file:
         - user.env
     command: "ruby server.rb"
