@@ -140,14 +140,6 @@ class Pano < Airrecord::Table
 
     return @unit
   end
-
-  def link_hotspots
-    if @link_hotspots.nil?
-      @link_hotspots = LinkHotspots.all(filter: "(FIND(\"#{self.id}\", {Pano ID}))")
-    end
-
-    return @link_hotspots
-  end
 end
 
 class ScreenshotVersion < Airrecord::Table
@@ -241,11 +233,6 @@ class FeedbackPermalink < Airrecord::Table
 
     return @project
   end
-end
-
-class LinkHotspots < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Link Hotspots"
 end
 
 class ProcurementForm < Airrecord::Table
