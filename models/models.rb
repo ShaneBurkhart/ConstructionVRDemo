@@ -106,6 +106,25 @@ class Unit < Airrecord::Table
     return @versions
   end
 
+  def latest_has_errors?
+    return false if self["Versions"].length == 0
+    current_version = self.versions.first
+    errors = current_version["Errors"]
+    return !errors.nil? && errors.length > 0
+  end
+
+  def total_feedbacks
+    self["Total Feedback Count"]
+  end
+
+  def total_completed_feedbacks
+    self["Completed Feedback Count"]
+  end
+
+  def total_feedbacks_to_complete
+    self["TODO Feedback Count"]
+  end
+
   def pano_data(version)
     panos = self.panos
     current_version_panos = []
@@ -183,11 +202,11 @@ class UnitVersion < Airrecord::Table
   end
 
   def total_to_complete
-    self.feedbacks.reduce(0) { |m,o| next o["Is Fix"] ? m + 1 : m }
+    self["Total Feedback Count"]
   end
 
   def total_completed
-    self.feedbacks.reduce(0) { |m,o| next o["Is Fix"] && !o["Fixed At"].nil? ? m + 1 : m }
+    self["Completed Feedback Count"]
   end
 
   def feedbacks
