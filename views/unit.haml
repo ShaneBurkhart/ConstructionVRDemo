@@ -98,6 +98,7 @@
       - if is_admin_mode
         %p
           %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
+          %a.button.red.remove-link-hotspot{ href: "#" } Remove Link Hotspot
       #pano-previews.pano-previews
         - unit_pano_data.each do |pano|
           .pano-preview{ data: { id: pano["Pano ID"][0] }}

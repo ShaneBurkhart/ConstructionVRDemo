@@ -130,6 +130,23 @@ post '/admin/linked_hotspot/set' do
   end
 end
 
+post '/admin/linked_hotspot/remove' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  pano_version_id = params[:pano_version_id]
+  dest_pano_version_id = params[:dest_pano_version_id]
+
+  hotspots = DBModels::LinkHotspot.where(
+    pano_version_id: pano_version_id,
+    destination_pano_version_id: dest_pano_version_id
+  )
+
+  hotspots.destroy_all unless hotspots.nil?
+
+  return {}
+end
+
 post '/admin/floor_plan_hotspot/set' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?

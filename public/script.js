@@ -5,6 +5,7 @@ $(document).ready(function () {
   var $removeFloorPlanHotspotButton = $(".remove-floor-plan-hotspot");
   var $floorPlanHotspotPanoPreviews = $('#floor-plan-hotspot-pano-previews .pano-preview');
   var $setLinkHotspotButton = $(".set-link-hotspot");
+  var $removeLinkHotspotButton = $(".remove-link-hotspot");
   var $setInitialYawButton = $(".set-initial-yaw");
   var panoElement = document.getElementById('pano-window');
   var $panoElement = $('#pano-window');
@@ -26,7 +27,8 @@ $(document).ready(function () {
   var $virtualTourToggleButton = $(".virtual-tour-toggle");
   var $virtualTourSection = $("#virtual-tour");
 
-  var IS_PICKING_LINK_HOTSPOT = false;
+  // 0 = Nothing, 1 = Set, 2 = Remove
+  var LINK_HOTSPOT_STATE = 0;
   // 0 = Nothing, 1 = Set, 2 = Remove
   var FLOOR_PLAN_HOTSPOT_STATE = 0;
 
@@ -253,7 +255,14 @@ $(document).ready(function () {
     $setLinkHotspotButton.attr('data-yaw', yaw);
     $setLinkHotspotButton.attr('data-pitch', pitch);
 
-    IS_PICKING_LINK_HOTSPOT = true;
+    LINK_HOTSPOT_STATE = 1;
+    $panoPreviews.addClass('select-pano');
+  });
+
+  $removeLinkHotspotButton.click(function (e) {
+    e.preventDefault();
+
+    LINK_HOTSPOT_STATE = 2;
     $panoPreviews.addClass('select-pano');
   });
 
@@ -347,6 +356,25 @@ $(document).ready(function () {
       complete: function (xhr, status) {
         if (xhr.status === 200) {
           console.log("Hotspot Updated.");
+        }
+      },
+    });
+  };
+
+  var removeLinkHotspot = function(pano_id, dest_pano_id) {
+    var pano_version_id = _panos[pano_id].data["Record ID"];
+    var dest_pano_version_id = _panos[dest_pano_id].data["Record ID"];
+
+    $.ajax({
+      type: "POST",
+      url: "/admin/linked_hotspot/remove",
+      data: {
+        pano_version_id: pano_version_id,
+        dest_pano_version_id: dest_pano_version_id,
+      },
+      complete: function (xhr, status) {
+        if (xhr.status === 200) {
+          console.log("Hotspot Removed.");
         }
       },
     });
@@ -501,7 +529,7 @@ $(document).ready(function () {
     var $this = $(this);
     var destPanoId = $this.data("id");
 
-    if (IS_PICKING_LINK_HOTSPOT) {
+    if (LINK_HOTSPOT_STATE == 1) {
       var currentPanoId = _currentPano.data["Pano ID"][0];
       var yaw = $setLinkHotspotButton.attr('data-yaw');
       var pitch = $setLinkHotspotButton.attr('data-pitch');
@@ -509,7 +537,15 @@ $(document).ready(function () {
       updateLinkHotspot(currentPanoId, destPanoId, yaw, pitch);
 
       $panoPreviews.removeClass('select-pano');
-      IS_PICKING_LINK_HOTSPOT = false;
+      LINK_HOTSPOT_STATE = 0;
+    } else if (LINK_HOTSPOT_STATE == 2) {
+      var currentPanoId = _currentPano.data["Pano ID"][0];
+
+      // Remove hotspot
+      removeLinkHotspot(currentPanoId, destPanoId);
+
+      $panoPreviews.removeClass('select-pano');
+      LINK_HOTSPOT_STATE = 0;
     } else {
       switchToPanoId(destPanoId);
     }
