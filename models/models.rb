@@ -124,28 +124,6 @@ class Unit < Airrecord::Table
   def total_feedbacks_to_complete
     self["TODO Feedback Count"]
   end
-
-  def pano_data(version)
-    panos = self.panos
-    current_version_panos = []
-
-    if !version.nil?
-      current_version = version
-      current_version_panos = current_version.pano_versions
-    end
-
-    return panos.map do |pano|
-      pano_version = current_version_panos.find { |p| p["Pano"][0] == pano.id }
-      fields = pano.fields
-      link_hotspots = pano.link_hotspots.map{ |lh| lh.fields }
-
-      # Backwards compatibility
-      pano["Image URL"] = pano_version["Image URL"] unless pano_version.nil?
-
-      fields["link_hotspots"] = link_hotspots
-      next fields
-    end
-  end
 end
 
 class Pano < Airrecord::Table
@@ -214,7 +192,7 @@ class UnitVersion < Airrecord::Table
   end
 
   def pano_data
-    pano_versions = self.pano_versions
+    pano_versions = self.pano_versions.sort_by { |p| p["Order Priority"] }
 
     return pano_versions.map do |pano_version|
       pano = pano_version.pano
