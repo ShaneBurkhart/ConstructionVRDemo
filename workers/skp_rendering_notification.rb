@@ -56,7 +56,7 @@ loop do
     send_slack_message_to_rendering_channel(slack_message)
 
     magic_message = create_update_hotspots_notification_to_magic_team(unit_version)
-    send_slack_message_to_magic_channel(magic_message)
+    #send_slack_message_to_magic_channel(magic_message)
 
     unit_version["Notified At"] = Time.now
     unit_version.save
