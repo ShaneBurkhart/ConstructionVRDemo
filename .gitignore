@@ -2,3 +2,5 @@ user.env
 .DS_Store
 output/
 data/
+**.zip
+node_modules/

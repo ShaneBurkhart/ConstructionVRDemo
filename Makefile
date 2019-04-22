@@ -29,6 +29,9 @@ ps:
 logs:
 	docker-compose -p ${NAME} logs -f
 
+rerun_photos:
+	docker-compose -p ${NAME} run --rm web_prod /app/scripts/rerun-photos.rb
+
 prod:
 	git checkout master
 	git pull origin master
