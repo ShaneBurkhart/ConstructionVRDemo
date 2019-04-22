@@ -31,13 +31,16 @@ var putS3Object = function (bucket, key, buffer, contentType, callback) {
     Body: buffer,
     ContentType: contentType,
     ACL: 'public-read',
+    Metadata: {
+      'Cache-Control': 'max-age=31536000',
+    },
   }, callback);
 };
 
 var createResizeTask = function (bucket, key, destKey, extension, photoSize) {
   return function (resizeCallback) {
     async.waterfall([
-      function download(next) {
+      function download(response, next) {
         // Download the image from S3 into a buffer.
         getS3Object(bucket, key, next);
       },
@@ -92,6 +95,28 @@ var createResizeTask = function (bucket, key, destKey, extension, photoSize) {
   };
 };
 
+var updateImageMetadata = function(bucket, key, callback) {
+  var contentType;
+
+  if (key.endsWith(".jpg")) {
+    contentType = "image/jpeg";
+  } else if(key.endsWith(".png")) {
+    contentType = "image/png";
+  }
+
+  // Change the Metadata for Cache-Control.
+  s3.copyObject({
+    CopySource: "/" + bucket + "/" + key,
+    Bucket: bucket,
+    Key: key,
+    ACL: 'public-read',
+    ContentType: contentType,
+    CacheControl: 'max-age=31536000',
+    MetadataDirective: "REPLACE",
+    Metadata: { },
+  }, callback);
+};
+
 exports.handler = function (event, context, callback) {
   var bucket = event.Records[0].s3.bucket.name;
   var key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
@@ -116,16 +141,19 @@ exports.handler = function (event, context, callback) {
 
   if (originalDir === "panos") photoSizes = PANO_SIZES;
 
-  for (var i = 0; i < photoSizes.length; i++) {
-    var photoSize = photoSizes[i];
-    keyParts.splice(0, 1, originalDir + "-" + photoSize.name);
+  // Update metadata of original before resizing everything.
+  updateImageMetadata(bucket, key, function () {
+    for (var i = 0; i < photoSizes.length; i++) {
+      var photoSize = photoSizes[i];
+      keyParts.splice(0, 1, originalDir + "-" + photoSize.name);
 
-    var destKey = keyParts.join("/");
-    tasks.push(createResizeTask(bucket, key, destKey, ext, photoSize));
-  }
+      var destKey = keyParts.join("/");
+      tasks.push(createResizeTask(bucket, key, destKey, ext, photoSize));
+    }
 
-  async.series(tasks, function (err) {
-    if (err) context.done(err);
-    context.done();
+    async.series(tasks, function (err) {
+      if (err) context.done(err);
+      context.done();
+    });
   });
 }
