@@ -64,7 +64,7 @@
       %h2 Interior Renderings
       - selected_version.screenshot_versions.each do |sv|
         %p
-          %img{ src: sv["Image URL"] }
+          %img{ src: sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/") }
 
   - else
     - if selected_version.screenshot_versions.length > 0
