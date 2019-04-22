@@ -59,8 +59,19 @@ $(document).ready(function () {
     viewer = new Marzipano.Viewer(panoElement, viewerOpts)
 
     var levels = [
+      { width: 512 },
       { width: 4096 },
     ];
+
+    var createSource = function(imageUrl) {
+      return new Marzipano.ImageUrlSource(function (tile) {
+        if (tile.z === 0) {
+          return { url: imageUrl.replace("\/panos\/", "\/panos-tiny\/") };
+        } else {
+          return { url: imageUrl };
+        }
+      });
+    };
 
     var geometry = new Marzipano.EquirectGeometry(levels);
     var limiter = Marzipano.util.compose(
@@ -72,8 +83,8 @@ $(document).ready(function () {
 
     for (var key in _panoData) {
       var data = _panoData[key];
-      var source = Marzipano.ImageUrlSource.fromString(data["Image URL"]);
       var recordId = data["Pano ID"][0];
+      var source = createSource(data["Image URL"]);
 
       _panos[recordId] = {
         data: data,

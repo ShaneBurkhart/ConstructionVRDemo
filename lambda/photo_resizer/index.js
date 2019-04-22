@@ -10,8 +10,9 @@ var s3 = new AWS.S3();
 // All images are
 var VALID_EXT = ['png', 'jpg', 'jpeg', 'tiff', 'gif'];
 var PANO_SIZES = [
-  { name: 'medium', max_width: 1024, max_height: 512 },
-  { name: 'small', max_width: 2048, max_height: 1024 },
+  { name: 'tiny', max_width: 512, max_height: 256 },
+  { name: 'small', max_width: 1024, max_height: 512 },
+  { name: 'medium', max_width: 2048, max_height: 1024 },
 ];
 var PHOTO_SIZES = [
   { name: 'large', max_width: 1280, max_height: 720 },
@@ -40,7 +41,7 @@ var putS3Object = function (bucket, key, buffer, contentType, callback) {
 var createResizeTask = function (bucket, key, destKey, extension, photoSize) {
   return function (resizeCallback) {
     async.waterfall([
-      function download(response, next) {
+      function download(next) {
         // Download the image from S3 into a buffer.
         getS3Object(bucket, key, next);
       },
@@ -95,26 +96,27 @@ var createResizeTask = function (bucket, key, destKey, extension, photoSize) {
   };
 };
 
-var updateImageMetadata = function(bucket, key, callback) {
-  var contentType;
+var createUpdateImageMetadataTask = function(bucket, key) {
+  return function(callback) {
+    var contentType;
 
-  if (key.endsWith(".jpg")) {
-    contentType = "image/jpeg";
-  } else if(key.endsWith(".png")) {
-    contentType = "image/png";
-  }
+    if (key.endsWith(".jpg")) {
+      contentType = "image/jpeg";
+    } else if(key.endsWith(".png")) {
+      contentType = "image/png";
+    }
 
-  // Change the Metadata for Cache-Control.
-  s3.copyObject({
-    CopySource: "/" + bucket + "/" + key,
-    Bucket: bucket,
-    Key: key,
-    ACL: 'public-read',
-    ContentType: contentType,
-    CacheControl: 'max-age=31536000',
-    MetadataDirective: "REPLACE",
-    Metadata: { },
-  }, callback);
+    // Change the Metadata for Cache-Control.
+    s3.copyObject({
+      CopySource: "/" + bucket + "/" + key,
+      Bucket: bucket,
+      Key: key,
+      ACL: 'public-read',
+      ContentType: contentType,
+      CacheControl: 'max-age=31536000',
+      MetadataDirective: "REPLACE",
+    }, callback);
+  };
 };
 
 exports.handler = function (event, context, callback) {
@@ -142,18 +144,15 @@ exports.handler = function (event, context, callback) {
   if (originalDir === "panos") photoSizes = PANO_SIZES;
 
   // Update metadata of original before resizing everything.
-  updateImageMetadata(bucket, key, function () {
-    for (var i = 0; i < photoSizes.length; i++) {
-      var photoSize = photoSizes[i];
-      keyParts.splice(0, 1, originalDir + "-" + photoSize.name);
+  tasks.push(createUpdateImageMetadataTask(bucket, key));
 
-      var destKey = keyParts.join("/");
-      tasks.push(createResizeTask(bucket, key, destKey, ext, photoSize));
-    }
+  for (var i = 0; i < photoSizes.length; i++) {
+    var photoSize = photoSizes[i];
+    keyParts.splice(0, 1, originalDir + "-" + photoSize.name);
 
-    async.series(tasks, function (err) {
-      if (err) context.done(err);
-      context.done();
-    });
-  });
+    var destKey = keyParts.join("/");
+    tasks.push(createResizeTask(bucket, key, destKey, ext, photoSize));
+  }
+
+  async.series(tasks, callback);
 }
