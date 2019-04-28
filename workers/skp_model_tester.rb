@@ -1,4 +1,5 @@
 require 'open-uri'
+require "airrecord"
 
 require "./util/slack.rb"
 require "./models/models.rb"
@@ -84,26 +85,31 @@ def create_unit_version_success_notification_message(unit_version)
 end
 
 loop do
-  unit_versions = UnitVersion.all(view: "To Test")
+  begin
+    unit_versions = UnitVersion.all(view: "To Test")
 
-  unit_versions.each do |unit_version|
-    model_data = check_unit_version_model(unit_version)
-    errors = model_data[:errors]
-    screenshots = model_data[:scenes].select { |s| s[:name].include? "Enscape View" }
-    screenshot_count = screenshots.nil? ? 0 : screenshots.length
+    unit_versions.each do |unit_version|
+      model_data = check_unit_version_model(unit_version)
+      errors = model_data[:errors]
+      screenshots = model_data[:scenes].select { |s| s[:name].include? "Enscape View" }
+      screenshot_count = screenshots.nil? ? 0 : screenshots.length
 
-    if errors.length > 0
-      unit_version["Errors"] = errors.join("\n")
-      slack_message = create_unit_version_error_notification_message(unit_version)
-      send_slack_message_to_rendering_channel(slack_message)
-    else
-      slack_message = create_unit_version_success_notification_message(unit_version)
-      send_slack_message_to_rendering_channel(slack_message)
+      if errors.length > 0
+        unit_version["Errors"] = errors.join("\n")
+        slack_message = create_unit_version_error_notification_message(unit_version)
+        send_slack_message_to_rendering_channel(slack_message)
+      else
+        slack_message = create_unit_version_success_notification_message(unit_version)
+        send_slack_message_to_rendering_channel(slack_message)
+      end
+
+      unit_version["Screenshot Count"] = screenshot_count
+      unit_version["Tested At"] = Time.now
+      unit_version.save
     end
-
-    unit_version["Screenshot Count"] = screenshot_count
-    unit_version["Tested At"] = Time.now
-    unit_version.save
+  rescue Airrecord::Error => e
+    puts "Ooopps! There was an Airtables error.  Waiting a bit, then trying again."
+    puts e
   end
 
   sleep 60
