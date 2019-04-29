@@ -15,9 +15,10 @@ $(document).ready(function () {
   var $fullscreenSubmitFeedback = $("#fullscreen-feedback-submit");
   var $fullscreenFeedbackInput = $("#fullscreen-feedback-input");
   var $feedbackInput = $("#feedback-input");
-  var $feedbackInput = $("#feedback-input");
+  var $showScreenshotFeedback = $(".show-give-feedback");
   var $feedbackIsFixInput = $("#feedback-is-fix");
   var $submitFeedback = $("#feedback-submit");
+  var $screenshotFeedbackSubmit = $(".screenshot-feedback-submit");
   var $feedbacks = $("#feedbacks");
   var $unitFloorPlan = $("#unit-floor-plan img");
   var $unitFloorPlanLabels = $("#unit-floor-plan .label");
@@ -154,6 +155,13 @@ $(document).ready(function () {
     // Show first pano
     switchToPanoId(_panoData[0]["Pano ID"][0]);
   }
+
+  $showScreenshotFeedback.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $inputContainer = $this.parent().find(".feedback-input");
+    $inputContainer.toggle();
+  });
 
   $virtualTourToggleButton.click(function (e) {
     e.preventDefault();
@@ -405,6 +413,31 @@ $(document).ready(function () {
       },
     });
   };
+
+  $screenshotFeedbackSubmit.click(function (e) {
+    e.preventDefault();
+    var $this = $(this);
+    var $container = $this.parent();
+    var $textarea = $container.find("textarea");
+
+    var data = {
+      unitVersionId: $container.data("unit-version-id"),
+      imageURL: $container.data("image-url"),
+      notes: $textarea.val(),
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/project/" + _accessToken + "/screenshot/feedback",
+      data: data,
+      complete: function (res, resStatus) {
+        if (resStatus === "error") alert("There was an error when submitting.");
+      },
+    });
+
+    $textarea.val("");
+    $container.hide();
+  });
 
   var isRequesting = false;
   var submitFeedback = function (feedbackText) {

@@ -399,6 +399,38 @@ post '/project/:access_token/feedback_feed/:id/update' do
   return fields.to_json
 end
 
+post '/project/:access_token/screenshot/feedback' do
+  is_admin = !!session[:is_admin]
+  return "Not found" if is_admin.nil?
+
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  unit_version_id = params["unitVersionId"]
+  image_url = params["imageURL"]
+  notes = params["notes"]
+
+  unit_version = UnitVersion.find(unit_version_id)
+  return "Not found" if unit_version.nil? or !unit_version.unit.belongs_to_project?(project)
+  return "Not found" if unit_version["Pano Versions"].length < 1
+
+  feedback = Feedback.new(
+    "Pano Version" => [unit_version["Pano Versions"].first],
+    "Notes" => notes,
+    "Is Fix" => true,
+    "Screenshot" => [{ url: image_url }],
+  )
+
+  feedback.create
+
+  fields = feedback.fields
+  fields["Notes HTML"] = feedback.notes_html
+
+  content_type :json
+  return fields.to_json
+end
+
 post '/project/:access_token/pano/:id/feedback' do
   is_admin = !!session[:is_admin]
   return "Not found" if is_admin.nil?

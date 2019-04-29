@@ -207,6 +207,8 @@ textarea {
     opacity: 1;
 }
 
+.screenshot { margin-bottom: 20px; }
+
 #pano-window {
     width: 100%;
     padding-bottom: 50%;

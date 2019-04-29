@@ -1,5 +1,5 @@
 %script(src="/underscore.js")
-%script(src="/script.js?v=190422")
+%script(src="/script.js?v=190429")
 
 .large-container
   %p
@@ -63,8 +63,15 @@
     #screenshots
       %h2 Interior Renderings
       - selected_version.screenshot_versions.each do |sv|
-        %p
-          %img{ src: sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/") }
+        .screenshot
+          - imgSrc = sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/")
+          %img{ src: imgSrc }
+          - if is_admin_mode
+            %a.show-give-feedback{ href: "#" } + Give Feedback
+            .feedback-input{ style: "display: none;", data: { unit_version_id: sv["Unit Version"][0], image_url: imgSrc } }
+              %textarea{ name: "notes", placeholder: "Enter your feedback here..." }
+              %br
+              %button.screenshot-feedback-submit Submit Feedback
 
   - else
     - if selected_version.screenshot_versions.length > 0
