@@ -413,7 +413,7 @@ post '/project/:access_token/screenshot/feedback' do
 
   unit_version = UnitVersion.find(unit_version_id)
   return "Not found" if unit_version.nil? or !unit_version.unit.belongs_to_project?(project)
-  return "Not found" if unit_version["Pano Versions"].length < 1
+  return "Not found" if unit_version["Pano Versions"].nil? or unit_version["Pano Versions"].length < 1
 
   feedback = Feedback.new(
     "Pano Version" => [unit_version["Pano Versions"].first],
