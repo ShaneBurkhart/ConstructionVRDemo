@@ -94,6 +94,16 @@ loop do
       screenshots = model_data[:scenes].select { |s| s[:name].include? "Enscape View" }
       screenshot_count = screenshots.nil? ? 0 : screenshots.length
 
+      # Include default setting no matter what.
+      rendering_settings_codes = ["FV000"]
+      rendering_settings_codes = screenshots.reduce(rendering_settings_codes) do |memo, s|
+        result = /[fF][vV]\d{3}/.match(s[:name])
+        # We will use default if no settings are provided.  Default is already added.
+        next if result.nil?
+        memo << result[0]
+        next memo
+      end
+
       if errors.length > 0
         unit_version["Errors"] = errors.join("\n")
         slack_message = create_unit_version_error_notification_message(unit_version)
@@ -105,6 +115,7 @@ loop do
 
       unit_version["Screenshot Count"] = screenshot_count
       unit_version["Tested At"] = Time.now
+      unit_version["Rendering Settings"] = rendering_settings_codes
       unit_version.save
     end
   rescue Airrecord::Error => e
