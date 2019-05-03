@@ -87,6 +87,7 @@ end
 loop do
   begin
     unit_versions = UnitVersion.all(view: "To Test")
+    available_rendering_settings = RenderingSetting.all(view: "Available")
 
     unit_versions.each do |unit_version|
       model_data = check_unit_version_model(unit_version)
@@ -94,14 +95,16 @@ loop do
       screenshots = model_data[:scenes].select { |s| s[:name].include? "Enscape View" }
       screenshot_count = screenshots.nil? ? 0 : screenshots.length
 
-      # Include default setting no matter what.
-      rendering_settings_codes = ["FV000"]
+      # Include default setting no matter what.  The Record ID is for FV000.
+      rendering_settings_codes = ["rec1OLozwPCO6FhRj"]
       if !screenshots.nil?
         screenshots.each do |s|
           result = /[fF][vV]\d{3}/.match(s[:name])
           # We will use default if no settings are provided.  Default is already added.
           next if result.nil?
-          rendering_settings_codes << result[0]
+          r = available_rendering_settings.find { |t| t["Name"] === result[0] }
+          next if setting.nil?
+          rendering_settings_codes << r.id
         end
       end
 

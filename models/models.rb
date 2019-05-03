@@ -243,3 +243,9 @@ class ProcurementForm < Airrecord::Table
     return records.first
   end
 end
+
+class RenderingSetting < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Rendering Settings"
+end
+
