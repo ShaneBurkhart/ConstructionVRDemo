@@ -96,11 +96,13 @@ loop do
 
       # Include default setting no matter what.
       rendering_settings_codes = ["FV000"]
-      screenshots.each do |s|
-        result = /[fF][vV]\d{3}/.match(s[:name])
-        # We will use default if no settings are provided.  Default is already added.
-        next if result.nil?
-        rendering_settings_codes << result[0]
+      if !screenshots.nil?
+        screenshots.each do |s|
+          result = /[fF][vV]\d{3}/.match(s[:name])
+          # We will use default if no settings are provided.  Default is already added.
+          next if result.nil?
+          rendering_settings_codes << result[0]
+        end
       end
 
       if errors.length > 0
