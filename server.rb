@@ -43,6 +43,39 @@ get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   }
 end
 
+get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard' do
+  is_admin = !!session[:is_admin]
+  return "Not found" unless is_admin
+
+  haml :rendering_dashboard, locals: {
+    unit_versions: UnitVersion.all(sort: { "Created At": "desc" }, max_records: 30),
+    unit_versions_to_render: UnitVersion.all(view: "To Render"),
+  }
+end
+
+get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
+  is_admin = !!session[:is_admin]
+  return "Not found" unless is_admin
+  unit_version_id = params[:uv_id] || ""
+  prefix = params[:p] || ""
+
+  if !["Floor Plans", "Screenshots", "Panos"].include? prefix
+    return redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+  end
+
+  unit_version = UnitVersion.find(unit_version_id)
+  if unit_version.nil?
+    return redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+  end
+
+  unit_version["#{prefix} Started At"] = nil
+  unit_version["#{prefix} Finished At"] = nil
+  unit_version["Notified At"] = nil
+  unit_version.save
+
+  redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+end
+
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.
@@ -99,7 +132,7 @@ end
 
 post '/admin/linked_hotspot/set' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   pano_version_id = params[:pano_version_id]
   dest_pano_version_id = params[:dest_pano_version_id]
@@ -132,7 +165,7 @@ end
 
 post '/admin/linked_hotspot/remove' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   pano_version_id = params[:pano_version_id]
   dest_pano_version_id = params[:dest_pano_version_id]
@@ -149,7 +182,7 @@ end
 
 post '/admin/floor_plan_hotspot/set' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   pano_version_id = params[:pano_version_id]
   percentX = params[:percent_x]
@@ -167,7 +200,7 @@ end
 
 post '/admin/floor_plan_hotspot/remove' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   pano_version_id = params[:pano_version_id]
   pano_version = PanoVersion.find(pano_version_id)
@@ -182,7 +215,7 @@ end
 
 post '/admin/pano/initial_yaw/set' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   pano_version_id = params[:pano_version_id]
   yaw = params[:yaw]
@@ -401,7 +434,7 @@ end
 
 post '/project/:access_token/screenshot/feedback' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
@@ -433,7 +466,7 @@ end
 
 post '/project/:access_token/pano/:id/feedback' do
   is_admin = !!session[:is_admin]
-  return "Not found" if is_admin.nil?
+  return "Not found" unless is_admin
 
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)

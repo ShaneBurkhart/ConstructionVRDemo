@@ -1,0 +1,95 @@
+%link(rel="stylesheet" href="/semantic.min.css?v=190407")
+%script(src="/semantic.min.js?v=190407")
+
+.large-container
+  .header
+    %h1 Rendering Dashboard
+
+    %hr
+
+    %h3 To Render
+    %table.ui.celled.table
+      %thead
+        %tr
+          %th{ style: "padding-right: 20px;" } Name
+          %th{ style: "padding-right: 20px;" } Retries
+          %th{ style: "padding-right: 20px;" } Floor Plans
+          %th{ style: "padding-right: 20px;" } Panos
+          %th{ style: "padding-right: 20px;" } Screenshots
+      %tbody
+        - unit_versions_to_render.each do |u|
+          %tr
+            %td= u["Unit Name"][0] + " - " + u["Project Name"][0]
+            %td= u["Rendering Retries"]
+            %td
+              - if !u["Floor Plans Started At"].nil? and u["Floor Plans Finished At"].nil?
+                = "Rendering"
+              - elsif !u["Floor Plans Started At"].nil? and !u["Floor Plans Finished At"].nil?
+                = "Done - "
+                %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Floor Plans')}&uv_id=#{u.id}" } Restart
+              - else
+                = "TODO"
+            %td
+              - if !u["Panos Started At"].nil? and u["Panos Finished At"].nil?
+                = "Rendering"
+              - elsif !u["Panos Started At"].nil? and !u["Panos Finished At"].nil?
+                = "Done - "
+                %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Panos')}&uv_id=#{u.id}" } Restart
+              - else
+                = "TODO"
+            %td
+              - if !u["Screenshots Started At"].nil? and u["Screenshots Finished At"].nil?
+                = "Rendering"
+              - elsif !u["Screenshots Started At"].nil? and !u["Screenshots Finished At"].nil?
+                = "Done - "
+                %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Screenshots')}&uv_id=#{u.id}" } Restart
+              - else
+                = "TODO"
+
+    %h3 Past Renderings
+    %table.ui.celled.table
+      %thead
+        %tr
+          %th{ colspan: 3 }
+          %th{ colspan: 3 } Asset Counts
+          %th{ colspan: 3 } Restart
+          %th{ colspan: 4 } Download
+        %tr
+          %th{ style: "padding-right: 20px;" } Name
+          %th{ style: "padding-right: 20px; width: 100px;" } Errors?
+          %th{ style: "padding-right: 20px; width: 50px;" } RTs
+          %th{ style: "padding-right: 20px; width: 50px;" } FPs
+          %th{ style: "padding-right: 20px; width: 50px;" } Ps
+          %th{ style: "padding-right: 20px; width: 50px;" } Ss
+          %th{ style: "padding-right: 20px; width: 50px;" } FPs
+          %th{ style: "padding-right: 20px; width: 50px;" } Ps
+          %th{ style: "padding-right: 20px; width: 50px;" } Ss
+          %th{ style: "padding-right: 20px; width: 50px;" } FPs
+          %th{ style: "padding-right: 20px; width: 50px;" } Ps
+          %th{ style: "padding-right: 20px; width: 50px;" } Ss
+          %th{ style: "padding-right: 20px; width: 50px;" } SKP
+      %tbody
+        - unit_versions.each do |u|
+          - next if unit_versions_to_render.include?(u)
+
+          %tr
+            %td= u["Unit Name"][0] + " - " + u["Project Name"][0]
+            %td= !!u["Errors"] ? "True" : ""
+            %td= u["Rendering Retries"] || 0
+            %td= u["Floor Plan Image URL"].nil? ? 0 : 1
+            %td= u["Pano Versions"].nil? ? 0 : u["Pano Versions"].count
+            %td= u["Screenshot Versions"].nil? ? 0 : u["Screenshot Versions"].count
+            %td
+              %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Floor Plans')}&uv_id=#{u.id}" } Go
+            %td
+              %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Panos')}&uv_id=#{u.id}" } Go
+            %td
+              %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart?p=#{URI.encode('Screenshots')}&uv_id=#{u.id}" } Go
+            %td
+              %a{ href: "#" } .zip
+            %td
+              %a{ href: "#" } .zip
+            %td
+              %a{ href: "#" } .zip
+            %td
+              %a{ href: u["SKP File URL"] } .skp
