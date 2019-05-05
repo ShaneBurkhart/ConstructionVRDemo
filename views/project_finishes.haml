@@ -17,22 +17,25 @@
     %table
       %thead
         %tr
-          %th{ style: "width: 13%;" } Type
-          %th{ style: "width: 7%;" } Location
-          %th{ style: "width: 9%;" } Room
-          %th{ style: "width: 15%;" } Option Name
-          %th{ style: "width: 22%;" } Option Info
-          %th{ style: "width: 34%;" } Option Image
+          %th{ style: "width: 33%;" } Description
+          %th{ style: "width: 67%;" } Option Image
       %tbody
         - finishes.each do |finish|
           %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
-            %td= finish["Type"]
-            %td= finish["Location"]
-            %td= finish["Room"]
             %td
+              %p.bold.large
+                = finish["Type"]
+
               - if !finish["Option Names"].nil?
-                = finish["Option Names"].first
-            %td
+                %p
+                  %b Selection:
+                  = finish["Option Names"].first
+
+              %p
+                %b Location:
+                = "#{finish['Location']} - #{finish['Room']}"
+
+              %p.bold.no-margin Notes:
               - if !finish["Option Info"].nil? or !finish["Notes"].nil?
                 - notes = finish["Notes"] || ""
                 - info = finish["Option Info"] || [""]
@@ -69,8 +72,10 @@
   }
 
   img {
+    padding: 1px;
+    max-width: 255px;
     max-height: 225px;
-    display: block;
+    display: inline-block;
   }
 
   tbody td, tbody tr {
@@ -90,11 +95,12 @@
   }
 
   td {
-    padding: 1px 10px;
+    padding: 10px;
+    vertical-align: top;
   }
 
   td * {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.2;
   }
 

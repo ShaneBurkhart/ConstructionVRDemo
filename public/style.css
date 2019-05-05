@@ -101,6 +101,7 @@ h4 {
 }
 
 .small { font-size: 14px; }
+.large { font-size: 20px; }
 .bold { font-weight: bold; }
 .light { font-weight: 300; }
 .italic { font-style: italic; }
@@ -112,6 +113,8 @@ p {
     font-size: 16px;
     line-height: 1.8;
 }
+
+p.no-margin { margin-bottom: 0; }
 
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
