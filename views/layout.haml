@@ -1,7 +1,11 @@
 !!!
 %html
   %head
-    %meta(name="viewport" content="width=device-width, initial-scale=1")
+    - if defined? fixed_width_viewport
+      %meta(name="viewport" content="width=1200, initial-scale=1, maximum-scale=1.0")
+    - else
+      %meta(name="viewport" content="width=device-width, initial-scale=1")
+
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
 
     %script{:crossorigin => "anonymous", :integrity => "sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=", :src => "https://code.jquery.com/jquery-2.2.4.min.js"}
@@ -18,3 +22,9 @@
   %body
     = yield
 
+
+    - if defined? fixed_width_viewport
+      :javascript
+        var $viewportElement = document.head.querySelector("[name~=viewport]");
+        var ratio = document.body.clientWidth / 1200;
+        $viewportElement.setAttribute('content', 'width=1200, maximum-scale=1.0, initial-scale=' + ratio);

@@ -270,6 +270,7 @@ get '/project/:access_token/finishes' do
     markdown: MARKDOWN,
     project: project,
     access_token: access_token,
+    fixed_width_viewport: true,
   }
 end
 

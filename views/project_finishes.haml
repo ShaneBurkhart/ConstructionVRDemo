@@ -1,45 +1,46 @@
-%p
-%p.filters
-  Filter:
-  %a.selected{ href: "#", data: { location: "all" } } All
-  |
-  %a{ href: "#", data: { location: "units" } } Units
-  |
-  %a{ href: "#", data: { location: "common-areas" } } Common Areas
-  |
-  %a{ href: "#", data: { location: "amenities" } } Amenities
+.xlarge-container
+  %p.filters
+    Filter:
+    %a.selected{ href: "#", data: { location: "all" } } All
+    |
+    %a{ href: "#", data: { location: "units" } } Units
+    |
+    %a{ href: "#", data: { location: "common-areas" } } Common Areas
+    |
+    %a{ href: "#", data: { location: "amenities" } } Amenities
 
-%h1= project["Name"]
+  %h1= project["Name"]
 
-- @finishes.each do |category, finishes|
-  %h2= category
+  - @finishes.each do |category, finishes|
+    %h2= category
 
-  %table
-    %thead
-      %tr
-        %th{ style: "width: 13%;" } Type
-        %th{ style: "width: 7%;" } Location
-        %th{ style: "width: 9%;" } Room
-        %th{ style: "width: 15%;" } Option Name
-        %th{ style: "width: 22%;" } Option Info
-        %th{ style: "width: 34%;" } Option Image
-    %tbody
-      - finishes.each do |finish|
-        %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
-          %td= finish["Type"]
-          %td= finish["Location"]
-          %td= finish["Room"]
-          %td
-            - if !finish["Option Names"].nil?
-              = finish["Option Names"].first
-          %td
-            - if !finish["Option Info"].nil? or !finish["Notes"].nil?
-              - notes = finish["Notes"] || ""
-              - info = finish["Option Info"] || [""]
-              = markdown.render("#{notes}\n\n#{info.first}")
-          %td
-            - if !finish["Option Images"].nil?
-              %img{ src: finish["Option Images"].first["url"] }
+    %table
+      %thead
+        %tr
+          %th{ style: "width: 13%;" } Type
+          %th{ style: "width: 7%;" } Location
+          %th{ style: "width: 9%;" } Room
+          %th{ style: "width: 15%;" } Option Name
+          %th{ style: "width: 22%;" } Option Info
+          %th{ style: "width: 34%;" } Option Image
+      %tbody
+        - finishes.each do |finish|
+          %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
+            %td= finish["Type"]
+            %td= finish["Location"]
+            %td= finish["Room"]
+            %td
+              - if !finish["Option Names"].nil?
+                = finish["Option Names"].first
+            %td
+              - if !finish["Option Info"].nil? or !finish["Notes"].nil?
+                - notes = finish["Notes"] || ""
+                - info = finish["Option Info"] || [""]
+                = markdown.render("#{notes}\n\n#{info.first}")
+            %td
+              - if !finish["Option Images"].nil?
+                - finish["Option Images"].each do |m|
+                  %img{ src: m["url"] }
 
 :javascript
   $(document).ready(function () {
