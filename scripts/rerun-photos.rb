@@ -7,7 +7,7 @@ AWS_ACCESS_KEY_ID = ENV["ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = ENV["SECRET_ACCESS_KEY"]
 AWS_REGION = ENV["REGION"]
 AWS_BUCKET = ENV["BUCKET"]
-LAMBDA_FUNCTION_NAME = "PhotoResizer"
+LAMBDA_FUNCTION_NAME = "ImageResizer"
 S3_KEY_PREFIXES = ["screenshots/", "floor-plans/", "panos/"]
 
 Aws.config.update({

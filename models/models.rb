@@ -23,6 +23,8 @@ end
 class ProjectFinishSelections < Airrecord::Table
   self.base_key = FINISHES_AIRTABLE_APP_ID
 
+  has_many :finish_options, class: "FinishOptions", column: "Options"
+
   def self.finishes_for_project(project)
     return {} if project.nil?
     views = [

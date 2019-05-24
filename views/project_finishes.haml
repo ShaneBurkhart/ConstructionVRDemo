@@ -18,32 +18,54 @@
       %thead
         %tr
           %th{ style: "width: 33%;" } Description
-          %th{ style: "width: 67%;" } Option Image
+          %th{ style: "width: 33%;" } Option Info
+          %th{ style: "width: 34%;" } Option Image
       %tbody
         - finishes.each do |finish|
+          - finish_options = finish.finish_options
+          - finish_options_count = finish_options.length
+          - finish_option = finish_options.shift
+
           %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
-            %td
-              %p.bold.large
-                = finish["Type"]
+            %td{ rowspan: [finish_options_count, 1].max }
+              %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish["Type"]
+              %p= "#{finish['Location']} - #{finish['Room']}"
 
-              - if !finish["Option Names"].nil?
-                %p
-                  %b Selection:
-                  = finish["Option Names"].first
+              - if !finish["Notes"].nil?
+                - notes = (finish["Notes"] || "").gsub("\n", "<br>")
+                .notes
+                  = markdown.render(notes)
 
-              %p
-                %b Location:
-                = "#{finish['Location']} - #{finish['Room']}"
+              %td
+                - if !finish_option.nil?
+                  %p.bold= finish_option["Name"]
 
-              %p.bold.no-margin Notes:
-              - if !finish["Option Info"].nil? or !finish["Notes"].nil?
-                - notes = finish["Notes"] || ""
-                - info = finish["Option Info"] || [""]
-                = markdown.render("#{notes}\n\n#{info.first}")
-            %td
-              - if !finish["Option Images"].nil?
-                - finish["Option Images"].each do |m|
-                  %img{ src: m["url"] }
+                  - if !finish_option["Info"].nil?
+                    - info = (finish_option["Info"] || "").gsub("\n", "<br>")
+                    .notes
+                      = markdown.render(info)
+
+              %td
+                - if !finish_option.nil? and !finish_option["Image"].nil?
+                  - images = finish_option["Image"].first(2)
+                  - images.each do |m|
+                    %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
+
+          - finish_options.each do |finish_option|
+            %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
+              %td
+                %p.bold= finish_option["Name"]
+
+                - if !finish_option["Info"].nil?
+                  - info = (finish_option["Info"] || "").gsub("\n", "<br>")
+                  .notes
+                    = markdown.render(info)
+
+              %td
+                - if !finish_option["Image"].nil?
+                  - images = finish_option["Image"].first(2)
+                  - images.each do |m|
+                    %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
 :javascript
   $(document).ready(function () {
@@ -65,23 +87,6 @@
   });
 
 :css
-  @media print {
-    body { font-size: 14px; }
-    table { page-break-inside:auto; page-break-after: always;}
-    tr { page-break-inside:avoid; page-break-after:auto }
-  }
-
-  img {
-    padding: 1px;
-    max-width: 255px;
-    max-height: 225px;
-    display: inline-block;
-  }
-
-  tbody td, tbody tr {
-    height: 225px;
-  }
-
   table {
     table-layout: fixed;
     border-collapse: collapse;
@@ -95,17 +100,34 @@
   }
 
   td {
-    padding: 10px;
     vertical-align: top;
+    padding: 3px 5px;
   }
 
-  td * {
-    font-size: 16px;
-    line-height: 1.2;
+  img {
+    padding: 1px;
+    max-width: 175px;
+    max-height: 175px;
+    display: inline-block;
   }
 
-  thead tr {
-    height: 30px;
+  .bordered {
+    border: 1px solid #cccccc;
+  }
+
+  .selection-info {
+    border-right: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    word-wrap: break-word;
+  }
+
+  .selection p {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+  }
+
+  .selection .notes p, .selection .notes a {
+    font-size: 14px;
   }
 
   a.selected {
@@ -116,4 +138,13 @@
   a.selected:hover {
     text-decoration: none;
   }
+
+  @media print {
+    body { font-size: 14px; }
+    table { page-break-inside:auto; page-break-after: always;}
+    tr { page-break-inside:avoid; page-break-after:auto }
+    img.one { max-width: 175px; max-height: 175px; }
+    img.two { max-width: 100px; max-height: 100px; }
+  }
+
 
