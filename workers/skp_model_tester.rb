@@ -92,7 +92,7 @@ loop do
     unit_versions.each do |unit_version|
       model_data = check_unit_version_model(unit_version)
       errors = model_data[:errors]
-      screenshots = model_data[:scenes].select { |s| s[:name].include? "Enscape View" }
+      screenshots = model_data[:scenes].select { |s| s[:name].downcase.include? "enscape view" }
       screenshot_count = screenshots.nil? ? 0 : screenshots.length
 
       # Include default setting no matter what.  The Record ID is for FV000.
