@@ -407,8 +407,8 @@ get '/project/:access_token/unit/:id/set_current_version' do
     return redirect "/project/#{access_token}/unit/#{unit_id}"
   end
 
-  unit_version["Current Version"] = [unit_version_id]
-  unit_version.save
+  unit["Current Version"] = [unit_version_id]
+  unit.save
 
   return redirect "/project/#{access_token}/unit/#{unit_id}"
 end
