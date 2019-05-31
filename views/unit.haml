@@ -28,7 +28,7 @@
           - else
             %span= label
 
-    - if uv.id != unit["Current Version"][0]
+    - if selected_version.id != unit["Current Version"][0]
       %p
         %a.button{ href: "/set_current_version?uv_id=#{uv.id}" } Make Current Version
 
