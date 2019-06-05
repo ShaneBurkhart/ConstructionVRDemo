@@ -12,6 +12,8 @@
   %h1= project["Name"]
 
   - @finishes.each do |category, finishes|
+    - next if finishes.nil? or finishes.length == 0
+
     %h2= category
 
     %table

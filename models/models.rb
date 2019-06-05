@@ -28,6 +28,7 @@ class ProjectFinishSelections < Airrecord::Table
   def self.finishes_for_project(project)
     return {} if project.nil?
     views = [
+      "Concepts",
       "Walls & Millwork",
       "Flooring",
       "Cabinets & Countertops",
