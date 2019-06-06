@@ -51,7 +51,8 @@
                 - if !finish_option.nil? and !finish_option["Image"].nil?
                   - images = finish_option["Image"].first(2)
                   - images.each do |m|
-                    %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
+                    %a{ href: m["url"], target: "_blank" }
+                      %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
           - finish_options.each do |finish_option|
             %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
@@ -67,7 +68,8 @@
                 - if !finish_option["Image"].nil?
                   - images = finish_option["Image"].first(2)
                   - images.each do |m|
-                    %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
+                    %a{ href: m["url"], target: "_blank" }
+                      %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
 :javascript
   $(document).ready(function () {
