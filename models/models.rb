@@ -32,6 +32,7 @@ class ProjectFinishSelections < Airrecord::Table
       "Walls & Millwork",
       "Flooring",
       "Cabinets & Countertops",
+      "Tile",
       "Light Fixtures",
       "Plumbing Fixtures & Acc.",
       "Mirrors",
