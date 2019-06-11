@@ -40,7 +40,11 @@
 
               %td
                 - if !finish_option.nil?
-                  %p.bold= finish_option["Name"]
+                  %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
+                  - if !finish["Unit Price"].nil?
+                    %p= "Price: $#{finish['Unit Price'][0]}"
+                  - else
+                    %p Price: n/a
 
                   - if !finish_option["Info"].nil?
                     - info = (finish_option["Info"] || "").gsub("\n", "<br>")
@@ -57,7 +61,11 @@
           - finish_options.each do |finish_option|
             %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
               %td
-                %p.bold= finish_option["Name"]
+                %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
+                - if !finish["Unit Price"].nil?
+                  %p= "Price: $#{finish['Unit Price'][0]}"
+                - else
+                  %p Price: n/a
 
                 - if !finish_option["Info"].nil?
                   - info = (finish_option["Info"] || "").gsub("\n", "<br>")
