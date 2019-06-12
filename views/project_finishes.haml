@@ -41,8 +41,8 @@
               %td
                 - if !finish_option.nil?
                   %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
-                  - if !finish["Unit Price"].nil?
-                    %p= "Price: $#{finish['Unit Price'][0]}"
+                  - if !finish_option["Unit Price"].nil?
+                    %p= "Price: $#{finish_option['Unit Price']}"
                   - else
                     %p Price: n/a
 
@@ -62,8 +62,8 @@
             %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
               %td
                 %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
-                - if !finish["Unit Price"].nil?
-                  %p= "Price: $#{finish['Unit Price'][0]}"
+                - if !finish_option["Unit Price"].nil?
+                  %p= "Price: $#{finish_option['Unit Price']}"
                 - else
                   %p Price: n/a
 
