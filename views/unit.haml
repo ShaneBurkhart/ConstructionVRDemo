@@ -67,7 +67,7 @@
       %h2 Interior Renderings
       - selected_version.screenshot_versions.each do |sv|
         .screenshot
-          - imgSrc = sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/")
+          - imgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
           %img{ src: imgSrc }
           - if is_admin_mode
             %a.show-give-feedback{ href: "#" } + Give Feedback
