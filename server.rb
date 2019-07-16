@@ -1,5 +1,6 @@
 require "sinatra"
 require "active_record"
+require "slack-ruby-client"
 require "haml"
 require "redis-store"
 require 'redis-rack'
