@@ -15,7 +15,7 @@ gem 'redis-rack'
 gem 'rerun'
 
 gem 'airrecord'
-
+gem 'slack-ruby-client'
 gem 'ruby-trello'
 
 gem 'aws-sdk', '~> 3'

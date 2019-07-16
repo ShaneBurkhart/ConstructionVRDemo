@@ -18,6 +18,10 @@ set :bind, '0.0.0.0'
 
 use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
 
+Slack.configure do |config|
+  config.token = ENV['SLACK_KONTENT_KEEPER_SIGNING_SECRET']
+end
+
 def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""
   records = Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
@@ -74,6 +78,19 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   unit_version.save
 
   redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+end
+
+post '/f038c9d4-2809-4050-976a-309445be7c8b/slack/kontent-keeper/webhook' do
+  slack_request = Slack::Events::Request.new(request)
+  slack_request.verify!
+
+  puts params.inspect
+  #Content::Links.create(
+    #"Link" => params["link"],
+    #"Description" => params["description"],
+  #)
+
+  return params[:challenge]
 end
 
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
