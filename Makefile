@@ -8,7 +8,7 @@ run:
 	docker-compose -p ${NAME} up -d
 
 build:
-	 docker build -t ${IMAGE_TAG} -f Dockerfile .
+	docker build -t ${IMAGE_TAG} -f Dockerfile .
 
 db:
 	docker-compose -p ${NAME} run --rm web_prod rake db:migrate

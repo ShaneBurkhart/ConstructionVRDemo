@@ -4,3 +4,4 @@ output/
 data/
 **.zip
 node_modules/
+scripts/input/

@@ -5,10 +5,40 @@ require "./models/db_models.rb"
 
 RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
 FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
+FINISHES_2_AIRTABLE_APP_ID = "appWVS9i2byAQv6bn"
+CONTENT_AIRTABLE_APP_ID = "appSLMPJEIk05Sday"
 Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 
 # For rendering some HTML
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
+
+module Content
+  class Links < Airrecord::Table
+    self.base_key = CONTENT_AIRTABLE_APP_ID
+    self.table_name = "Links"
+  end
+end
+
+module Finishes
+  class Project < Airrecord::Table
+    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.table_name = "Projects"
+
+    has_many :selections, class: "Finishes::Selection", column: "Selections"
+  end
+
+  class Selection < Airrecord::Table
+    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.table_name = "Selections"
+
+    has_many :options, class: "Finishes::Option", column: "Options"
+  end
+
+  class Option < Airrecord::Table
+    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.table_name = "Options"
+  end
+end
 
 class FinishOptions < Airrecord::Table
   self.base_key = FINISHES_AIRTABLE_APP_ID
@@ -45,6 +75,7 @@ class ProjectFinishSelections < Airrecord::Table
     ]
     finishes = {}
     self.table_name = project["Finish Selections Table Name"]
+    self.table_name = project if project.is_a?(String)
 
     views.each do |view|
       finishes[view] = self.all(view: view)
@@ -207,6 +238,50 @@ class UnitVersion < Airrecord::Table
       fields["link_hotspots"] = link_hotspots
       next fields
     end
+  end
+
+  def get_screenshot_scene_names
+    screenshot_scenes = self.parse_model_data[:scenes].select do |s|
+      s[:name].downcase.include?("enscape view")
+    end
+    screenshot_scenes.map { |s| s[:name].gsub(/enscape view/i, "").strip }
+  end
+
+  def parse_model_data
+    model_data = { scenes: [], layers: {} }
+    lines = self["Model Data Output"].split("\n")
+    current_scene = nil
+
+    lines.each do |line|
+      next unless line.strip.length > 0
+      next if line.include? "Model Layers:"
+      next if line.include? "Scene Layers:"
+      next if line.include? "Scenes:"
+
+      if line.start_with? "Scene:"
+        parts = line.split(/:\s+/)
+        if parts.length > 1
+          name = parts[1].strip
+          current_scene = { name: name, layers: {} }
+          model_data[:scenes] << current_scene
+        end
+        next
+      end
+
+      parts = line.split(/:\s+/)
+      name = parts[0]
+      next if name.nil? or name.length == 0
+      visibility = -1
+      visibility = parts[1].strip.to_i if parts.length > 1
+
+      if current_scene.nil?
+        model_data[:layers][name] = visibility
+      else
+        current_scene[:layers][name] = visibility
+      end
+    end
+
+    return model_data
   end
 end
 

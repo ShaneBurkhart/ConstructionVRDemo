@@ -70,9 +70,13 @@
 
     #screenshots
       %h2 Interior Renderings
-      - selected_version.screenshot_versions.each do |sv|
+      - screenshot_scene_names = selected_version.get_screenshot_scene_names
+      - selected_version.screenshot_versions.each_with_index do |sv, i|
         .screenshot
           - imgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
+          %h4
+            Scene:
+            = screenshot_scene_names[i]
           %img{ src: imgSrc }
           - if is_admin_mode
             %a.show-give-feedback{ href: "#" } + Give Feedback
