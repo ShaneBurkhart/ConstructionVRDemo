@@ -37,8 +37,13 @@
   .row
     .third
       %h1= unit["Name"]
+
+      - if is_admin_mode
+        %p
+          %a.edit-description{ href: "#", data: { description: unit["Details"] } } Edit Description
+
       %ul
-        - (unit["Details"] || "").split("\n").each do |detail|
+        - (unit["Details"] || "").split(/[\n|]/).each do |detail|
           %li= detail
     .two-third
       #unit-floor-plan
@@ -165,6 +170,20 @@
 
       %input#feedback-file-upload.hidden{ type: "file", name: "feedback-file-upload", accept: "image/*" }
 
+- if is_admin_mode
+  :javascript
+    $(document).ready(function () {
+      var $editDescription = $(".edit-description");
+
+      $editDescription.click(function (e) {
+        var $this = $(this);
+        e.preventDefault();
+
+        var newDesc = prompt("What should the description for the unit say? The '|' character separates bullet points.", $this.data("description").replace(/\n/, "|"));
+
+        window.location.href = window.location.href + "/set_description?description=" + newDesc;
+      });
+    });
 
 - if is_debug_mode
   :javascript
