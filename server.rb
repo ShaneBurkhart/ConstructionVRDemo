@@ -117,7 +117,7 @@ get '/api/project/:ps_access_token/renderings' do
     {
       name: u["Name"],
       description: u["Details"],
-      updated_at: u.current_version["Created At"],
+      updated_at: u.current_version[0]["Created At"],
       floor_plan_url: u["Floor Plan Image URL"],
       url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
     }
