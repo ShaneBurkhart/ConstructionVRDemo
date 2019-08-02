@@ -11,7 +11,7 @@
 
   %h1= project["Name"]
 
-  - @finishes.each do |category, finishes|
+  - @finish_categories.each do |category, finishes|
     - next if finishes.nil? or finishes.length == 0
 
     %h2= category
@@ -24,11 +24,12 @@
           %th{ style: "width: 34%;" } Option Image
       %tbody
         - finishes.each do |finish|
-          - finish_options = finish.finish_options
+          - next if finish["Location"].nil?
+          - finish_options = @options_for_selection[finish.id]
           - finish_options_count = finish_options.length
           - finish_option = finish_options.shift
 
-          %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
+          %tr.selection{ class: (finish["Location"] || "").downcase.gsub(" ", "-") }
             %td{ rowspan: [finish_options_count, 1].max }
               %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish["Type"]
               %p= "#{finish['Location']} - #{finish['Room']}"
@@ -59,7 +60,7 @@
                       %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
           - finish_options.each do |finish_option|
-            %tr.selection{ class: finish["Location"].downcase.gsub(" ", "-") }
+            %tr.selection{ class: (finish["Location"] || "").downcase.gsub(" ", "-") }
               %td
                 %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
                 - if !finish_option["Unit Price"].nil?

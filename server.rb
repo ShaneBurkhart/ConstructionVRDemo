@@ -283,7 +283,26 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @finishes = ProjectFinishSelections.finishes_for_project(project)
+  @finish_categories = ProjectFinishSelections.finishes_for_project(project)
+
+  finish_option_ids = []
+
+  @finish_categories.each do |category, finish_selections|
+    finish_selections.each do |finish_selection|
+      finish_option_ids.concat(finish_selection["Options"] || [])
+    end
+  end
+
+  all_finish_options = FinishOptions.find_many(finish_option_ids)
+  finish_options_by_id = all_finish_options.map { |o| [o.id, o] }.to_h
+
+  @options_for_selection = {}
+  @finish_categories.each do |category, finish_selections|
+    finish_selections.each do |finish_selection|
+      options = (finish_selection["Options"] || [])
+      @options_for_selection[finish_selection.id] = options.map { |id| finish_options_by_id[id] }
+    end
+  end
 
   haml :project_finishes, locals: {
     markdown: MARKDOWN,
