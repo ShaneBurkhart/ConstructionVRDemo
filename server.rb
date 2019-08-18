@@ -309,6 +309,7 @@ get '/project/:access_token/finishes' do
     project: project,
     access_token: access_token,
     fixed_width_viewport: true,
+    is_admin_mode: is_admin_mode,
   }
 end
 
