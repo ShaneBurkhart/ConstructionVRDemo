@@ -1,0 +1,22 @@
+.ui.fluid.card
+  .content
+    .ui.two.column.grid
+      .column
+        - if !finish_option.nil?
+          %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
+          - if !finish_option["Unit Price"].nil?
+            %p= "Price: $#{finish_option['Unit Price']}"
+          - else
+            %p Price: n/a
+
+          - if !finish_option["Info"].nil?
+            - info = (finish_option["Info"] || "").gsub("\n", "<br>")
+            .notes
+              = markdown.render(info)
+
+      .column
+        - if !finish_option.nil? and !finish_option["Image"].nil?
+          - images = finish_option["Image"].first(2)
+          - images.each do |m|
+            %a{ href: m["url"], target: "_blank" }
+              %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }

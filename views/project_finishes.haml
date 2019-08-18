@@ -20,8 +20,7 @@
       %thead
         %tr
           %th{ style: "width: 33%;" } Selection
-          %th{ style: "width: 33%;" } Option Info
-          %th{ style: "width: 34%;" } Option Image
+          %th{ style: "width: 66%;" } Options
       %tbody
         - finishes.each_with_index do |finish, i|
           - next if finish["Location"].nil?
@@ -48,46 +47,14 @@
                 .notes
                   = markdown.render(notes)
 
-              %td
-                - if !finish_option.nil?
-                  %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
-                  - if !finish_option["Unit Price"].nil?
-                    %p= "Price: $#{finish_option['Unit Price']}"
-                  - else
-                    %p Price: n/a
-
-                  - if !finish_option["Info"].nil?
-                    - info = (finish_option["Info"] || "").gsub("\n", "<br>")
-                    .notes
-                      = markdown.render(info)
-
-              %td
-                - if !finish_option.nil? and !finish_option["Image"].nil?
-                  - images = finish_option["Image"].first(2)
-                  - images.each do |m|
-                    %a{ href: m["url"], target: "_blank" }
-                      %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
+              %td{ style: "padding: 5px;" }
+                = haml :_finish_option_card, locals: { markdown: markdown, finish_option: finish_option }
 
           - finish_options.each do |finish_option|
             %tr.selection{ class: [location_class, row_shade_class].join(" "), data: { selection_id: finish.id } }
-              %td
-                %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
-                - if !finish_option["Unit Price"].nil?
-                  %p= "Price: $#{finish_option['Unit Price']}"
-                - else
-                  %p Price: n/a
+              %td{ style: "padding: 5px;" }
+                = haml :_finish_option_card, locals: { markdown: markdown, finish_option: finish_option }
 
-                - if !finish_option["Info"].nil?
-                  - info = (finish_option["Info"] || "").gsub("\n", "<br>")
-                  .notes
-                    = markdown.render(info)
-
-              %td
-                - if !finish_option["Image"].nil?
-                  - images = finish_option["Image"].first(2)
-                  - images.each do |m|
-                    %a{ href: m["url"], target: "_blank" }
-                      %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
 :javascript
   $(document).ready(function () {
