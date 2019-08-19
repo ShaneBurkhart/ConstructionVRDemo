@@ -1,22 +1,28 @@
 .ui.modal.finish-selection-modal
+  .ui.inverted.dimmer
+    .ui.text.loader Linking
+
   .header
     .pull-right
       .ui.icon.input
         %input.finish-search-input{ type: "text", placeholder: "Search for something" }
     %h4 Search for a finish option to link.
 
-  .scrolling.content
+  .scrolling.content.search-content
     .ui.active.inverted.dimmer
       .ui.text.loader Searching
+
+    .search-options-container
+
   .actions
     .pull-left
       %p
         Selection:
-        %span.bold.selection-type Walls Paint
+        %span.bold.selection-type
         %span{ style: "font-weight: normal;" } for
-        %span.bold.selection-location Units - Kitchen
-    .ui.button Close
-    .ui.green.button Link Option
+        %span.bold.selection-location
+    .ui.green.button Create New Option
+    .ui.close.button Close
 
 :css
   .ui.modal.finish-selection-modal .header {
@@ -28,24 +34,68 @@
     margin: 0;
   }
 
-  .ui.modal.finish-selection-modal .content {
+  .ui.modal.finish-selection-modal .content.search-content {
     position: relative;
     min-height: 300px;
   }
 
 :javascript
   $(document).ready(function () {
+    var $searchOptionsContainer = $(".finish-selection-modal .search-options-container");
+    var $searching = $(".finish-selection-modal .content .ui.inverted.dimmer");
+    var $linking = $(".finish-selection-modal > .ui.inverted.dimmer");
+
+    $(".search-options-container").on("click", ".link-to-selection", function () {
+      var $this = $(this);
+      var $selectionOption = $this.closest(".option");
+      var optionId = $selectionOption.data("option-id");
+      var $modal = $this.closest(".finish-selection-modal");
+      var selectionId = $modal.data("selection-id");
+
+      $linking.addClass("active");
+
+      var url = "/project/#{access_token}/finishes/selection/" + selectionId + "/option/" + optionId + "/link"
+
+      $.post(url, function (data) {
+        var dataJSON = JSON.parse(data);
+        var $selection = $(".selection[data-selection-id=\"" + selectionId + "\"]");
+        var option = dataJSON["option"] || {};
+
+        if(option["List Card HTML"]) {
+          $selection.find(".open-selection-option-modal").before(option["List Card HTML"]);
+        }
+
+        $linking.removeClass("active");
+        $modal.modal('hide');
+      });
+    });
+
     function searchForFinishes(search) {
+      safe_search = encodeURIComponent(search)
+      $.get("/project/#{access_token}/finishes/options/search", { s: safe_search }, function (data) {
+        var $cards = [];
+        var data = JSON.parse(data);
+        var options = data["options"];
+
+        $searchOptionsContainer.empty();
+
+        for (var i = 0; i < options.length; i++) {
+          $cards.push(options[i]["Search Card HTML"] || "");
+        }
+
+        $searchOptionsContainer.append($cards);
+        $searching.removeClass("active");
+      });
     }
 
     var debouncedSearch = _.debounce(searchForFinishes, 400)
 
-    $(".finish-selection-modal .finish-search-input").change(function () {
+    $(".finish-selection-modal .finish-search-input").keyup(function () {
       var $this = $(this);
       var searchText = $this.val();
-      var $loading = $(".finish-selection-modal .content .ui.inverted.dimmer");
+      var $searching = $(".finish-selection-modal .content .ui.inverted.dimmer");
 
-      $loading.addClass("active");
+      $searching.addClass("active");
       debouncedSearch(searchText);
     });
   });

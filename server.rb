@@ -313,6 +313,34 @@ get '/project/:access_token/finishes' do
   }
 end
 
+get '/project/:access_token/finishes/options/search' do
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  search_token = params[:s]
+
+  options = FinishOptions.all(filter: "SEARCH('#{search_token}', {Name})")
+  options = options.map do |o|
+    fields = o.fields
+
+    fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
+      markdown: MARKDOWN,
+      is_admin_mode: is_admin_mode,
+      finish_option: o,
+      is_search: false,
+    }
+    fields["Search Card HTML"] = haml :_finish_option_card, layout: false, locals: {
+      markdown: MARKDOWN,
+      is_admin_mode: is_admin_mode,
+      finish_option: o,
+      is_search: true,
+    }
+
+    next fields
+  end
+
+  return { options: options }.to_json
+end
+
 post '/project/:access_token/finishes/selection/:id/remove' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
@@ -329,7 +357,43 @@ post '/project/:access_token/finishes/selection/:id/remove' do
 
   selection.destroy
 
-  return {}
+  return {}.to_json
+end
+
+post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/link' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  selection_id = params[:selection_id]
+  option_id = params[:option_id]
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
+  # TODO when we update the Finishes tables, we need to check for belongs to project
+  # Right now, we use the project to fetch the record so it definitely belongs.
+  return "Not found" if selection.nil? #or !selection.belongs_to_project?(project)
+
+  option = FinishOptions.find(option_id)
+  return "Not found" if option.nil?
+
+  option_fields = {}
+
+  if !selection["Options"].include? option_id
+    selection["Options"] += [option_id]
+    selection.save
+
+    option_fields = option.fields
+    option_fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
+      markdown: MARKDOWN,
+      is_admin_mode: is_admin_mode,
+      finish_option: option,
+      is_search: false,
+    }
+  end
+
+  return { option: option_fields }.to_json
 end
 
 post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/unlink' do

@@ -1,3 +1,5 @@
+- is_search = false unless defined? is_search
+
 .ui.fluid.card.option{ data: { option_id: finish_option.id } }
   .content
 
@@ -22,10 +24,14 @@
             %a{ href: m["url"], target: "_blank" }
               %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
 
-  - if is_admin_mode
+  - if !is_search and is_admin_mode
     .extra.content
       %a.ui.unlink-selection-option{ href: "javascript:void(0)" } Remove Option
       .ui.popup.unlink-selection-option-popup
         .header Unlink Option From Selection?
         %p You are about to unlink an option for this selection. Do you want to continue? You can relink it later if you want.
         .ui.red.button Unlink
+
+  - if is_search
+    .extra.content
+      %a.ui.link-to-selection{ href: "javascript:void(0)" } + Link Option to Selection

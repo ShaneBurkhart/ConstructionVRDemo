@@ -45,15 +45,15 @@
                 .notes
                   = markdown.render(notes)
 
-            %td{ style: "padding: 8px;" }
+            %td.selection-options-container{ style: "padding: 8px;" }
               - finish_options.each do |finish_option|
                 = haml :_finish_option_card, locals: { markdown: markdown, is_admin_mode: is_admin_mode, finish_option: finish_option }
 
               - if is_admin_mode
-                %a.link-selection-option{ href: "javascript:void(0)" } + Link an option to this selection
+                %a.open-selection-option-modal{ href: "javascript:void(0)" } + Link an option to this selection
 
   - if is_admin_mode
-    = haml :_finish_selection_modal
+    = haml :_finish_selection_modal, locals: { access_token: access_token }
 
 :javascript
   $(document).ready(function () {
@@ -120,7 +120,7 @@
         }
     })
 
-    $('.link-selection-option').click(function(e) {
+    $('.open-selection-option-modal').click(function(e) {
       var $this = $(this);
       var $modal = $(".finish-selection-modal");
       var $selection = $this.closest(".selection");
@@ -128,10 +128,13 @@
       var selectionType = $selection.data("type");
       var selectionLocation = $selection.data("location");
 
+      $(".finish-selection-modal").data("selection-id", selectionId);
 
       $(".finish-selection-modal .selection-type").text(selectionType);
       $(".finish-selection-modal .selection-location").text(selectionLocation);
 
+      $(".finish-selection-modal .finish-search-input").val("");
+      $(".finish-selection-modal .finish-search-input").trigger("keyup");
       $modal.modal('show');
     });
   });
@@ -179,8 +182,12 @@
     word-wrap: break-word;
   }
 
-  .selection .notes p, .selection .notes a {
+  .selection .notes p,
+  .selection .notes a,
+  .finish-selection-modal .option .notes p,
+  .finish-selection-modal .option .notes a {
     font-size: 14px;
+    word-wrap: break-word;
   }
 
   a.selected {
