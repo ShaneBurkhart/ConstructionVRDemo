@@ -25,36 +25,35 @@
         - finishes.each_with_index do |finish, i|
           - next if finish["Location"].nil?
           - finish_options = @options_for_selection[finish.id]
-          - finish_options_count = finish_options.length
-          - finish_option = finish_options.shift
           - location_class = (finish["Location"] || "").downcase.gsub(" ", "-")
           - row_shade_class = i % 2 == 0 ? "white" : "shade"
 
-          %tr.selection{ class: [location_class, row_shade_class].join(" "), data: { selection_id: finish.id } }
-            %td{ rowspan: [finish_options_count, 1].max }
+          %tr.selection{ class: [location_class, row_shade_class].join(" "), data: { selection_id: finish.id, type: finish["Type"], location: "#{finish['Location']} - #{finish['Room']}" } }
+            %td
               %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish["Type"]
               %p= "#{finish['Location']} - #{finish['Room']}"
               - if is_admin_mode
                 .admin-controls
-                  %a.remove-selection{ href: "#" } Remove
+                  %a.remove-selection{ href: "javascript:void(0)" } Remove Selection
                   .ui.popup.remove-selection-popup
                     .header Remove Selection Row?
                     %p You are about to remove the entire row for this selection. Do you want to continue?  This is not removing an option.
-                    .ui.red.button{ data: { selection_id: finish.id } } Remove
+                    .ui.red.button Remove
 
               - if !finish["Notes"].nil?
                 - notes = (finish["Notes"] || "").gsub("\n", "<br>")
                 .notes
                   = markdown.render(notes)
 
-              %td{ style: "padding: 5px;" }
-                = haml :_finish_option_card, locals: { markdown: markdown, finish_option: finish_option }
+            %td{ style: "padding: 8px;" }
+              - finish_options.each do |finish_option|
+                = haml :_finish_option_card, locals: { markdown: markdown, is_admin_mode: is_admin_mode, finish_option: finish_option }
 
-          - finish_options.each do |finish_option|
-            %tr.selection{ class: [location_class, row_shade_class].join(" "), data: { selection_id: finish.id } }
-              %td{ style: "padding: 5px;" }
-                = haml :_finish_option_card, locals: { markdown: markdown, finish_option: finish_option }
+              - if is_admin_mode
+                %a.link-selection-option{ href: "javascript:void(0)" } + Link an option to this selection
 
+  - if is_admin_mode
+    = haml :_finish_selection_modal
 
 :javascript
   $(document).ready(function () {
@@ -84,18 +83,57 @@
 
     function removeSelection(selectionId) {
         $(".selection[data-selection-id=\"" + selectionId + "\"]").remove();
-        $.post("finishes/remove-selection/" + selectionId);
+        $.post("finishes/selection/" + selectionId + "/remove");
     }
 
     $('.remove-selection-popup .ui.red.button').click(function(e) {
         var $this = $(this);
         if ($this.text() == "Are you sure?") {
-            var selectionId = $this.data("selection-id");
+            var selectionId = $this.closest(".selection").data("selection-id");
             removeSelection(selectionId);
         } else {
             $this.text("Are you sure?");
         }
     })
+
+    $('.unlink-selection-option').popup({
+      inline: true,
+      on: "click",
+      onHide: function() {
+        $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
+      },
+    });
+
+    function unlinkSelectionOption(selectionId, optionId) {
+        $(".selection[data-selection-id=\"" + selectionId + "\"] .option[data-option-id=\"" + optionId + "\"]").remove();
+        $.post("finishes/selection/" + selectionId + "/option/" + optionId + "/unlink");
+    }
+
+    $('.unlink-selection-option-popup .ui.red.button').click(function(e) {
+        var $this = $(this);
+        if ($this.text() == "Are you sure?") {
+            var selectionId = $this.closest(".selection").data("selection-id");
+            var optionId = $this.closest(".option").data("option-id");
+            unlinkSelectionOption(selectionId, optionId);
+        } else {
+            $this.text("Are you sure?");
+        }
+    })
+
+    $('.link-selection-option').click(function(e) {
+      var $this = $(this);
+      var $modal = $(".finish-selection-modal");
+      var $selection = $this.closest(".selection");
+      var selectionId = $selection.data("selection-id");
+      var selectionType = $selection.data("type");
+      var selectionLocation = $selection.data("location");
+
+
+      $(".finish-selection-modal .selection-type").text(selectionType);
+      $(".finish-selection-modal .selection-location").text(selectionLocation);
+
+      $modal.modal('show');
+    });
   });
 
 :css

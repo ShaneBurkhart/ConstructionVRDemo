@@ -1,7 +1,8 @@
-.ui.fluid.card
+.ui.fluid.card.option{ data: { option_id: finish_option.id } }
   .content
-    .ui.two.column.grid
-      .column
+
+    .ui.grid
+      .eight.wide.column
         - if !finish_option.nil?
           %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish_option["Name"]
           - if !finish_option["Unit Price"].nil?
@@ -14,9 +15,17 @@
             .notes
               = markdown.render(info)
 
-      .column
+      .eight.wide.column
         - if !finish_option.nil? and !finish_option["Image"].nil?
           - images = finish_option["Image"].first(2)
           - images.each do |m|
             %a{ href: m["url"], target: "_blank" }
               %img{ class: images.length == 1 ? "one" : "two", src: m["url"] }
+
+  - if is_admin_mode
+    .extra.content
+      %a.ui.unlink-selection-option{ href: "javascript:void(0)" } Remove Option
+      .ui.popup.unlink-selection-option-popup
+        .header Unlink Option From Selection?
+        %p You are about to unlink an option for this selection. Do you want to continue? You can relink it later if you want.
+        .ui.red.button Unlink

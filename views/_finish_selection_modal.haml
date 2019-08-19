@@ -1,0 +1,51 @@
+.ui.modal.finish-selection-modal
+  .header
+    .pull-right
+      .ui.icon.input
+        %input.finish-search-input{ type: "text", placeholder: "Search for something" }
+    %h4 Search for a finish option to link.
+
+  .scrolling.content
+    .ui.active.inverted.dimmer
+      .ui.text.loader Searching
+  .actions
+    .pull-left
+      %p
+        Selection:
+        %span.bold.selection-type Walls Paint
+        %span{ style: "font-weight: normal;" } for
+        %span.bold.selection-location Units - Kitchen
+    .ui.button Close
+    .ui.green.button Link Option
+
+:css
+  .ui.modal.finish-selection-modal .header {
+    font-size: inherit;
+    padding-top: 1em;
+  }
+
+  .ui.modal.finish-selection-modal .header h4 {
+    margin: 0;
+  }
+
+  .ui.modal.finish-selection-modal .content {
+    position: relative;
+    min-height: 300px;
+  }
+
+:javascript
+  $(document).ready(function () {
+    function searchForFinishes(search) {
+    }
+
+    var debouncedSearch = _.debounce(searchForFinishes, 400)
+
+    $(".finish-selection-modal .finish-search-input").change(function () {
+      var $this = $(this);
+      var searchText = $this.val();
+      var $loading = $(".finish-selection-modal .content .ui.inverted.dimmer");
+
+      $loading.addClass("active");
+      debouncedSearch(searchText);
+    });
+  });

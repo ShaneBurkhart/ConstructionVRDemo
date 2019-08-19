@@ -55,6 +55,15 @@ class ProjectFinishSelections < Airrecord::Table
 
   has_many :finish_options, class: "FinishOptions", column: "Options"
 
+  def self.find_project_selection(project, selection_id)
+    return {} if project.nil? or selection_id.nil?
+
+    self.table_name = project["Finish Selections Table Name"]
+    self.table_name = project if project.is_a?(String)
+
+    self.find(selection_id)
+  end
+
   def self.finishes_for_project(project)
     return {} if project.nil?
     views = [

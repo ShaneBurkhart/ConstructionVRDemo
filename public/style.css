@@ -46,6 +46,9 @@ body {
     overflow: hidden;
 }
 
+.pull-right { float: right; }
+.pull-left { float: left; }
+
 .half {
     display: inline-block;
     width: 50%;
