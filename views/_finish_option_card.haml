@@ -1,6 +1,8 @@
 - is_search = false unless defined? is_search
+- fields = finish_option.form_object
+- fields[:option_id] = finish_option.id
 
-.ui.fluid.card.option{ data: { option_id: finish_option.id } }
+.ui.fluid.card.option{ data: fields }
   .content
 
     .ui.grid
@@ -26,12 +28,16 @@
 
   - if !is_search and is_admin_mode
     .extra.content
-      %a.ui.unlink-selection-option{ href: "javascript:void(0)" } Remove Option
+      %a.ui.unlink-selection-option{ href: "javascript:void(0)" } Unlink Option
       .ui.popup.unlink-selection-option-popup
         .header Unlink Option From Selection?
         %p You are about to unlink an option for this selection. Do you want to continue? You can relink it later if you want.
         .ui.red.button Unlink
+      &mdash;
+      %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option
 
   - if is_search
     .extra.content
-      %a.ui.link-to-selection{ href: "javascript:void(0)" } + Link Option to Selection
+      .pull-right
+        %a.ui.link-to-selection{ href: "javascript:void(0)" } + Link Option to Selection
+      %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option

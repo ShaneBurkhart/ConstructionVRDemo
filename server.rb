@@ -23,6 +23,12 @@ Slack.configure do |config|
   config.token = ENV['SLACK_KONTENT_KEEPER_SIGNING_SECRET']
 end
 
+def find_user_by_access_token(access_token)
+  return false if access_token.nil? or access_token == ""
+  records = User.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
+  return records.first
+end
+
 def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""
   records = Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
@@ -149,6 +155,20 @@ get '/admin/login/:admin_token' do
   redirect redirect_to
 end
 
+get '/user/login/:access_token' do
+  access_token = params[:access_token]
+  user = find_user_by_access_token(access_token)
+  return "Not found" if user.nil?
+
+  redirect_to = params[:redirect_to]
+  redirect_to = "/projects" if redirect_to.nil? or redirect_to.length == 0
+
+  session[:is_admin] = !!user["Admin?"]
+  session[:user_id] = user.id
+
+  redirect redirect_to
+end
+
 post '/admin/linked_hotspot/set' do
   is_admin = !!session[:is_admin]
   return "Not found" unless is_admin
@@ -246,6 +266,16 @@ post '/admin/pano/initial_yaw/set' do
   pano_version.save
 
   return { pano_version: pano_version }.to_json
+end
+
+get '/projects' do
+  is_admin_mode = !!session[:is_admin]
+  user = User.find(session[:user_id])
+  return "Not found" if user.nil?
+
+  projects = user.projects
+
+  haml :projects, locals: { projects: projects }
 end
 
 get '/project/:access_token' do

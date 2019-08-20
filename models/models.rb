@@ -48,6 +48,12 @@ class FinishOptions < Airrecord::Table
     # Implement search later
     FinishOptions.all view: "Has Model"
   end
+
+  def form_object
+    self.fields.slice(
+      "Name", "Type", "Unit Price", "URL", "Info"
+    ).transform_keys { |k| k.underscore.gsub(" ", "_") }
+  end
 end
 
 class ProjectFinishSelections < Airrecord::Table
@@ -94,9 +100,18 @@ class ProjectFinishSelections < Airrecord::Table
   end
 end
 
+class User < Airrecord::Table
+  self.base_key = RENDERING_AIRTABLE_APP_ID
+  self.table_name = "Users"
+
+  has_many :projects, class: "Project", column: "Projects"
+end
+
 class Project < Airrecord::Table
   self.base_key = RENDERING_AIRTABLE_APP_ID
   self.table_name = "Projects"
+
+  belongs_to :users, class: "User", column: "Users"
 
   def units
     if @units.nil?
