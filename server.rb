@@ -371,6 +371,56 @@ get '/project/:access_token/finishes/options/search' do
   return { options: options }.to_json
 end
 
+post '/project/:access_token/finishes/option/save' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" unless is_admin_mode
+
+  option_id = params[:id]
+  selection_id = params[:selection_id]
+  option = FinishOptions.new({})
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  if !option_id.nil? and option_id != ""
+    option = FinishOptions.find(option_id)
+    option = FinishOptions.new({}) if option.nil? or option.id.nil? or option.id == ""
+  end
+
+  option["Name"] = params[:name] if params.has_key? :name
+  option["Type"] = params[:type] if params.has_key? :type
+  option["Unit Price"] = params[:unit_price].to_f if params.has_key? :unit_price
+  option["URL"] = params[:url] if params.has_key? :url
+  option["Info"] = params[:info] if params.has_key? :info
+
+  option.save
+
+  option_fields = option.fields
+  option_fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
+    markdown: MARKDOWN,
+    is_admin_mode: is_admin_mode,
+    finish_option: option,
+    is_search: false,
+  }
+
+  return { option: option_fields }.to_json if selection_id.nil? or selection_id == ""
+
+  # Add option to selection
+  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
+  # TODO when we update the Finishes tables, we need to check for belongs to project
+  # Right now, we use the project to fetch the record so it definitely belongs.
+  return { option: option_fields }.to_json if selection.nil? #or !selection.belongs_to_project?(project)
+
+  if !selection["Options"].include? option.id
+    selection["Options"] += [option.id]
+    selection.save
+  end
+
+  return { option: option_fields }.to_json
+end
+
 post '/project/:access_token/finishes/selection/:id/remove' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]

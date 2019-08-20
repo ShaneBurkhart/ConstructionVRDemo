@@ -110,7 +110,7 @@
         $.post("finishes/selection/" + selectionId + "/option/" + optionId + "/unlink");
     }
 
-    $('.unlink-selection-option-popup .ui.red.button').click(function(e) {
+    $('.selections-container').on('click', '.unlink-selection-option-popup .ui.red.button', function(e) {
         var $this = $(this);
         if ($this.text() == "Are you sure?") {
             var selectionId = $this.closest(".selection").data("selection-id");

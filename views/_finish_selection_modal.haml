@@ -61,12 +61,8 @@
 
   .actions
     .ui.cancel.button Close
-    .ui.popup.close-edit-option
-      .header Discard Changes?
-      %p Any changes you have made will not be saved. Press the save button to save changes.
-      .ui.red.button Discard Changes
-    .ui.blue.button Save
-    .ui.green.button Save & Link
+    .ui.blue.approve.button Save
+    .ui.green.approve.button Save & Link
 
 :css
   .ui.modal.finish-selection-modal .header {
@@ -83,7 +79,6 @@
     min-height: 300px;
   }
 
-
 :javascript
   $(document).ready(function () {
     var $searchOptionsContainer = $(".finish-selection-modal .search-options-container");
@@ -91,18 +86,69 @@
     var $linking = $(".finish-selection-modal > .ui.inverted.dimmer");
     var $openCreateOption = $(".finish-selection-modal .actions .open-create-finish-option-modal");
     var $editFinishOptionModal = $(".edit-finish-option-modal");
+    var $saving = $(".edit-finish-option-modal > .ui.inverted.dimmer");
 
     $(".ui.modal").modal({ allowMultiple: true, closable: false });
-    $('.close-edit-option').popup({ inline: true, on: "click" });
 
     $editFinishOptionModal.modal({
       closable: false,
       allowMultiple: true,
       onDeny: function(){
+        var val = confirm('Are you sure you want to close?  Any changes will be lost.')
+        if (!val) return false;
+
         $linking.removeClass('active');
       },
-      onApprove: function() {
-        window.alert('Approved!');
+      onApprove: function(e) {
+        var $button = $(e);
+        var $optionForm = $editFinishOptionModal.find(".option-form");
+        var selectionId = $(".finish-selection-modal").data("selection-id");
+        var d = {
+          id: $optionForm.find('.record-id').val(),
+          name: $optionForm.find(".name").val(),
+          type: $optionForm.find(".type").val(),
+          unit_price: $optionForm.find(".unit-price").val(),
+          url: $optionForm.find(".url").val(),
+          info: $optionForm.find(".info").val(),
+        };
+
+        $saving.addClass('active');
+
+        if ($button.text() == "Save & Link") {
+            // Add info for linking
+            d["selection_id"] = selectionId;
+        }
+
+        // Save option
+        var url = "/project/#{access_token}/finishes/option/save";
+        $.post(url, d, function (data) {
+            if ($button.text() == "Save & Link") {
+              var dataJSON = JSON.parse(data);
+              var option = dataJSON["option"] || {};
+
+              if(selectionId && option["List Card HTML"]) {
+                var $selection = $(".selection[data-selection-id=\"" + selectionId + "\"]");
+                $selection.find(".open-selection-option-modal").before(option["List Card HTML"]);
+
+                // Link controls again.
+                $('.unlink-selection-option').popup({
+                  inline: true,
+                  on: "click",
+                  onHide: function() {
+                    $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
+                  },
+                });
+              }
+
+              $(".finish-selection-modal").modal("hide");
+            }
+
+            $linking.removeClass("active");
+            $saving.removeClass("active");
+            $(".edit-finish-option-modal").modal("hide");
+        });
+
+        return false;
       }
     })
 
@@ -111,9 +157,11 @@
       var $form = $(".edit-finish-option-modal .option-form");
 
       $(".edit-finish-option-modal .option-name").text(option["name"] || "New Option");
+
+      $form.find(".record-id").val(option["optionId"] || "");
       $form.find(".name").val(option["name"] || "");
       $form.find(".type").val(option["type"] || "");
-      $form.find(".unit-price").val(option["unit_price"] || "");
+      $form.find(".unit-price").val(option["unitPrice"] || "");
       $form.find(".url").val(option["url"] || "");
       $form.find(".info").val(option["info"] || "");
     }
