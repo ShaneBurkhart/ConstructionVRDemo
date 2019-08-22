@@ -1,5 +1,7 @@
 .container
-  %h1 All Projects
+  %h1 Your Projects
 
-  - projects.each do |project|
-    %a{ href: "/project/#{project["Access Token"]}" }= project["Name"]
+  %ul
+    - projects.each do |project|
+      %li
+        %a{ href: "/project/#{project["Access Token"]}" }= project["Name"]

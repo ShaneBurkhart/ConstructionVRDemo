@@ -128,7 +128,23 @@
 
               if(selectionId && option["List Card HTML"]) {
                 var $selection = $(".selection[data-selection-id=\"" + selectionId + "\"]");
-                $selection.find(".open-selection-option-modal").before(option["List Card HTML"]);
+                var $oldOption = $selection.find(".option[data-option-id=\"" + option["Record ID"] + "\"]");
+                var $optionCard = $(option["List Card HTML"]);
+
+                if ($oldOption.length) {
+                  $oldOption.replaceWith($optionCard);
+                } else {
+                  $selection.find(".open-selection-option-modal").before($optionCard);
+                }
+
+                $optionCard.find('.unlink-selection-option').popup({
+                  inline: true,
+                  on: "click",
+                  onHide: function() {
+                    $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
+                  },
+                });
+
 
                 // Link controls again.
                 $('.unlink-selection-option').popup({
@@ -224,7 +240,15 @@
         var option = dataJSON["option"] || {};
 
         if(option["List Card HTML"]) {
-          $selection.find(".open-selection-option-modal").before(option["List Card HTML"]);
+          var $optionCard = $(option["List Card HTML"]);
+          $selection.find(".open-selection-option-modal").before($optionCard);
+          $optionCard.find('.unlink-selection-option').popup({
+            inline: true,
+            on: "click",
+            onHide: function() {
+              $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
+            },
+          });
         }
 
         $linking.removeClass("active");
