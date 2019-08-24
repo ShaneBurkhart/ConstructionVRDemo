@@ -12,7 +12,9 @@
     %a{ href: "#", data: { location: "amenities" } } Amenities
 
   .selections-container
-    - @finish_categories.each do |category, finishes|
+    - @finish_categories.each do |obj|
+      - category = obj[:category]
+      - finishes = obj[:selections]
       - next if finishes.nil? or finishes.length == 0
 
       %h2= category

@@ -26,6 +26,23 @@ module Finishes
 
     has_many :options, class: "Finishes::Option", column: "Options"
 
+    CATEGORY_ORDER = [
+      "Concepts",
+      "Walls & Millwork",
+      "Flooring",
+      "Cabinets & Countertops",
+      "Tile",
+      "Light Fixtures",
+      "Plumbing Fixtures & Acc.",
+      "Mirrors",
+      "Blinds",
+      "Shelving",
+      "Appliances",
+      "Furniture",
+      "Exterior",
+      "Misc"
+    ]
+
     def belong_to_project?(project)
       return false if project.nil?
       return self["Project"][0] == project.id
@@ -33,7 +50,23 @@ module Finishes
 
     def self.finishes_for_project(project)
       return {} if project.nil?
-      return project.selections.group_by { |s| s["Category"] }
+      selections = project.selections
+      by_category = selections.group_by { |s| s["Category"] }
+      output = []
+
+      by_category.delete(nil)
+
+      self::CATEGORY_ORDER.each do |c|
+        next if by_category[c].nil?
+        output << { category: c, selections: by_category[c] }
+      end
+
+      remaining = by_category.except(self::CATEGORY_ORDER).to_a.map { |k, v|
+        { category: k, selections: v }
+      }
+      output.concat(remaining.sort_by{ |s| s[:category] })
+
+      return output
     end
   end
 

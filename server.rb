@@ -331,7 +331,9 @@ get '/project/:access_token/finishes' do
 
   finish_option_ids = []
 
-  @finish_categories.each do |category, finish_selections|
+  @finish_categories.each do |o|
+    category = o[:category]
+    finish_selections = o[:selections]
     finish_selections.each do |finish_selection|
       finish_option_ids.concat(finish_selection["Options"] || [])
     end
@@ -341,7 +343,9 @@ get '/project/:access_token/finishes' do
   finish_options_by_id = all_finish_options.map { |o| [o.id, o] }.to_h
 
   @options_for_selection = {}
-  @finish_categories.each do |category, finish_selections|
+  @finish_categories.each do |o|
+    category = o[:category]
+    finish_selections = o[:selections]
     finish_selections.each do |finish_selection|
       options = (finish_selection["Options"] || [])
       @options_for_selection[finish_selection.id] = options.map { |id| finish_options_by_id[id] }
