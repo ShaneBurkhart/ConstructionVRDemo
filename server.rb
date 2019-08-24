@@ -64,7 +64,7 @@ end
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
-      finish_options: FinishOptions.search_for_component(s)
+    finish_options: Finishes::Option.search_for_component(s)
   }
 end
 
@@ -327,7 +327,7 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @finish_categories = ProjectFinishSelections.finishes_for_project(project)
+  @finish_categories = Finishes::Selection.finishes_for_project(project)
 
   finish_option_ids = []
 
@@ -337,7 +337,7 @@ get '/project/:access_token/finishes' do
     end
   end
 
-  all_finish_options = FinishOptions.find_many(finish_option_ids)
+  all_finish_options = Finishes::Option.find_many(finish_option_ids)
   finish_options_by_id = all_finish_options.map { |o| [o.id, o] }.to_h
 
   @options_for_selection = {}
@@ -362,7 +362,7 @@ get '/project/:access_token/finishes/options/search' do
   is_admin_mode = !!session[:is_admin]
   search_token = params[:s]
 
-  options = FinishOptions.all(filter: "SEARCH('#{search_token}', {Name})")
+  options = Finishes::Option.all(filter: "SEARCH('#{search_token}', {Name})")
   options = options.map do |o|
     fields = o.fields
 
@@ -436,14 +436,14 @@ post '/project/:access_token/finishes/option/save' do
 
   option_id = params[:id]
   selection_id = params[:selection_id]
-  option = FinishOptions.new({})
+  option = Finishes::Option.new({})
 
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
   if !option_id.nil? and option_id != ""
-    option = FinishOptions.find(option_id)
-    option = FinishOptions.new({}) if option.nil? or option.id.nil? or option.id == ""
+    option = Finishes::Option.find(option_id)
+    option = Finishes::Option.new({}) if option.nil? or option.id.nil? or option.id == ""
   end
 
   option["Name"] = params[:name] if params.has_key? :name
@@ -469,10 +469,8 @@ post '/project/:access_token/finishes/option/save' do
   return { option: option_fields }.to_json if selection_id.nil? or selection_id == ""
 
   # Add option to selection
-  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
-  # TODO when we update the Finishes tables, we need to check for belongs to project
-  # Right now, we use the project to fetch the record so it definitely belongs.
-  return { option: option_fields }.to_json if selection.nil? #or !selection.belongs_to_project?(project)
+  selection = Finishes::Selection.find(selection_id)
+  return { option: option_fields }.to_json if selection.nil? or !selection.belongs_to_project?(project)
 
   if !selection["Options"].include? option.id
     selection["Options"] += [option.id]
@@ -491,10 +489,8 @@ post '/project/:access_token/finishes/selection/:id/remove' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
-  # TODO when we update the Finishes tables, we need to check for belongs to project
-  # Right now, we use the project to fetch the record so it definitely belongs.
-  return "Not found" if selection.nil? #or !selection.belongs_to_project?(project)
+  selection = Finishes::Selection.find(selection_id)
+  return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
 
   selection.destroy
 
@@ -511,12 +507,10 @@ post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
-  # TODO when we update the Finishes tables, we need to check for belongs to project
-  # Right now, we use the project to fetch the record so it definitely belongs.
-  return "Not found" if selection.nil? #or !selection.belongs_to_project?(project)
+  selection = Finishes::Selection.find(selection_id)
+  return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
 
-  option = FinishOptions.find(option_id)
+  option = Finishes::Option.find(option_id)
   return "Not found" if option.nil?
 
   option_fields = {}
@@ -547,10 +541,8 @@ post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  selection = ProjectFinishSelections.find_project_selection(project, selection_id)
-  # TODO when we update the Finishes tables, we need to check for belongs to project
-  # Right now, we use the project to fetch the record so it definitely belongs.
-  return "Not found" if selection.nil? #or !selection.belongs_to_project?(project)
+  selection = Finishes::Selection.find(selection_id)
+  return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
   return "Not found" if option_id.nil?
 
   selection["Options"] = selection["Options"] - [option_id]

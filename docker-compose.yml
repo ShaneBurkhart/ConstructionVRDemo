@@ -7,6 +7,7 @@ web:
         - redis
     volumes:
         - .:/app
+        - /app/node_modules
     env_file:
         - user.env
     command: "rerun --background ruby server.rb"

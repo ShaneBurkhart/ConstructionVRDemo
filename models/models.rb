@@ -20,23 +20,37 @@ module Content
 end
 
 module Finishes
-  class Project < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
-    self.table_name = "Projects"
-
-    has_many :selections, class: "Finishes::Selection", column: "Selections"
-  end
-
   class Selection < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Selections"
 
     has_many :options, class: "Finishes::Option", column: "Options"
+
+    def belong_to_project?(project)
+      return false if project.nil?
+      return self["Project"][0] == project.id
+    end
+
+    def self.finishes_for_project(project)
+      return {} if project.nil?
+      return project.selections.group_by { |s| s["Category"] }
+    end
   end
 
   class Option < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Options"
+
+    def self.search_for_component(s)
+      # Implement search later
+      self.all view: "Has Model"
+    end
+
+    def form_object
+      self.fields.slice(
+        "Name", "Type", "Unit Price", "URL", "Info"
+      ).transform_keys { |k| k.underscore.gsub(" ", "_") }
+    end
   end
 end
 
@@ -112,6 +126,7 @@ class Project < Airrecord::Table
   self.table_name = "Projects"
 
   belongs_to :users, class: "User", column: "Users"
+  has_many :selections, class: "Finishes::Selection", column: "Selections"
 
   def units
     if @units.nil?
