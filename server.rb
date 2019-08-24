@@ -436,7 +436,8 @@ post '/project/:access_token/finishes/option/save' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
-  return "Not found" unless is_admin_mode
+  user_id = session[:user_id]
+  return "Not found" unless is_admin_mode and !user_id.nil?
 
   option_id = params[:id]
   selection_id = params[:selection_id]
@@ -450,6 +451,7 @@ post '/project/:access_token/finishes/option/save' do
     option = Finishes::Option.new({}) if option.nil? or option.id.nil? or option.id == ""
   end
 
+  option["User"] = [ user_id ]
   option["Name"] = params[:name] if params.has_key? :name
   option["Type"] = params[:type] if params.has_key? :type
   option["Unit Price"] = params[:unit_price].to_f if params.has_key? :unit_price
