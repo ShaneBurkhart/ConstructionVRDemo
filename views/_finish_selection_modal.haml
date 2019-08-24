@@ -170,6 +170,10 @@
                 $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
               },
             });
+            $optionCard.find('.copy-to-edit-option').popup({
+              inline: true,
+              on: "click",
+            });
 
             if ($button.text() == "Save & Link") {
               $(".finish-selection-modal").modal("hide");
@@ -185,13 +189,14 @@
       }
     })
 
-    function populateEditFinishOptionModal(option, $el) {
+    function populateEditFinishOptionModal(option, $el, to_duplicate) {
       if(!option) option = {};
+      if(!to_duplicate) to_duplicate = false;
       var $form = $(".edit-finish-option-modal .option-form");
 
       $(".edit-finish-option-modal .option-name").text(option["name"] || "New Option");
 
-      $form.find(".record-id").val(option["optionId"] || "");
+      if (!to_duplicate) $form.find(".record-id").val(option["optionId"] || "");
       $form.find(".name").val(option["name"] || "");
       $form.find(".type").val(option["type"] || "");
       $form.find(".unit-price").val(option["unitPrice"] || "");
@@ -225,6 +230,8 @@
       var selectionType = $selection.data("type");
       var selectionLocation = $selection.data("location");
 
+      $selectionOption.find(".copy-to-edit-option").popup("hide");
+
       $(".finish-selection-modal").data("selection-id", selectionId);
 
       $(".finish-selection-modal .selection-type").text(selectionType);
@@ -234,7 +241,7 @@
       $(".finish-selection-modal .finish-search-input").trigger("keyup");
       $modal.modal("show");
 
-      populateEditFinishOptionModal(data, $selectionOption);
+      populateEditFinishOptionModal(data, $selectionOption, $this.hasClass("duplicate"));
       $linking.addClass("active");
       $editFinishOptionModal.modal("show")
     });
@@ -244,7 +251,7 @@
       var $selectionOption = $this.closest(".option");
       var data = $selectionOption.data();
 
-      populateEditFinishOptionModal(data, $selectionOption);
+      populateEditFinishOptionModal(data, $selectionOption, $this.hasClass("duplicate"));
       $linking.addClass("active");
       $editFinishOptionModal.modal("show")
     });
@@ -274,6 +281,10 @@
             onHide: function() {
               $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
             },
+          });
+          $optionCard.find('.copy-to-edit-option').popup({
+            inline: true,
+            on: "click",
           });
         }
 

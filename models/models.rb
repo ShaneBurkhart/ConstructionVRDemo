@@ -43,7 +43,7 @@ module Finishes
       "Misc"
     ]
 
-    def belong_to_project?(project)
+    def belongs_to_project?(project)
       return false if project.nil?
       return self["Project"][0] == project.id
     end
@@ -74,6 +74,8 @@ module Finishes
     self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Options"
 
+    FINISH_VISION_VR_TEAM_USER_ID = "recCToPMsjUh8gdcc"
+
     def self.search_for_component(s)
       # Implement search later
       self.all view: "Has Model"
@@ -83,6 +85,10 @@ module Finishes
       self.fields.slice(
         "Name", "Type", "Unit Price", "URL", "Info"
       ).transform_keys { |k| k.underscore.gsub(" ", "_") }
+    end
+
+    def is_library?
+      return self["User"].include?(Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID)
     end
   end
 end

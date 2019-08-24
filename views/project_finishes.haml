@@ -106,6 +106,7 @@
         $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
       },
     });
+    $('.copy-to-edit-option').popup({ inline: true, on: "click" });
 
     function unlinkSelectionOption(selectionId, optionId) {
         $(".selection[data-selection-id=\"" + selectionId + "\"] .option[data-option-id=\"" + optionId + "\"]").remove();

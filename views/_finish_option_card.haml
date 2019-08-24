@@ -28,16 +28,39 @@
 
   - if !is_search and is_admin_mode
     .extra.content
+      - if finish_option.is_library?
+        .pull-right FinishVisionVR Library
+
       %a.ui.unlink-selection-option{ href: "javascript:void(0)" } Unlink Option
       .ui.popup.unlink-selection-option-popup
         .header Unlink Option From Selection?
         %p You are about to unlink an option for this selection. Do you want to continue? You can relink it later if you want.
         .ui.red.button Unlink
-      &mdash;
-      %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option
+
+      - if finish_option.is_library?
+        &mdash;
+        %a.ui.copy-to-edit-option{ href: "javascript:void(0)" } Edit Option
+        .ui.popup.copy-to-edit-option-popup
+          .header This is a Library Option.
+          %p This is an option from our library. To edit, we create a duplicate and save it to your library.
+          .ui.green.button.open-edit-option-modal.duplicate Create Copy
+      - else
+        &mdash;
+        %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option
 
   - if is_search
     .extra.content
-      .pull-right
-        %a.ui.link-to-selection{ href: "javascript:void(0)" } + Link Option to Selection
-      %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option
+      - if finish_option.is_library?
+        .pull-right FinishVisionVR Library
+
+      %a.ui.link-to-selection{ href: "javascript:void(0)" } + Link Option to Selection
+      - if finish_option.is_library?
+        &mdash;
+        %a.ui.copy-to-edit-option{ href: "javascript:void(0)" } Edit Option
+        .ui.popup.copy-to-edit-option-popup
+          .header This is a Library Option.
+          %p This is an option from our library. To edit, we create a duplicate and save it to your library.
+          .ui.green.button.open-edit-option-modal.duplicate Create Copy
+      - else
+        &mdash;
+        %a.ui.open-edit-option-modal{ href: "javascript:void(0)" } Edit Option

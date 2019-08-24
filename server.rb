@@ -448,6 +448,11 @@ post '/project/:access_token/finishes/option/save' do
 
   if !option_id.nil? and option_id != ""
     option = Finishes::Option.find(option_id)
+
+    # Check that found option can be edited by this user.
+    return "Not Found" if option and !(option["User"] || []).include?(user_id)
+
+    # If option not found, we are creating it.
     option = Finishes::Option.new({}) if option.nil? or option.id.nil? or option.id == ""
   end
 
