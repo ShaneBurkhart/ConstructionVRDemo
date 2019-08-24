@@ -6,9 +6,23 @@ require "redis-store"
 require 'redis-rack'
 require 'redcarpet'
 require 'json'
+require 'aws-sdk'
+require 'aws-sdk-s3'
+require 'open-uri'
 
 require './models/models.rb'
 require './models/db_models.rb'
+
+S3_URL = "https://s3-us-west-2.amazonaws.com"
+REGION = ENV["REGION"]
+BUCKET = ENV["BUCKET"]
+TMP_KEY_PREFIX = "tmp"
+
+Aws.config.update({
+  region: REGION,
+  credentials: Aws::Credentials.new(ENV["ACCESS_KEY_ID"], ENV["SECRET_ACCESS_KEY"])
+})
+s3 = Aws::S3::Resource.new(region: REGION)
 
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
@@ -371,6 +385,49 @@ get '/project/:access_token/finishes/options/search' do
   return { options: options }.to_json
 end
 
+get '/project/:access_token/finishes/options/images/upload' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" unless is_admin_mode
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  open(params[:fetch]) { |f|
+    content_type f.content_type
+    return f.read
+  }
+end
+
+post '/project/:access_token/finishes/options/images/upload' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  filepond = params["filepond"]
+  return "Not found" unless is_admin_mode
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  if params[:fetch]
+    return open(params[:fetch])
+  end
+
+  ext = filepond["filename"].split(".").last
+  key = "#{TMP_KEY_PREFIX}/#{SecureRandom.uuid}.#{ext}"
+  obj = s3.bucket(BUCKET).object(key)
+  obj.upload_file(filepond["tempfile"].path)
+  obj.acl.put({acl: "public-read"})
+
+  return key
+end
+
+post '/project/:access_token/finishes/options/images/upload' do
+  # Nothing to do. Needed for filepond to delete images.
+  # We use an expiration date for temp files in s3 instead.
+end
+
 post '/project/:access_token/finishes/option/save' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
@@ -394,6 +451,10 @@ post '/project/:access_token/finishes/option/save' do
   option["Unit Price"] = params[:unit_price].to_f if params.has_key? :unit_price
   option["URL"] = params[:url] if params.has_key? :url
   option["Info"] = params[:info] if params.has_key? :info
+
+  if params.has_key? :images
+    option["Image"] = (params[:images] || []).map { |i| { url: "#{S3_URL}/#{BUCKET}/#{i}"} }
+  end
 
   option.save
 

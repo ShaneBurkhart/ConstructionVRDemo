@@ -57,7 +57,7 @@
         %textarea.info{ rows: "2" }
       .field
         %label Images
-        %input.image{ type: "file" }
+        %input.images{ type: "file", multiple: true, data: { max_files: 2 } }
 
   .actions
     .ui.cancel.button Close
@@ -90,9 +90,20 @@
 
     $(".ui.modal").modal({ allowMultiple: true, closable: false });
 
+    FilePond.registerPlugin(FilePondPluginImagePreview);
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
+
+    var $imageUpload = $editFinishOptionModal.find(".option-form .images");
+    $imageUpload.filepond()
+      .filepond("server", "/project/#{access_token}/finishes/options/images/upload")
+      .filepond("acceptedFileTypes", ['image/png', 'image/jpeg']);
+    var pond = FilePond.find($imageUpload[0]);
+
     $editFinishOptionModal.modal({
       closable: false,
       allowMultiple: true,
+      onVisible: function () {
+      },
       onDeny: function(){
         var val = confirm('Are you sure you want to close?  Any changes will be lost.')
         if (!val) return false;
@@ -110,7 +121,19 @@
           unit_price: $optionForm.find(".unit-price").val(),
           url: $optionForm.find(".url").val(),
           info: $optionForm.find(".info").val(),
+          images: [],
         };
+
+        var currentFiles = pond.getFiles();
+        for (var i = 0; i < currentFiles.length; i++) {
+          d["images"].push(currentFiles[i].serverId);
+        }
+
+        var isLoading = currentFiles.filter(function (x) {
+          return x.status !== 5;
+        }).length !== 0;
+
+        if (isLoading) return false;
 
         $saving.addClass('active');
 
@@ -122,53 +145,47 @@
         // Save option
         var url = "/project/#{access_token}/finishes/option/save";
         $.post(url, d, function (data) {
-            if ($button.text() == "Save & Link") {
-              var dataJSON = JSON.parse(data);
-              var option = dataJSON["option"] || {};
+          var dataJSON = JSON.parse(data);
+          var option = dataJSON["option"] || {};
 
-              if(selectionId && option["List Card HTML"]) {
-                var $selection = $(".selection[data-selection-id=\"" + selectionId + "\"]");
-                var $oldOption = $selection.find(".option[data-option-id=\"" + option["Record ID"] + "\"]");
-                var $optionCard = $(option["List Card HTML"]);
+          if(option["List Card HTML"]) {
+            var optionSelector = ".option[data-option-id=\"" + option["Record ID"] + "\"]";
+            var $optionCard = $(option["List Card HTML"]);
 
-                if ($oldOption.length) {
-                  $oldOption.replaceWith($optionCard);
-                } else {
-                  $selection.find(".open-selection-option-modal").before($optionCard);
-                }
+            if (selectionId && $button.text() == "Save & Link") {
+              var $selection = $(".selection[data-selection-id=\"" + selectionId + "\"]");
 
-                $optionCard.find('.unlink-selection-option').popup({
-                  inline: true,
-                  on: "click",
-                  onHide: function() {
-                    $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
-                  },
-                });
-
-
-                // Link controls again.
-                $('.unlink-selection-option').popup({
-                  inline: true,
-                  on: "click",
-                  onHide: function() {
-                    $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
-                  },
-                });
+              if (!$selection.find(optionSelector).length) {
+                $selection.find(".open-selection-option-modal").before($optionCard);
               }
-
-              $(".finish-selection-modal").modal("hide");
             }
 
-            $linking.removeClass("active");
-            $saving.removeClass("active");
-            $(".edit-finish-option-modal").modal("hide");
+            var $oldOption = $(optionSelector);
+            $oldOption.replaceWith($optionCard);
+
+            $optionCard.find('.unlink-selection-option').popup({
+              inline: true,
+              on: "click",
+              onHide: function() {
+                $('.unlink-selection-option-popup .ui.red.button').text("Unlink");
+              },
+            });
+
+            if ($button.text() == "Save & Link") {
+              $(".finish-selection-modal").modal("hide");
+            }
+          }
+
+          $linking.removeClass("active");
+          $saving.removeClass("active");
+          $(".edit-finish-option-modal").modal("hide");
         });
 
         return false;
       }
     })
 
-    function populateEditFinishOptionModal(option) {
+    function populateEditFinishOptionModal(option, $el) {
       if(!option) option = {};
       var $form = $(".edit-finish-option-modal .option-form");
 
@@ -180,6 +197,15 @@
       $form.find(".unit-price").val(option["unitPrice"] || "");
       $form.find(".url").val(option["url"] || "");
       $form.find(".info").val(option["info"] || "");
+
+      if ($el) {
+        pond.removeFiles();
+
+        $el.find("img").each(function (i, img) {
+          var src = $(img).attr("src");
+          pond.addFile(src);
+        })
+      }
     }
 
     $openCreateOption.click(function () {
@@ -208,7 +234,7 @@
       $(".finish-selection-modal .finish-search-input").trigger("keyup");
       $modal.modal("show");
 
-      populateEditFinishOptionModal(data);
+      populateEditFinishOptionModal(data, $selectionOption);
       $linking.addClass("active");
       $editFinishOptionModal.modal("show")
     });
@@ -218,7 +244,7 @@
       var $selectionOption = $this.closest(".option");
       var data = $selectionOption.data();
 
-      populateEditFinishOptionModal(data);
+      populateEditFinishOptionModal(data, $selectionOption);
       $linking.addClass("active");
       $editFinishOptionModal.modal("show")
     });
