@@ -18,7 +18,7 @@ function App() {
   }, _react.default.createElement("img", {
     className: "App-logo",
     alt: "logo"
-  }), _react.default.createElement("p", null, "Edit ", _react.default.createElement("code", null, "src/App.js"), " and save to reload."), _react.default.createElement("a", {
+  }), _react.default.createElement("p", null, "Edits ", _react.default.createElement("code", null, "src/App.js"), " and save to reload."), _react.default.createElement("a", {
     className: "App-link",
     href: "https://reactjs.org",
     target: "_blank",

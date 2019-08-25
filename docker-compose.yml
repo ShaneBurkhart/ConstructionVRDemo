@@ -10,7 +10,7 @@ web:
         - /app/node_modules
     env_file:
         - user.env
-    command: "rerun --background ruby server.rb"
+    command: "rerun --background --ignore 'build/*' ruby server.rb"
 
 react_build:
     image: shaneburkhart/construction-vr-demo
@@ -19,7 +19,7 @@ react_build:
         - /app/node_modules
     env_file:
         - user.env
-    command: "rerun --background make build_react"
+    command: "rerun --background --ignore 'build/*' --ignore 'public/finishes-app.js' make build_react"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo
