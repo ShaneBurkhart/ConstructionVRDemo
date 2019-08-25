@@ -61,6 +61,8 @@
     = haml :_finish_selection_modal, locals: { access_token: access_token }
 
 :javascript
+  var PROJECT_ACCESS_TOKEN = "#{access_token}";
+
   $(document).ready(function () {
     var $filters = $(".filters");
     $filters.click("a", function (e) {

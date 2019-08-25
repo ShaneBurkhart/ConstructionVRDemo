@@ -1,25 +1,37 @@
 import React from 'react';
+import { connect } from 'react-redux'
+
+import ActionCreators from './action_creators';
+
+import SelectionCategorySection from './SelectionCategorySection';
+
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img className="App-logo" alt="logo" />
-        <p>
-          Edits <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  componentDidMount() {
+    ActionCreators.load()
+  }
+
+  render() {
+    const { selections_by_category } = this.props;
+
+    return (
+      <div className="selections-container">
+        {Object.keys(selections_by_category).map((value, index) => {
+          return <SelectionCategorySection
+                    category={value}
+                    selections={selections_by_category[value]}
+                    />
+        })}
+      </div>
+    );
+  }
 }
 
-export default App;
+export default connect(
+  (state, props) => ({
+    selections_by_category: state.selections_by_category
+  }),
+  (dispatch) => ({
+  })
+)(App);

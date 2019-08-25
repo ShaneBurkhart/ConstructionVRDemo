@@ -16,7 +16,10 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-plugin-css-modules-transform": "^1.6.2",
-    "browserify": "^16.5.0"
+    "browserify": "^16.5.0",
+    "jquery": "^3.4.1",
+    "react-redux": "^7.1.0",
+    "redux": "^4.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
