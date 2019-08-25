@@ -12,6 +12,15 @@ web:
         - user.env
     command: "rerun --background ruby server.rb"
 
+react_build:
+    image: shaneburkhart/construction-vr-demo
+    volumes:
+        - .:/app
+        - /app/node_modules
+    env_file:
+        - user.env
+    command: "rerun --background make build_react"
+
 web_prod:
     image: shaneburkhart/construction-vr-demo
     ports:

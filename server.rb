@@ -30,7 +30,6 @@ MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 $stdout.sync = true
 
 set :bind, '0.0.0.0'
-set :public_folder, Proc.new { File.join(root, "build") }
 
 use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
 
@@ -63,7 +62,7 @@ def find_project_by_admin_access_token(admin_access_token)
 end
 
 get "/" do
-  File.read(File.join('build', 'index.html'))
+  redirect "/projects"
 end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do

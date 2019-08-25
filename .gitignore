@@ -1,6 +1,8 @@
 user.env
 .DS_Store
 output/
+build/
+temp/
 data/
 **.zip
 node_modules/
