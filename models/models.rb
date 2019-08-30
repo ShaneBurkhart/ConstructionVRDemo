@@ -167,6 +167,13 @@ class Project < Airrecord::Table
   belongs_to :users, class: "User", column: "Users"
   has_many :selections, class: "Finishes::Selection", column: "Selections"
 
+  def options
+    selections = self.selections
+    option_ids = selections.map { |s| s["Options"] }.flatten
+    puts option_ids.inspect
+    return Finishes::Option.find_many(option_ids)
+  end
+
   def units
     if @units.nil?
       @units = Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
@@ -181,6 +188,15 @@ class Project < Airrecord::Table
     end
 
     return @procurement_forms
+  end
+
+  def belongs_to_user?(user)
+    return false if user.nil?
+    if user.is_a? String
+      return self["Users"].include? user
+    else
+      return self["Users"].include? user.id
+    end
   end
 end
 

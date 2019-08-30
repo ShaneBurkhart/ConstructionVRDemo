@@ -118,6 +118,62 @@ post '/f038c9d4-2809-4050-976a-309445be7c8b/slack/kontent-keeper/webhook' do
   return params[:challenge]
 end
 
+def project_data(project, is_admin)
+  selections = project.selections
+  selections.each { |s|
+    s["Notes HTML"] = MARKDOWN.render(s["Notes"] || "").gsub("\n", "<br>")
+  }
+
+  options = project.options
+  options.each { |o|
+    o["Info HTML"] = MARKDOWN.render(o["Info"] || "").gsub("\n", "<br>")
+    o["Is Library?"] = o.is_library?
+  }
+
+  content_type :json
+  return {
+    is_admin: is_admin,
+    project: project,
+    selections: selections,
+    options: options,
+  }.to_json
+end
+
+get '/api/project/:access_token' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  user_id = session[:user_id]
+  #return "Not found" unless is_admin_mode
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil? or !project.belongs_to_user?(user_id)
+
+  return project_data(project, is_admin_mode)
+end
+
+post '/api/project/:access_token/finishes/selection/:selection_id/option/:option_id/unlink' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  user_id = session[:user_id]
+  selection_id = params[:selection_id]
+  option_id = params[:option_id]
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil? or !project.belongs_to_user?(user_id)
+
+  selection = Finishes::Selection.find(selection_id)
+  return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
+  return "Not found" if option_id.nil?
+
+  selection["Options"] = selection["Options"] - [option_id]
+  selection.save
+
+  return project_data(project, is_admin_mode)
+end
+
+
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.
@@ -544,26 +600,6 @@ post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/
   end
 
   return { option: option_fields }.to_json
-end
-
-post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/unlink' do
-  access_token = params[:access_token]
-  is_debug_mode = !!params[:debug] || !!session[:is_admin]
-  is_admin_mode = !!session[:is_admin]
-  selection_id = params[:selection_id]
-  option_id = params[:option_id]
-
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-
-  selection = Finishes::Selection.find(selection_id)
-  return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
-  return "Not found" if option_id.nil?
-
-  selection["Options"] = selection["Options"] - [option_id]
-  selection.save
-
-  return {}
 end
 
 get '/project/:access_token/procurement_forms' do

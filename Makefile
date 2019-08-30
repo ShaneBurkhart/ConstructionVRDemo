@@ -15,8 +15,9 @@ react:
 
 build_react:
 	./node_modules/.bin/babel --presets=@babel/preset-react,@babel/preset-env --plugins=css-modules-transform -d build --copy-files react
+	rm -f public/finishes-app.js
 	./node_modules/.bin/browserify build/index.js -o public/finishes-app.js
-	rm public/*.tmp-browserify*
+	rm -f public/*.tmp-browserify*
 
 db:
 	docker-compose -p ${NAME} run --rm web_prod rake db:migrate
