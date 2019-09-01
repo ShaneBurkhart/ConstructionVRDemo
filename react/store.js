@@ -11,9 +11,11 @@ const initialState = {
   selections: [],
   options: [],
   selections_by_category: {},
+  selections_by_id: {},
   options_by_id: {},
   modals: {
     editOptionId: null,
+    selectingForSelectionId: null,
   }
 };
 
@@ -32,11 +34,16 @@ const reducer = (state = initialState, action) => {
       return unlinkOptionFromSelection(state, action)
       break;
 
+    case Actions.OPEN_MODAL:
+      var newModals = _.extend({}, state.modals, { [action.modal]: action.id })
+      return _.extend({}, state, { modals: newModals });
+      break;
+    case Actions.CLOSE_MODAL:
+      var newModals = _.extend({}, state.modals, { [action.modal]: null })
+      return _.extend({}, state, { modals: newModals });
+      break;
     case Actions.LOADING:
       return _.extend({}, state, { isLoading: action.isLoading })
-      break;
-
-    case Actions.OPEN_EDIT_OPTIONS_MODAL:
       break;
   }
 
@@ -56,10 +63,11 @@ function updateProject(state, action) {
   var newState = _.extend({}, state, _.pick(action, "project", "selections", "options", "is_admin"))
   newState.selections_by_category = _.groupBy(newState.selections, (s) => (s.fields["Category"]));
   newState.options_by_id = _.indexBy(newState.options, (s) => (s["id"]));
+  newState.selections_by_id = _.indexBy(newState.selections, (s) => (s["id"]));
 
   return newState;
 }
 
-const finishesStore = createStore(reducer);
+const finishesStore = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 
 export default finishesStore

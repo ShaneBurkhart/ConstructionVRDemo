@@ -12,14 +12,14 @@ web:
         - user.env
     command: "rerun --background --ignore 'build/*' ruby server.rb"
 
-react_build:
-    image: shaneburkhart/construction-vr-demo
-    volumes:
-        - .:/app
-        - /app/node_modules
-    env_file:
-        - user.env
-    command: "rerun --background --ignore 'build/*' --ignore 'public/finishes-app.js' make build_react"
+#react_build:
+    #image: shaneburkhart/construction-vr-demo
+    #volumes:
+        #- .:/app
+        #- /app/node_modules
+    #env_file:
+        #- user.env
+    #command: "rerun --background --ignore 'build/*' --ignore 'public/finishes-app.js' make build_react"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo

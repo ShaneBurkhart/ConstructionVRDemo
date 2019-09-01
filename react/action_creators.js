@@ -17,8 +17,14 @@ export default {
   },
 
   openEditOptionModal: (optionId) => ({
-    type: Actions.OPEN_EDIT_OPTIONS_MODAL,
+    type: Actions.OPEN_MODAL,
+    modal: "editOptionId",
     id: optionId,
+  }),
+
+  closeEditOptionModal: () => ({
+    type: Actions.CLOSE_MODAL,
+    modal: "editOptionId"
   }),
 
   unlinkOption: (selectionId, optionId) => {
@@ -28,4 +34,15 @@ export default {
     $.post(url, dispatch_project_callback);
     return { type: Actions.LOADING, isLoading: true }
   },
+
+  saveOption: (optionId, optionValues) => {
+    const url = [ "/api/project/", PROJECT_ACCESS_TOKEN, "/finishes/option/save"].join("");
+
+    $.post(url, optionValues, (data) => {
+      dispatch_project_callback(data);
+    });
+
+    store.dispatch({ type: Actions.CLOSE_MODAL, modal: "editOptionId" });
+    return { type: Actions.LOADING, isLoading: true }
+  }
 }

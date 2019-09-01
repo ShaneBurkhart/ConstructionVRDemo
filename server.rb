@@ -152,6 +152,49 @@ get '/api/project/:access_token' do
   return project_data(project, is_admin_mode)
 end
 
+post '/api/project/:access_token/finishes/option/save' do
+  access_token = params[:access_token]
+  is_debug_mode = !!params[:debug] || !!session[:is_admin]
+  is_admin_mode = !!session[:is_admin]
+  user_id = session[:user_id]
+  return "Not found" unless is_admin_mode and !user_id.nil?
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil? or !project.belongs_to_user?(user_id)
+
+  option_id = params[:id]
+  option = Finishes::Option.new({})
+
+  if !option_id.nil? and option_id != ""
+    option = Finishes::Option.find(option_id)
+
+    # Check that found option can be edited by this user.
+    # This also makes it so no one but FinishVision can update library.
+    return "Not Found" if option and !(option["User"] || []).include?(user_id)
+
+    # If option not found, we are creating it.
+    option = Finishes::Option.new({}) if option.nil? or option.id.nil? or option.id == ""
+  end
+
+  option["User"] = [ user_id ] if option["User"].nil?
+  option["Name"] = params[:name] if params.has_key? :name
+  option["Type"] = params[:type] if params.has_key? :type
+  option["Other Type Value"] = params[:other_value] if params.has_key? :other_value
+  option["Unit Price"] = params[:unit_price].to_f if params.has_key? :unit_price
+  option["URL"] = params[:url] if params.has_key? :url
+  option["Info"] = params[:info] if params.has_key? :info
+
+  if params.has_key? :images
+    option["Image"] = (params[:images] || []).map { |i| { url: "#{S3_URL}/#{BUCKET}/#{i}"} }
+  end
+
+  puts option.inspect
+
+  option.save
+
+  return project_data(project, is_admin_mode)
+end
+
 post '/api/project/:access_token/finishes/selection/:selection_id/option/:option_id/unlink' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
@@ -449,7 +492,7 @@ get '/project/:access_token/finishes/options/search' do
   return { options: options }.to_json
 end
 
-get '/project/:access_token/finishes/options/images/upload' do
+get '/api/project/:access_token/finishes/options/images/upload' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
@@ -458,13 +501,13 @@ get '/project/:access_token/finishes/options/images/upload' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  open(params[:fetch]) { |f|
+  open(params[:fetch] || params[:load]) { |f|
     content_type f.content_type
     return f.read
   }
 end
 
-post '/project/:access_token/finishes/options/images/upload' do
+post '/api/project/:access_token/finishes/options/images/upload' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
@@ -487,69 +530,11 @@ post '/project/:access_token/finishes/options/images/upload' do
   return key
 end
 
-post '/project/:access_token/finishes/options/images/upload' do
+post '/api/project/:access_token/finishes/options/images/upload' do
   # Nothing to do. Needed for filepond to delete images.
   # We use an expiration date for temp files in s3 instead.
 end
 
-post '/project/:access_token/finishes/option/save' do
-  access_token = params[:access_token]
-  is_debug_mode = !!params[:debug] || !!session[:is_admin]
-  is_admin_mode = !!session[:is_admin]
-  user_id = session[:user_id]
-  return "Not found" unless is_admin_mode and !user_id.nil?
-
-  option_id = params[:id]
-  selection_id = params[:selection_id]
-  option = Finishes::Option.new({})
-
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-
-  if !option_id.nil? and option_id != ""
-    option = Finishes::Option.find(option_id)
-
-    # Check that found option can be edited by this user.
-    return "Not Found" if option and !(option["User"] || []).include?(user_id)
-
-    # If option not found, we are creating it.
-    option = Finishes::Option.new({}) if option.nil? or option.id.nil? or option.id == ""
-  end
-
-  option["User"] = [ user_id ]
-  option["Name"] = params[:name] if params.has_key? :name
-  option["Type"] = params[:type] if params.has_key? :type
-  option["Unit Price"] = params[:unit_price].to_f if params.has_key? :unit_price
-  option["URL"] = params[:url] if params.has_key? :url
-  option["Info"] = params[:info] if params.has_key? :info
-
-  if params.has_key? :images
-    option["Image"] = (params[:images] || []).map { |i| { url: "#{S3_URL}/#{BUCKET}/#{i}"} }
-  end
-
-  option.save
-
-  option_fields = option.fields
-  option_fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
-    markdown: MARKDOWN,
-    is_admin_mode: is_admin_mode,
-    finish_option: option,
-    is_search: false,
-  }
-
-  return { option: option_fields }.to_json if selection_id.nil? or selection_id == ""
-
-  # Add option to selection
-  selection = Finishes::Selection.find(selection_id)
-  return { option: option_fields }.to_json if selection.nil? or !selection.belongs_to_project?(project)
-
-  if !selection["Options"].include? option.id
-    selection["Options"] += [option.id]
-    selection.save
-  end
-
-  return { option: option_fields }.to_json
-end
 
 post '/project/:access_token/finishes/selection/:id/remove' do
   access_token = params[:access_token]

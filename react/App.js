@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux'
 import ActionCreators from './action_creators';
 
 import SelectionCategorySection from './SelectionCategorySection';
+import EditOptionModal from './EditOptionModal';
 
 import './App.css';
 
@@ -14,7 +15,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { selections_by_category, isLoading } = this.props;
+    const { selections_by_category, isLoading, editOption } = this.props;
     console.log("render");
 
     const dimmerClass = ["ui page inverted dimmer", isLoading ? "active" : ""].join(" ")
@@ -30,6 +31,7 @@ class App extends React.Component {
                       />
           })}
         </div>
+        {!!editOption && <EditOptionModal option={editOption} />}
         <div className={dimmerClass}>
           <div className="ui grey header content">Loading...</div>
         </div>
@@ -41,6 +43,7 @@ class App extends React.Component {
 export default connect(
   (state, props) => ({
     isLoading: state.isLoading,
+    editOption: state.options_by_id[state.modals.editOptionId],
     selections_by_category: state.selections_by_category
   }),
   (dispatch, props) => (bindActionCreators({
