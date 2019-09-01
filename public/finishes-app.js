@@ -171,6 +171,7 @@ function (_React$Component) {
     var option = props.option;
     var fields = option.fields;
     _this.onSave = _this.onSave.bind(_assertThisInitialized(_this));
+    console.log(fields["Image"]);
     _this.state = {
       id: option.id,
       name: fields["Name"] || "",
@@ -262,6 +263,7 @@ function (_React$Component) {
         allowMultiple: true,
         maxFiles: 2,
         server: "/api/project/" + projectAccessToken + "/finishes/options/images/upload",
+        acceptedFileTypes: ['image/png', 'image/jpeg'],
         onupdatefiles: function onupdatefiles(fileItems) {
           // Set currently active file objects to this.state
           console.log(fileItems);
@@ -503,6 +505,12 @@ var _react = _interopRequireDefault(require("react"));
 
 var _reactRedux = require("react-redux");
 
+var _redux = require("redux");
+
+var _semanticUiReact = require("semantic-ui-react");
+
+var _action_creators = _interopRequireDefault(require("./action_creators"));
+
 var _OptionCard = _interopRequireDefault(require("./OptionCard"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -511,14 +519,24 @@ function SelectionRow(props) {
   var selection = props.selection,
       options = props.options,
       index = props.index,
-      isAdmin = props.isAdmin;
+      isAdmin = props.isAdmin,
+      onRemoveSelection = props.onRemoveSelection;
   var fields = selection.fields;
   var shade = index % 2 == 0 ? "white" : "shade";
   return _react.default.createElement("tr", {
     className: ["selection", shade].join(" ")
   }, _react.default.createElement("td", null, _react.default.createElement("p", {
     className: "bold"
-  }, fields["Type"]), _react.default.createElement("p", null, fields["Location"], " - ", fields["Room"]), _react.default.createElement("div", {
+  }, fields["Type"]), _react.default.createElement("p", null, fields["Location"], " - ", fields["Room"]), _react.default.createElement("p", null, _react.default.createElement(_semanticUiReact.Popup, {
+    on: "click",
+    trigger: _react.default.createElement("a", {
+      className: "ui"
+    }, "Remove Selection"),
+    content: _react.default.createElement(_semanticUiReact.Button, {
+      color: "red",
+      onClick: onRemoveSelection
+    }, "Are you sure?")
+  })), _react.default.createElement("div", {
     className: "notes",
     dangerouslySetInnerHTML: {
       __html: fields["Notes HTML"]
@@ -541,12 +559,16 @@ var _default = (0, _reactRedux.connect)(function (state, props) {
     isAdmin: state.is_admin,
     options: options
   };
-}, function (dispatch) {
-  return {};
+}, function (dispatch, props) {
+  return (0, _redux.bindActionCreators)({
+    onRemoveSelection: function onRemoveSelection() {
+      return _action_creators.default.removeSelection(props.selection.id);
+    }
+  }, dispatch);
 })(SelectionRow);
 
 exports.default = _default;
-},{"./OptionCard":3,"react":464,"react-redux":454}],7:[function(require,module,exports){
+},{"./OptionCard":3,"./action_creators":8,"react":464,"react-redux":454,"redux":465,"semantic-ui-react":600}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -634,6 +656,16 @@ var _default = {
     return {
       type: _actions.default.CLOSE_MODAL,
       modal: "editOptionId"
+    };
+  },
+  removeSelection: function removeSelection(selectionId) {
+    var url = ["/api/project/", PROJECT_ACCESS_TOKEN, "/finishes/selection/", selectionId, "/remove"].join("");
+
+    _jquery.default.post(url, dispatch_project_callback);
+
+    return {
+      type: _actions.default.LOADING,
+      isLoading: true
     };
   },
   unlinkOption: function unlinkOption(selectionId, optionId) {

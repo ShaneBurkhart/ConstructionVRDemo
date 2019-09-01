@@ -118,7 +118,8 @@ post '/f038c9d4-2809-4050-976a-309445be7c8b/slack/kontent-keeper/webhook' do
   return params[:challenge]
 end
 
-def project_data(project, is_admin)
+def project_data(access_token, is_admin)
+  project = find_project_by_access_token(access_token)
   selections = project.selections
   selections.each { |s|
     s["Notes HTML"] = MARKDOWN.render(s["Notes"] || "").gsub("\n", "<br>")
@@ -149,7 +150,7 @@ get '/api/project/:access_token' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil? or !project.belongs_to_user?(user_id)
 
-  return project_data(project, is_admin_mode)
+  return project_data(access_token, is_admin_mode)
 end
 
 post '/api/project/:access_token/finishes/option/save' do
@@ -185,14 +186,18 @@ post '/api/project/:access_token/finishes/option/save' do
   option["Info"] = params[:info] if params.has_key? :info
 
   if params.has_key? :images
-    option["Image"] = (params[:images] || []).map { |i| { url: "#{S3_URL}/#{BUCKET}/#{i}"} }
+    option["Image"] = (params[:images] || []).map do |i|
+      # This is an image that already exists.
+      next { url: i } if i.include? "http"
+      next { url: "#{S3_URL}/#{BUCKET}/#{i}" }
+    end
   end
 
   puts option.inspect
 
   option.save
 
-  return project_data(project, is_admin_mode)
+  return project_data(access_token, is_admin_mode)
 end
 
 post '/api/project/:access_token/finishes/selection/:selection_id/option/:option_id/unlink' do
@@ -213,7 +218,7 @@ post '/api/project/:access_token/finishes/selection/:selection_id/option/:option
   selection["Options"] = selection["Options"] - [option_id]
   selection.save
 
-  return project_data(project, is_admin_mode)
+  return project_data(access_token, is_admin_mode)
 end
 
 
@@ -524,7 +529,9 @@ post '/api/project/:access_token/finishes/options/images/upload' do
   ext = filepond["filename"].split(".").last
   key = "#{TMP_KEY_PREFIX}/#{SecureRandom.uuid}.#{ext}"
   obj = s3.bucket(BUCKET).object(key)
-  obj.upload_file(filepond["tempfile"].path)
+  obj.upload_file(filepond["tempfile"].path, {
+    content_type: ext == "png" ? "image/png" : "image/jpeg",
+  })
   obj.acl.put({acl: "public-read"})
 
   return key
@@ -536,7 +543,7 @@ post '/api/project/:access_token/finishes/options/images/upload' do
 end
 
 
-post '/project/:access_token/finishes/selection/:id/remove' do
+post '/api/project/:access_token/finishes/selection/:id/remove' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
@@ -550,7 +557,7 @@ post '/project/:access_token/finishes/selection/:id/remove' do
 
   selection.destroy
 
-  return {}.to_json
+  return project_data(access_token, is_admin_mode)
 end
 
 post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/link' do

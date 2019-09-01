@@ -27,6 +27,14 @@ export default {
     modal: "editOptionId"
   }),
 
+  removeSelection: (selectionId) => {
+    const url = [ "/api/project/", PROJECT_ACCESS_TOKEN, "/finishes/selection/",
+      selectionId, "/remove" ].join("");
+
+    $.post(url, dispatch_project_callback);
+    return { type: Actions.LOADING, isLoading: true }
+  },
+
   unlinkOption: (selectionId, optionId) => {
     const url = [ "/api/project/", PROJECT_ACCESS_TOKEN, "/finishes/selection/",
       selectionId, "/option/", optionId, "/unlink" ].join("");

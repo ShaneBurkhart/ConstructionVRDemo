@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux'
 import ActionCreators from './action_creators';
 
 import { Select, Button, Header, Image, Modal, Input, Form } from 'semantic-ui-react'
+
 import { FilePond, registerPlugin } from 'react-filepond'
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
@@ -70,7 +71,6 @@ class EditOptionModal extends React.Component {
     const data = _.extend({}, this.state);
 
     data.images = data.images.map((i) => (i.serverId));
-    console.log(data);
 
     // Ask if we should link to selection
     if (selectingForSelection) {
@@ -138,9 +138,9 @@ class EditOptionModal extends React.Component {
                 allowMultiple={true}
                 maxFiles={2}
                 server={"/api/project/" + projectAccessToken + "/finishes/options/images/upload"}
+                acceptedFileTypes={['image/png', 'image/jpeg']}
                 onupdatefiles={fileItems => {
                   // Set currently active file objects to this.state
-                  console.log(fileItems);
                   this.setState({
                     images: fileItems.map(fileItem => fileItem)
                   });
