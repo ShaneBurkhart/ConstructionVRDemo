@@ -9,7 +9,9 @@ import ActionCreators from './action_creators';
 import OptionCard from './OptionCard';
 
 function SelectionRow(props) {
-  const { selection, options, index, isAdmin, onRemoveSelection } = props;
+  const {
+    selection, options, index, isAdmin, onRemoveSelection, onOpenSelectionModal,
+  } = props;
   const { fields } = selection;
   const shade = index % 2 == 0 ? "white" : "shade";
 
@@ -39,6 +41,8 @@ function SelectionRow(props) {
             isAdmin={isAdmin}
             />
         ))}
+
+        <a className="ui" onClick={onOpenSelectionModal}>+ Link Options to this Selection</a>
       </td>
     </tr>
   );
@@ -56,6 +60,7 @@ export default connect(
     }
   },
   (dispatch, props) => (bindActionCreators({
-    onRemoveSelection: () => (ActionCreators.removeSelection(props.selection.id))
+    onRemoveSelection: () => (ActionCreators.removeSelection(props.selection.id)),
+    onOpenSelectionModal: () => (ActionCreators.openSelectionModal(props.selection.id))
   }, dispatch))
 )(SelectionRow);

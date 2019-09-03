@@ -81,6 +81,17 @@ module Finishes
       self.all view: "Has Model"
     end
 
+    def self.search(s, user)
+      return {} if s.nil? or user.nil?
+      sort = { "Used In Selection Count": "desc" }
+      user_library_filter = "AND(FIND({User ID}, '#{user.id}'),FIND('#{s}', {Search Text}))"
+
+      return {
+        userLibrary: self.all(filter: user_library_filter, sort: sort),
+        finishVisionLibrary: [],
+      }
+    end
+
     def form_object
       self.fields.slice(
         "Name", "Type", "Unit Price", "URL", "Info"

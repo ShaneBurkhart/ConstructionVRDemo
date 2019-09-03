@@ -17,6 +17,7 @@ class OptionCardControls extends React.Component {
     return (
       <div className="extra content">
         {isLibrary && <div className="pull-right">FinishVisionVR Library</div>}
+        {!isLibrary && <div className="pull-right">Your Library</div>}
 
         {isSearch && <a className="ui">+ Link Option to Selection</a>}
         {!isSearch &&

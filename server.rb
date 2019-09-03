@@ -197,6 +197,17 @@ post '/api/project/:access_token/finishes/option/save' do
 
   option.save
 
+  selection_id = params[:selection_id]
+  if !selection_id.nil?
+    selection = Finishes::Selection.find(selection_id)
+    return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
+
+    if !selection["Options"].include? option.id
+      selection["Options"] += [option.id]
+      selection.save
+    end
+  end
+
   return project_data(access_token, is_admin_mode)
 end
 
@@ -469,32 +480,18 @@ get '/project/:access_token/finishes' do
   }
 end
 
-get '/project/:access_token/finishes/options/search' do
+get '/api/project/:access_token/finishes/options/search' do
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
   search_token = params[:s]
 
-  options = Finishes::Option.all(filter: "SEARCH('#{search_token}', {Name})")
-  options = options.map do |o|
-    fields = o.fields
+  user = User.find(session[:user_id])
+  return "Not found" if user.nil?
 
-    fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
-      markdown: MARKDOWN,
-      is_admin_mode: is_admin_mode,
-      finish_option: o,
-      is_search: false,
-    }
-    fields["Search Card HTML"] = haml :_finish_option_card, layout: false, locals: {
-      markdown: MARKDOWN,
-      is_admin_mode: is_admin_mode,
-      finish_option: o,
-      is_search: true,
-    }
+  searchResults = Finishes::Option.search(search_token, user)
 
-    next fields
-  end
-
-  return { options: options }.to_json
+  content_type :json
+  return { searchResults: searchResults }.to_json
 end
 
 get '/api/project/:access_token/finishes/options/images/upload' do
@@ -560,38 +557,43 @@ post '/api/project/:access_token/finishes/selection/:id/remove' do
   return project_data(access_token, is_admin_mode)
 end
 
-post '/project/:access_token/finishes/selection/:selection_id/option/:option_id/link' do
+post '/api/project/:access_token/finishes/selection/:selection_id/option/:option_id/link' do
   access_token = params[:access_token]
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
+  user_id = session[:user_id]
   selection_id = params[:selection_id]
   option_id = params[:option_id]
 
+  return "Not found" unless is_admin_mode and !user_id.nil?
+
   project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
+  return "Not found" if project.nil? or !project.belongs_to_user?(user_id)
 
   selection = Finishes::Selection.find(selection_id)
   return "Not found" if selection.nil? or !selection.belongs_to_project?(project)
 
   option = Finishes::Option.find(option_id)
-  return "Not found" if option.nil?
 
-  option_fields = {}
-
-  if !selection["Options"].include? option_id
-    selection["Options"] += [option_id]
-    selection.save
-
-    option_fields = option.fields
-    option_fields["List Card HTML"] = haml :_finish_option_card, layout: false, locals: {
-      markdown: MARKDOWN,
-      is_admin_mode: is_admin_mode,
-      finish_option: option,
-      is_search: false,
-    }
+  # Copy the option to the users library
+  if option.is_library?
+    fields = option.fields.slice("Name", "Type", "Other Type Value", "Image", "Info", "URL", "Unit Price", "SketchUp Model URL")
+    fields["Image"] = fields["Image"].map{ |i| { url: i["url"] } }
+    option = Finishes::Option.new(fields)
+    option["User"] = [user_id]
+    option["Library Seed Option"] = [option_id]
+    option.save
   end
 
-  return { option: option_fields }.to_json
+  return "Not Found" if option and !(option["User"] || []).include?(user_id)
+
+
+  if !selection["Options"].include? option.id
+    selection["Options"] += [option.id]
+    selection.save
+  end
+
+  return project_data(access_token, is_admin_mode)
 end
 
 get '/project/:access_token/procurement_forms' do

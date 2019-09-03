@@ -6,6 +6,7 @@ import ActionCreators from './action_creators';
 
 import SelectionCategorySection from './SelectionCategorySection';
 import EditOptionModal from './EditOptionModal';
+import SelectionModal from './SelectionModal';
 
 import './App.css';
 
@@ -15,7 +16,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { selections_by_category, isLoading, editOption } = this.props;
+    const { selections_by_category, isLoading, editOption, selectingForSelection } = this.props;
     console.log("render");
 
     const dimmerClass = ["ui page inverted dimmer", isLoading ? "active" : ""].join(" ")
@@ -31,10 +32,17 @@ class App extends React.Component {
                       />
           })}
         </div>
-        {!!editOption && <EditOptionModal option={editOption} />}
-        <div className={dimmerClass}>
-          <div className="ui grey header content">Loading...</div>
-        </div>
+        {!!editOption && !selectingForSelection &&
+          <EditOptionModal option={editOption} />
+        }
+        {!!selectingForSelection &&
+          <SelectionModal selection={selectingForSelection} />
+        }
+        {isLoading &&
+          <div className="ui page inverted dimmer active">
+            <div className="ui grey header content">Loading...</div>
+          </div>
+        }
       </div>
     );
   }
@@ -44,6 +52,7 @@ export default connect(
   (state, props) => ({
     isLoading: state.isLoading,
     editOption: state.options_by_id[state.modals.editOptionId],
+    selectingForSelection: state.selections_by_id[state.modals.selectingForSelectionId],
     selections_by_category: state.selections_by_category
   }),
   (dispatch, props) => (bindActionCreators({

@@ -10,6 +10,10 @@ const initialState = {
   project: {},
   selections: [],
   options: [],
+  searchResults: {
+    userLibrary: [],
+    finishVisionLibrary: [],
+  },
   selections_by_category: {},
   selections_by_id: {},
   options_by_id: {},
@@ -23,6 +27,10 @@ const reducer = (state = initialState, action) => {
   switch (action.type) {
     case Actions.UPDATE_PROJECT:
       return updateProject(state, action);
+      break;
+
+    case Actions.UPDATE_SEARCH_RESULTS:
+      return updateSearchResults(state, action);
       break;
 
     case Actions.ADD_SELECTION:
@@ -65,6 +73,11 @@ function updateProject(state, action) {
   newState.options_by_id = _.indexBy(newState.options, (s) => (s["id"]));
   newState.selections_by_id = _.indexBy(newState.selections, (s) => (s["id"]));
 
+  return newState;
+}
+
+function updateSearchResults(state, action) {
+  var newState = _.extend({}, state, _.pick(action, "searchResults"))
   return newState;
 }
 

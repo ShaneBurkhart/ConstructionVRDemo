@@ -39,13 +39,14 @@ const options = [
 class EditOptionModal extends React.Component {
   constructor(props) {
     super(props);
-    const { option } = props;
+    const { option, selection } = props;
     const { fields } = option;
 
     this.onSave = this.onSave.bind(this);
 
     this.state = {
       id: option.id,
+      selection_id: (selection || {}).id,
       name: fields["Name"] || "",
       type: fields["Type"] || "",
       unit_price: fields["Unit Price"] || "",
@@ -57,8 +58,6 @@ class EditOptionModal extends React.Component {
         source: i["url"],
         options: { type: "local" },
       })),
-
-      ask_to_link_to_selection: false,
     }
   }
 
@@ -67,17 +66,12 @@ class EditOptionModal extends React.Component {
   }
 
   onSave() {
-    const { option, selectingForSelection } = this.props;
+    const { option, selection, saveOption } = this.props;
     const data = _.extend({}, this.state);
 
     data.images = data.images.map((i) => (i.serverId));
 
-    // Ask if we should link to selection
-    if (selectingForSelection) {
-      this.setState({ ask_to_link_to_selection: true });
-    } else {
-      this.props.saveOption(option.id, data);
-    }
+    saveOption(data, (selection || {}).id);
   }
 
   render() {
@@ -86,7 +80,9 @@ class EditOptionModal extends React.Component {
 
     return (
       <Modal open={!!option}>
-        <Modal.Header>{fields["Name"]}</Modal.Header>
+        <Modal.Header>
+          Editing: <span className="bold">{fields["Name"] || "New Finish"}</span>
+        </Modal.Header>
         <Modal.Content>
           <Form>
             <Form.Field>
@@ -161,15 +157,11 @@ class EditOptionModal extends React.Component {
 export default connect(
   (state, props) => ({
     projectAccessToken: state.project.fields["Access Token"],
-
-    isLoading: state.isLoading,
     editOption: state.options_by_id[state.modals.editOptionId],
-    selectingForSelection: state.selections_by_id[state.modals.selectingForSelectionId],
-    selections_by_category: state.selections_by_category
   }),
   (dispatch, props) => (bindActionCreators({
     loadProject: () => (ActionCreators.load()),
     closeModal: () => (ActionCreators.closeEditOptionModal()),
-    saveOption: (id, option) => (ActionCreators.saveOption(id, option)),
+    saveOption: (option, selectionId) => (ActionCreators.saveOption(option, selectionId)),
   }, dispatch))
 )(EditOptionModal);
