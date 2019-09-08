@@ -8,33 +8,58 @@ import { Select, Button, Header, Image, Modal, Input, Icon } from 'semantic-ui-r
 
 import EditOptionModal from './EditOptionModal';
 import SearchResultRow from './SearchResultRow';
+import SearchThumbnailSection from './SearchThumbnailSection';
+import SearchResultsPage from './SearchResultsPage';
+import SearchPromoPage from './SearchPromoPage';
+import OptionTypeSelect from './OptionTypeSelect';
 
 class SelectionModal extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onClickShowMore = this.onClickShowMore.bind(this);
     this.onClickAddFinish = this.onClickAddFinish.bind(this);
+    this.onChangeSearchText = this.onChangeSearchText.bind(this);
+    this.onChangeSearchCategory = this.onChangeSearchCategory.bind(this);
+    this.onClickSearch = this.onClickSearch.bind(this);
+    this.onRedirectToSearch = this.onRedirectToSearch.bind(this);
 
     this.state = {
+      searchText: "",
+      searchCategory: "",
       addNewFinish: false,
-      resultsToShow: 30,
     }
   }
 
-  onClickShowMore() {
-    this.setState({ resultsToShow: this.state.resultsToShow + 30 });
+  onRedirectToSearch(searchText, searchCategory) {
+    this.setState({
+      searchText: searchText || this.state.searchText,
+      searchCategory: searchCategory || this.state.searchCategory
+    });
+    this.onClickSearch();
+  }
+
+  onClickSearch() {
+    this.props.searchForOptions(this.state.searchText, this.state.searchCategory)
   }
 
   onClickAddFinish() {
     this.setState({ addNewFinish: true });
   }
 
+  onChangeSearchText(e) {
+    this.setState({ searchText: e.target.value });
+  }
+
+  onChangeSearchCategory(e) {
+    this.setState({ searchCategory: e.target.value });
+  }
+
   render() {
     const {
-      isAdmin, isLoading, selection, searchResults, closeModal, onChangeSearch, onLinkOptionToSelection
+      isAdmin, isLoading, selection, searchResults, promoResults,
+      closeModal, onChangeSearch, onLinkOptionToSelection
     } = this.props;
-    const { resultsToShow, addNewFinish } = this.state;
+    const { searchText, searchCategory, addNewFinish } = this.state;
     const { fields } = selection;
 
     const { userLibrary, finishVisionLibrary } = searchResults;
@@ -42,35 +67,50 @@ class SelectionModal extends React.Component {
     return (
       <Modal open={!!selection}>
         <Modal.Header>
-          <div className="pull-right">
-            <Button size="small" icon labelPosition="right">
-              Filters
-              <Icon name="down arrow"/>
-            </Button>
+          <div style={{ fontSize: "16px" }} className="pull-right">
             <Input
-              icon='search'
-              size="mini"
+              action
+              type='text'
+              value={searchText}
               placeholder='Search...'
-              onChange={onChangeSearch}
+              onChange={this.onChangeSearchText}
+              >
+              <OptionTypeSelect
+                value={searchCategory}
+                emptyText="All Categories"
+                onChange={this.onChangeSearchCategory}
               />
+              <input />
+              <Button type='submit'>Search</Button>
+            </Input>
           </div>
-          <h4>Search for a finish to link.</h4>
+          <h4>Link Option</h4>
         </Modal.Header>
         <Modal.Content
           className="scrolling"
           style={{ position: "relative", height: "calc(70vh)"}}
           >
-          {userLibrary.slice(0, resultsToShow).map((value, i) => (
-            <SearchResultRow
-              key={value["id"]}
-              option={value}
-              selection={selection}
+          {(!!searchText || !!searchCategory) &&
+            <SearchResultsSection
               isAdmin={isAdmin}
+              header="Your Library"
+              options={userLibrary}
+              selection={selection}
+              resultsToShow={30}
               onLinkOptionToSelection={onLinkOptionToSelection}
               />
-          ))}
+          }
 
-          <a className="ui" onClick={this.onClickShowMore}>Show More</a>
+          {!searchText && !searchCategory &&
+            <SearchPromoPage
+              isAdmin={isAdmin}
+              selection={selection}
+              groupedOptions={promoResults.byOptionType || {}}
+              onRedirectToSearch={this.onRedirectToSearch}
+              onLinkOptionToSelection={onLinkOptionToSelection}
+              />
+          }
+
 
           {isLoading &&
             <div className="ui inverted dimmer active">
@@ -93,16 +133,56 @@ class SelectionModal extends React.Component {
   }
 }
 
+class SearchResultsSection extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.onClickShowMore = this.onClickShowMore.bind(this);
+
+    this.state = {
+      resultsToShow: props.resultsToShow || 30,
+    }
+  }
+
+  onClickShowMore() {
+    this.setState({ resultsToShow: this.state.resultsToShow + 30 });
+  }
+
+  render() {
+    const {
+      isAdmin, header, options, selection, resultsToShow, onLinkOptionToSelection,
+    } = this.props;
+
+    return (
+      <div className="search-results-section">
+        <h3>{header}</h3>
+        {options.slice(0, resultsToShow).map((value, i) => (
+          <SearchThumbnailSection
+            key={value["id"]}
+            option={value}
+            selection={selection}
+            isAdmin={isAdmin}
+            onLinkOptionToSelection={onLinkOptionToSelection}
+            />
+        ))}
+
+        <a className="ui" onClick={this.onClickShowMore}>Show More</a>
+      </div>
+    );
+  }
+}
+
 export default connect(
   (state, props) => ({
     isAdmin: state.is_admin,
     isLoading: state.isLoading,
     searchResults: state.searchResults,
+    promoResults: state.promoResults,
     selectingForSelection: state.selections_by_id[state.modals.selectingForSelectionId],
   }),
   (dispatch, props) => (bindActionCreators({
-    closeModal: () => (ActionCreators.closeSelectionModal()),
-    onChangeSearch: (e) => (ActionCreators.searchForOptions(e.target.value)),
+    closeModal: ActionCreators.closeSelectionModal,
+    searchForOptions: ActionCreators.searchForOptions,
     onLinkOptionToSelection: (optionId) => (
       ActionCreators.linkOptionToSelection(optionId, props.selection.id)
     )

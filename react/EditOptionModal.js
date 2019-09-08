@@ -6,35 +6,14 @@ import ActionCreators from './action_creators';
 
 import { Select, Button, Header, Image, Modal, Input, Form } from 'semantic-ui-react'
 
+import OptionTypeSelect from './OptionTypeSelect';
+
 import { FilePond, registerPlugin } from 'react-filepond'
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 
 // Register the plugins
 registerPlugin(FilePondPluginFileValidateType, FilePondPluginImagePreview);
-
-const options = [
-  "Concepts",
-  "Flooring",
-  "Light Fixture",
-  "Bath Accessories",
-  "Appliance",
-  "Plumbing Fixture",
-  "Tile",
-  "Exterior",
-  "Cabinet/Countertop",
-  "Paint Color",
-  "LVT - Luxury Vinyl Tile",
-  "Millwork",
-  "Furniture",
-  "Mirrors",
-  "Art",
-  "Misc",
-  "Blinds",
-  "Shelving",
-  "Doors",
-  "Other"
-].map((v, i) =>({ key: v, text: v, value: v }))
 
 class EditOptionModal extends React.Component {
   constructor(props) {
@@ -95,9 +74,8 @@ class EditOptionModal extends React.Component {
             </Form.Field>
             <Form.Field>
               <label>Type</label>
-              <Select
+              <OptionTypeSelect
                 value={this.state.type}
-                options={options}
                 onChange={this.createUpdateFieldHandler("type")}
                 />
             </Form.Field>

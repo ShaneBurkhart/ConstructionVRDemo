@@ -75,6 +75,28 @@ module Finishes
     self.table_name = "Options"
 
     FINISH_VISION_VR_TEAM_USER_ID = "recCToPMsjUh8gdcc"
+    TYPES = [
+      "Concepts",
+      "Flooring",
+      "Light Fixture",
+      "Bath Accessories",
+      "Appliance",
+      "Plumbing Fixture",
+      "Tile",
+      "Exterior",
+      "Cabinet/Countertop",
+      "Paint Color",
+      "LVT - Luxury Vinyl Tile",
+      "Millwork",
+      "Furniture",
+      "Mirrors",
+      "Art",
+      "Misc",
+      "Blinds",
+      "Shelving",
+      "Doors",
+      "Other"
+    ]
 
     def self.search_for_component(s)
       # Implement search later
@@ -85,10 +107,34 @@ module Finishes
       return {} if s.nil? or user.nil?
       sort = { "Used In Selection Count": "desc" }
       user_library_filter = "AND(FIND({User ID}, '#{user.id}'),FIND('#{s}', {Search Text}))"
+      finish_vision_library_filter = "AND(FIND({User ID}, '#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}'),FIND('#{s}', {Search Text}))"
+
+      if s == ""
+        return {
+          promoResults: {
+            byOptionType: self::TYPES.map{ |t|
+              by_option_type_filter = "AND(FIND('#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}', {User ID}), FIND('#{t}', {Type}))"
+
+              [t, self.all(filter: by_option_type_filter, sort: sort, max_records: 10)]
+            }.to_h
+          }
+        }
+      end
 
       return {
-        userLibrary: self.all(filter: user_library_filter, sort: sort),
-        finishVisionLibrary: [],
+        searchResults: {
+          query: s,
+          userLibrary: self.all(
+            filter: user_library_filter,
+            sort: sort,
+            paginate: false
+          ),
+          finishVisionLibrary: self.all(
+            filter: finish_vision_library_filter,
+            sort: sort,
+            paginate: false,
+          )
+        }
       }
     end
 

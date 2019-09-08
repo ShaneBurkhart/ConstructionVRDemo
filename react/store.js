@@ -11,8 +11,12 @@ const initialState = {
   selections: [],
   options: [],
   searchResults: {
+    query: "",
     userLibrary: [],
     finishVisionLibrary: [],
+  },
+  promoResults: {
+    byOptionType: {},
   },
   selections_by_category: {},
   selections_by_id: {},
@@ -77,8 +81,11 @@ function updateProject(state, action) {
 }
 
 function updateSearchResults(state, action) {
-  var newState = _.extend({}, state, _.pick(action, "searchResults"))
-  return newState;
+  if ("promoResults" in action) {
+    return _.extend({}, state, _.pick(action, "promoResults"))
+  } else {
+    return _.extend({}, state, _.pick(action, "searchResults"))
+  }
 }
 
 const finishesStore = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());

@@ -12,7 +12,7 @@ import './App.css';
 
 class App extends React.Component {
   componentDidMount() {
-    this.props.loadProject()
+    this.props.load()
   }
 
   render() {
@@ -56,6 +56,6 @@ export default connect(
     selections_by_category: state.selections_by_category
   }),
   (dispatch, props) => (bindActionCreators({
-    loadProject: () => (ActionCreators.load()),
+    load: () => (ActionCreators.load()),
   }, dispatch))
 )(App);

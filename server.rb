@@ -491,7 +491,7 @@ get '/api/project/:access_token/finishes/options/search' do
   searchResults = Finishes::Option.search(search_token, user)
 
   content_type :json
-  return { searchResults: searchResults }.to_json
+  return searchResults.to_json
 end
 
 get '/api/project/:access_token/finishes/options/images/upload' do

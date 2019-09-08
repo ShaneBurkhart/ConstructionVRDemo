@@ -19,10 +19,10 @@ function dispatch_search_results_callback(data) {
   store.dispatch({ type: Actions.LOADING, isLoading: false })
 }
 
-function searchRquest(search) {
+function searchRquest(search, category) {
   $.get(
     "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/options/search",
-    { s: search },
+    { s: search, category: category },
     dispatch_search_results_callback
   );
 }
@@ -32,11 +32,13 @@ var debouncedSearchRequest = _.debounce(searchRquest, 500);
 export default {
   load: () => {
     $.get("/api/project/" + PROJECT_ACCESS_TOKEN, dispatch_project_callback);
+    // Get promor results from empty search first thing.
+    debouncedSearchRequest("", "")
     return { type: Actions.LOADING, isLoading: true }
   },
 
-  searchForOptions: (search) => {
-    debouncedSearchRequest(search);
+  searchForOptions: (search, category) => {
+    debouncedSearchRequest(search, category);
     return { type: Actions.LOADING, isLoading: true }
   },
 
