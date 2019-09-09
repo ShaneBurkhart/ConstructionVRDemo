@@ -36,6 +36,11 @@ const reducer = (state = initialState, action) => {
     case Actions.UPDATE_SEARCH_RESULTS:
       return updateSearchResults(state, action);
       break;
+    case Actions.CLEAR_SEARCH_RESULTS:
+      return _.extend({}, state, { searchResults: {
+        query: "", userLibrary: [], finishVisionLibrary: []
+      }});
+      break;
 
     case Actions.ADD_SELECTION:
       break;

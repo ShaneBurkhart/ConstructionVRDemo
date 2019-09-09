@@ -483,12 +483,18 @@ end
 get '/api/project/:access_token/finishes/options/search' do
   is_debug_mode = !!params[:debug] || !!session[:is_admin]
   is_admin_mode = !!session[:is_admin]
-  search_token = params[:s]
+  search_token = params[:s] || ""
+  category = params[:category] || ""
 
   user = User.find(session[:user_id])
   return "Not found" if user.nil?
 
-  searchResults = Finishes::Option.search(search_token, user)
+  if search_token.length == 0 and category.length == 0
+    content_type :json
+    return Finishes::Option.promo_results.to_json
+  end
+
+  searchResults = Finishes::Option.search(search_token, category, user)
 
   content_type :json
   return searchResults.to_json

@@ -48,10 +48,13 @@ export default {
     id: selectionId,
   }),
 
-  closeSelectionModal: () => ({
-    type: Actions.CLOSE_MODAL,
-    modal: "selectingForSelectionId"
-  }),
+  closeSelectionModal: () => {
+    store.dispatch({ type: Actions.CLEAR_SEARCH_RESULTS });
+    return {
+      type: Actions.CLOSE_MODAL,
+      modal: "selectingForSelectionId"
+    }
+  },
 
   openEditOptionModal: (optionId) => ({
     type: Actions.OPEN_MODAL,

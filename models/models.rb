@@ -103,27 +103,35 @@ module Finishes
       self.all view: "Has Model"
     end
 
-    def self.search(s, user)
-      return {} if s.nil? or user.nil?
+    def self.promo_results
       sort = { "Used In Selection Count": "desc" }
-      user_library_filter = "AND(FIND({User ID}, '#{user.id}'),FIND('#{s}', {Search Text}))"
-      finish_vision_library_filter = "AND(FIND({User ID}, '#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}'),FIND('#{s}', {Search Text}))"
 
-      if s == ""
-        return {
-          promoResults: {
-            byOptionType: self::TYPES.map{ |t|
-              by_option_type_filter = "AND(FIND('#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}', {User ID}), FIND('#{t}', {Type}))"
+      return {
+        promoResults: {
+          byOptionType: self::TYPES.map{ |t|
+            by_option_type_filter = "AND(FIND('#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}', {User ID}), FIND('#{t}', {Type}))"
 
-              [t, self.all(filter: by_option_type_filter, sort: sort, max_records: 10)]
-            }.to_h
-          }
+            [t, self.all(filter: by_option_type_filter, sort: sort, max_records: 10)]
+          }.to_h
         }
+      }
+    end
+
+    def self.search(s, category, user)
+      return {} if user.nil?
+      sort = { "Used In Selection Count": "desc" }
+      search_filter = "FIND('#{s}', {Search Text})"
+      if category.length
+        search_filter = "AND({Type} = '#{category}', FIND('#{s}', {Search Text}))"
       end
+
+      user_library_filter = "AND(FIND({User ID}, '#{user.id}'), #{search_filter})"
+      finish_vision_library_filter = "AND(FIND({User ID}, '#{Finishes::Option::FINISH_VISION_VR_TEAM_USER_ID}'), #{search_filter})"
 
       return {
         searchResults: {
           query: s,
+          category: category,
           userLibrary: self.all(
             filter: user_library_filter,
             sort: sort,

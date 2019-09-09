@@ -488,7 +488,7 @@ function OptionTypeSelect(props) {
 
   if (emptyText && emptyText != "") {
     o = [{
-      key: emptyText,
+      key: "",
       text: emptyText,
       value: ""
     }].concat(options);
@@ -496,6 +496,7 @@ function OptionTypeSelect(props) {
 
   return _react.default.createElement(_semanticUiReact.Select, {
     value: value,
+    placeholder: "All Categories",
     compact: compact,
     options: o,
     onChange: onChange
@@ -617,7 +618,52 @@ var _default = SearchResultRow;
 exports.default = _default;
 },{"react":471,"semantic-ui-react":607}],8:[function(require,module,exports){
 "use strict";
-},{}],9:[function(require,module,exports){
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _semanticUiReact = require("semantic-ui-react");
+
+var _SearchThumbnailSection = _interopRequireDefault(require("./SearchThumbnailSection"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function SearchResultsPage(props) {
+  var isAdmin = props.isAdmin,
+      header = props.header,
+      searchResults = props.searchResults,
+      selection = props.selection,
+      resultsToShow = props.resultsToShow,
+      onLinkOptionToSelection = props.onLinkOptionToSelection;
+  var query = searchResults.query,
+      category = searchResults.category,
+      userLibrary = searchResults.userLibrary,
+      finishVisionLibrary = searchResults.finishVisionLibrary;
+  return _react.default.createElement("div", {
+    className: "search-results-section"
+  }, _react.default.createElement("div", null, _react.default.createElement(_semanticUiReact.Label, null, "Search: \"", query, "\""), _react.default.createElement(_semanticUiReact.Label, null, "Category: ", category)), _react.default.createElement(_SearchThumbnailSection.default, {
+    isAdmin: isAdmin,
+    header: "Your Library",
+    options: userLibrary,
+    selection: selection,
+    onLinkOptionToSelection: onLinkOptionToSelection
+  }), _react.default.createElement("hr", null), _react.default.createElement(_SearchThumbnailSection.default, {
+    grid: true,
+    isAdmin: isAdmin,
+    header: "FinishVision Library",
+    options: finishVisionLibrary,
+    selection: selection,
+    onLinkOptionToSelection: onLinkOptionToSelection
+  }));
+}
+
+var _default = SearchResultsPage;
+exports.default = _default;
+},{"./SearchThumbnailSection":10,"react":471,"semantic-ui-react":607}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -635,33 +681,45 @@ function SearchThumbnail(props) {
   var option = props.option,
       onLinkOptionToSelection = props.onLinkOptionToSelection;
   var fields = option.fields;
+  var name = fields["Name"] || "";
   var image = (fields["Image"] || [])[0] || {};
-  return _react.default.createElement(_semanticUiReact.Popup, {
-    position: "top left",
-    pinned: true,
-    trigger: _react.default.createElement("div", {
-      style: {
-        width: "175px",
-        display: "inline-block"
-      }
-    }, _react.default.createElement("div", {
-      style: {
-        height: "175px",
-        overflowY: "hidden"
-      }
-    }, _react.default.createElement("img", {
-      style: {
-        width: "175px"
-      },
-      src: image["url"]
-    })), _react.default.createElement(_semanticUiReact.Label, {
-      style: {
-        height: "40px",
-        whiteSpace: "normal",
-        overflowY: "hidden"
-      }
-    }, fields["Name"].slice(0, 35), fields["Name"].length > 35 ? "..." : ""))
-  });
+  return _react.default.createElement("div", {
+    style: {
+      width: "175px",
+      display: "inline-block"
+    }
+  }, _react.default.createElement("div", {
+    style: {
+      position: "relative",
+      height: "175px",
+      overflowY: "hidden"
+    }
+  }, _react.default.createElement("img", {
+    style: {
+      width: "175px"
+    },
+    src: image["url"]
+  }), _react.default.createElement("div", {
+    style: {
+      position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      textAlign: "center"
+    }
+  }, _react.default.createElement(_semanticUiReact.Button, {
+    color: "green",
+    size: "small",
+    onClick: function onClick() {
+      onLinkOptionToSelection(option.id);
+    }
+  }, "Select"))), _react.default.createElement(_semanticUiReact.Label, {
+    style: {
+      height: "40px",
+      whiteSpace: "normal",
+      overflowY: "hidden"
+    }
+  }, name.slice(0, 35), name.length > 35 ? "..." : ""));
 }
 
 var _default = SearchThumbnail;
@@ -684,23 +742,29 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function SearchThumbnailSection(props) {
   var header = props.header,
+      grid = props.grid,
       options = props.options,
       onClickShowMore = props.onClickShowMore,
       onLinkOptionToSelection = props.onLinkOptionToSelection;
+  var gridStyle = {
+    textAlign: "center"
+  };
+  var scrollStyle = {
+    overflowX: "scroll",
+    overflowY: "hidden",
+    whiteSpace: "nowrap"
+  };
   return _react.default.createElement("div", {
     className: "search-thumbnail-row"
   }, _react.default.createElement("h3", null, header), onClickShowMore && _react.default.createElement("a", {
     onClick: onClickShowMore
   }, "View More"), _react.default.createElement("div", {
-    style: {
-      overflowX: "scroll",
-      overflowY: "hidden",
-      whiteSpace: "nowrap"
-    }
+    style: !grid ? scrollStyle : gridStyle
   }, options.map(function (option) {
     return _react.default.createElement(_SearchThumbnail.default, {
       key: option["id"],
-      option: option
+      option: option,
+      onLinkOptionToSelection: onLinkOptionToSelection
     });
   })));
 }
@@ -769,6 +833,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -796,15 +862,11 @@ function (_React$Component) {
     _classCallCheck(this, SelectionModal);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectionModal).call(this, props));
-    _this.onClickAddFinish = _this.onClickAddFinish.bind(_assertThisInitialized(_this));
-    _this.onChangeSearchText = _this.onChangeSearchText.bind(_assertThisInitialized(_this));
-    _this.onChangeSearchCategory = _this.onChangeSearchCategory.bind(_assertThisInitialized(_this));
     _this.onClickSearch = _this.onClickSearch.bind(_assertThisInitialized(_this));
     _this.onRedirectToSearch = _this.onRedirectToSearch.bind(_assertThisInitialized(_this));
     _this.state = {
       searchText: "",
-      searchCategory: "",
-      addNewFinish: false
+      searchCategory: ""
     };
     return _this;
   }
@@ -812,11 +874,14 @@ function (_React$Component) {
   _createClass(SelectionModal, [{
     key: "onRedirectToSearch",
     value: function onRedirectToSearch(searchText, searchCategory) {
+      var _this2 = this;
+
       this.setState({
         searchText: searchText || this.state.searchText,
         searchCategory: searchCategory || this.state.searchCategory
+      }, function () {
+        _this2.onClickSearch();
       });
-      this.onClickSearch();
     }
   }, {
     key: "onClickSearch",
@@ -824,25 +889,13 @@ function (_React$Component) {
       this.props.searchForOptions(this.state.searchText, this.state.searchCategory);
     }
   }, {
-    key: "onClickAddFinish",
-    value: function onClickAddFinish() {
-      this.setState({
-        addNewFinish: true
-      });
-    }
-  }, {
-    key: "onChangeSearchText",
-    value: function onChangeSearchText(e) {
-      this.setState({
-        searchText: e.target.value
-      });
-    }
-  }, {
-    key: "onChangeSearchCategory",
-    value: function onChangeSearchCategory(e) {
-      this.setState({
-        searchCategory: e.target.value
-      });
+    key: "createUpdateHandler",
+    value: function createUpdateHandler(field) {
+      var _this3 = this;
+
+      return function (e) {
+        _this3.setState(_defineProperty({}, field, e.target.value || e.target.innerText));
+      };
     }
   }, {
     key: "render",
@@ -850,18 +903,22 @@ function (_React$Component) {
       var _this$props = this.props,
           isAdmin = _this$props.isAdmin,
           isLoading = _this$props.isLoading,
+          isNewFinish = _this$props.isNewFinish,
           selection = _this$props.selection,
           searchResults = _this$props.searchResults,
           promoResults = _this$props.promoResults,
           closeModal = _this$props.closeModal,
           onChangeSearch = _this$props.onChangeSearch,
-          onLinkOptionToSelection = _this$props.onLinkOptionToSelection;
+          onLinkOptionToSelection = _this$props.onLinkOptionToSelection,
+          openAddFinishModal = _this$props.openAddFinishModal;
       var _this$state = this.state,
           searchText = _this$state.searchText,
           searchCategory = _this$state.searchCategory,
           addNewFinish = _this$state.addNewFinish;
       var fields = selection.fields;
-      var userLibrary = searchResults.userLibrary,
+      var query = searchResults.query,
+          category = searchResults.category,
+          userLibrary = searchResults.userLibrary,
           finishVisionLibrary = searchResults.finishVisionLibrary;
       return _react.default.createElement(_semanticUiReact.Modal, {
         open: !!selection
@@ -875,27 +932,27 @@ function (_React$Component) {
         type: "text",
         value: searchText,
         placeholder: "Search...",
-        onChange: this.onChangeSearchText
+        onChange: this.createUpdateHandler("searchText")
       }, _react.default.createElement(_OptionTypeSelect.default, {
         value: searchCategory,
         emptyText: "All Categories",
-        onChange: this.onChangeSearchCategory
+        onChange: this.createUpdateHandler("searchCategory")
       }), _react.default.createElement("input", null), _react.default.createElement(_semanticUiReact.Button, {
-        type: "submit"
+        type: "submit",
+        onClick: this.onClickSearch
       }, "Search"))), _react.default.createElement("h4", null, "Link Option")), _react.default.createElement(_semanticUiReact.Modal.Content, {
         className: "scrolling",
         style: {
           position: "relative",
           height: "calc(70vh)"
         }
-      }, (!!searchText || !!searchCategory) && _react.default.createElement(SearchResultsSection, {
+      }, (!!query || !!category) && _react.default.createElement(_SearchResultsPage.default, {
         isAdmin: isAdmin,
-        header: "Your Library",
-        options: userLibrary,
+        searchResults: searchResults,
         selection: selection,
         resultsToShow: 30,
         onLinkOptionToSelection: onLinkOptionToSelection
-      }), !searchText && !searchCategory && _react.default.createElement(_SearchPromoPage.default, {
+      }), !query && !category && _react.default.createElement(_SearchPromoPage.default, {
         isAdmin: isAdmin,
         selection: selection,
         groupedOptions: promoResults.byOptionType || {},
@@ -911,10 +968,10 @@ function (_React$Component) {
         className: "bold"
       }, fields["Name"])), _react.default.createElement(_semanticUiReact.Button, {
         color: "green",
-        onClick: this.onClickAddFinish
-      }, "Add A Finish To Your Library"), _react.default.createElement(_semanticUiReact.Button, {
+        onClick: openAddFinishModal
+      }, "Upload Finish Option"), _react.default.createElement(_semanticUiReact.Button, {
         onClick: closeModal
-      }, "Close"), addNewFinish && _react.default.createElement(_EditOptionModal.default, {
+      }, "Close"), isNewFinish && _react.default.createElement(_EditOptionModal.default, {
         option: {
           fields: {}
         },
@@ -926,65 +983,11 @@ function (_React$Component) {
   return SelectionModal;
 }(_react.default.Component);
 
-var SearchResultsSection =
-/*#__PURE__*/
-function (_React$Component2) {
-  _inherits(SearchResultsSection, _React$Component2);
-
-  function SearchResultsSection(props) {
-    var _this2;
-
-    _classCallCheck(this, SearchResultsSection);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SearchResultsSection).call(this, props));
-    _this2.onClickShowMore = _this2.onClickShowMore.bind(_assertThisInitialized(_this2));
-    _this2.state = {
-      resultsToShow: props.resultsToShow || 30
-    };
-    return _this2;
-  }
-
-  _createClass(SearchResultsSection, [{
-    key: "onClickShowMore",
-    value: function onClickShowMore() {
-      this.setState({
-        resultsToShow: this.state.resultsToShow + 30
-      });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props2 = this.props,
-          isAdmin = _this$props2.isAdmin,
-          header = _this$props2.header,
-          options = _this$props2.options,
-          selection = _this$props2.selection,
-          resultsToShow = _this$props2.resultsToShow,
-          onLinkOptionToSelection = _this$props2.onLinkOptionToSelection;
-      return _react.default.createElement("div", {
-        className: "search-results-section"
-      }, _react.default.createElement("h3", null, header), options.slice(0, resultsToShow).map(function (value, i) {
-        return _react.default.createElement(_SearchThumbnailSection.default, {
-          key: value["id"],
-          option: value,
-          selection: selection,
-          isAdmin: isAdmin,
-          onLinkOptionToSelection: onLinkOptionToSelection
-        });
-      }), _react.default.createElement("a", {
-        className: "ui",
-        onClick: this.onClickShowMore
-      }, "Show More"));
-    }
-  }]);
-
-  return SearchResultsSection;
-}(_react.default.Component);
-
 var _default = (0, _reactRedux.connect)(function (state, props) {
   return {
     isAdmin: state.is_admin,
     isLoading: state.isLoading,
+    isNewFinish: state.modals.editOptionId == -1,
     searchResults: state.searchResults,
     promoResults: state.promoResults,
     selectingForSelection: state.selections_by_id[state.modals.selectingForSelectionId]
@@ -993,6 +996,9 @@ var _default = (0, _reactRedux.connect)(function (state, props) {
   return (0, _redux.bindActionCreators)({
     closeModal: _action_creators.default.closeSelectionModal,
     searchForOptions: _action_creators.default.searchForOptions,
+    openAddFinishModal: function openAddFinishModal() {
+      return _action_creators.default.openEditOptionModal(-1);
+    },
     onLinkOptionToSelection: function onLinkOptionToSelection(optionId) {
       return _action_creators.default.linkOptionToSelection(optionId, props.selection.id);
     }
@@ -1198,6 +1204,10 @@ var _default = {
     };
   },
   closeSelectionModal: function closeSelectionModal() {
+    _store.default.dispatch({
+      type: _actions.default.CLEAR_SEARCH_RESULTS
+    });
+
     return {
       type: _actions.default.CLOSE_MODAL,
       modal: "selectingForSelectionId"
@@ -1286,6 +1296,7 @@ var _default = {
   LOADING: "LOADING",
   UPDATE_PROJECT: "UPDATE_PROJECT",
   UPDATE_SEARCH_RESULTS: "UPDATE_SEARCH_RESULTS",
+  CLEAR_SEARCH_RESULTS: "CLEAR_SEARCH_RESULTS",
   ADD_SELECTION: "ADD_SELECTION",
   REMOVE_SELECTION: "REMOVE_SELECTION",
   UNLINK_OPTION: "UNLINK_OPTION",
@@ -1493,6 +1504,16 @@ var reducer = function reducer() {
 
     case _actions.default.UPDATE_SEARCH_RESULTS:
       return updateSearchResults(state, action);
+      break;
+
+    case _actions.default.CLEAR_SEARCH_RESULTS:
+      return _underscore.default.extend({}, state, {
+        searchResults: {
+          query: "",
+          userLibrary: [],
+          finishVisionLibrary: []
+        }
+      });
       break;
 
     case _actions.default.ADD_SELECTION:

@@ -1,29 +1,32 @@
 import React from 'react';
 
-import { Popup, Label, Image } from 'semantic-ui-react'
+import { Button, Popup, Label, Image } from 'semantic-ui-react'
 
 function SearchThumbnail(props) {
   const { option, onLinkOptionToSelection } = props;
   const { fields } = option;
 
+  const name = fields["Name"] || ""
   const image = (fields["Image"] || [])[0] || {}
 
   return (
-    <Popup
-      position="top left"
-      pinned
-      trigger={
-        <div style={{ width: "175px", display: "inline-block" }}>
-          <div style={{ height: "175px", overflowY: "hidden" }}>
-            <img style={{ width: "175px" }} src={image["url"]} />
-          </div>
-          <Label style={{ height: "40px", whiteSpace: "normal", overflowY: "hidden" }}>
-            {fields["Name"].slice(0, 35)}{fields["Name"].length > 35 ? "..." : ""}
-          </Label>
+    <div style={{ width: "175px", display: "inline-block" }}>
+      <div style={{ position: "relative", height: "175px", overflowY: "hidden" }}>
+        <img style={{ width: "175px" }} src={image["url"]} />
+        <div style={{ position: "absolute", top: "0", left: "0", width: "100%", textAlign: "center" }}>
+          <Button
+            color="green"
+            size="small"
+            onClick={() => {onLinkOptionToSelection(option.id)}}
+            >
+            Select
+          </Button>
         </div>
-      }
-      >
-    </Popup>
+      </div>
+      <Label style={{ height: "40px", whiteSpace: "normal", overflowY: "hidden" }}>
+        {name.slice(0, 35)}{name.length > 35 ? "..." : ""}
+      </Label>
+    </div>
   );
 }
 

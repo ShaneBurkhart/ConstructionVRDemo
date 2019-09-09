@@ -30,12 +30,13 @@ function OptionTypeSelect(props) {
   var o = options;
 
   if (emptyText && emptyText != "") {
-    o = [{ key: emptyText, text: emptyText, value: "" }].concat(options);
+    o = [{ key: "", text: emptyText, value: "" }].concat(options);
   }
 
   return (
     <Select
       value={value}
+      placeholder="All Categories"
       compact={compact}
       options={o}
       onChange={onChange}
