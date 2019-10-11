@@ -9,6 +9,8 @@ gem 'pug'
 gem 'haml'
 gem 'redcarpet'
 
+gem 'nokogiri'
+
 gem "redis-store"
 gem 'redis-rack'
 
