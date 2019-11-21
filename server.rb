@@ -6,6 +6,7 @@ require "redis-store"
 require 'redis-rack'
 require 'redcarpet'
 require 'json'
+require 'cgi'
 
 require './models/models.rb'
 require './models/db_models.rb'
@@ -97,7 +98,7 @@ end
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.
-  ps_access_token = params[:ps_access_token].gsub("%2F", "/")
+  ps_access_token = CGI.escape(params[:ps_access_token])
   project = find_project_by_plansource_access_token(ps_access_token)
   return { renderings: [] }.to_json if project.nil?
 
