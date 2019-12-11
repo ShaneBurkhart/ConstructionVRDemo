@@ -8,6 +8,8 @@ require 'redcarpet'
 require 'json'
 require 'cgi'
 
+require './util/slack.rb'
+require './util/messages.rb'
 require './models/models.rb'
 require './models/db_models.rb'
 
@@ -546,6 +548,9 @@ post '/project/:access_token/screenshot/feedback' do
 
   fields = feedback.fields
   fields["Notes HTML"] = feedback.notes_html
+
+  # Send notification to slack
+  send_slack_message_to_rendering_channel(create_feedback_notification_message(feedback))
 
   content_type :json
   return fields.to_json
