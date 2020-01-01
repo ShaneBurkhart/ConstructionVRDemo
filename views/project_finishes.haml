@@ -4,12 +4,9 @@
   %p.filters
     Filter:
     %a.selected{ href: "#", data: { location: "all" } } All
-    |
-    %a{ href: "#", data: { location: "units" } } Units
-    |
-    %a{ href: "#", data: { location: "common-areas" } } Common Areas
-    |
-    %a{ href: "#", data: { location: "amenities" } } Amenities
+    - @location_filters.each do |location|
+      |
+      %a{ href: "#", data: { location: location.downcase.gsub(" ", "-") } }= location
 
   - @finish_categories.each do |category, finishes|
     - next if finishes.nil? or finishes.length == 0

@@ -307,6 +307,14 @@ get '/project/:access_token/finishes' do
     end
   end
 
+  @location_filters = []
+  @finish_categories.values.flatten.each do |finish|
+    next if finish["Location"].nil?
+    if !@location_filters.include?(finish["Location"])
+      @location_filters << finish["Location"]
+    end
+  end
+
   haml :project_finishes, locals: {
     markdown: MARKDOWN,
     project: project,
