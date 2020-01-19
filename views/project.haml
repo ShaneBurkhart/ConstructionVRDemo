@@ -1,10 +1,14 @@
 .container
   %h1= project["Name"]
 
+  %a{ href: "/project/#{access_token}/finishes" } Finish Selections
+
   - if is_admin_mode
+    | |
     %a{ href: "/project/#{access_token}/feedbacks" } All Feedbacks
     | |
     %a{ href: "/project/#{access_token}/procurement_forms" } Procurement Forms
+
 
   %hr
 
