@@ -13,23 +13,23 @@
 
     %p
       Versions:
-    %ul
-      - unit_versions.each do |uv|
-        %li
+      %select#unit-version.ui.dropdown
+        - unit_versions.each do |uv|
           - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
           - label += " (Current)" if uv.id == unit["Current Version"][0]
           - label += " (Errors)" if uv.has_errors?
           - label += " (Rendering)" if uv.is_rendering?
-          - if uv.id == @version_id
-            %b= "Viewing: "
+          %option{ value: "#{uv.id}" }= label
+      :javascript
+        $('#unit-version.ui.dropdown').dropdown("set selected", "#{@version_id}")
+          .dropdown({
+            onChange: function(val) {
+              console.log(val);
+              location.href = "?version=" + val;
+            }
+          });
 
-          - if uv.is_viewable?
-            %a{ href: "?version=#{uv.id}" }= label
-          - else
-            %span= label
-
-    - if selected_version.id != unit["Current Version"][0]
-      %p
+      - if selected_version.id != unit["Current Version"][0]
         %a.button{ href: "/project/#{access_token}/unit/#{unit.id}/set_current_version?uv_id=#{selected_version.id}" } Make Current Version
 
     %hr
