@@ -11,9 +11,10 @@ RUN bundle install
 
 ADD package.json /app/package.json
 RUN npm install
-RUN npm run build
 
 ADD . /app/
+
+RUN npm run build
 
 EXPOSE 4567
 
