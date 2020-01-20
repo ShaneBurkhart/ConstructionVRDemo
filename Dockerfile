@@ -11,7 +11,7 @@ RUN bundle install
 
 ADD package.json /app/package.json
 RUN npm install
-VOLUME /app/node_modules
+RUN npm run build
 
 ADD . /app/
 
