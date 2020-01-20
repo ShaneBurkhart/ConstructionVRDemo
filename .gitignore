@@ -5,3 +5,4 @@ data/
 **.zip
 node_modules/
 scripts/input/
+package-lock.json
