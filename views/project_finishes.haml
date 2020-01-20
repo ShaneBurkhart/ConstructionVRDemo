@@ -1,8 +1,6 @@
-.xlarge-container
-  %h1= project["Name"]
-  %p.no-print
-    %a{ href: "/project/#{access_token}" } View Renderings
+= haml :_project_header, locals: { page: "finishes", project: project, access_token: access_token }
 
+.xlarge-container
   %p.filters
     Filter:
     %a.selected{ href: "#", data: { location: "all" } } All
@@ -34,13 +32,6 @@
             %td{ rowspan: [finish_options_count, 1].max }
               %p.bold{ style: "margin-bottom: 0px; line-height: 1.2;" }= finish["Type"]
               %p= "#{finish['Location']} - #{finish['Room']}"
-              - if is_admin_mode
-                .admin-controls
-                  %a.remove-selection{ href: "#" } Remove
-                  .ui.popup.remove-selection-popup
-                    .header Remove Selection Row?
-                    %p You are about to remove the entire row for this selection. Do you want to continue?  This is not removing an option.
-                    .ui.red.button{ data: { selection_id: finish.id } } Remove
 
               - if !finish["Notes"].nil?
                 - notes = (finish["Notes"] || "").gsub("\n", "<br>")

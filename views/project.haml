@@ -1,17 +1,11 @@
-.container
-  %h1= project["Name"]
+= haml :_project_header, locals: { page: "renderings", project: project, access_token: access_token }
 
-  %a{ href: "/project/#{access_token}/finishes" } Finish Selections
+- if is_admin_mode
+  .admin-section
+    .xlarge-container
+      %a{ href: "/project/#{access_token}/feedbacks" } All Feedbacks
 
-  - if is_admin_mode
-    | |
-    %a{ href: "/project/#{access_token}/feedbacks" } All Feedbacks
-    | |
-    %a{ href: "/project/#{access_token}/procurement_forms" } Procurement Forms
-
-
-  %hr
-
+.xlarge-container
   #unit-previews
     - units.each do |unit|
       .unit-preview{ data: { href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } }

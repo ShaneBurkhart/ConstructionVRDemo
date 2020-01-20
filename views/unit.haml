@@ -1,38 +1,41 @@
 %script(src="/underscore.js")
 %script(src="/script.js?v=190429")
 
+= haml :_project_header, locals: { page: "renderings", project: project, access_token: access_token }
+
+- if is_admin_mode
+  .admin-section
+    .large-container
+      %p
+        %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
+
+      %p
+        Versions:
+        %select#unit-version.ui.dropdown
+          - unit_versions.each do |uv|
+            - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
+            - label += " (Current)" if uv.id == unit["Current Version"][0]
+            - label += " (Errors)" if uv.has_errors?
+            - label += " (Rendering)" if uv.is_rendering?
+            %option{ value: "#{uv.id}" }= label
+        :javascript
+          $('#unit-version.ui.dropdown').dropdown("set selected", "#{@version_id}")
+            .dropdown({
+              onChange: function(val) {
+                console.log(val);
+                location.href = "?version=" + val;
+              }
+            });
+
+        - if selected_version.id != unit["Current Version"][0]
+          %a.button{ href: "/project/#{access_token}/unit/#{unit.id}/set_current_version?uv_id=#{selected_version.id}" } Make Current Version
+
+
 .large-container
   %p
     %a{ href: "/project/#{access_token}" } Back to all Units
 
   %hr
-
-  - if is_admin_mode
-    %p
-      %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
-
-    %p
-      Versions:
-      %select#unit-version.ui.dropdown
-        - unit_versions.each do |uv|
-          - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
-          - label += " (Current)" if uv.id == unit["Current Version"][0]
-          - label += " (Errors)" if uv.has_errors?
-          - label += " (Rendering)" if uv.is_rendering?
-          %option{ value: "#{uv.id}" }= label
-      :javascript
-        $('#unit-version.ui.dropdown').dropdown("set selected", "#{@version_id}")
-          .dropdown({
-            onChange: function(val) {
-              console.log(val);
-              location.href = "?version=" + val;
-            }
-          });
-
-      - if selected_version.id != unit["Current Version"][0]
-        %a.button{ href: "/project/#{access_token}/unit/#{unit.id}/set_current_version?uv_id=#{selected_version.id}" } Make Current Version
-
-    %hr
 
   .row
     .third
@@ -40,7 +43,7 @@
 
       - if is_admin_mode
         %p
-          %a.edit-description{ href: "#", data: { description: unit["Details"] } } Edit Description
+          %a.edit-description{ href: "#", data: { description: unit["Details"] || "" } } Edit Description
 
       %ul
         - (unit["Details"] || "").split(/[\n|]/).each do |detail|
@@ -64,10 +67,11 @@
             .pano-preview{ data: { id: pano["Pano ID"][0] }}
               .name= pano["Pano Name"].first
 
-  - if !is_tour
-    %p
-      %a.button.green{ href: "?show_tour=1&version=#{selected_version.id}" } Go to Virtual Tour
+  .ui.tabular.menu
+    %a.item{ href: "?version=#{selected_version.id}", class: !is_tour ? "active" : "" } Rendered Images
+    %a.item{ href: "?show_tour=1&version=#{selected_version.id}", class: is_tour ? "active" : "" } Virtual Tour
 
+  - if !is_tour
     #screenshots
       %h2 Interior Renderings
       - screenshot_scene_names = selected_version.get_screenshot_scene_names
@@ -86,10 +90,6 @@
               %button.screenshot-feedback-submit Submit Feedback
 
   - else
-    - if selected_version.screenshot_versions.length > 0
-      %p
-        %a.button.green{ href: "?version=#{selected_version.id}" } Go to Interior Renderings
-
     #virtual-tour
       %h2 Virtual Tour
       %p

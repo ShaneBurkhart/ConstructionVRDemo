@@ -425,6 +425,7 @@ get '/project/:access_token/unit/:id' do
   end
 
   haml :unit, locals: {
+    project: project,
     unit: unit,
     selected_version: version,
     unit_versions: unit.versions,
