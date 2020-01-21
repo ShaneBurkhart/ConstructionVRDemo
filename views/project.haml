@@ -8,10 +8,14 @@
 .xlarge-container
   #unit-previews
     - units.each do |unit|
+      - next if !is_admin_mode && unit["Hidden?"]
       .unit-preview{ data: { href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } }
         .image-wrapper
           %img{ src: unit["Floor Plan Image URL"] }
-        .name= unit["Name"]
+        .name
+          = unit["Name"]
+          - if unit["Hidden?"]
+            = "(Hidden)"
 
 :javascript
   $(document).ready(function () {
