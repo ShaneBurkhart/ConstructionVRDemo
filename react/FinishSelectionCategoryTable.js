@@ -13,6 +13,11 @@ class FinishSelectionCategoryTable extends React.Component {
     this.markdownConverter = new showdown.Converter();
   }
 
+  getMarkdownHTML(markdown) {
+    const m = (markdown || "").replace(/\n/g, "<br>");
+    return this.markdownConverter.makeHtml(m || "");
+  }
+
   renderSelectionRows() {
     const { selections, options_by_selection_id } = this.props;
 
@@ -37,7 +42,7 @@ class FinishSelectionCategoryTable extends React.Component {
                   <p className="cell-details">Niche: {selectionFields["Room"]}</p>
                   <div
                     className="notes"
-                    dangerouslySetInnerHTML={{ __html: this.markdownConverter.makeHtml(selectionFields["Notes"] || "") }}
+                    dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
                     />
                 </td>
               }
@@ -46,7 +51,7 @@ class FinishSelectionCategoryTable extends React.Component {
                 {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
                 <div
                   className="notes"
-                  dangerouslySetInnerHTML={{ __html: this.markdownConverter.makeHtml(selectionFields["Notes"] || "") }}
+                  dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
                   />
               </td>
               <td>
