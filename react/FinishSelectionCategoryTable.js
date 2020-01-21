@@ -58,19 +58,23 @@ class FinishSelectionCategoryTable extends React.Component {
                 </td>
               }
               <td>
-                <p className="cell-heading">{optionFields["Name"]}</p>
-                {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
-                <div
-                  className="notes"
-                  dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
-                  />
-              </td>
-              <td>
-                {images.map((image) => (
-                  <a key={image["id"]} href={image["url"]} target="_blank">
-                    <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
-                  </a>
-                ))}
+                <div className="finish-option">
+                  <div className="half">
+                    <p className="cell-heading">{optionFields["Name"]}</p>
+                    {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+                    <div
+                      className="notes"
+                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+                      />
+                  </div>
+                  <div className="half">
+                    {images.map((image) => (
+                      <a key={image["id"]} href={image["url"]} target="_blank">
+                        <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </td>
             </tr>
           )
@@ -83,7 +87,6 @@ class FinishSelectionCategoryTable extends React.Component {
               <p className="cell-details">Location: {selectionFields["Location"]}</p>
               <p className="cell-details">Niche: {selectionFields["Room"]}</p>
             </td>
-            <td></td>
             <td></td>
           </tr>
         )
@@ -111,8 +114,7 @@ class FinishSelectionCategoryTable extends React.Component {
             <thead>
               <tr>
                 <th style={{ width: "33%" }}>Selection</th>
-                <th style={{ width: "33%" }}>Option Info</th>
-                <th style={{ width: "33%" }}>Option Image</th>
+                <th style={{ width: "66%" }}>Options</th>
               </tr>
             </thead>
             <tbody>
