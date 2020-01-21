@@ -463,7 +463,7 @@ get '/project/:access_token/unit/:id/set_visibility' do
   access_token = params[:access_token]
   is_admin = !!session[:is_admin]
   unit_id = params[:id]
-  set_visible = params[:visible] == "1"
+  set_hidden = params[:hidden] == "1"
 
   return "Not found" unless is_admin
 
@@ -473,8 +473,7 @@ get '/project/:access_token/unit/:id/set_visibility' do
   unit = Unit.find(unit_id)
   return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
 
-  puts set_visible
-  unit["Hidden?"] = set_visible
+  unit["Hidden?"] = set_hidden
   unit.save
 
   return redirect "/project/#{access_token}/unit/#{unit_id}"
