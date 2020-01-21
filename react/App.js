@@ -4,41 +4,88 @@ import { bindActionCreators } from 'redux'
 
 import ActionCreators from './action_creators';
 
+import FinishSelectionFilters from './FinishSelectionFilters';
+import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
+
 import './App.css';
+import './FinishSelectionTable.css';
 
 class App extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.onChangeFilter = this.onChangeFilter.bind(this);
+
+    this.state = {
+      currentFilter: "All",
+    }
+  }
+
   componentDidMount() {
     this.props.load()
   }
 
-  render() {
-    const { selections_by_category, isLoading, editOption, selectingForSelection } = this.props;
-    console.log("render");
+  onChangeFilter(filter) {
+    this.setState({ currentFilter: filter });
+  }
 
-    const dimmerClass = ["ui page inverted dimmer", isLoading ? "active" : ""].join(" ")
+  getFilters() {
+    const { selections_by_category } = this.props;
+    const allSelections = Object.values(selections_by_category).flat();
+    const locations = {};
+
+    allSelections.forEach((selection) => {
+      const l = selection["fields"]["Location"];
+      if (l && !locations[l]) locations[l] = true;
+    });
+
+    return Object.keys(locations);
+  }
+
+  renderCategorySections() {
+    const { selections_by_category } = this.props;
+    const { currentFilter } = this.state;
+
+    return Object.keys(selections_by_category || {}).map((key, i) => {
+      let filtered = selections_by_category[key] || [];
+
+      if (currentFilter != "All") {
+        filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
+      }
+
+      return (
+        <FinishSelectionCategoryTable
+          key={key}
+          name={key}
+          selections={filtered}
+          />
+      )
+    });
+  }
+
+  renderLoading() {
+    const { isLoading } = this.props;
+    if (!isLoading) return "";
 
     return (
-      <div className="app-container">
-        <div className="selections-container">
-          {Object.keys(selections_by_category).map((value, index) => {
-            return <SelectionCategorySection
-                      key={value}
-                      category={value}
-                      selections={selections_by_category[value]}
-                      />
-          })}
-        </div>
-        {!!editOption && !selectingForSelection &&
-          <EditOptionModal option={editOption} />
-        }
-        {!!selectingForSelection &&
-          <SelectionModal selection={selectingForSelection} />
-        }
-        {isLoading &&
-          <div className="ui page inverted dimmer active">
-            <div className="ui grey header content">Loading...</div>
-          </div>
-        }
+      <div className="ui inverted dimmer active">
+        <div className="ui grey header content">Loading...</div>
+      </div>
+    );
+  }
+
+  render() {
+    const { currentFilter } = this.state;
+
+    return (
+      <div className="xlarge-container">
+        <FinishSelectionFilters
+          current={currentFilter}
+          filters={this.getFilters()}
+          onChange={this.onChangeFilter}
+          />
+        {this.renderCategorySections()}
+        {this.renderLoading()}
       </div>
     );
   }
@@ -47,9 +94,8 @@ class App extends React.Component {
 export default connect(
   (state, props) => ({
     isLoading: state.isLoading,
-    editOption: state.options_by_id[state.modals.editOptionId],
-    selectingForSelection: state.selections_by_id[state.modals.selectingForSelectionId],
-    selections_by_category: state.selections_by_category
+    selections_by_category: state.selections_by_category,
+    options_by_selection_id: state.options_by_selection_id
   }),
   (dispatch, props) => (bindActionCreators({
     load: () => (ActionCreators.load()),
