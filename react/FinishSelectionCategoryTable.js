@@ -4,13 +4,25 @@ import { bindActionCreators } from 'redux'
 
 import ActionCreators from './action_creators';
 
+import './FinishSelectionCategoryTable.css';
+
 const showdown = require("showdown");
 
 class FinishSelectionCategoryTable extends React.Component {
   constructor(props) {
     super(props)
 
+    this.state = {
+      expanded: true,
+    };
+
+    this.onClickCollapse = this.onClickCollapse.bind(this);
     this.markdownConverter = new showdown.Converter();
+  }
+
+  onClickCollapse() {
+    const { expanded } = this.state;
+    this.setState({ expanded: !expanded });
   }
 
   getMarkdownHTML(markdown) {
@@ -24,8 +36,7 @@ class FinishSelectionCategoryTable extends React.Component {
     return selections.map((selection, j) => {
       const selectionFields = selection["fields"];
       const options = options_by_selection_id[selection["id"]] || [];
-      let rowClasses = ["selection"];
-      if (j % 2 == 1) rowClasses.push("shade");
+      let rowClasses = ["selection", j % 2 == 1 ? "shade" : "white"];
 
       if (options.length > 0) {
         return options.map((option, i) => {
@@ -81,23 +92,34 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   render() {
-    const { name } = this.props;
+    const { name, selections } = this.props;
+    const { expanded } = this.state;
+    const count = (selections || []).length;
 
     return (
       <div className="selections-category">
-        <h2>{name}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: "33%" }}>Selection</th>
-              <th style={{ width: "33%" }}>Option Info</th>
-              <th style={{ width: "33%" }}>Option Image</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.renderSelectionRows()}
-          </tbody>
-        </table>
+        <h2>
+          {name}
+          <span className="expand-collapse hide-print">
+            <a href="#/" onClick={this.onClickCollapse}>
+              {expanded ? "Collapse" : `Expand (${count} selections)` }
+            </a>
+          </span>
+        </h2>
+        {expanded &&
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: "33%" }}>Selection</th>
+                <th style={{ width: "33%" }}>Option Info</th>
+                <th style={{ width: "33%" }}>Option Image</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.renderSelectionRows()}
+            </tbody>
+          </table>
+        }
       </div>
     )
   }
