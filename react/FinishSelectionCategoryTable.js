@@ -4,7 +4,15 @@ import { bindActionCreators } from 'redux'
 
 import ActionCreators from './action_creators';
 
+const showdown = require("showdown");
+
 class FinishSelectionCategoryTable extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.markdownConverter = new showdown.Converter();
+  }
+
   renderSelectionRows() {
     const { selections, options_by_selection_id } = this.props;
 
@@ -24,14 +32,22 @@ class FinishSelectionCategoryTable extends React.Component {
             <tr className={rowClasses.join(" ")} key={option["id"]}>
               {isFirst &&
                 <td rowSpan={Math.max(...[(options || []).length, 1])}>
-                  <p className="bold">{selectionFields["Type"]}</p>
-                  <p>Location: {selectionFields["Location"]}</p>
-                  <p>Niche: {selectionFields["Room"]}</p>
+                  <p className="cell-heading">{selectionFields["Type"]}</p>
+                  <p className="cell-details">Location: {selectionFields["Location"]}</p>
+                  <p className="cell-details">Niche: {selectionFields["Room"]}</p>
+                  <div
+                    className="notes"
+                    dangerouslySetInnerHTML={{ __html: this.markdownConverter.makeHtml(selectionFields["Notes"] || "") }}
+                    />
                 </td>
               }
               <td>
-                <p className="bold">{optionFields["Name"]}</p>
+                <p className="cell-heading">{optionFields["Name"]}</p>
                 {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+                <div
+                  className="notes"
+                  dangerouslySetInnerHTML={{ __html: this.markdownConverter.makeHtml(selectionFields["Notes"] || "") }}
+                  />
               </td>
               <td>
                 {images.map((image) => (
@@ -47,9 +63,9 @@ class FinishSelectionCategoryTable extends React.Component {
         return (
           <tr className={rowClasses.join(" ")} key={selection["id"]}>
             <td>
-              <p className="bold">{selectionFields["Type"]}</p>
-              <p>Location: {selectionFields["Location"]}</p>
-              <p>Niche: {selectionFields["Room"]}</p>
+              <p className="cell-heading">{selectionFields["Type"]}</p>
+              <p className="cell-details">Location: {selectionFields["Location"]}</p>
+              <p className="cell-details">Niche: {selectionFields["Room"]}</p>
             </td>
             <td></td>
             <td></td>
