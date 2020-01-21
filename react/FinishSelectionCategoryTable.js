@@ -57,7 +57,7 @@ class FinishSelectionCategoryTable extends React.Component {
                     />
                 </td>
               }
-              <td>
+              <td className="options-cell">
                 <div className="finish-option">
                   <div className="half">
                     <p className="cell-heading">{optionFields["Name"]}</p>
@@ -87,7 +87,7 @@ class FinishSelectionCategoryTable extends React.Component {
               <p className="cell-details">Location: {selectionFields["Location"]}</p>
               <p className="cell-details">Niche: {selectionFields["Room"]}</p>
             </td>
-            <td></td>
+            <td className="options-cell"></td>
           </tr>
         )
       }
