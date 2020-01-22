@@ -4,17 +4,14 @@
     margin-bottom: 20px;
 }
 
-.selections-category table {
+.selections-category .table {
     background-color: #ffffff;
 }
 
-.selections-category table tr {
+.selections-category .table .table-row {
     border: 1px solid #bbb;
     border-top: none;
-}
-
-.selections-category table thead tr {
-    border: 1px solid #bbb;
+    overflow: hidden;
 }
 
 .selections-category h2 {
@@ -28,8 +25,8 @@
     margin-left: 10px;
 }
 
-.selections-category .option-cell {
-    padding: 5px;
+.selections-category .options-cell {
+    padding: 5px 0 0;
     border: none;
 }
 
@@ -40,6 +37,7 @@
     border: 1px solid #ccc;
     border-radius: 3px;
     min-height: 70px;
+    margin-bottom: 5px;
 }
 
 .selections-category .finish-option .half {

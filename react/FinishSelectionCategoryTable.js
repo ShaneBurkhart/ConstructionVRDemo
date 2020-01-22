@@ -1,6 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import ActionCreators from './action_creators';
 
@@ -31,71 +30,68 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { selections, options_by_selection_id } = this.props;
+    const { selections } = this.props;
 
     return selections.map((selection, j) => {
       const selectionFields = selection["fields"];
-      const options = options_by_selection_id[selection["id"]] || [];
-      let rowClasses = ["selection", j % 2 == 1 ? "shade" : "white"];
+      const options = selection["Options"] || [];
+      const rowClasses = ["table-row", "selection", "white" ];
 
-      if (options.length > 0) {
-        return options.map((option, i) => {
-          const optionFields = option["fields"];
-          const images = (optionFields["Image"] || []).slice(0, 2);
-          const isFirst = i == 0;
+      const optionEls = options.map((option, i) => {
+        const optionFields = option["fields"];
+        const images = (optionFields["Image"] || []).slice(0, 2);
 
-          return (
-            <tr className={rowClasses.join(" ")} key={option["id"]}>
-              {isFirst &&
-                <td rowSpan={Math.max(...[(options || []).length, 1])}>
-                  <p className="cell-heading">{selectionFields["Type"]}</p>
-                  <p className="cell-details">Location: {selectionFields["Location"]}</p>
-                  <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-                  <div
-                    className="notes"
-                    dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
-                    />
-                </td>
-              }
-              <td className="options-cell">
-                <div className="finish-option">
-                  <div className="half">
-                    <p className="cell-heading">{optionFields["Name"]}</p>
-                    {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
-                    <div
-                      className="notes"
-                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
-                      />
-                  </div>
-                  <div className="half">
-                    {images.map((image) => (
-                      <a key={image["id"]} href={image["url"]} target="_blank">
-                        <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </td>
-            </tr>
-          )
-        })
-      } else {
         return (
-          <tr className={rowClasses.join(" ")} key={selection["id"]}>
-            <td>
-              <p className="cell-heading">{selectionFields["Type"]}</p>
-              <p className="cell-details">Location: {selectionFields["Location"]}</p>
-              <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-            </td>
-            <td className="options-cell"></td>
-          </tr>
-        )
-      }
+          <div key={option["id"]} className="finish-option">
+            <div className="half">
+              <p className="cell-heading">{optionFields["Name"]}</p>
+              {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+              <div
+                className="notes"
+                dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+                />
+            </div>
+            <div className="half">
+              {images.map((image) => (
+                <a key={image["id"]} href={image["url"]} target="_blank">
+                  <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      });
+
+      return (
+        <Draggable key={selection["id"]} draggableId={selection["id"]} index={j}>
+          {(provided, snapshot) => (
+            <div
+              className={rowClasses.join(" ")}
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              >
+              <div className="table-column third">
+                <p className="cell-heading">{selectionFields["Type"]}</p>
+                <p className="cell-details">Location: {selectionFields["Location"]}</p>
+                <p className="cell-details">Niche: {selectionFields["Room"]}</p>
+                <div
+                  className="notes"
+                  dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
+                  />
+              </div>
+              <div className="table-column two-third options-cell">
+                {optionEls}
+              </div>
+            </div>
+          )}
+        </Draggable>
+      );
     });
   }
 
   render() {
-    const { name, selections } = this.props;
+    const { name, selections, onDragStartSelection, onDragEndSelection } = this.props;
     const { expanded } = this.state;
     const count = (selections || []).length;
 
@@ -110,27 +106,31 @@ class FinishSelectionCategoryTable extends React.Component {
           </span>
         </h2>
         {expanded &&
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: "33%" }}>Selection</th>
-                <th style={{ width: "66%" }}>Options</th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.renderSelectionRows()}
-            </tbody>
-          </table>
+          <DragDropContext
+            onDragEnd={onDragEndSelection}
+            onDragStart={onDragStartSelection}
+            >
+            <Droppable droppableId={name}>
+              {(provided, snapshot) => (
+                <div
+                  className="table"
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  >
+                  <div className="table-row">
+                    <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+                    <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+                  </div>
+                  {this.renderSelectionRows()}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         }
       </div>
     )
   }
 }
 
-export default connect(
-  (state, props) => ({
-    options_by_selection_id: state.options_by_selection_id
-  }),
-  (dispatch, props) => (bindActionCreators({
-  }, dispatch))
-)(FinishSelectionCategoryTable);
+export default FinishSelectionCategoryTable;

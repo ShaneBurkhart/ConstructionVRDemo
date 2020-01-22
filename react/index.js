@@ -4,9 +4,6 @@ import ReactDOM from 'react-dom';
 import 'semantic-ui-css/semantic.min.css';
 import './index.css';
 
-import { Provider } from 'react-redux'
-import store from './store'
-
 import App from './App';
 
-ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('finishes-app'));
+ReactDOM.render(<App />, document.getElementById('finishes-app'));
