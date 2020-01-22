@@ -63,7 +63,12 @@ class FinishSelectionCategoryTable extends React.Component {
       });
 
       return (
-        <Draggable key={selection["id"]} draggableId={selection["id"]} index={j}>
+        <Draggable
+          key={selection["id"]}
+          draggableId={selection["id"]}
+          type="SELECTION"
+          index={j}
+          >
           {(provided, snapshot) => (
             <div
               className={rowClasses.join(" ")}
@@ -110,7 +115,7 @@ class FinishSelectionCategoryTable extends React.Component {
             onDragEnd={onDragEndSelection}
             onDragStart={onDragStartSelection}
             >
-            <Droppable droppableId={name}>
+            <Droppable droppableId={name} type="SELECTION">
               {(provided, snapshot) => (
                 <div
                   className="table"

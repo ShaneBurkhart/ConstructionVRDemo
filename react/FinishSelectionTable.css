@@ -61,7 +61,7 @@ a.selected:hover {
 @media print {
     body { font-size: 14px; }
     .table { page-break-inside:auto; page-break-after: always;}
-    .row { page-break-inside:avoid; page-break-after:auto }
+    .table-row { page-break-inside:avoid; page-break-after:auto }
     img.one { max-width: 175px; max-height: 175px; }
     img.two { max-width: 100px; max-height: 100px; }
     .no-print { display: none; }

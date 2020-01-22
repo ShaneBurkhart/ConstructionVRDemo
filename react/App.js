@@ -51,16 +51,19 @@ class App extends React.Component {
     const { source, destination } = result;
     if (!destination) return;
 
+    console.log(result);
     console.log(source);
     console.log(destination);
 
-    const selections = Array.from(selectionsByCategory[source.droppableId]);
-    const [removed] = selections.splice(source.index, 1);
-    selections.splice(destination.index, 0, removed);
+    if (result["type"] == "SELECTION") {
+      const selections = Array.from(selectionsByCategory[source.droppableId]);
+      const [removed] = selections.splice(source.index, 1);
+      selections.splice(destination.index, 0, removed);
 
-    selectionsByCategory[source.droppableId] = selections;
+      selectionsByCategory[source.droppableId] = selections;
 
-    this.setState({ selectionsByCategory });
+      this.setState({ selectionsByCategory });
+    }
   }
 
   getFilters() {
