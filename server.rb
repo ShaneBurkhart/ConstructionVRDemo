@@ -459,6 +459,26 @@ get '/project/:access_token/unit/:id/set_description' do
   return redirect "/project/#{access_token}/unit/#{unit_id}"
 end
 
+get '/project/:access_token/unit/:id/set_visibility' do
+  access_token = params[:access_token]
+  is_admin = !!session[:is_admin]
+  unit_id = params[:id]
+  set_hidden = params[:hidden] == "1"
+
+  return "Not found" unless is_admin
+
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  unit = Unit.find(unit_id)
+  return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
+
+  unit["Hidden?"] = set_hidden
+  unit.save
+
+  return redirect "/project/#{access_token}/unit/#{unit_id}"
+end
+
 get '/project/:access_token/unit/:id/set_current_version' do
   access_token = params[:access_token]
   is_admin = !!session[:is_admin]

@@ -10,6 +10,16 @@
         %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
 
       %p
+        - if unit["Hidden?"]
+          %span.bold Only Admins can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=0" }
+            Make Visible to Everyone
+        - else
+          %span.bold Everyone can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=1" }
+            Hide Unit
+
+      %p
         Versions:
         %select#unit-version.ui.dropdown
           - unit_versions.each do |uv|
