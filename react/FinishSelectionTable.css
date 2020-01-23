@@ -6,6 +6,10 @@
     word-wrap: break-word;
 }
 
+.table-row {
+    display: flex;
+}
+
 .table-row.white { background-color: #ffffff; }
 .table-row.shade { background-color: #f2f2f2; }
 

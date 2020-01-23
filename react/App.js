@@ -15,10 +15,12 @@ class App extends React.Component {
     this.onChangeFilter = this.onChangeFilter.bind(this);
     this.onDragStartSelection = this.onDragStartSelection.bind(this);
     this.onDragEndSelection = this.onDragEndSelection.bind(this);
+    this.onClickSelection = this.onClickSelection.bind(this);
 
     // Keep selection state in here
     this.state = {
       isLoading: false,
+      selectionModal: null,
       currentFilter: "All",
       selectionsByCategory: {},
     }
@@ -66,6 +68,11 @@ class App extends React.Component {
     }
   }
 
+  onClickSelection(selectionId) {
+    console.log(selectionId);
+    this.setState({ selectionModal: selectionId });
+  }
+
   getFilters() {
     const { selectionsByCategory } = this.state;
     const allSelections = Object.values(selectionsByCategory).flat();
@@ -96,9 +103,21 @@ class App extends React.Component {
           selections={filtered}
           onDragStartSelection={this.onDragStartSelection}
           onDragEndSelection={this.onDragEndSelection}
+          onClickSelection={this.onClickSelection}
           />
       )
     });
+  }
+
+  renderSelectionModal() {
+    const { selectionModal } = this.state;
+    if (!selectionModal) return "";
+
+    return (
+      <div className="ui inverted dimmer active">
+        <div className="ui grey header content">Loading...</div>
+      </div>
+    );
   }
 
   renderLoading() {
@@ -123,6 +142,7 @@ class App extends React.Component {
           onChange={this.onChangeFilter}
           />
         {this.renderCategorySections()}
+        {this.renderSelectionModal()}
         {this.renderLoading()}
       </div>
     );

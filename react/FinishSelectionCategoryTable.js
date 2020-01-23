@@ -3,6 +3,8 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import ActionCreators from './action_creators';
 
+import FinishSelectionAdminControls from './FinishSelectionAdminControls';
+
 import './FinishSelectionCategoryTable.css';
 
 const showdown = require("showdown");
@@ -30,7 +32,7 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { selections } = this.props;
+    const { selections, onClickSelection } = this.props;
 
     return selections.map((selection, j) => {
       const selectionFields = selection["fields"];
@@ -74,16 +76,21 @@ class FinishSelectionCategoryTable extends React.Component {
               className={rowClasses.join(" ")}
               ref={provided.innerRef}
               {...provided.draggableProps}
-              {...provided.dragHandleProps}
               >
-              <div className="table-column third">
-                <p className="cell-heading">{selectionFields["Type"]}</p>
-                <p className="cell-details">Location: {selectionFields["Location"]}</p>
-                <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-                <div
-                  className="notes"
-                  dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
+              <div className="table-column third flex">
+                <FinishSelectionAdminControls
+                  dragHandleProps={provided.dragHandleProps}
+                  onClickEdit={() => onClickSelection(selection["id"])}
                   />
+                <div className="info-cell">
+                  <p className="cell-heading">{selectionFields["Type"]}</p>
+                  <p className="cell-details">Location: {selectionFields["Location"]}</p>
+                  <p className="cell-details">Niche: {selectionFields["Room"]}</p>
+                  <div
+                    className="notes"
+                    dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
+                    />
+                </div>
               </div>
               <div className="table-column two-third options-cell">
                 {optionEls}
