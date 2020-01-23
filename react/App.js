@@ -1,103 +1,63 @@
 import React from 'react';
-import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import ReactDataSheet from 'react-datasheet';
+import $ from 'jquery';
 
-import ActionCreators from './action_creators';
+import 'react-datasheet/lib/react-datasheet.css';
 
-import FinishSelectionFilters from './FinishSelectionFilters';
-import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
+const header = [
+  { value: "Name", readOnly: true },
+  { value: "Type", readOnly: true },
+  { value: "Image", readOnly: true },
+  { value: "Info", readOnly: true },
+  { value: "URL", readOnly: true },
+];
 
-import './App.css';
-import './FinishSelectionTable.css';
+const valueRenderer = (cell) => {
+  if (cell.type == "images") {
+    return (cell.value || []).map(i => i["url"]).join(" ");
+  }
+  return cell.value;
+}
 
 class App extends React.Component {
   constructor(props) {
     super(props)
-
-    this.onChangeFilter = this.onChangeFilter.bind(this);
-
     this.state = {
-      currentFilter: "All",
+      finishes: [],
     }
   }
 
   componentDidMount() {
-    this.props.load()
-  }
-
-  onChangeFilter(filter) {
-    this.setState({ currentFilter: filter });
-  }
-
-  getFilters() {
-    const { selections_by_category } = this.props;
-    const allSelections = Object.values(selections_by_category).flat();
-    const locations = {};
-
-    allSelections.forEach((selection) => {
-      const l = selection["fields"]["Location"];
-      if (l && !locations[l]) locations[l] = true;
-    });
-
-    return Object.keys(locations);
-  }
-
-  renderCategorySections() {
-    const { selections_by_category } = this.props;
-    const { currentFilter } = this.state;
-
-    return Object.keys(selections_by_category || {}).map((key, i) => {
-      let filtered = selections_by_category[key] || [];
-
-      if (currentFilter != "All") {
-        filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
-      }
-
-      return (
-        <FinishSelectionCategoryTable
-          key={key}
-          name={key}
-          selections={filtered}
-          />
-      )
+    $.get("/api/finishes", (data) => {
+      this.setState({ finishes: data.finishes });
     });
   }
 
-  renderLoading() {
-    const { isLoading } = this.props;
-    if (!isLoading) return "";
+  generateGrid() {
+    const { finishes } = this.state;
+    const finishesRows = (finishes || []).map(f => (
+      [
+        { value: f["fields"]["Name"] },
+        { value: f["fields"]["Type"] },
+        { type: "images", value: f["fields"]["Image"] },
+        { value: f["fields"]["Info"] },
+        { value: f["fields"]["URL"] },
+      ]
+    ));
 
-    return (
-      <div className="ui inverted dimmer active">
-        <div className="ui grey header content">Loading...</div>
-      </div>
-    );
+    return [].concat([header], finishesRows);
   }
 
   render() {
-    const { currentFilter } = this.state;
-
     return (
       <div className="xlarge-container">
-        <FinishSelectionFilters
-          current={currentFilter}
-          filters={this.getFilters()}
-          onChange={this.onChangeFilter}
+        <ReactDataSheet
+            data={this.generateGrid()}
+            valueRenderer={valueRenderer}
           />
-        {this.renderCategorySections()}
-        {this.renderLoading()}
       </div>
     );
   }
 }
 
-export default connect(
-  (state, props) => ({
-    isLoading: state.isLoading,
-    selections_by_category: state.selections_by_category,
-    options_by_selection_id: state.options_by_selection_id
-  }),
-  (dispatch, props) => (bindActionCreators({
-    load: () => (ActionCreators.load()),
-  }, dispatch))
-)(App);
+export default App;

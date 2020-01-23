@@ -251,6 +251,19 @@ post '/admin/pano/initial_yaw/set' do
   return { pano_version: pano_version }.to_json
 end
 
+get '/api/finishes' do
+  all_finishes = FinishOptions.all
+
+  content_type "text/json"
+  { finishes: all_finishes }.to_json
+end
+
+get '/admin/finishes_library' do
+  haml :admin_finishes_library, locals: {
+    no_style: true,
+  }
+end
+
 get '/project/:access_token' do
   is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]

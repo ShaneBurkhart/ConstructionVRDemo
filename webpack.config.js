@@ -4,6 +4,9 @@ const webpack = require("webpack");
 module.exports = {
   entry: "./react/index.js",
   mode: "development",
+  watchOptions: {
+    poll: 3000
+  },
   module: {
     rules: [
       {
