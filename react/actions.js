@@ -1,0 +1,4 @@
+export default {
+  LOADING: "LOADING",
+  UPDATE_PROJECT: "UPDATE_PROJECT",
+}
