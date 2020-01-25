@@ -1,0 +1,9 @@
+.finish-option-placeholder {
+    background-color: #fafafa;
+    padding: 5px 5px;
+    border: 1px dashed #ccc;
+    border-radius: 3px;
+    min-height: 70px;
+    margin-bottom: 5px;
+}
+

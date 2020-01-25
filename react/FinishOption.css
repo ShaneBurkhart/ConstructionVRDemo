@@ -1,0 +1,23 @@
+.finish-option {
+    overflow: hidden;
+    background-color: #fafafa;
+    padding: 5px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    min-height: 70px;
+    margin-bottom: 5px;
+    display: flex;
+}
+
+.finish-option .half {
+    width: 50%;
+}
+
+.admin-mode .finish-option {
+    cursor: pointer;
+}
+
+.admin-mode .finish-option:hover {
+    background-color: #e0e0e0;
+}
+

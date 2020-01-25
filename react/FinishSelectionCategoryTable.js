@@ -1,0 +1,106 @@
+import React from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Icon } from 'semantic-ui-react'
+
+import ActionCreators from './action_creators';
+import AdminContext from './context/AdminContext';
+
+import AdminControls from './AdminControls';
+import FinishSelection from './FinishSelection';
+import FinishOptionsContainer from './FinishOptionsContainer';
+
+import './FinishSelectionCategoryTable.css';
+
+class FinishSelectionCategoryTable extends React.Component {
+  static contextType = AdminContext;
+
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      expanded: true,
+    };
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.selections == nextProps.selections &&
+        this.state.expanded == nextState.expanded) {
+      return false;
+    }
+
+    return true;
+  }
+
+  onClickCollapse = () => {
+    const { expanded } = this.state;
+    this.setState({ expanded: !expanded });
+  }
+
+  renderSelectionRows() {
+    const { name, selections, onClickSelection, onClickOption } = this.props;
+    const isAdmin = this.context;
+
+    return selections.map((selection, j) => (
+      <FinishSelection
+        selection={selection}
+        category={name}
+        index={j}
+        key={selection["id"]}
+        onClick={onClickSelection}
+        onClickOption={onClickOption}
+      />
+    ));
+  }
+
+  render() {
+    const { name, selections } = this.props;
+    const { expanded } = this.state;
+    const isAdmin = this.context;
+    const count = (selections || []).length;
+    let table = null;
+
+    if (isAdmin) {
+      table = (
+        <Droppable droppableId={name} type="SELECTION">
+          {(provided, snapshot) => (
+            <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
+              <div className="table-row">
+                <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+                <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+              </div>
+              {this.renderSelectionRows()}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      );
+    } else {
+      table = (
+        <div className="table" >
+          <div className="table-row">
+            <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+            <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+          </div>
+          {this.renderSelectionRows()}
+        </div>
+      );
+    }
+
+    return (
+      <div className="selections-category">
+        <h2 onClick={this.onClickCollapse}>
+          <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
+          {name}
+          <span className="expand-collapse hide-print">
+            <a href="#/">
+              {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
+            </a>
+          </span>
+        </h2>
+        {expanded && table}
+      </div>
+    )
+  }
+}
+
+export default FinishSelectionCategoryTable;
