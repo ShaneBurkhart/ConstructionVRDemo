@@ -97,7 +97,7 @@ class App extends React.Component {
       let destSelectionIndex = null;
 
       if (source.droppableId != destination.droppableId) {
-        destSelectionsArray.from(selectionsByCategory[destination.droppableId]);
+        destSelections = Array.from(selectionsByCategory[destination.droppableId]);
       }
 
       if (destination.index < filteredSelectionsByCategory[destination.droppableId].length) {
