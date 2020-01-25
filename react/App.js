@@ -82,6 +82,8 @@ class App extends React.Component {
     const { selectionsByCategory, filteredSelectionsByCategory } = this.state;
     const { source, destination } = result;
     if (!destination) return;
+    // Picked it up and dropped it in the same spot.
+    if (source.droppableId == destination.droppableId && source.index == destination.index) return;
 
     console.log(result);
     console.log(source);
@@ -123,16 +125,26 @@ class App extends React.Component {
       const sourceSelectionIndex = sourceSelections.findIndex(s => s["id"] == sourceDroppableId);
       const sourceSelection = _.clone(sourceSelections[sourceSelectionIndex]);
       const sourceOptions = Array.from(sourceSelection["Options"]);
+      let destSelections = sourceSelections;
+      let destSelectionIndex = sourceSelectionIndex;
+      let destSelection = sourceSelection;
+      let destOptions = sourceOptions;
+
+      if (sourceCategory != destCategory) {
+        destSelections = Array.from(selectionsByCategory[destCategory]);
+      }
+
+      if (sourceDroppableId != destDroppableId) {
+        destSelectionIndex = destSelections.findIndex(s => s["id"] == destDroppableId);
+        destSelection = _.clone(destSelections[destSelectionIndex]);
+        destOptions = Array.from(destSelection["Options"]);
+      }
+
       const [removedOption] = sourceOptions.splice(source.index, 1);
 
       sourceSelection["Options"] = sourceOptions;
       sourceSelections[sourceSelectionIndex] = sourceSelection;
       selectionsByCategory[sourceCategory] = sourceSelections;
-
-      const destSelections = Array.from(selectionsByCategory[destCategory]);
-      const destSelectionIndex = destSelections.findIndex(s => s["id"] == destDroppableId);
-      const destSelection = _.clone(destSelections[destSelectionIndex]);
-      const destOptions = Array.from(destSelection["Options"]);
 
       destOptions.splice(destination.index, 0, removedOption);
       destSelection["Options"] = destOptions;
