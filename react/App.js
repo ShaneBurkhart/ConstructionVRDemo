@@ -25,12 +25,14 @@ class App extends React.Component {
       optionModal: null,
       currentFilter: "All",
       selectionsByCategory: {},
+      filteredSelectionsByCategory: {},
       adminMode: false,
     }
   }
 
   componentDidMount() {
     this.setState({ isLoading: true });
+
     ActionCreators.load((data) => {
       // Combine selections and options
       const selections = data.selections_by_category;
@@ -43,13 +45,27 @@ class App extends React.Component {
       this.setState({
         isLoading: false,
         selectionsByCategory: selections,
+        filteredSelectionsByCategory: selections,
         adminMode: data["admin_mode"]
       });
     })
   }
 
   onChangeFilter = (filter) => {
-    this.setState({ currentFilter: filter });
+    const { selectionsByCategory } = this.state;
+    let filteredSelectionsByCategory = {};
+
+    Object.keys(selectionsByCategory || {}).each((key, i) => {
+      let filtered = selectionsByCategory[key] || [];
+
+      if (currentFilter != "All") {
+        filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
+      }
+
+      filteredSelectionsByCategory[key] = filtered;
+    });
+
+    this.setState({ filteredSelectionsByCategory, currentFilter: filter });
   }
 
   onDragStartSelection = () => {
@@ -149,20 +165,14 @@ class App extends React.Component {
   }
 
   renderCategorySections() {
-    const { currentFilter, selectionsByCategory } = this.state;
+    const { currentFilter, filteredSelectionsByCategory } = this.state;
 
-    return Object.keys(selectionsByCategory || {}).map((key, i) => {
-      let filtered = selectionsByCategory[key] || [];
-
-      if (currentFilter != "All") {
-        filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
-      }
-
+    return Object.keys(filteredSelectionsByCategory || {}).map((key, i) => {
       return (
         <FinishSelectionCategoryTable
           key={key}
           name={key}
-          selections={filtered}
+          selections={filteredSelectionsByCategory[key]}
           onDragStartSelection={this.onDragStartSelection}
           onDragEndSelection={this.onDragEndSelection}
           onClickSelection={this.onClickSelection}

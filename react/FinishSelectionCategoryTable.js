@@ -26,6 +26,14 @@ class FinishSelectionCategoryTable extends React.Component {
     this.markdownConverter = new showdown.Converter();
   }
 
+  shouldComponentUpdate(nextProps) {
+    if (this.props.selections == nextProps.selections) {
+      return false;
+    }
+
+    return true;
+  }
+
   onClickCollapse = () => {
     const { expanded } = this.state;
     this.setState({ expanded: !expanded });
