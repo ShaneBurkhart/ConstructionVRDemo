@@ -69,8 +69,8 @@ class App extends React.Component {
   }
 
   onChangeFilter = (filter) => {
-    const { selectionsByCategory, currentFilter } = this.state;
-    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
+    const { selectionsByCategory } = this.state;
+    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, filter );
     this.setState({ filteredSelectionsByCategory, currentFilter: filter });
   }
 
@@ -79,7 +79,7 @@ class App extends React.Component {
   }
 
   onDragEndSelection = (result) => {
-    const { selectionsByCategory } = this.state;
+    const { selectionsByCategory, filteredSelectionsByCategory } = this.state;
     const { source, destination } = result;
     if (!destination) return;
 
@@ -88,14 +88,32 @@ class App extends React.Component {
     console.log(destination);
 
     if (result["type"] == "SELECTION") {
+      const sourceSelectionId = filteredSelectionsByCategory[source.droppableId][source.index]["id"];
       const sourceSelections = Array.from(selectionsByCategory[source.droppableId]);
-      const [removed] = sourceSelections.splice(source.index, 1);
+      const sourceSelectionIndex = sourceSelections.findIndex(s => s["id"] == sourceSelectionId);
+
+      let destSelections = sourceSelections;
+      let destSelectionId = null;
+      let destSelectionIndex = null;
+
+      if (source.droppableId != destination.droppableId) {
+        destSelectionsArray.from(selectionsByCategory[destination.droppableId]);
+      }
+
+      if (destination.index < filteredSelectionsByCategory[destination.droppableId].length) {
+        destSelectionId = filteredSelectionsByCategory[destination.droppableId][destination.index]["id"];
+        destSelectionIndex = destSelections.findIndex(s => s["id"] == destSelectionId);
+      } else {
+        destSelectionId = filteredSelectionsByCategory[destination.droppableId][destination.index - 1]["id"];
+        // Put after the selection we moved it after.
+        destSelectionIndex = destSelections.findIndex(s => s["id"] == destSelectionId) + 1;
+      }
+
+      // Remove after finding indexes
+      const [removed] = sourceSelections.splice(sourceSelectionIndex, 1);
 
       selectionsByCategory[source.droppableId] = sourceSelections;
-
-      const destSelections = Array.from(selectionsByCategory[destination.droppableId]);
-
-      destSelections.splice(destination.index, 0, removed);
+      destSelections.splice(destSelectionIndex, 0, removed);
       selectionsByCategory[destination.droppableId] = destSelections;
     } else if (result["type"] == "OPTION") {
       const [sourceCategory, sourceDroppableId] = source.droppableId.split("/");
@@ -123,9 +141,9 @@ class App extends React.Component {
     }
 
     const { currentFilter } = this.state;
-    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
+    const newFilteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
 
-    this.setState({ selectionsByCategory, filteredSelectionsByCategory });
+    this.setState({ selectionsByCategory, filteredSelectionsByCategory: newFilteredSelectionsByCategory });
     this._isDragging = false;
   }
 
