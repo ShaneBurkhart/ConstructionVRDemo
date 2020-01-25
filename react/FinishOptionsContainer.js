@@ -19,27 +19,29 @@ class FinishOptionsContainer extends React.Component {
 
     if (draggable) {
       return (
-        <Droppable droppableId={droppableId || this._droppableId} type="OPTION">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {options.map((option, i) => (
-                <FinishOption
-                  draggable={draggable}
-                  draggableId={`${this._draggableId}/${option["id"]}`}
-                  index={i}
-                  key={option["id"]}
-                  option={option}
-                  onClick={_ => { if (onSelectOption) onSelectOption(option["id"]) }}
-                />
-              ))}
-              {provided.placeholder}
-              <NewFinishOptionPlaceholder onClick={_ => { if (onSelectOption) onSelectOption("new") }} />
-            </div>
-          )}
-        </Droppable>
+        <div>
+          <Droppable droppableId={droppableId || this._droppableId} type="OPTION">
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {options.map((option, i) => (
+                  <FinishOption
+                    draggable={draggable}
+                    draggableId={`${this._draggableId}/${option["id"]}`}
+                    index={i}
+                    key={option["id"]}
+                    option={option}
+                    onClick={_ => { if (onSelectOption) onSelectOption(option["id"]) }}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <NewFinishOptionPlaceholder onClick={_ => { if (onSelectOption) onSelectOption("new") }} />
+        </div>
       );
     } else {
       return (
