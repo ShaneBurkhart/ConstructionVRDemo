@@ -5,13 +5,11 @@ import { Icon } from 'semantic-ui-react'
 import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
 
-import FinishOption from './FinishOption';
 import AdminControls from './AdminControls';
+import FinishSelection from './FinishSelection';
 import FinishOptionsContainer from './FinishOptionsContainer';
 
 import './FinishSelectionCategoryTable.css';
-
-const showdown = require("showdown");
 
 class FinishSelectionCategoryTable extends React.Component {
   static contextType = AdminContext;
@@ -22,12 +20,11 @@ class FinishSelectionCategoryTable extends React.Component {
     this.state = {
       expanded: true,
     };
-
-    this.markdownConverter = new showdown.Converter();
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.props.selections == nextProps.selections) {
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.selections == nextProps.selections &&
+        this.state.expanded == nextState.expanded) {
       return false;
     }
 
@@ -39,115 +36,53 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
-  getMarkdownHTML(markdown) {
-    const m = (markdown || "").replace(/\n/g, "<br>");
-    return this.markdownConverter.makeHtml(m || "");
-  }
-
   renderSelectionRows() {
     const { name, selections, onClickSelection, onClickOption } = this.props;
     const isAdmin = this.context;
 
-    return selections.map((selection, j) => {
-      const selectionFields = selection["fields"];
-      const options = selection["Options"] || [];
-      const rowClasses = ["table-row", "selection", "white" ];
-
-      if (isAdmin) {
-        return (
-          <Draggable
-            key={selection["id"]}
-            draggableId={selection["id"]}
-            type="SELECTION"
-            index={j}
-            >
-            {(provided, snapshot) => (
-              <div
-                className={rowClasses.join(" ")}
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                onClick={() => onClickSelection(selection["id"])}
-              >
-                <div className="table-column third flex">
-                  {isAdmin && <AdminControls
-                    dragHandleProps={provided.dragHandleProps}
-                  />}
-                  <div className="info-cell">
-                    <p className="cell-heading">{selectionFields["Type"]}</p>
-                    <p className="cell-details">Location: {selectionFields["Location"]}</p>
-                    <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-                    <div
-                      className="notes"
-                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
-                      />
-                  </div>
-                </div>
-                <div className="table-column two-third options-cell">
-                  <FinishOptionsContainer
-                    draggable
-                    droppableId={`${name}/${selection["id"]}`}
-                    options={options}
-                    onSelectOption={(optionId) => { if (onClickOption) onClickOption(optionId, selection["id"]) }}
-                  />
-                </div>
-              </div>
-            )}
-          </Draggable>
-        );
-      } else {
-        return (
-          <div className={rowClasses.join(" ")} key={selection["id"]}>
-            <div className="table-column third flex">
-              <div className="info-cell">
-                <p className="cell-heading">{selectionFields["Type"]}</p>
-                <p className="cell-details">Location: {selectionFields["Location"]}</p>
-                <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-                <div
-                  className="notes"
-                  dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
-                  />
-              </div>
-            </div>
-            <div className="table-column two-third options-cell">
-              <FinishOptionsContainer options={options} />
-            </div>
-          </div>
-        );
-      }
-    });
+    return selections.map((selection, j) => (
+      <FinishSelection
+        selection={selection}
+        category={name}
+        index={j}
+        key={selection["id"]}
+        onClick={onClickSelection}
+        onClickOption={onClickOption}
+      />
+    ));
   }
 
   render() {
-    const { name, selections, onDragStartSelection, onDragEndSelection } = this.props;
+    const { name, selections } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
     const count = (selections || []).length;
-    let table = (
-      <div className="table" >
-        <div className="table-row">
-          <div className="table-column third" style={{ width: "33%" }}>Selection</div>
-          <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
-        </div>
-        {this.renderSelectionRows()}
-      </div>
-    );
+    let table = null;
 
     if (isAdmin) {
       table = (
-        <DragDropContext onDragEnd={onDragEndSelection} onDragStart={onDragStartSelection} >
-          <Droppable droppableId={name} type="SELECTION">
-            {(provided, snapshot) => (
-              <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
-                <div className="table-row">
-                  <div className="table-column third" style={{ width: "33%" }}>Selection</div>
-                  <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
-                </div>
-                {this.renderSelectionRows()}
-                {provided.placeholder}
+        <Droppable droppableId={name} type="SELECTION">
+          {(provided, snapshot) => (
+            <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
+              <div className="table-row">
+                <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+                <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+              {this.renderSelectionRows()}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      );
+    } else {
+      table = (
+        <div className="table" >
+          <div className="table-row">
+            <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+            <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+          </div>
+          {this.renderSelectionRows()}
+        </div>
       );
     }
 

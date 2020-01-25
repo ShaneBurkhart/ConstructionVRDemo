@@ -26,14 +26,14 @@ class FinishOption extends React.Component {
   }
 
   render() {
-    const { option, index, draggable } = this.props;
+    const { option, index, draggable, draggableId } = this.props;
     const optionFields = option["fields"];
     const images = (optionFields["Image"] || []).slice(0, 2);
 
     if (draggable) {
       return (
         <Draggable
-          draggableId={option["id"]}
+          draggableId={draggableId}
           type="OPTION"
           index={index}
         >

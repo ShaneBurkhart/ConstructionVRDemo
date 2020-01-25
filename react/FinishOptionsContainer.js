@@ -11,6 +11,7 @@ class FinishOptionsContainer extends React.Component {
   constructor(props) {
     super(props);
     this._droppableId = Math.random().toString(36).substring(2, 15);
+    this._draggableId = Math.random().toString(36).substring(2, 15);
   }
 
   render() {
@@ -27,6 +28,7 @@ class FinishOptionsContainer extends React.Component {
               {options.map((option, i) => (
                 <FinishOption
                   draggable={draggable}
+                  draggableId={`${this._draggableId}/${option["id"]}`}
                   index={i}
                   key={option["id"]}
                   option={option}

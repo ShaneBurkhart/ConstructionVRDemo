@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from 'underscore';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
@@ -45,18 +46,17 @@ class App extends React.Component {
       this.setState({
         isLoading: false,
         selectionsByCategory: selections,
-        filteredSelectionsByCategory: selections,
+        filteredSelectionsByCategory: _.clone(selections),
         adminMode: data["admin_mode"]
       });
     })
   }
 
-  onChangeFilter = (filter) => {
-    const { selectionsByCategory } = this.state;
+  _getFilteredSelectionsByCategory(selectionsByCategory, currentFilter) {
     let filteredSelectionsByCategory = {};
 
-    Object.keys(selectionsByCategory || {}).each((key, i) => {
-      let filtered = selectionsByCategory[key] || [];
+    Object.keys(selectionsByCategory || {}).forEach((key, i) => {
+      let filtered = Array.from(selectionsByCategory[key] || []);
 
       if (currentFilter != "All") {
         filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
@@ -65,6 +65,12 @@ class App extends React.Component {
       filteredSelectionsByCategory[key] = filtered;
     });
 
+    return filteredSelectionsByCategory;
+  }
+
+  onChangeFilter = (filter) => {
+    const { selectionsByCategory, currentFilter } = this.state;
+    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
     this.setState({ filteredSelectionsByCategory, currentFilter: filter });
   }
 
@@ -82,40 +88,44 @@ class App extends React.Component {
     console.log(destination);
 
     if (result["type"] == "SELECTION") {
-      const selections = Array.from(selectionsByCategory[source.droppableId]);
-      const [removed] = selections.splice(source.index, 1);
-      selections.splice(destination.index, 0, removed);
+      const sourceSelections = Array.from(selectionsByCategory[source.droppableId]);
+      const [removed] = sourceSelections.splice(source.index, 1);
 
-      selectionsByCategory[source.droppableId] = selections;
+      selectionsByCategory[source.droppableId] = sourceSelections;
 
-      this.setState({ selectionsByCategory });
+      const destSelections = Array.from(selectionsByCategory[destination.droppableId]);
+
+      destSelections.splice(destination.index, 0, removed);
+      selectionsByCategory[destination.droppableId] = destSelections;
     } else if (result["type"] == "OPTION") {
       const [sourceCategory, sourceDroppableId] = source.droppableId.split("/");
       const [destCategory, destDroppableId] = destination.droppableId.split("/");
-      // sourceCategory == destCategory always for meow
-      const selections = Array.from(selectionsByCategory[sourceCategory]);
+      const sourceSelections = Array.from(selectionsByCategory[sourceCategory]);
 
-      const sourceSelection = selections.find(s => s["id"] == sourceDroppableId);
+      const sourceSelectionIndex = sourceSelections.findIndex(s => s["id"] == sourceDroppableId);
+      const sourceSelection = _.clone(sourceSelections[sourceSelectionIndex]);
       const sourceOptions = Array.from(sourceSelection["Options"]);
       const [removedOption] = sourceOptions.splice(source.index, 1);
 
-      if (sourceDroppableId != destDroppableId) {
-        // Moving to another selection.
-        const destSelection = selections.find(s => s["id"] == destDroppableId);
-        const destOptions = Array.from(destSelection["Options"]);
-
-        destOptions.splice(destination.index, 0, removedOption);
-        destSelection["Options"] = destOptions;
-      } else {
-        sourceOptions.splice(destination.index, 0, removedOption);
-      }
-
       sourceSelection["Options"] = sourceOptions;
+      sourceSelections[sourceSelectionIndex] = sourceSelection;
+      selectionsByCategory[sourceCategory] = sourceSelections;
 
-      selectionsByCategory[sourceCategory] = selections;
-      this.setState({ selectionsByCategory });
+      const destSelections = Array.from(selectionsByCategory[destCategory]);
+      const destSelectionIndex = destSelections.findIndex(s => s["id"] == destDroppableId);
+      const destSelection = _.clone(destSelections[destSelectionIndex]);
+      const destOptions = Array.from(destSelection["Options"]);
+
+      destOptions.splice(destination.index, 0, removedOption);
+      destSelection["Options"] = destOptions;
+      destSelections[destSelectionIndex] = destSelection;
+      selectionsByCategory[destCategory] = destSelections;
     }
 
+    const { currentFilter } = this.state;
+    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
+
+    this.setState({ selectionsByCategory, filteredSelectionsByCategory });
     this._isDragging = false;
   }
 
@@ -173,8 +183,6 @@ class App extends React.Component {
           key={key}
           name={key}
           selections={filteredSelectionsByCategory[key]}
-          onDragStartSelection={this.onDragStartSelection}
-          onDragEndSelection={this.onDragEndSelection}
           onClickSelection={this.onClickSelection}
           onClickOption={this.onClickOption}
         />
@@ -225,7 +233,9 @@ class App extends React.Component {
             filters={this.getFilters()}
             onChange={this.onChangeFilter}
             />
-          {this.renderCategorySections()}
+          <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
+            {this.renderCategorySections()}
+          </DragDropContext>
           {adminMode && this.renderSelectionModal()}
           {this.renderLoading()}
         </div>
