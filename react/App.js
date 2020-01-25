@@ -1,8 +1,12 @@
 import React from 'react';
+import * as _ from 'underscore';
+import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
+import AdminContext from './context/AdminContext';
 
 import FinishSelectionFilters from './FinishSelectionFilters';
+import FinishSelectionModal from './FinishSelectionModal';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
 
 import './App.css';
@@ -12,17 +16,16 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
-    this.onChangeFilter = this.onChangeFilter.bind(this);
-    this.onDragStartSelection = this.onDragStartSelection.bind(this);
-    this.onDragEndSelection = this.onDragEndSelection.bind(this);
-    this.onClickSelection = this.onClickSelection.bind(this);
+    this._isDragging = false;
 
     // Keep selection state in here
     this.state = {
       isLoading: false,
       selectionModal: null,
+      optionModal: null,
       currentFilter: "All",
       selectionsByCategory: {},
+      adminMode: false,
     }
   }
 
@@ -37,18 +40,23 @@ class App extends React.Component {
         selections[category].forEach(s => s["Options"] = options[s["id"]]);
       });
 
-      this.setState({ isLoading: false, selectionsByCategory: selections });
+      this.setState({
+        isLoading: false,
+        selectionsByCategory: selections,
+        adminMode: data["admin_mode"]
+      });
     })
   }
 
-  onChangeFilter(filter) {
+  onChangeFilter = (filter) => {
     this.setState({ currentFilter: filter });
   }
 
-  onDragStartSelection() {
+  onDragStartSelection = () => {
+    this._isDragging = true;
   }
 
-  onDragEndSelection(result) {
+  onDragEndSelection = (result) => {
     const { selectionsByCategory } = this.state;
     const { source, destination } = result;
     if (!destination) return;
@@ -65,12 +73,66 @@ class App extends React.Component {
       selectionsByCategory[source.droppableId] = selections;
 
       this.setState({ selectionsByCategory });
+    } else if (result["type"] == "OPTION") {
+      const [sourceCategory, sourceDroppableId] = source.droppableId.split("/");
+      const [destCategory, destDroppableId] = destination.droppableId.split("/");
+      // sourceCategory == destCategory always for meow
+      const selections = Array.from(selectionsByCategory[sourceCategory]);
+
+      const sourceSelection = selections.find(s => s["id"] == sourceDroppableId);
+      const sourceOptions = Array.from(sourceSelection["Options"]);
+      const [removedOption] = sourceOptions.splice(source.index, 1);
+
+      if (sourceDroppableId != destDroppableId) {
+        // Moving to another selection.
+        const destSelection = selections.find(s => s["id"] == destDroppableId);
+        const destOptions = Array.from(destSelection["Options"]);
+
+        destOptions.splice(destination.index, 0, removedOption);
+        destSelection["Options"] = destOptions;
+      } else {
+        sourceOptions.splice(destination.index, 0, removedOption);
+      }
+
+      sourceSelection["Options"] = sourceOptions;
+
+      selectionsByCategory[sourceCategory] = selections;
+      this.setState({ selectionsByCategory });
     }
+
+    this._isDragging = false;
   }
 
-  onClickSelection(selectionId) {
+  onSaveSelection = (selectionId, selectionFields, selectionOptions) => {
+    const { selectionsByCategory } = this.state;
+
+    Object.keys(selectionsByCategory).forEach((cat) => {
+      const selectionsForCat = selectionsByCategory[cat];
+      const selection = selectionsForCat.find(s => s["id"] == selectionId);
+      if (!selection) return;
+
+      selectionsByCategory[cat] = Array.from(selectionsForCat).map(s => {
+        if (s["id"] != selectionId) return s;
+        s["fields"] = _.extend(s["fields"], selectionFields);
+        s["Options"] = _.extend(s["Options"], selectionOptions);
+        return s;
+      });
+    });
+
+    this.setState({ selectionModal: null, optionModal: null, selectionsByCategory });
+  }
+
+  onClickSelection = (selectionId) => {
+    if (this._isDragging) return;
     console.log(selectionId);
-    this.setState({ selectionModal: selectionId });
+    this.setState({ selectionModal: selectionId, optionModal: null });
+  }
+
+  onClickOption = (optionId, selectionId) => {
+    if (this._isDragging) return;
+    console.log(optionId);
+    console.log(selectionId);
+    this.setState({ selectionModal: selectionId, optionModal: optionId });
   }
 
   getFilters() {
@@ -104,19 +166,29 @@ class App extends React.Component {
           onDragStartSelection={this.onDragStartSelection}
           onDragEndSelection={this.onDragEndSelection}
           onClickSelection={this.onClickSelection}
-          />
+          onClickOption={this.onClickOption}
+        />
       )
     });
   }
 
   renderSelectionModal() {
-    const { selectionModal } = this.state;
+    const { selectionModal, optionModal, selectionsByCategory } = this.state;
     if (!selectionModal) return "";
 
+    const selections = Object.values(selectionsByCategory)
+      .reduce((acc, val) => acc.concat(val), []);
+    const selection = selections.find(s => s["id"] == selectionModal);
+    if (!selection) return "";
+
     return (
-      <div className="ui inverted dimmer active">
-        <div className="ui grey header content">Loading...</div>
-      </div>
+      <FinishSelectionModal
+        key={selectionModal}
+        selection={selection}
+        selectedOptionId={optionModal}
+        onClose={_ => this.setState({ selectionModal: null, optionModal: null }) }
+        onSave={this.onSaveSelection}
+      />
     );
   }
 
@@ -132,19 +204,22 @@ class App extends React.Component {
   }
 
   render() {
-    const { currentFilter } = this.state;
+    const { currentFilter, adminMode } = this.state;
+    const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
     return (
-      <div className="xlarge-container">
-        <FinishSelectionFilters
-          current={currentFilter}
-          filters={this.getFilters()}
-          onChange={this.onChangeFilter}
-          />
-        {this.renderCategorySections()}
-        {this.renderSelectionModal()}
-        {this.renderLoading()}
-      </div>
+      <AdminContext.Provider value={adminMode}>
+        <div className={wrapperClasses.join(" ")}>
+          <FinishSelectionFilters
+            current={currentFilter}
+            filters={this.getFilters()}
+            onChange={this.onChangeFilter}
+            />
+          {this.renderCategorySections()}
+          {adminMode && this.renderSelectionModal()}
+          {this.renderLoading()}
+        </div>
+      </AdminContext.Provider>
     );
   }
 }

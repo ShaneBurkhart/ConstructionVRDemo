@@ -25,29 +25,21 @@
     margin-left: 10px;
 }
 
-.selections-category .selection:hover {
+.selections-category h2 {
+    cursor: pointer;
+}
+
+.admin-mode .selections-category .selection {
+    cursor: pointer;
+}
+
+.admin-mode .selections-category .selection:hover {
     background-color: #f0f0f0;
 }
 
 .selections-category .options-cell {
     padding: 5px 0 0;
     border: none;
-}
-
-.selections-category .finish-option {
-    overflow: hidden;
-    background-color: #fafafa;
-    padding: 5px 5px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    min-height: 70px;
-    margin-bottom: 5px;
-    display: flex;
-}
-
-.selections-category .finish-option .half {
-    width: 50%;
-    display: inline-block;
 }
 
 @media print {

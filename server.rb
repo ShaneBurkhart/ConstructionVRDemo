@@ -126,6 +126,7 @@ get '/api/project/:access_token/finishes' do
 
   content_type "application/json"
   {
+    admin_mode: is_admin_mode,
     selections_by_category: @finish_categories,
     options_by_selection_id: @options_for_selection,
   }.to_json
