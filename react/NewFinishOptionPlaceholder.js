@@ -17,6 +17,7 @@ class NewFinishOptionPlaceholder extends React.Component {
   render() {
     return (
       <div className="finish-option-placeholder hide-print" onClick={this.onClick}>
+        <Icon name="plus circle" />
         Click Here to Add Finish Option
       </div>
     );

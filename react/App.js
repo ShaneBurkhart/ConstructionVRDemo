@@ -160,7 +160,7 @@ class App extends React.Component {
   }
 
   onSaveSelection = (selectionId, selectionFields, selectionOptions) => {
-    const { selectionsByCategory } = this.state;
+    const { selectionsByCategory, currentFilter } = this.state;
 
     Object.keys(selectionsByCategory).forEach((cat) => {
       const selectionsForCat = selectionsByCategory[cat];
@@ -169,13 +169,20 @@ class App extends React.Component {
 
       selectionsByCategory[cat] = Array.from(selectionsForCat).map(s => {
         if (s["id"] != selectionId) return s;
+
+        s = _.clone(s);
         s["fields"] = _.extend(s["fields"], selectionFields);
         s["Options"] = _.extend(s["Options"], selectionOptions);
         return s;
       });
     });
 
-    this.setState({ selectionModal: null, optionModal: null, selectionsByCategory });
+    this.setState({
+      selectionsByCategory,
+      selectionModal: null,
+      optionModal: null,
+      filteredSelectionsByCategory: this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter)
+    });
   }
 
   onClickSelection = (selectionId) => {

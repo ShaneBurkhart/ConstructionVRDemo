@@ -1,9 +1,16 @@
 .finish-option-placeholder {
     background-color: #fafafa;
     padding: 5px 5px;
-    border: 1px dashed #ccc;
+    border: 2px dashed #ccc;
     border-radius: 3px;
-    min-height: 70px;
+    min-height: 35px;
     margin-bottom: 5px;
+    text-align: center;
+    color: #cccccc;
+    cursor: pointer;
 }
 
+.finish-option-placeholder:hover {
+    color: #40A819;
+    border-color: #40A819;
+}

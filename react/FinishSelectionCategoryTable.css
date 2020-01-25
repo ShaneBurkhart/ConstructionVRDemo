@@ -29,19 +29,6 @@
     cursor: pointer;
 }
 
-.admin-mode .selections-category .selection {
-    cursor: pointer;
-}
-
-.admin-mode .selections-category .selection:hover {
-    background-color: #f0f0f0;
-}
-
-.selections-category .options-cell {
-    padding: 5px 0 0;
-    border: none;
-}
-
 @media print {
     .selections-category h2 {
         border: none;

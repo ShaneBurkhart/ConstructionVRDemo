@@ -22,7 +22,7 @@
       %link(href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Roboto:300,400,700|Handlee" rel="stylesheet")
       %link(type="text/css" rel="stylesheet" href="/style.css?v=200117")
 
-  %body
+  %body{ class: defined?(is_admin_mode) && is_admin_mode ? "admin-mode" : "" }
     = yield
 
     - if defined? fixed_width_viewport

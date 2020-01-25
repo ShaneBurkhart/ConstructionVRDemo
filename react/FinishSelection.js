@@ -7,6 +7,8 @@ import AdminContext from './context/AdminContext';
 import FinishOptionsContainer from './FinishOptionsContainer';
 import AdminControls from './AdminControls';
 
+import "./FinishSelection.css"
+
 const showdown = require("showdown");
 
 class FinishSelection extends React.Component {
