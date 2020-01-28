@@ -14,6 +14,15 @@ class FinishOptionsContainer extends React.Component {
     this._draggableId = Math.random().toString(36).substring(2, 15);
   }
 
+  onNewOption = () => {
+    const { onSelectOption } = this.props;
+    if (onSelectOption) {
+      onSelectOption({
+        "id": "new" + Math.random().toString(36).substring(2, 15),
+      });
+    }
+  }
+
   render() {
     const { options, onSelectOption, draggable, droppableId } = this.props;
 
@@ -33,14 +42,14 @@ class FinishOptionsContainer extends React.Component {
                     index={i}
                     key={option["id"]}
                     option={option}
-                    onClick={_ => { if (onSelectOption) onSelectOption(option["id"]) }}
+                    onClick={_ => { if (onSelectOption) onSelectOption(option) }}
                   />
                 ))}
                 {provided.placeholder}
               </div>
             )}
           </Droppable>
-          <NewFinishOptionPlaceholder onClick={_ => { if (onSelectOption) onSelectOption("new") }} />
+          <NewFinishOptionPlaceholder onClick={this.onNewOption} />
         </div>
       );
     } else {
@@ -52,10 +61,10 @@ class FinishOptionsContainer extends React.Component {
               index={i}
               key={option["id"]}
               option={option}
-              onClick={_ => { if (onSelectOption) onSelectOption(option["id"]) }}
+              onClick={_ => { if (onSelectOption) onSelectOption(option) }}
             />
           ))}
-        {!!onSelectOption && <NewFinishOptionPlaceholder onClick={_ => onSelectOption("new")} />}
+        {!!onSelectOption && <NewFinishOptionPlaceholder onClick={this.onNewOption} />}
         </div>
       );
     }

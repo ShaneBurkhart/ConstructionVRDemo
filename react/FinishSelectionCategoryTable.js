@@ -8,6 +8,7 @@ import AdminContext from './context/AdminContext';
 import AdminControls from './AdminControls';
 import FinishSelection from './FinishSelection';
 import FinishOptionsContainer from './FinishOptionsContainer';
+import NewFinishSelectionPlaceholder from './NewFinishSelectionPlaceholder';
 
 import './FinishSelectionCategoryTable.css';
 
@@ -36,6 +37,18 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
+  onNewSelection = () => {
+    const { name, onClickSelection } = this.props;
+    if (onClickSelection) {
+      onClickSelection({
+        "id": "new" + Math.random().toString(36).substring(2, 15),
+        "fields": {
+          "Category": name,
+        }
+      });
+    }
+  }
+
   renderSelectionRows() {
     const { name, selections, onClickSelection, onClickOption } = this.props;
     const isAdmin = this.context;
@@ -61,18 +74,21 @@ class FinishSelectionCategoryTable extends React.Component {
 
     if (isAdmin) {
       table = (
-        <Droppable droppableId={name} type="SELECTION">
-          {(provided, snapshot) => (
-            <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
-              <div className="table-row">
-                <div className="table-column third" style={{ width: "33%" }}>Selection</div>
-                <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+        <div>
+          <Droppable droppableId={name} type="SELECTION">
+            {(provided, snapshot) => (
+              <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
+                <div className="table-row">
+                  <div className="table-column third" style={{ width: "33%" }}>Selection</div>
+                  <div className="table-column two-third" style={{ width: "66%" }}>Options</div>
+                </div>
+                {this.renderSelectionRows()}
+                {provided.placeholder}
               </div>
-              {this.renderSelectionRows()}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+            )}
+          </Droppable>
+          <NewFinishSelectionPlaceholder onClick={this.onNewSelection}/>
+        </div>
       );
     } else {
       table = (

@@ -159,23 +159,39 @@ class App extends React.Component {
     this._isDragging = false;
   }
 
-  onSaveSelection = (selectionId, selectionFields, selectionOptions) => {
+  onSaveSelection = (originalCategory, selection) => {
+    console.log(originalCategory);
+    console.log(selection);
     const { selectionsByCategory, currentFilter } = this.state;
+    const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategory]);
+    const selectionId = selection["id"];
+    if (!sourceSelectionsForCat) return;
 
-    Object.keys(selectionsByCategory).forEach((cat) => {
-      const selectionsForCat = selectionsByCategory[cat];
-      const selection = selectionsForCat.find(s => s["id"] == selectionId);
-      if (!selection) return;
+    const selectionIndex = sourceSelectionsForCat.findIndex(s => s["id"] == selectionId);
+    const destCategory = (selection["fields"] || {})["Category"];
+    let destSelectionsForCat = selectionsByCategory[destCategory];
 
-      selectionsByCategory[cat] = Array.from(selectionsForCat).map(s => {
-        if (s["id"] != selectionId) return s;
+    if (originalCategory == destCategory) {
+      if (selectionIndex == -1) {
+        // If source selection not found, add to end of dest selections.
+        // Not typical path. Shouldn't happen really.
+        destSelectionsForCat.push(selection);
+      } else {
+        destSelectionsForCat[selectionIndex] = selection;
+      }
+    } else {
+      if (selectionIndex != -1) {
+        // Remove selection from source if found index
+        sourceSelectionsForCat.splice(selectionIndex, 1);
+      }
 
-        s = _.clone(s);
-        s["fields"] = _.extend(s["fields"], selectionFields);
-        s["Options"] = _.extend(s["Options"], selectionOptions);
-        return s;
-      });
-    });
+      // Append selection to end of destination.
+      destSelectionsForCat = Array.from(selectionsByCategory[destCategory]);
+      destSelectionsForCat.push(selection);
+    }
+
+    selectionsByCategory[originalCategory] = sourceSelectionsForCat;
+    selectionsByCategory[destCategory] = destSelectionsForCat;
 
     this.setState({
       selectionsByCategory,
@@ -185,17 +201,17 @@ class App extends React.Component {
     });
   }
 
-  onClickSelection = (selectionId) => {
+  onClickSelection = (selection) => {
     if (this._isDragging) return;
-    console.log(selectionId);
-    this.setState({ selectionModal: selectionId, optionModal: null });
+    console.log(selection);
+    this.setState({ selectionModal: selection, optionModal: null });
   }
 
-  onClickOption = (optionId, selectionId) => {
+  onClickOption = (option, selection) => {
     if (this._isDragging) return;
-    console.log(optionId);
-    console.log(selectionId);
-    this.setState({ selectionModal: selectionId, optionModal: optionId });
+    console.log(option);
+    console.log(selection);
+    this.setState({ selectionModal: selection, optionModal: option });
   }
 
   getFilters() {
@@ -231,16 +247,11 @@ class App extends React.Component {
     const { selectionModal, optionModal, selectionsByCategory } = this.state;
     if (!selectionModal) return "";
 
-    const selections = Object.values(selectionsByCategory)
-      .reduce((acc, val) => acc.concat(val), []);
-    const selection = selections.find(s => s["id"] == selectionModal);
-    if (!selection) return "";
-
     return (
       <FinishSelectionModal
-        key={selectionModal}
-        selection={selection}
-        selectedOptionId={optionModal}
+        key={selectionModal["id"]}
+        selection={selectionModal}
+        selectedOption={optionModal}
         onClose={_ => this.setState({ selectionModal: null, optionModal: null }) }
         onSave={this.onSaveSelection}
       />

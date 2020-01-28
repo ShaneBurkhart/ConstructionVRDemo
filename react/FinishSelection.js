@@ -33,8 +33,13 @@ class FinishSelection extends React.Component {
     return this.markdownConverter.makeHtml(m || "");
   }
 
+  onClickOption = (option) => {
+    const { selection, onClickOption } = this.props;
+    if (onClickOption) onClickOption(option, selection);
+  }
+
   render() {
-    const { selection, index, category, onClick, onClickOption } = this.props;
+    const { selection, index, category, onClick } = this.props;
     const isAdmin = this.context;
 
     const selectionFields = selection["fields"];
@@ -53,7 +58,7 @@ class FinishSelection extends React.Component {
               className={rowClasses.join(" ")}
               ref={provided.innerRef}
               {...provided.draggableProps}
-              onClick={() => onClick(selection["id"])}
+              onClick={_ => onClick(selection)}
             >
               <div className="table-column third flex">
                 <AdminControls dragHandleProps={provided.dragHandleProps} />
@@ -72,7 +77,7 @@ class FinishSelection extends React.Component {
                   draggable
                   droppableId={`${category}/${selection["id"]}`}
                   options={options}
-                  onSelectOption={(optionId) => { if (onClickOption) onClickOption(optionId, selection["id"]) }}
+                  onSelectOption={this.onClickOption}
                 />
               </div>
             </div>

@@ -10,11 +10,15 @@ class FinishSelectionModal extends React.Component {
   constructor(props) {
     super(props);
 
+    const selection = props.selection || {};
+
+    this._originalCategory = (selection["fields"] || {})["Category"];
+
     this.state = {
-      selectedOptionId: props.selectedOptionId || null,
-      selectionId: props.selection["id"],
-      selectionFields: _.clone(props.selection["fields"]),
-      options: Array.from(props.selection["Options"]),
+      selectedOption: props.selectedOption || null,
+      selectionId: selection["id"],
+      selectionFields: _.clone(selection["fields"] || {}),
+      options: Array.from(selection["Options"] || []),
     };
   }
 
@@ -29,23 +33,23 @@ class FinishSelectionModal extends React.Component {
   onSaveOption = (optionId, optionFields) => {
     const { options } = this.state;
     const newOptions = Array.from(options);
+    const i = newOptions.findIndex(o => o["id"] == optionId);
 
-    if (optionId.startsWith("new")) {
+    if (i == -1 && optionId.startsWith("new")) {
       newOptions.push({ "id": optionId, "fields": optionFields });
     } else {
-      const i = newOptions.findIndex(o => o["id"] == optionId);
       newOptions[i]["fields"] = _.extend(newOptions[i]["fields"], optionFields);
     }
 
-    this.setState({ selectedOptionId: null, options: newOptions });
+    this.setState({ selectedOption: null, options: newOptions });
   }
 
-  onSelectOption = (optionId) => {
-    this.setState({ selectedOptionId: optionId });
+  onSelectOption = (option) => {
+    this.setState({ selectedOption: option });
   }
 
   onCloseOption = () => {
-    this.setState({ selectedOptionId: null });
+    this.setState({ selectedOption: null });
   }
 
   onDragEnd = (result) => {
@@ -62,12 +66,16 @@ class FinishSelectionModal extends React.Component {
   onSave = () => {
     const { onSave } = this.props;
     const { selectionId, selectionFields, options } = this.state;
-    onSave(selectionId, selectionFields, options);
+    onSave(this._originalCategory, {
+      "id": selectionId,
+      "fields": selectionFields,
+      "Options": options
+    });
   }
 
   render() {
     const { onClose } = this.props;
-    const { selectionFields, options, selectedOptionId } = this.state;
+    const { selectionFields, options, selectedOption } = this.state;
 
     return (
       <div>
@@ -83,28 +91,28 @@ class FinishSelectionModal extends React.Component {
                   fluid
                   label="Type"
                   placeholder="PT1 - Accent Wall Paint"
-                  value={selectionFields["Type"]}
+                  value={selectionFields["Type"] || ""}
                   onChange={this.onChangeFor("Type")}
                 />
                 <Form.Input
                   fluid
                   label="Location"
                   placeholder="Clubhouse"
-                  value={selectionFields["Location"]}
+                  value={selectionFields["Location"] || ""}
                   onChange={this.onChangeFor("Location")}
                 />
                 <Form.Input
                   fluid
                   label="Niche"
                   placeholder="Coffee Bar"
-                  value={selectionFields["Room"]}
+                  value={selectionFields["Room"] || ""}
                   onChange={this.onChangeFor("Room")}
                 />
               </Form.Group>
               <Form.TextArea
                 label='Notes'
                 placeholder='Add notes about this selections here...'
-                value={selectionFields["Notes"]}
+                value={selectionFields["Notes"] || ""}
                 onChange={this.onChangeFor("Notes")}
               />
               <p>Options (click to edit, drag to reorder)</p>
@@ -131,10 +139,10 @@ class FinishSelectionModal extends React.Component {
               />
           </Modal.Actions>
         </Modal>
-        {selectedOptionId &&
+        {selectedOption &&
           <FinishOptionModal
-            isNew={selectedOptionId.startsWith("new")}
-            option={options.find(o => o["id"] == selectedOptionId)}
+            isNew={selectedOption["id"].startsWith("new")}
+            option={selectedOption}
             onClose={this.onCloseOption}
             onSave={this.onSaveOption}
           />
