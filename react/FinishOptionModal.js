@@ -47,8 +47,8 @@ class FinishOptionModal extends React.Component {
             <Grid>
               <Grid.Row>
                 {images.map((image) => (
-                  <Grid.Column width={8}>
-                    <Image key={image["id"]} src={image["url"]} />
+                  <Grid.Column width={8} key={image["id"]}>
+                    <Image src={image["url"]} />
                   </Grid.Column>
                 ))}
                 {images.length < 2 &&
