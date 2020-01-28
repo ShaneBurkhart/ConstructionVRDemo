@@ -15,7 +15,7 @@ react_build:
     image: shaneburkhart/construction-vr-demo
     volumes:
         - .:/app
-    command: "rerun --dir react --background npm run build"
+    command: "npm run build"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo
