@@ -10,7 +10,7 @@ class AdminControls extends React.Component {
     return (
       <div className="admin-controls hide-print" onClick={(e) => e.stopPropagation()}>
         <div {...dragHandleProps}>
-          <Icon name="ellipsis vertical" />
+          <Icon name="bars" />
         </div>
       </div>
     );

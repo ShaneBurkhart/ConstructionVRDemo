@@ -1,15 +1,18 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import { Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+
+import StyledDropzone from "./StyledDropzone"
 
 class FinishOptionModal extends React.Component {
   constructor(props) {
     super(props);
 
     const option = props.option || {};
+    const newId = "new" + Math.random().toString(36).substring(2, 15);
 
     this.state = {
-      optionId: option["id"] || "new",
+      optionId: option["id"] || newId,
       optionFields: _.clone(option["fields"] || {}),
     };
   }
@@ -31,6 +34,7 @@ class FinishOptionModal extends React.Component {
   render() {
     const { onClose } = this.props;
     const { optionFields } = this.state;
+    const images = optionFields["Image"] || [];
 
     return (
       <Modal open={true}>
@@ -40,6 +44,20 @@ class FinishOptionModal extends React.Component {
         </Modal.Header>
         <Modal.Content>
           <Form>
+            <Grid>
+              <Grid.Row>
+                {images.map((image) => (
+                  <Grid.Column width={8}>
+                    <Image src={image["url"]} />
+                  </Grid.Column>
+                ))}
+                {images.length < 2 &&
+                  <Grid.Column width={8}>
+                    <StyledDropzone onDrop={acceptedFiles => console.log(acceptedFiles)} />
+                  </Grid.Column>
+                }
+              </Grid.Row>
+            </Grid>
             <Form.Group widths="equal">
               <Form.Input
                 fluid

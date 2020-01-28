@@ -30,7 +30,7 @@ class FinishSelectionModal extends React.Component {
     const { options } = this.state;
     const newOptions = Array.from(options);
 
-    if (optionId == "new") {
+    if (optionId.startsWith("new")) {
       newOptions.push({ "id": optionId, "fields": optionFields });
     } else {
       const i = newOptions.findIndex(o => o["id"] == optionId);
@@ -133,7 +133,7 @@ class FinishSelectionModal extends React.Component {
         </Modal>
         {selectedOptionId &&
           <FinishOptionModal
-            isNew={selectedOptionId == "new"}
+            isNew={selectedOptionId.startsWith("new")}
             option={options.find(o => o["id"] == selectedOptionId)}
             onClose={this.onCloseOption}
             onSave={this.onSaveOption}
