@@ -104,7 +104,7 @@ get '/api/project/:ps_access_token/renderings' do
   project = find_project_by_plansource_access_token(ps_access_token)
   return { renderings: [] }.to_json if project.nil?
 
-  renderings = project.units.map do |u|
+  renderings = project.units.filter { |r| !r["Hidden?"] }.map do |u|
     @version_id = (u["Current Version"] || [])[0]
 
     if !@version_id.nil?
