@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as _ from 'underscore';
-import { Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
+import { Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import DragDropModal from './DragDropModal';
@@ -19,6 +19,20 @@ class FinishCategoriesModal extends DragDropModal {
       categories: categories,
       selectedCategory: props.selectedCategory
     };
+  }
+
+  handleCategoryChangeFor = (category) => {
+    return (e, data) => {
+      const categories = Array.from(this.state.categories || []).map(c => {
+        if (c.original != category) return c;
+
+        const newC = _.clone(c);
+        newC.category = e.target.value;
+        return newC;
+      });
+
+      this.setState({ categories });
+    }
   }
 
   onDragEnd = (result) => {
@@ -80,7 +94,14 @@ class FinishCategoriesModal extends DragDropModal {
                               <AdminControls
                                 dragHandleProps={provided.dragHandleProps}
                               />
-                              <div>{c.category}</div>
+                              <div style={{ width: "100%" }}>
+                                <Input
+                                  fluid
+                                  placeholder="Concepts"
+                                  value={c.category}
+                                  onChange={this.handleCategoryChangeFor(c.original)}
+                                />
+                              </div>
                             </div>
                           </div>
                         )}
