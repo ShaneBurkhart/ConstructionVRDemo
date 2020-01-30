@@ -38,9 +38,11 @@ class FinishOptionModal extends React.Component {
 
     return (
       <Modal open={true}>
-        <Icon name="close" onClick={onClose} />
         <Modal.Header>
           {optionFields["Name"] || "New Option"}
+          <span style={{ float: "right" }}>
+            <Icon name="close" onClick={onClose} />
+          </span>
         </Modal.Header>
         <Modal.Content>
           <Form>

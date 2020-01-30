@@ -30,6 +30,7 @@ class App extends React.Component {
       currentFilter: "All",
       selectionsByCategory: {},
       filteredSelectionsByCategory: {},
+      orderedCategories: [],
       adminMode: false,
     }
   }
@@ -50,6 +51,7 @@ class App extends React.Component {
         isLoading: false,
         selectionsByCategory: selections,
         filteredSelectionsByCategory: _.clone(selections),
+        orderedCategories: Object.keys(selections),
         adminMode: data["admin_mode"]
       });
     })
@@ -91,10 +93,6 @@ class App extends React.Component {
     if (!destination) return;
     // Picked it up and dropped it in the same spot.
     if (source.droppableId == destination.droppableId && source.index == destination.index) return;
-
-    console.log(result);
-    console.log(source);
-    console.log(destination);
 
     if (result["type"] == "SELECTION") {
       const sourceSelectionId = filteredSelectionsByCategory[source.droppableId][source.index]["id"];
@@ -167,11 +165,29 @@ class App extends React.Component {
   }
 
   onSaveCategories = (categories) => {
+    const { currentFilter } = this.state;
+    const selectionsByCategory = _.clone(this.state.selectionsByCategory || {});
+
+    const orderedCategories = (categories || []).map(c => {
+      if (c.original != c.category) {
+        selectionsByCategory[c.category] = selectionsByCategory[c.original] || [];
+        delete selectionsByCategory[c.original]
+      }
+
+      return c.category;
+    });
+
+    this.setState({
+      orderedCategories,
+      selectionsByCategory,
+      selectionModal: null,
+      optionModal: null,
+      categoriesModal: null,
+      filteredSelectionsByCategory: this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter)
+    });
   }
 
   onSaveSelection = (originalCategory, selection) => {
-    console.log(originalCategory);
-    console.log(selection);
     const { selectionsByCategory, currentFilter } = this.state;
     const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategory]);
     const selectionId = selection["id"];
@@ -213,14 +229,11 @@ class App extends React.Component {
 
   onClickSelection = (selection) => {
     if (this._isDragging) return;
-    console.log(selection);
     this.setState({ selectionModal: selection, optionModal: null });
   }
 
   onClickOption = (option, selection) => {
     if (this._isDragging) return;
-    console.log(option);
-    console.log(selection);
     this.setState({ selectionModal: selection, optionModal: option });
   }
 
@@ -238,30 +251,30 @@ class App extends React.Component {
   }
 
   renderCategorySections() {
-    const { currentFilter, filteredSelectionsByCategory } = this.state;
+    const { orderedCategories, currentFilter, filteredSelectionsByCategory } = this.state;
 
-    return Object.keys(filteredSelectionsByCategory || {}).map((key, i) => {
+    return orderedCategories.map((key, i) => {
       return (
         <FinishSelectionCategoryTable
           key={key}
           name={key}
-          selections={filteredSelectionsByCategory[key]}
+          selections={filteredSelectionsByCategory[key] || []}
           onClickSelection={this.onClickSelection}
           onClickOption={this.onClickOption}
+          onClickEditCategory={this.handleOpenCategoryModalFor(key)}
         />
       )
     });
   }
 
   renderCategoriesModal() {
-    const { categoriesModal, selectionsByCategory } = this.state;
+    const { orderedCategories, categoriesModal, selectionsByCategory } = this.state;
     if (!categoriesModal) return "";
-    const categories = Object.keys(selectionsByCategory);
 
     return (
       <FinishCategoriesModal
         key={categoriesModal}
-        categories={categories}
+        categories={orderedCategories}
         selectedCategory={categoriesModal}
         onClose={_ => this.setState({ categoriesModal: null }) }
         onSave={this.onSaveCategories}
@@ -303,10 +316,10 @@ class App extends React.Component {
 
     return (
       <AdminContext.Provider value={adminMode}>
+        {adminMode && <FinishAdminSection
+          onClickManageCategories={this.handleOpenCategoryModalFor(true)}
+        />}
         <div className={wrapperClasses.join(" ")}>
-          {adminMode && <FinishAdminSection
-            onClickManageCategories={this.handleOpenCategoryModalFor(true)}
-          />}
           <FinishSelectionFilters
             current={currentFilter}
             filters={this.getFilters()}

@@ -13,11 +13,13 @@ class FinishAdminSection extends React.Component {
     const { onClickManageCategories } = this.props;
 
     return (
-      <div>
-        <Button
-          color="blue"
-          onClick={onClickManageCategories}
-        >Manage Categories</Button>
+      <div className="admin-section hide-print">
+        <div className="xlarge-container">
+          <Button
+            color="blue"
+            onClick={onClickManageCategories}
+          >Manage Categories</Button>
+        </div>
       </div>
     );
   }

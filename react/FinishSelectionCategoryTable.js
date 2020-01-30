@@ -1,6 +1,6 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Icon } from 'semantic-ui-react'
+import { Button, Icon } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
@@ -49,6 +49,12 @@ class FinishSelectionCategoryTable extends React.Component {
     }
   }
 
+  onClickEditCategory = (e) => {
+    const { onClickEditCategory } = this.props;
+    e.stopPropagation();
+    if (onClickEditCategory) onClickEditCategory();
+  }
+
   renderSelectionRows() {
     const { name, selections, onClickSelection, onClickOption } = this.props;
     const isAdmin = this.context;
@@ -66,7 +72,7 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   render() {
-    const { name, selections } = this.props;
+    const { name, selections, onClickEditCategory } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
     const count = (selections || []).length;
@@ -111,6 +117,15 @@ class FinishSelectionCategoryTable extends React.Component {
             <a href="#/">
               {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
             </a>
+          </span>
+
+          <span style={{ float: "right" }}>
+            <Button basic icon onClick={this.onClickEditCategory}>
+              <Icon className="hide-print" name="edit" />
+            </Button>
+            <Button basic icon onClick={this.onClickEditCategory}>
+              <Icon className="hide-print" name="tasks" />
+            </Button>
           </span>
         </h2>
         {expanded && table}
