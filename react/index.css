@@ -527,7 +527,7 @@ p.filters {
     .break-after { page-break-after: always; }
 }
 
-@media only screen and (max-width: 750px) {
+@media only screen and (max-width: 650px) {
     .half, .third, .two-third {
         width: 100%;
         display: block;

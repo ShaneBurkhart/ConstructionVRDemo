@@ -1,12 +1,13 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import { Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import DragDropModal from './DragDropModal';
 import FinishOptionsContainer from './FinishOptionsContainer';
 import FinishOptionModal from './FinishOptionModal';
 
-class FinishSelectionModal extends React.Component {
+class FinishSelectionModal extends DragDropModal {
   constructor(props) {
     super(props);
 
@@ -56,6 +57,7 @@ class FinishSelectionModal extends React.Component {
     const { source, destination } = result;
     const { options } = this.state;
     const newOptions = Array.from(options);
+    if (!destination) return;
 
     const [removed] = newOptions.splice(source.index, 1);
     newOptions.splice(destination.index, 0, removed);
@@ -73,27 +75,52 @@ class FinishSelectionModal extends React.Component {
     });
   }
 
+  getCategoryOptions = () => {
+    const { categories } = this.props;
+    const { selectionFields } = this.state;
+    const categoryOptions = (categories || []).map(c => ({
+      key: c, value: c, text: c,
+      active: selectionFields["Category"] == c,
+      selected: selectionFields["Category"] == c,
+    }));
+    categoryOptions.push({ text: "+ Add Category" });
+
+    return categoryOptions;
+  }
+
   render() {
     const { onClose } = this.props;
     const { selectionFields, options, selectedOption } = this.state;
 
     return (
-      <div>
-        <Modal open={true}>
-          <Icon name="close" onClick={onClose} />
+      <div {...this.modalsWrapperProps}>
+        <div {...this.modalProps}>
           <Modal.Header>
             {selectionFields["Name"] || "New Selection"}
+            <span style={{ float: "right" }}>
+              <Icon name="close" onClick={onClose} />
+            </span>
           </Modal.Header>
           <Modal.Content>
             <Form>
               <Form.Group widths="equal">
                 <Form.Input
                   fluid
-                  label="Type"
+                  label="Name"
                   placeholder="PT1 - Accent Wall Paint"
                   value={selectionFields["Type"] || ""}
                   onChange={this.onChangeFor("Type")}
                 />
+                <Form.Select
+                  fluid
+                  label="Category"
+                  placeholder="Concepts"
+                  options={this.getCategoryOptions()}
+                  value={selectionFields["Category"] || ""}
+                  onChange={this.onChangeFor("Category")}
+                />
+              </Form.Group>
+              <Form.Group widths="equal">
                 <Form.Input
                   fluid
                   label="Location"
@@ -116,11 +143,12 @@ class FinishSelectionModal extends React.Component {
                 onChange={this.onChangeFor("Notes")}
               />
               <p>Options (click to edit, drag to reorder)</p>
-              <DragDropContext onDragEnd={this.onDragEnd}>
+              <DragDropContext onDragEnd={this.onDragEnd} >
                 <FinishOptionsContainer
                   draggable
                   options={options}
                   onSelectOption={this.onSelectOption}
+                  getDraggableStyleOverride={this.getDraggableStyleOverride}
                 />
               </DragDropContext>
             </Form>
@@ -138,7 +166,7 @@ class FinishSelectionModal extends React.Component {
                 onClick={this.onSave}
               />
           </Modal.Actions>
-        </Modal>
+        </div>
         {selectedOption &&
           <FinishOptionModal
             isNew={selectedOption["id"].startsWith("new")}

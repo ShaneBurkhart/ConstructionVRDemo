@@ -24,7 +24,8 @@ class FinishOptionsContainer extends React.Component {
   }
 
   render() {
-    const { options, onSelectOption, draggable, droppableId } = this.props;
+    const { options, onSelectOption, draggable, droppableId,
+      getDraggableStyleOverride } = this.props;
 
     if (draggable) {
       return (
@@ -39,6 +40,7 @@ class FinishOptionsContainer extends React.Component {
                   <FinishOption
                     draggable={draggable}
                     draggableId={`${this._draggableId}/${option["id"]}`}
+                    getDraggableStyleOverride={getDraggableStyleOverride}
                     index={i}
                     key={option["id"]}
                     option={option}

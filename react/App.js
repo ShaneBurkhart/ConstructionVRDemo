@@ -9,6 +9,8 @@ import AdminContext from './context/AdminContext';
 import FinishSelectionFilters from './FinishSelectionFilters';
 import FinishSelectionModal from './FinishSelectionModal';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
+import FinishCategoriesModal from './FinishCategoriesModal';
+import FinishAdminSection from './FinishAdminSection';
 
 import './App.css';
 import './FinishSelectionTable.css';
@@ -22,6 +24,7 @@ class App extends React.Component {
     // Keep selection state in here
     this.state = {
       isLoading: false,
+      categoriesModal: null,
       selectionModal: null,
       optionModal: null,
       currentFilter: "All",
@@ -76,6 +79,10 @@ class App extends React.Component {
 
   onDragStartSelection = () => {
     this._isDragging = true;
+  }
+
+  handleOpenCategoryModalFor = (category) => {
+    return _ => this.setState({ categoriesModal: category });
   }
 
   onDragEndSelection = (result) => {
@@ -157,6 +164,9 @@ class App extends React.Component {
 
     this.setState({ selectionsByCategory, filteredSelectionsByCategory: newFilteredSelectionsByCategory });
     this._isDragging = false;
+  }
+
+  onSaveCategories = (categories) => {
   }
 
   onSaveSelection = (originalCategory, selection) => {
@@ -243,15 +253,33 @@ class App extends React.Component {
     });
   }
 
+  renderCategoriesModal() {
+    const { categoriesModal, selectionsByCategory } = this.state;
+    if (!categoriesModal) return "";
+    const categories = Object.keys(selectionsByCategory);
+
+    return (
+      <FinishCategoriesModal
+        key={categoriesModal}
+        categories={categories}
+        selectedCategory={categoriesModal}
+        onClose={_ => this.setState({ categoriesModal: null }) }
+        onSave={this.onSaveCategories}
+      />
+    );
+  }
+
   renderSelectionModal() {
     const { selectionModal, optionModal, selectionsByCategory } = this.state;
     if (!selectionModal) return "";
+    const categories = Object.keys(selectionsByCategory);
 
     return (
       <FinishSelectionModal
         key={selectionModal["id"]}
         selection={selectionModal}
         selectedOption={optionModal}
+        categories={categories}
         onClose={_ => this.setState({ selectionModal: null, optionModal: null }) }
         onSave={this.onSaveSelection}
       />
@@ -276,6 +304,9 @@ class App extends React.Component {
     return (
       <AdminContext.Provider value={adminMode}>
         <div className={wrapperClasses.join(" ")}>
+          {adminMode && <FinishAdminSection
+            onClickManageCategories={this.handleOpenCategoryModalFor(true)}
+          />}
           <FinishSelectionFilters
             current={currentFilter}
             filters={this.getFilters()}
@@ -284,8 +315,11 @@ class App extends React.Component {
           <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
             {this.renderCategorySections()}
           </DragDropContext>
-          {adminMode && this.renderSelectionModal()}
-          {this.renderLoading()}
+          <div className="modal-container">
+            {adminMode && this.renderCategoriesModal()}
+            {adminMode && this.renderSelectionModal()}
+            {this.renderLoading()}
+          </div>
         </div>
       </AdminContext.Provider>
     );

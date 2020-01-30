@@ -1,4 +1,5 @@
 import React from 'react';
+import * as _ from 'underscore';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import AdminControls from './AdminControls';
@@ -26,7 +27,7 @@ class FinishOption extends React.Component {
   }
 
   render() {
-    const { option, index, draggable, draggableId } = this.props;
+    const { option, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
     const optionFields = option["fields"];
     const images = (optionFields["Image"] || []).slice(0, 2);
 
@@ -37,35 +38,47 @@ class FinishOption extends React.Component {
           type="OPTION"
           index={index}
         >
-          {(provided, snapshot) => (
-            <div
-              className="finish-option"
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              onClick={this.onClick}
-            >
-              <div className="half" style={{ display: "flex" }}>
-                <AdminControls
-                  dragHandleProps={provided.dragHandleProps}
-                />
-                <div>
-                  <p className="cell-heading">{optionFields["Name"]}</p>
-                  {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
-                  <div
-                    className="notes"
-                    dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
-                    />
+          {(provided, snapshot) => {
+            let draggableStyle = provided.draggableProps["style"];
+
+            if (getDraggableStyleOverride) {
+              draggableStyle = getDraggableStyleOverride(
+                draggableStyle, snapshot.isDragging
+              );
+            }
+
+            return (
+              <div
+                className="finish-option"
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                style={draggableStyle}
+                onClick={this.onClick}
+              >
+                <div className="half" style={{ display: "flex", overflow: "hidden" }}>
+                  <AdminControls
+                    dragHandleProps={provided.dragHandleProps}
+                  />
+                  <div>
+                    <p className="cell-heading">{optionFields["Name"]}</p>
+                    {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+                    <div
+                      className="notes"
+                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+                      />
+                  </div>
+                </div>
+                <div className="half">
+                  {images.map((image) => (
+                    <a key={image["id"]} href={image["url"]} target="_blank">
+                      <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
+                    </a>
+                  ))}
                 </div>
               </div>
-              <div className="half">
-                {images.map((image) => (
-                  <a key={image["id"]} href={image["url"]} target="_blank">
-                    <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+            )
+          }}
+
         </Draggable>
       );
     } else {
