@@ -15,7 +15,7 @@ react_build:
     image: shaneburkhart/construction-vr-demo
     volumes:
         - .:/app
-    command: "npm run build"
+    command: "npm run watch"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo

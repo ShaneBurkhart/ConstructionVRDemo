@@ -119,6 +119,7 @@ class FinishSelectionCategoryTable extends React.Component {
             </a>
           </span>
 
+        {isAdmin &&
           <span style={{ float: "right" }}>
             <Button basic icon onClick={this.onClickEditCategory}>
               <Icon className="hide-print" name="edit" />
@@ -127,6 +128,7 @@ class FinishSelectionCategoryTable extends React.Component {
               <Icon className="hide-print" name="tasks" />
             </Button>
           </span>
+        }
         </h2>
         {expanded && table}
       </div>
