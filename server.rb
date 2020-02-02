@@ -28,26 +28,26 @@ end
 
 def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""
-  records = Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
   return records.first
 end
 
 def find_project_by_plansource_access_token(ps_access_token)
   return false if ps_access_token.nil? or ps_access_token == ""
-  records = Project.all(filter: "(FIND(\"#{ps_access_token}\", {PlanSource Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{ps_access_token}\", {PlanSource Access Token}))") || []
   return records.first
 end
 
 def find_project_by_admin_access_token(admin_access_token)
   return false if admin_access_token.nil? or admin_access_token == ""
-  records = Project.all(filter: "(FIND(\"#{admin_access_token}\", {Admin Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{admin_access_token}\", {Admin Access Token}))") || []
   return records.first
 end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
-      finish_options: FinishOptions.search_for_component(s)
+    finish_options: Finish::Options.search_for_component(s)
   }
 end
 
@@ -84,26 +84,13 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
 end
 
-post '/f038c9d4-2809-4050-976a-309445be7c8b/slack/kontent-keeper/webhook' do
-  slack_request = Slack::Events::Request.new(request)
-  slack_request.verify!
-
-  puts params.inspect
-  #Content::Links.create(
-    #"Link" => params["link"],
-    #"Description" => params["description"],
-  #)
-
-  return params[:challenge]
-end
-
 get '/api/project/:access_token/finishes' do
   is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @finish_categories = ProjectFinishSelections.finishes_for_project(project)
+  @finish_categories = Finishes::Selection.finishes_for_project(project)
 
   finish_option_ids = []
 
@@ -113,7 +100,7 @@ get '/api/project/:access_token/finishes' do
     end
   end
 
-  all_finish_options = FinishOptions.find_many(finish_option_ids)
+  all_finish_options = Finishes::Option.find_many(finish_option_ids)
   finish_options_by_id = all_finish_options.map { |o| [o.id, o] }.to_h
 
   @options_for_selection = {}
@@ -342,50 +329,6 @@ get '/project/:access_token/procurement_forms' do
     project: project,
     access_token: access_token,
   }
-end
-
-get '/project/:access_token/procurement_forms/:id/edit' do
-  is_admin_mode = !!session[:is_admin]
-  access_token = params[:access_token]
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-  return "Not found" if !is_admin_mode
-
-  @procurement_form = ProcurementForm.find(params[:id])
-  return "Not found" if @procurement_form.nil?
-
-  haml :edit_project_procurement_form, locals: {
-    project: project,
-    access_token: access_token,
-    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
-  }
-end
-
-get '/procurement_forms/:access_token' do
-  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
-  return "Not found" if @procurement_form.nil?
-
-  haml :project_procurement_form, locals: {
-    markdown: MARKDOWN,
-    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
-  }
-end
-
-post '/procurement_forms/:access_token/update' do
-  is_admin_mode = !!session[:is_admin]
-  return "Not found" if !is_admin_mode
-
-  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
-  return "Not found" if @procurement_form.nil?
-
-  updates = params["updates"]
-  updates.each do |key, val|
-    @procurement_form[key] = val
-  end
-
-  @procurement_form.save
-
-  return 200
 end
 
 get '/project/:access_token/feedbacks' do
