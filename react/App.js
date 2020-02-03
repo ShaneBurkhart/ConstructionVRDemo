@@ -28,9 +28,9 @@ class App extends React.Component {
       selectionModal: null,
       optionModal: null,
       currentFilter: "All",
+      categories: [],
       selectionsByCategory: {},
       filteredSelectionsByCategory: {},
-      orderedCategories: [],
       adminMode: false,
     }
   }
@@ -40,21 +40,42 @@ class App extends React.Component {
 
     ActionCreators.load((data) => {
       // Combine selections and options
-      const selections = data.selections_by_category;
-      const options = data.options_by_selection_id;
+      const categories = Array.from(data.categories);
+      const selections = Array.from(data.selections);
+      const options = Array.from(data.options);
+      const { currentFilter } = this.state;
 
-      Object.keys(selections).forEach(category => {
-        selections[category].forEach(s => s["Options"] = options[s["id"]]);
+      selections.forEach(s => {
+        s["Options"] = _.filter(options, o => (s.fields["Options"] || "").includes(o.id));
       });
+      categories.forEach(c => {
+        c["Selections"] = _.filter(selections, s => (s.fields["Category"] || [])[0] == c.id);
+      });
+
+      const categoriesState = this._getCategoriesState(categories, currentFilter);
 
       this.setState({
         isLoading: false,
-        selectionsByCategory: selections,
-        filteredSelectionsByCategory: _.clone(selections),
-        orderedCategories: Object.keys(selections),
-        adminMode: data["admin_mode"]
+        adminMode: data["admin_mode"],
+        ...categoriesState
       });
     })
+  }
+
+  _getCategoriesState(categories, currentFilter) {
+    const selectionsByCategory = {};
+
+    categories.forEach(c => {
+      selectionsByCategory[c.id] = c["Selections"];
+    });
+
+    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
+
+    return {
+      categories: categories,
+      selectionsByCategory: selectionsByCategory,
+      filteredSelectionsByCategory: filteredSelectionsByCategory,
+    };
   }
 
   _getFilteredSelectionsByCategory(selectionsByCategory, currentFilter) {
@@ -157,47 +178,43 @@ class App extends React.Component {
       selectionsByCategory[destCategory] = destSelections;
     }
 
-    const { currentFilter } = this.state;
-    const newFilteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
+    const { categories, currentFilter } = this.state;
 
-    this.setState({ selectionsByCategory, filteredSelectionsByCategory: newFilteredSelectionsByCategory });
+    // Set updated selections to categories in state and reset
+    const newCategories = Object.keys(selectionsByCategory).map(categoryID => {
+      const selections = selectionsByCategory[categoryID];
+      const category = _.clone(categories.find(c => c.id == categoryID));
+      category["Selections"] = selections;
+      return category;
+    });
+
+    this.setState(this._getCategoriesState(newCategories, currentFilter));
     this._isDragging = false;
   }
 
   onSaveCategories = (categories) => {
     const { currentFilter } = this.state;
-    const selectionsByCategory = _.clone(this.state.selectionsByCategory || {});
-
-    const orderedCategories = (categories || []).map(c => {
-      if (c.original != c.category) {
-        selectionsByCategory[c.category] = selectionsByCategory[c.original] || [];
-        delete selectionsByCategory[c.original]
-      }
-
-      return c.category;
-    });
+    const categoriesState = this._getCategoriesState(categories, currentFilter);
 
     this.setState({
-      orderedCategories,
-      selectionsByCategory,
       selectionModal: null,
       optionModal: null,
       categoriesModal: null,
-      filteredSelectionsByCategory: this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter)
+      ...categoriesState
     });
   }
 
-  onSaveSelection = (originalCategory, selection) => {
+  onSaveSelection = (originalCategoryId, selection) => {
     const { selectionsByCategory, currentFilter } = this.state;
-    const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategory]);
+    const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategoryId]);
     const selectionId = selection["id"];
     if (!sourceSelectionsForCat) return;
 
     const selectionIndex = sourceSelectionsForCat.findIndex(s => s["id"] == selectionId);
-    const destCategory = (selection["fields"] || {})["Category"];
+    const destCategory = (selection["fields"] || {})["Category"][0];
     let destSelectionsForCat = selectionsByCategory[destCategory];
 
-    if (originalCategory == destCategory) {
+    if (originalCategoryId == destCategory) {
       if (selectionIndex == -1) {
         // If source selection not found, add to end of dest selections.
         // Not typical path. Shouldn't happen really.
@@ -216,14 +233,23 @@ class App extends React.Component {
       destSelectionsForCat.push(selection);
     }
 
-    selectionsByCategory[originalCategory] = sourceSelectionsForCat;
+    selectionsByCategory[originalCategoryId] = sourceSelectionsForCat;
     selectionsByCategory[destCategory] = destSelectionsForCat;
 
+    const { categories } = this.state;
+
+    // Set updated selections to categories in state and reset
+    const newCategories = Object.keys(selectionsByCategory).map(categoryID => {
+      const selections = selectionsByCategory[categoryID];
+      const category = _.clone(categories.find(c => c.id == categoryID));
+      category["Selections"] = selections;
+      return category;
+    });
+
     this.setState({
-      selectionsByCategory,
       selectionModal: null,
       optionModal: null,
-      filteredSelectionsByCategory: this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter)
+      ...this._getCategoriesState(newCategories, currentFilter)
     });
   }
 
@@ -251,13 +277,16 @@ class App extends React.Component {
   }
 
   renderCategorySections() {
-    const { orderedCategories, currentFilter, filteredSelectionsByCategory } = this.state;
+    const { categories, currentFilter, filteredSelectionsByCategory } = this.state;
 
-    return orderedCategories.map((key, i) => {
+    return categories.map((category, i) => {
+      const key = category.id;
+      const name = category.fields["Name"];
+
       return (
         <FinishSelectionCategoryTable
-          key={key}
-          name={key}
+          key={category.id}
+          category={category}
           selections={filteredSelectionsByCategory[key] || []}
           onClickSelection={this.onClickSelection}
           onClickOption={this.onClickOption}
@@ -268,13 +297,13 @@ class App extends React.Component {
   }
 
   renderCategoriesModal() {
-    const { orderedCategories, categoriesModal, selectionsByCategory } = this.state;
+    const { categories, categoriesModal} = this.state;
     if (!categoriesModal) return "";
 
     return (
       <FinishCategoriesModal
         key={categoriesModal}
-        categories={orderedCategories}
+        categories={categories}
         selectedCategory={categoriesModal}
         onClose={_ => this.setState({ categoriesModal: null }) }
         onSave={this.onSaveCategories}
@@ -283,9 +312,8 @@ class App extends React.Component {
   }
 
   renderSelectionModal() {
-    const { selectionModal, optionModal, selectionsByCategory } = this.state;
+    const { selectionModal, optionModal, categories } = this.state;
     if (!selectionModal) return "";
-    const categories = Object.keys(selectionsByCategory);
 
     return (
       <FinishSelectionModal

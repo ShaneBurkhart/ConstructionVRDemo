@@ -13,7 +13,7 @@ class FinishSelectionModal extends DragDropModal {
 
     const selection = props.selection || {};
 
-    this._originalCategory = (selection["fields"] || {})["Category"];
+    this._originalCategory = (selection["fields"] || {})["Category"][0];
 
     this.state = {
       selectedOption: props.selectedOption || null,
@@ -26,7 +26,11 @@ class FinishSelectionModal extends DragDropModal {
   onChangeFor(attr) {
     return (e, { value }) => {
       const { selectionFields } = this.state;
-      selectionFields[attr] = value;
+      if (attr == "Category") {
+        selectionFields[attr] = [value];
+      } else {
+        selectionFields[attr] = value;
+      }
       this.setState({ selectionFields });
     }
   }
@@ -79,9 +83,9 @@ class FinishSelectionModal extends DragDropModal {
     const { categories } = this.props;
     const { selectionFields } = this.state;
     const categoryOptions = (categories || []).map(c => ({
-      key: c, value: c, text: c,
-      active: selectionFields["Category"] == c,
-      selected: selectionFields["Category"] == c,
+      key: c.id, value: c.id, text: c.fields["Name"],
+      active: selectionFields["Category"][0] == c.id,
+      selected: selectionFields["Category"][0] == c.id,
     }));
     categoryOptions.push({ text: "+ Add Category" });
 
@@ -116,7 +120,7 @@ class FinishSelectionModal extends DragDropModal {
                   label="Category"
                   placeholder="Concepts"
                   options={this.getCategoryOptions()}
-                  value={selectionFields["Category"] || ""}
+                  value={selectionFields["Category"][0] || ""}
                   onChange={this.onChangeFor("Category")}
                 />
               </Form.Group>

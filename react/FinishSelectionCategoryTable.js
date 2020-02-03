@@ -38,12 +38,12 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   onNewSelection = () => {
-    const { name, onClickSelection } = this.props;
+    const { category, onClickSelection } = this.props;
     if (onClickSelection) {
       onClickSelection({
         "id": "new" + Math.random().toString(36).substring(2, 15),
         "fields": {
-          "Category": name,
+          "Category": [category.id],
         }
       });
     }
@@ -56,13 +56,13 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { name, selections, onClickSelection, onClickOption } = this.props;
+    const { category, selections, onClickSelection, onClickOption } = this.props;
     const isAdmin = this.context;
 
     return selections.map((selection, j) => (
       <FinishSelection
         selection={selection}
-        category={name}
+        categoryId={category.id}
         index={j}
         key={selection["id"]}
         onClick={onClickSelection}
@@ -72,7 +72,7 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   render() {
-    const { name, selections, onClickEditCategory } = this.props;
+    const { category, selections, onClickEditCategory } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
     const count = (selections || []).length;
@@ -81,7 +81,7 @@ class FinishSelectionCategoryTable extends React.Component {
     if (isAdmin) {
       table = (
         <div>
-          <Droppable droppableId={name} type="SELECTION">
+          <Droppable droppableId={category.id} type="SELECTION">
             {(provided, snapshot) => (
               <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
                 <div className="table-row">
@@ -112,7 +112,7 @@ class FinishSelectionCategoryTable extends React.Component {
       <div className="selections-category">
         <h2 onClick={this.onClickCollapse}>
           <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
-          {name}
+          {category.fields["Name"]}
           <span className="expand-collapse hide-print">
             <a href="#/">
               {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }

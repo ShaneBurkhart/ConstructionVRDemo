@@ -13,21 +13,19 @@ class FinishCategoriesModal extends DragDropModal {
 
     this._droppableId = Math.random().toString(36).substring(2, 15);
 
-    const categories = Array.from(props.categories || []).map(c => ({ original: c, category: c }));
-
     this.state = {
-      categories: categories,
+      categories: props.categories,
       selectedCategory: props.selectedCategory
     };
   }
 
-  handleCategoryChangeFor = (category) => {
+  handleCategoryChangeFor = (categoryId) => {
     return (e, data) => {
       const categories = Array.from(this.state.categories || []).map(c => {
-        if (c.original != category) return c;
+        if (c.id != categoryId) return c;
 
         const newC = _.clone(c);
-        newC.category = e.target.value;
+        newC.fields["Name"] = e.target.value;
         return newC;
       });
 
@@ -76,8 +74,8 @@ class FinishCategoriesModal extends DragDropModal {
                   >
                     {categories.map((c, i) => (
                       <Draggable
-                        key={c.original}
-                        draggableId={c.original}
+                        key={c.id}
+                        draggableId={c.id}
                         type="CATEGORY"
                         index={i}
                       >
@@ -98,8 +96,8 @@ class FinishCategoriesModal extends DragDropModal {
                                 <Input
                                   fluid
                                   placeholder="Concepts"
-                                  value={c.category}
-                                  onChange={this.handleCategoryChangeFor(c.original)}
+                                  value={c.fields["Name"]}
+                                  onChange={this.handleCategoryChangeFor(c.id)}
                                 />
                               </div>
                             </div>

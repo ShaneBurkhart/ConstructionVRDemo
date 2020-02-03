@@ -39,7 +39,7 @@ class FinishSelection extends React.Component {
   }
 
   render() {
-    const { selection, index, category, onClick } = this.props;
+    const { selection, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
 
     const selectionFields = selection["fields"];
@@ -75,7 +75,7 @@ class FinishSelection extends React.Component {
               <div className="table-column two-third options-cell">
                 <FinishOptionsContainer
                   draggable
-                  droppableId={`${category}/${selection["id"]}`}
+                  droppableId={`${categoryId}/${selection["id"]}`}
                   options={options}
                   onSelectOption={this.onClickOption}
                 />

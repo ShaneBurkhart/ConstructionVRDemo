@@ -19,6 +19,14 @@ module Finishes
 
     has_many :categories, class: "Finishes::Category", column: "Categories"
 
+    def selections
+      Finishes::Selection.all(filter: "FIND(\"#{self.id}\", {Project ID}) >= 1")
+    end
+
+    def options
+      Finishes::Option.all(filter: "FIND(\"#{self.id}\", {Project IDs}) >= 1")
+    end
+
     def units
       if @units.nil?
         @units = Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
