@@ -41,6 +41,16 @@ module Finishes
     self.table_name = "Categories"
 
     has_many :selections, class: "Finishes::Selection", column: "Selections"
+
+    def update(fields)
+      self["Name"] = fields["Name"]
+      self["Order"] = fields["Order"]
+    end
+
+    def is_different?(fields)
+      self["Name"] != fields["Name"] ||
+      self["Order"] != fields["Order"]
+    end
   end
 
   class Selection < Airrecord::Table
@@ -48,6 +58,29 @@ module Finishes
     self.table_name = "Selections"
 
     has_many :options, class: "Finishes::Option", column: "Options"
+
+    def update(fields)
+      self["Order"] = fields["Order"]
+      self["Name"] = fields["Name"]
+      self["Room"] = fields["Room"]
+      self["Type"] = fields["Type"]
+      self["Location"] = fields["Location"]
+      self["Notes"] = fields["Notes"]
+      self["Category"] = fields["Category"]
+      self["Options"] = fields["Options"]
+    end
+
+    def is_different?(fields)
+      self["Order"] != fields["Order"] ||
+      self["Name"] != fields["Name"] ||
+      self["Room"] != fields["Room"] ||
+      self["Type"] != fields["Type"] ||
+      self["Location"] != fields["Location"] ||
+      self["Notes"] != fields["Notes"] ||
+      self["Category"][0] != fields["Category"][0] ||
+      (self["Options"] || []).length != (fields["Options"] || []).length ||
+      fields["Options"].map{ |o| self["Options"].include?(o) }.include?(false)
+    end
 
     def self.finishes_for_project(project)
       return {} if project.nil?
@@ -69,6 +102,21 @@ module Finishes
       # Implement search later
       Finishes::Option.all view: "Has Model"
     end
+
+    def update(fields)
+      self["Name"] = fields["Name"]
+      self["Type"] = fields["Type"]
+      self["Info"] = fields["Info"]
+      self["URL"] = fields["URL"]
+    end
+
+    def is_different?(fields)
+      self["Name"] != fields["Name"] ||
+      self["Type"] != fields["Type"] ||
+      self["Info"] != fields["Info"] ||
+      self["URL"] != fields["URL"]
+    end
+
   end
 end
 

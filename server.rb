@@ -103,6 +103,73 @@ get '/api/project/:access_token/finishes' do
   }.to_json
 end
 
+post '/api/project/:access_token/finishes/save' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+  body = JSON.parse(request.body.read)
+
+  @categories = project.categories.index_by { |c| c.id }
+  @selections = project.selections.index_by { |s| s.id }
+  @options = project.options.index_by { |o| o.id }
+
+  updated_categories = []
+  updated_selections = []
+  updated_options = []
+
+  categories = body["categories"]
+  categories.each_with_index do |category, i|
+    old_category = @categories[category["id"]]
+    category_fields = category["fields"]
+    category_fields["Order"] = i
+
+    if old_category.is_different? category_fields
+      # Only update if is different than old
+      updated_categories << category["id"]
+      old_category.update(category_fields)
+      puts old_category.inspect
+      old_category.save
+    end
+
+    selections = category["Selections"]
+    selections.each_with_index do |selection, j|
+      old_selection = @selections[selection["id"]]
+      selection_fields = selection["fields"]
+      selection_fields["Category"] = [category["id"]]
+      selection_fields["Order"] = j
+      selection_fields["Options"] = selection["Options"].map{ |o| o["id"] }
+
+      if old_selection.is_different? selection_fields
+        # Only update if is different than old
+        updated_selections << selection["id"]
+        old_selection.update(selection_fields)
+        old_selection.save
+      end
+
+      options = selection["Options"]
+      options.each_with_index do |option, k|
+        old_option = @options[option["id"]]
+        option_fields = option["fields"]
+
+        if old_option.is_different?(option_fields) and !updated_options.include?(option["id"])
+          # Only update if is different than old
+          updated_options << option["id"]
+          old_option.update(option_fields)
+          old_option.save
+        end
+      end
+    end
+  end
+
+  content_type "application/json"
+  {
+    updated_categories: updated_categories,
+    updated_selections: updated_selections,
+    updated_options: updated_options,
+  }.to_json
+end
+
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
 get '/api/project/:ps_access_token/renderings' do
   # We have to escape slashes so now we unescape to check against airtables.

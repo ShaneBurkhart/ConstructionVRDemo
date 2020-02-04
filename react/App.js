@@ -21,6 +21,17 @@ class App extends React.Component {
 
     this._isDragging = false;
 
+    this._superSetState = this.setState;
+    this.setState = (newState) => {
+      this._superSetState(newState);
+
+      if (newState.categories && newState.isLoading === undefined) {
+        const categories = newState.categories;
+        // Save categories
+        ActionCreators.save(categories);
+      }
+    }
+
     // Keep selection state in here
     this.state = {
       isLoading: false,
@@ -49,7 +60,8 @@ class App extends React.Component {
         s["Options"] = _.filter(options, o => (s.fields["Options"] || "").includes(o.id));
       });
       categories.forEach(c => {
-        c["Selections"] = _.filter(selections, s => (s.fields["Category"] || [])[0] == c.id);
+        c["Selections"] = _.filter(selections, s => (s.fields["Category"] || [])[0] == c.id)
+          .sort((a, b) => ((a["fields"]["Order"] || 0) - (b["fields"]["Order"] || 0)));
       });
 
       const categoriesState = this._getCategoriesState(categories, currentFilter);
