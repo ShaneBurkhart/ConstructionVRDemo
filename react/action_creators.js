@@ -7,6 +7,10 @@ export default {
     $.get("/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes", callback);
   },
 
+  searchOptions: (query, callback) => {
+    $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
+  },
+
   save: (categories) => {
     console.log("Saving...", categories);
 

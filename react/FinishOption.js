@@ -21,15 +21,17 @@ class FinishOption extends React.Component {
   }
 
   onClick = (e) => {
-    const { onClick } = this.props;
+    const { option, onClick } = this.props;
     e.stopPropagation();
-    if (onClick) onClick();
+    if (onClick) onClick(option);
   }
 
   render() {
-    const { option, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
+    const { option, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
     const optionFields = option["fields"];
     const images = (optionFields["Image"] || []).slice(0, 2);
+    const classNames = ["finish-option"];
+    if (short) classNames.push("short");
 
     if (draggable) {
       return (
@@ -49,7 +51,7 @@ class FinishOption extends React.Component {
 
             return (
               <div
-                className="finish-option"
+                className={classNames.join(" ")}
                 ref={provided.innerRef}
                 {...provided.draggableProps}
                 style={draggableStyle}
@@ -68,7 +70,7 @@ class FinishOption extends React.Component {
                       />
                   </div>
                 </div>
-                <div className="half">
+                <div className="half images">
                   {images.map((image) => (
                     <a key={image["id"]} href={image["url"]} target="_blank">
                       <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
@@ -84,18 +86,18 @@ class FinishOption extends React.Component {
     } else {
       return (
         <div
-          className="finish-option"
+          className={classNames.join(" ")}
           onClick={this.onClick}
         >
           <div className="half">
             <p className="cell-heading">{optionFields["Name"]}</p>
-            {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+            {!!optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
             <div
               className="notes"
               dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
               />
           </div>
-          <div className="half">
+          <div className="half images">
             {images.map((image) => (
               <a key={image["id"]} href={image["url"]} target="_blank">
                 <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />

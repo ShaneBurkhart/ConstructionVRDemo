@@ -23,6 +23,11 @@ class FinishOptionsContainer extends React.Component {
     }
   }
 
+  onLinkOption = () => {
+    const { onLinkOption } = this.props;
+    if (onLinkOption) onLinkOption();
+  }
+
   render() {
     const { options, onSelectOption, draggable, droppableId,
       getDraggableStyleOverride } = this.props;
@@ -51,7 +56,10 @@ class FinishOptionsContainer extends React.Component {
               </div>
             )}
           </Droppable>
-          <NewFinishOptionPlaceholder onClick={this.onNewOption} />
+          <NewFinishOptionPlaceholder
+            onClickNew={this.onNewOption}
+            onClickLink={this.onLinkOption}
+          />
         </div>
       );
     } else {
@@ -66,7 +74,12 @@ class FinishOptionsContainer extends React.Component {
               onClick={_ => { if (onSelectOption) onSelectOption(option) }}
             />
           ))}
-        {!!onSelectOption && <NewFinishOptionPlaceholder onClick={this.onNewOption} />}
+        {!!onSelectOption &&
+          <NewFinishOptionPlaceholder
+            onClickNew={this.onNewOption}
+            onClickLink={this.onLinkOption}
+          />
+        }
         </div>
       );
     }

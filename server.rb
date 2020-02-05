@@ -84,6 +84,19 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
 end
 
+get '/api/finishes/options/search' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
+
+  @options = Finishes::Option.search(params["q"] || "")
+
+  content_type "application/json"
+  {
+    admin_mode: is_admin_mode,
+    options: @options,
+  }.to_json
+end
+
 get '/api/project/:access_token/finishes' do
   is_admin_mode = !!session[:is_admin]
   access_token = params[:access_token]
@@ -150,6 +163,7 @@ post '/api/project/:access_token/finishes/save' do
       options = selection["Options"]
       options.each_with_index do |option, k|
         old_option = @options[option["id"]]
+        old_option = Finishes::Option.find(option["id"]) if old_option.nil?
         option_fields = option["fields"]
 
         if old_option.is_different?(option_fields) and !updated_options.include?(option["id"])

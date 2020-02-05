@@ -38,6 +38,11 @@ class FinishSelection extends React.Component {
     if (onClickOption) onClickOption(option, selection);
   }
 
+  onClickLinkOption = () => {
+    const { selection, onClickLinkOption } = this.props;
+    if (onClickLinkOption) onClickLinkOption(selection);
+  }
+
   render() {
     const { selection, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
@@ -78,6 +83,7 @@ class FinishSelection extends React.Component {
                   droppableId={`${categoryId}/${selection["id"]}`}
                   options={options}
                   onSelectOption={this.onClickOption}
+                  onLinkOption={this.onClickLinkOption}
                 />
               </div>
             </div>

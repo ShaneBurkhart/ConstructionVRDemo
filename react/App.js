@@ -10,6 +10,7 @@ import FinishSelectionFilters from './FinishSelectionFilters';
 import FinishSelectionModal from './FinishSelectionModal';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
 import FinishCategoriesModal from './FinishCategoriesModal';
+import FinishSelectionLinkOptionModal from './FinishSelectionLinkOptionModal';
 import FinishAdminSection from './FinishAdminSection';
 
 import './App.css';
@@ -38,6 +39,7 @@ class App extends React.Component {
       categoriesModal: null,
       selectionModal: null,
       optionModal: null,
+      linkOptionToSelectionModal: null,
       currentFilter: "All",
       categories: [],
       selectionsByCategory: {},
@@ -259,6 +261,7 @@ class App extends React.Component {
     });
 
     this.setState({
+      linkOptionToSelectionModal: null,
       selectionModal: null,
       optionModal: null,
       ...this._getCategoriesState(newCategories, currentFilter)
@@ -273,6 +276,11 @@ class App extends React.Component {
   onClickOption = (option, selection) => {
     if (this._isDragging) return;
     this.setState({ selectionModal: selection, optionModal: option });
+  }
+
+  onClickLinkOption = (selection) => {
+    if (this._isDragging) return;
+    this.setState({ linkOptionToSelectionModal: selection });
   }
 
   getFilters() {
@@ -302,6 +310,7 @@ class App extends React.Component {
           selections={filteredSelectionsByCategory[key] || []}
           onClickSelection={this.onClickSelection}
           onClickOption={this.onClickOption}
+          onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
         />
       )
@@ -339,6 +348,20 @@ class App extends React.Component {
     );
   }
 
+  renderLinkOptionToSelectionModal() {
+    const { linkOptionToSelectionModal } = this.state;
+    if (!linkOptionToSelectionModal) return "";
+
+    return (
+      <FinishSelectionLinkOptionModal
+        key={linkOptionToSelectionModal["id"]}
+        selection={linkOptionToSelectionModal}
+        onClose={_ => this.setState({ linkOptionToSelectionModal: null }) }
+        onSave={this.onSaveSelection}
+      />
+    );
+  }
+
   renderLoading() {
     const { isLoading } = this.state;
     if (!isLoading) return "";
@@ -371,6 +394,7 @@ class App extends React.Component {
           <div className="modal-container">
             {adminMode && this.renderCategoriesModal()}
             {adminMode && this.renderSelectionModal()}
+            {adminMode && this.renderLinkOptionToSelectionModal()}
             {this.renderLoading()}
           </div>
         </div>

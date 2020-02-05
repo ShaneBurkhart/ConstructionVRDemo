@@ -103,6 +103,14 @@ module Finishes
       Finishes::Option.all view: "Has Model"
     end
 
+    def self.search(query)
+      Finishes::Option.all(
+        view: "Searchable",
+        filter: "(FIND(\"#{query}\", {Search Text}))",
+        max_records: 100,
+      )
+    end
+
     def update(fields)
       self["Name"] = fields["Name"]
       self["Type"] = fields["Type"]

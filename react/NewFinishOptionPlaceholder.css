@@ -14,3 +14,8 @@
     color: #40A819;
     border-color: #40A819;
 }
+
+.finish-option-placeholder.link:hover {
+    color: #fbbd08;
+    border-color: #fbbd08;
+}

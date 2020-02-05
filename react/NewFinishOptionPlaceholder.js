@@ -8,17 +8,33 @@ class NewFinishOptionPlaceholder extends React.Component {
     super(props);
   }
 
-  onClick = (e) => {
-    const { onClick } = this.props;
+  onClickNew = (e) => {
+    const { onClickNew } = this.props;
     e.stopPropagation();
-    if (onClick) onClick();
+    if (onClickNew) onClickNew();
+  }
+
+  onClickLink = (e) => {
+    const { onClickLink } = this.props;
+    e.stopPropagation();
+    if (onClickLink) onClickLink();
   }
 
   render() {
     return (
-      <div className="finish-option-placeholder hide-print" onClick={this.onClick}>
-        <Icon name="plus circle" />
-        Click Here to Add Finish Option
+      <div style={{ display: "flex" }}>
+        <div className="half">
+          <div className="finish-option-placeholder link hide-print" onClick={this.onClickLink}>
+            <Icon name="linkify" />
+            Link From Library
+          </div>
+        </div>
+        <div className="half" style={{ paddingLeft: 5 }}>
+          <div className="finish-option-placeholder hide-print" onClick={this.onClickNew}>
+            <Icon name="plus circle" />
+            Create New Option
+          </div>
+        </div>
       </div>
     );
   }
