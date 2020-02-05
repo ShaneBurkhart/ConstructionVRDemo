@@ -268,6 +268,10 @@ class App extends React.Component {
     });
   }
 
+  onUnlinkOption = (selection) => {
+    this.onSaveSelection(selection["fields"]["Category"][0], selection);
+  }
+
   onClickSelection = (selection) => {
     if (this._isDragging) return;
     this.setState({ selectionModal: selection, optionModal: null });
@@ -312,6 +316,7 @@ class App extends React.Component {
           onClickOption={this.onClickOption}
           onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
+          onUnlinkOption={this.onUnlinkOption}
         />
       )
     });

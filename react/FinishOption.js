@@ -26,6 +26,12 @@ class FinishOption extends React.Component {
     if (onClick) onClick(option);
   }
 
+  onClickUnlink = (e) => {
+    const { option, onClickUnlink } = this.props;
+    e.stopPropagation();
+    if (onClickUnlink) onClickUnlink(option);
+  }
+
   render() {
     const { option, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
     const optionFields = option["fields"];
@@ -60,6 +66,7 @@ class FinishOption extends React.Component {
                 <div className="half" style={{ display: "flex", overflow: "hidden" }}>
                   <AdminControls
                     dragHandleProps={provided.dragHandleProps}
+                    onClickUnlink={this.onClickUnlink}
                   />
                   <div>
                     <p className="cell-heading">{optionFields["Name"]}</p>

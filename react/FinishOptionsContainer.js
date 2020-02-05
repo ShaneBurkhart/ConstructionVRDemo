@@ -29,7 +29,7 @@ class FinishOptionsContainer extends React.Component {
   }
 
   render() {
-    const { options, onSelectOption, draggable, droppableId,
+    const { options, onSelectOption, onUnlinkOption, draggable, droppableId,
       getDraggableStyleOverride } = this.props;
 
     if (draggable) {
@@ -50,6 +50,7 @@ class FinishOptionsContainer extends React.Component {
                     key={option["id"]}
                     option={option}
                     onClick={_ => { if (onSelectOption) onSelectOption(option) }}
+                    onClickUnlink={_ => { if (onUnlinkOption) onUnlinkOption(option) }}
                   />
                 ))}
                 {provided.placeholder}

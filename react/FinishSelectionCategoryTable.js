@@ -56,7 +56,8 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { category, selections, onClickSelection, onClickOption, onClickLinkOption } = this.props;
+    const { category, selections, onClickSelection, onClickOption,
+      onClickLinkOption, onUnlinkOption } = this.props;
     const isAdmin = this.context;
 
     return selections.map((selection, j) => (
@@ -68,6 +69,7 @@ class FinishSelectionCategoryTable extends React.Component {
         onClick={onClickSelection}
         onClickOption={onClickOption}
         onClickLinkOption={onClickLinkOption}
+        onClickUnlinkOption={onUnlinkOption}
       />
     ));
   }

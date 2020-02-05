@@ -43,6 +43,15 @@ class FinishSelection extends React.Component {
     if (onClickLinkOption) onClickLinkOption(selection);
   }
 
+  onClickUnlinkOption = (option) => {
+    const { selection, onClickUnlinkOption } = this.props;
+    const newSelection = _.clone(selection);
+
+    newSelection["Options"] = (newSelection["Options"] || [])
+      .filter(o => o["id"] != option["id"]);
+    if (onClickUnlinkOption) onClickUnlinkOption(newSelection);
+  }
+
   render() {
     const { selection, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
@@ -84,6 +93,7 @@ class FinishSelection extends React.Component {
                   options={options}
                   onSelectOption={this.onClickOption}
                   onLinkOption={this.onClickLinkOption}
+                  onUnlinkOption={this.onClickUnlinkOption}
                 />
               </div>
             </div>
