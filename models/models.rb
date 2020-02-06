@@ -45,11 +45,14 @@ module Finishes
     def update(fields)
       self["Name"] = fields["Name"]
       self["Order"] = fields["Order"]
+      self["Selections"] = fields["Selections"]
     end
 
     def is_different?(fields)
       self["Name"] != fields["Name"] ||
-      self["Order"] != fields["Order"]
+      self["Order"] != fields["Order"] ||
+      (self["Selections"] || []).length != (fields["Selections"] || []).length ||
+      fields["Selections"].map{ |o| self["Selections"].include?(o) }.include?(false)
     end
   end
 

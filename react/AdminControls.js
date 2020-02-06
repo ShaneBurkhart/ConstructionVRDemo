@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from 'semantic-ui-react'
+import { Icon, Button, Popup } from 'semantic-ui-react'
 
 import "./AdminControls.css"
 
@@ -20,9 +20,20 @@ class AdminControls extends React.Component {
           </div>
         }
         {onClickTrash &&
-          <div onClick={onClickTrash}>
-            <Icon name="trash" />
-          </div>
+          <Popup
+            on="click"
+            content={
+              <div>
+                <p className="bold">Are you sure?</p>
+                <Button color="red" onClick={onClickTrash}>Delete Selection</Button>
+              </div>
+            }
+            trigger={
+              <div>
+                <Icon name="trash" />
+              </div>
+            }
+          />
         }
       </div>
     );

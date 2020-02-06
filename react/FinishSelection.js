@@ -52,6 +52,11 @@ class FinishSelection extends React.Component {
     if (onClickUnlinkOption) onClickUnlinkOption(newSelection);
   }
 
+  onClickTrashSelection = () => {
+    const { selection, onClickTrashSelection } = this.props;
+    if (onClickTrashSelection) onClickTrashSelection(selection);
+  }
+
   render() {
     const { selection, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
@@ -75,7 +80,10 @@ class FinishSelection extends React.Component {
               onClick={_ => onClick(selection)}
             >
               <div className="table-column third flex">
-                <AdminControls dragHandleProps={provided.dragHandleProps} />
+                <AdminControls
+                  dragHandleProps={provided.dragHandleProps}
+                  onClickTrash={this.onClickTrashSelection}
+                />
                 <div className="info-cell">
                   <p className="cell-heading">{selectionFields["Type"]}</p>
                   <p className="cell-details">Location: {selectionFields["Location"]}</p>

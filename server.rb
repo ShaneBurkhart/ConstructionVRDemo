@@ -136,6 +136,7 @@ post '/api/project/:access_token/finishes/save' do
     old_category = @categories[category["id"]]
     category_fields = category["fields"]
     category_fields["Order"] = i
+    category_fields["Selections"] = category["Selections"].map{ |s| s["id"] }
 
     if old_category.is_different? category_fields
       # Only update if is different than old

@@ -11,14 +11,15 @@ export default {
     $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
   },
 
-  save: (categories) => {
+  save: (categories, callback) => {
     console.log("Saving...", categories);
 
     $.post({
       url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify({ categories: categories }),
-      dataType: "json"
+      dataType: "json",
+      complete: callback
     });
   }
 }

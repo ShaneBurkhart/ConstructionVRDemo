@@ -29,13 +29,15 @@ class App extends React.Component {
       if (newState.categories && newState.isLoading === undefined) {
         const categories = newState.categories;
         // Save categories
-        ActionCreators.save(categories);
+        this.setState({ isSaving: true })
+        ActionCreators.save(categories, _ => this.setState({ isSaving: false }));
       }
     }
 
     // Keep selection state in here
     this.state = {
       isLoading: false,
+      isSaving: false,
       categoriesModal: null,
       selectionModal: null,
       optionModal: null,
@@ -50,6 +52,8 @@ class App extends React.Component {
 
   componentDidMount() {
     this.setState({ isLoading: true });
+
+    window.addEventListener('beforeunload', this.onUnload);
 
     ActionCreators.load((data) => {
       // Combine selections and options
@@ -74,6 +78,10 @@ class App extends React.Component {
         ...categoriesState
       });
     })
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.onUnload);
   }
 
   _getCategoriesState(categories, currentFilter) {
@@ -106,6 +114,15 @@ class App extends React.Component {
     });
 
     return filteredSelectionsByCategory;
+  }
+
+  onUnload = (e) => {
+    const { isSaving } = this.state;
+    e.preventDefault();
+
+    if (isSaving) {
+      e.returnValue = 1;
+    }
   }
 
   onChangeFilter = (filter) => {
@@ -218,6 +235,19 @@ class App extends React.Component {
     });
   }
 
+  onSaveCategory = (category) => {
+    const { categories, currentFilter } = this.state;
+    const catIndex = categories.findIndex(c => c["id"] == category["id"]);
+    if (catIndex < 0) return;
+
+    console.log(category);
+    const newCategories = Array.from(categories);
+    newCategories[catIndex] = _.clone(category);
+    const categoriesState = this._getCategoriesState(newCategories, currentFilter);
+
+    this.setState({ ...categoriesState });
+  }
+
   onSaveSelection = (originalCategoryId, selection) => {
     const { selectionsByCategory, currentFilter } = this.state;
     const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategoryId]);
@@ -272,6 +302,10 @@ class App extends React.Component {
     this.onSaveSelection(selection["fields"]["Category"][0], selection);
   }
 
+  onTrashSelection = (category) => {
+    this.onSaveCategory(category);
+  }
+
   onClickSelection = (selection) => {
     if (this._isDragging) return;
     this.setState({ selectionModal: selection, optionModal: null });
@@ -317,6 +351,7 @@ class App extends React.Component {
           onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
           onUnlinkOption={this.onUnlinkOption}
+          onTrashSelection={this.onTrashSelection}
         />
       )
     });

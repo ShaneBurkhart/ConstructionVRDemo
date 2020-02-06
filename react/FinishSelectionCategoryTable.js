@@ -55,9 +55,19 @@ class FinishSelectionCategoryTable extends React.Component {
     if (onClickEditCategory) onClickEditCategory();
   }
 
+  onClickTrashSelection = (selection) => {
+    const { category, onTrashSelection } = this.props;
+
+    if (onTrashSelection) {
+      category["Selections"] = Array.from(category["Selections"])
+        .filter(s => s["id"] != selection["id"]);
+      onTrashSelection(category);
+    }
+  }
+
   renderSelectionRows() {
     const { category, selections, onClickSelection, onClickOption,
-      onClickLinkOption, onUnlinkOption } = this.props;
+      onClickLinkOption, onUnlinkOption, onClickTrashSelection } = this.props;
     const isAdmin = this.context;
 
     return selections.map((selection, j) => (
@@ -70,6 +80,7 @@ class FinishSelectionCategoryTable extends React.Component {
         onClickOption={onClickOption}
         onClickLinkOption={onClickLinkOption}
         onClickUnlinkOption={onUnlinkOption}
+        onClickTrashSelection={this.onClickTrashSelection}
       />
     ));
   }
