@@ -20,6 +20,11 @@ body {
   box-sizing: inherit;
 }
 
+.ui.input.slim input,
+textarea.slim {
+    padding: 2px 1px;
+}
+
 .admin-section {
     background-color: #eeeeee;
     padding: 20px 0px;

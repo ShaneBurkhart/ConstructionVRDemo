@@ -6,6 +6,8 @@ import AdminContext from './context/AdminContext';
 
 import FinishOptionsContainer from './FinishOptionsContainer';
 import AdminControls from './AdminControls';
+import FocusEditableInput from './FocusEditableInput';
+import FocusEditableTextarea from './FocusEditableTextarea';
 
 import "./FinishSelection.css"
 
@@ -57,6 +59,55 @@ class FinishSelection extends React.Component {
     if (onClickTrashSelection) onClickTrashSelection(selection);
   }
 
+  onChangeFor(attr) {
+    const { selection, onSaveSelection } = this.props;
+    return val => {
+      if (onSaveSelection) {
+        const newSelection = _.clone(selection);
+        const newFields = _.clone(selection["fields"]);
+        newFields[attr] = val;
+        newSelection["fields"] = newFields;
+        onSaveSelection(newFields["Category"][0], newSelection);
+      }
+    }
+  }
+
+  renderSelectionDetails() {
+    const { selection } = this.props;
+    const selectionFields = selection["fields"];
+
+    return (
+      <div className="info-cell" style={{ width: "100%" }}>
+        <div className="cell-heading">
+          <FocusEditableInput
+            value={selectionFields["Type"]}
+            onChange={this.onChangeFor("Type")}
+          />
+        </div>
+        <div className="cell-details">
+          <span>Location: </span>
+          <FocusEditableInput
+            value={selectionFields["Location"]}
+            onChange={this.onChangeFor("Location")}
+          />
+        </div>
+        <div className="cell-details">
+          <span>Niche: </span>
+          <FocusEditableInput
+            value={selectionFields["Room"]}
+            onChange={this.onChangeFor("Room")}
+          />
+        </div>
+        <FocusEditableTextarea
+          className="notes"
+          unfocusedValue={this.getMarkdownHTML(selectionFields["Notes"])}
+          value={selectionFields["Notes"]}
+          onChange={this.onChangeFor("Notes")}
+        />
+      </div>
+    );
+  }
+
   render() {
     const { selection, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
@@ -77,22 +128,14 @@ class FinishSelection extends React.Component {
               className={rowClasses.join(" ")}
               ref={provided.innerRef}
               {...provided.draggableProps}
-              onClick={_ => onClick(selection)}
+              //onClick={_ => onClick(selection)}
             >
               <div className="table-column third flex">
                 <AdminControls
                   dragHandleProps={provided.dragHandleProps}
                   onClickTrash={this.onClickTrashSelection}
                 />
-                <div className="info-cell">
-                  <p className="cell-heading">{selectionFields["Type"]}</p>
-                  <p className="cell-details">Location: {selectionFields["Location"]}</p>
-                  <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-                  <div
-                    className="notes"
-                    dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
-                    />
-                </div>
+                {this.renderSelectionDetails()}
               </div>
               <div className="table-column two-third options-cell">
                 <FinishOptionsContainer
@@ -112,15 +155,7 @@ class FinishSelection extends React.Component {
       return (
         <div className={rowClasses.join(" ")}>
           <div className="table-column third flex">
-            <div className="info-cell">
-              <p className="cell-heading">{selectionFields["Type"]}</p>
-              <p className="cell-details">Location: {selectionFields["Location"]}</p>
-              <p className="cell-details">Niche: {selectionFields["Room"]}</p>
-              <div
-                className="notes"
-                dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(selectionFields["Notes"]) }}
-                />
-            </div>
+            {this.renderSelectionDetails()}
           </div>
           <div className="table-column two-third options-cell">
             <FinishOptionsContainer options={options} />

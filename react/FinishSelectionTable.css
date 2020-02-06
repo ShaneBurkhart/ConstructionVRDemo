@@ -40,12 +40,12 @@ img {
     line-height: 1.5;
 }
 
-.selection p.cell-heading {
+.selection .cell-heading {
     line-height: 1.2;
     font-weight: bold;
 }
 
-.selection p.cell-details {
+.selection .cell-details {
     line-height: 1.2;
 }
 

@@ -352,6 +352,7 @@ class App extends React.Component {
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
           onUnlinkOption={this.onUnlinkOption}
           onTrashSelection={this.onTrashSelection}
+          onSaveSelection={this.onSaveSelection}
         />
       )
     });

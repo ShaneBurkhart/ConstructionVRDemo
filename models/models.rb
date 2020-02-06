@@ -64,7 +64,6 @@ module Finishes
 
     def update(fields)
       self["Order"] = fields["Order"]
-      self["Name"] = fields["Name"]
       self["Room"] = fields["Room"]
       self["Type"] = fields["Type"]
       self["Location"] = fields["Location"]
