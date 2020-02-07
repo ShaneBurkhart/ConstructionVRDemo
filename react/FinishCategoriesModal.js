@@ -93,12 +93,7 @@ class FinishCategoriesModal extends DragDropModal {
                                 dragHandleProps={provided.dragHandleProps}
                               />
                               <div style={{ width: "100%" }}>
-                                <Input
-                                  fluid
-                                  placeholder="Concepts"
-                                  value={c.fields["Name"]}
-                                  onChange={this.handleCategoryChangeFor(c.id)}
-                                />
+                                <p>{c.fields["Name"]}</p>
                               </div>
                             </div>
                           </div>

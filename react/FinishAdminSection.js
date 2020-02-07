@@ -18,7 +18,7 @@ class FinishAdminSection extends React.Component {
           <Button
             color="blue"
             onClick={onClickManageCategories}
-          >Manage Categories</Button>
+          >Reorder Categories</Button>
         </div>
       </div>
     );

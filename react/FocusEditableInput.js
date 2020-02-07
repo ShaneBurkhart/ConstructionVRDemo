@@ -60,7 +60,7 @@ class FocusEditableInput extends React.Component {
           style={{ display: "inline-block", minWidth: 60 }}
         >
           {value} &nbsp;
-          {hovering && <Icon name="pencil alternate" />}
+          {hovering && <Icon name="pencil alternate" style={{ fontSize: 16 }} />}
         </span>
       );
     }

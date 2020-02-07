@@ -9,6 +9,7 @@ import AdminControls from './AdminControls';
 import FinishSelection from './FinishSelection';
 import FinishOptionsContainer from './FinishOptionsContainer';
 import NewFinishSelectionPlaceholder from './NewFinishSelectionPlaceholder';
+import FocusEditableInput from './FocusEditableInput';
 
 import './FinishSelectionCategoryTable.css';
 
@@ -49,12 +50,6 @@ class FinishSelectionCategoryTable extends React.Component {
     }
   }
 
-  onClickEditCategory = (e) => {
-    const { onClickEditCategory } = this.props;
-    e.stopPropagation();
-    if (onClickEditCategory) onClickEditCategory();
-  }
-
   onClickTrashSelection = (selection) => {
     const { category, onTrashSelection } = this.props;
 
@@ -62,6 +57,20 @@ class FinishSelectionCategoryTable extends React.Component {
       category["Selections"] = Array.from(category["Selections"])
         .filter(s => s["id"] != selection["id"]);
       onTrashSelection(category);
+    }
+  }
+
+  onChangeCategoryName = (name) => {
+    const { category, onSaveCategory } = this.props;
+
+    if (onSaveCategory) {
+      const newCategory = _.clone(category);
+      const newFields = _.clone(category["fields"]);
+
+      newFields["Name"] = name;
+      newCategory["fields"] = newFields;
+
+      onSaveCategory(newCategory);
     }
   }
 
@@ -128,23 +137,12 @@ class FinishSelectionCategoryTable extends React.Component {
       <div className="selections-category">
         <h2 onClick={this.onClickCollapse}>
           <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
-          {category.fields["Name"]}
+          <FocusEditableInput value={category.fields["Name"]} onChange={this.onChangeCategoryName} />
           <span className="expand-collapse hide-print">
             <a href="#/">
               {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
             </a>
           </span>
-
-        {isAdmin &&
-          <span style={{ float: "right" }}>
-            <Button basic icon onClick={this.onClickEditCategory}>
-              <Icon className="hide-print" name="edit" />
-            </Button>
-            <Button basic icon onClick={this.onClickEditCategory}>
-              <Icon className="hide-print" name="tasks" />
-            </Button>
-          </span>
-        }
         </h2>
         {expanded && table}
       </div>

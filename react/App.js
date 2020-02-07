@@ -7,11 +7,11 @@ import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
 
 import FinishSelectionFilters from './FinishSelectionFilters';
-import FinishSelectionModal from './FinishSelectionModal';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
 import FinishCategoriesModal from './FinishCategoriesModal';
 import FinishSelectionLinkOptionModal from './FinishSelectionLinkOptionModal';
 import FinishAdminSection from './FinishAdminSection';
+import FinishOptionModal from './FinishOptionModal';
 
 import './App.css';
 import './FinishSelectionTable.css';
@@ -298,17 +298,23 @@ class App extends React.Component {
     });
   }
 
+  onSaveOption = (optionId, optionFields) => {
+    const { selectionModal, optionModal } = this.props;
+    const optionIdx = selectionModal["Options"].findIndex(o => optionId == o["id"]);
+    if (optionIdx < 0) return;
+
+    const newOption = _.extend({}, optionModal, { "fields": optionFields });
+    selectionModal["Options"][optionIdx] = newOption;
+
+    this.onSaveSelection(selectionModal["fields"]["Category"][0], selectionModal);
+  }
+
   onUnlinkOption = (selection) => {
     this.onSaveSelection(selection["fields"]["Category"][0], selection);
   }
 
   onTrashSelection = (category) => {
     this.onSaveCategory(category);
-  }
-
-  onClickSelection = (selection) => {
-    if (this._isDragging) return;
-    this.setState({ selectionModal: selection, optionModal: null });
   }
 
   onClickOption = (option, selection) => {
@@ -346,13 +352,13 @@ class App extends React.Component {
           key={category.id}
           category={category}
           selections={filteredSelectionsByCategory[key] || []}
-          onClickSelection={this.onClickSelection}
           onClickOption={this.onClickOption}
           onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
           onUnlinkOption={this.onUnlinkOption}
           onTrashSelection={this.onTrashSelection}
           onSaveSelection={this.onSaveSelection}
+          onSaveCategory={this.onSaveCategory}
         />
       )
     });
@@ -373,18 +379,16 @@ class App extends React.Component {
     );
   }
 
-  renderSelectionModal() {
-    const { selectionModal, optionModal, categories } = this.state;
-    if (!selectionModal) return "";
+  renderOptionModal() {
+    const { optionModal, categories } = this.state;
+    if (!optionModal) return "";
 
     return (
-      <FinishSelectionModal
-        key={selectionModal["id"]}
-        selection={selectionModal}
-        selectedOption={optionModal}
-        categories={categories}
-        onClose={_ => this.setState({ selectionModal: null, optionModal: null }) }
-        onSave={this.onSaveSelection}
+      <FinishOptionModal
+        isNew={optionModal["id"].startsWith("new")}
+        option={optionModal}
+        onClose={_ => this.setState({ optionModal: null }) }
+        onSave={this.onSaveOption}
       />
     );
   }
@@ -434,7 +438,7 @@ class App extends React.Component {
           </DragDropContext>
           <div className="modal-container">
             {adminMode && this.renderCategoriesModal()}
-            {adminMode && this.renderSelectionModal()}
+            {adminMode && this.renderOptionModal()}
             {adminMode && this.renderLinkOptionToSelectionModal()}
             {this.renderLoading()}
           </div>
