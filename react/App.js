@@ -43,11 +43,6 @@ class App extends React.Component {
       selectionModal: null,
       optionModal: null,
       linkOptionToSelectionModal: null,
-      currentFilter: "All",
-      categories: [],
-      selectionsByCategory: {},
-      filteredSelectionsByCategory: {},
-      adminMode: false,
     }
   }
 
@@ -56,67 +51,13 @@ class App extends React.Component {
 
     window.addEventListener('beforeunload', this.onUnload);
 
-    const onLoadData = (data) => {
-      // Combine selections and options
-      const categories = Array.from(data.categories);
-      const selections = Array.from(data.selections);
-      const options = Array.from(data.options);
-      const { currentFilter } = this.state;
-
-      selections.forEach(s => {
-        s["Options"] = _.filter(options, o => (s.fields["Options"] || "").includes(o.id));
-      });
-      categories.forEach(c => {
-        c["Selections"] = _.filter(selections, s => (s.fields["Category"] || [])[0] == c.id)
-          .sort((a, b) => ((a["fields"]["Order"] || 0) - (b["fields"]["Order"] || 0)));
-      });
-
-      const categoriesState = this._getCategoriesState(categories, currentFilter);
-
-      this.setState({
-        isLoading: false,
-        adminMode: data["admin_mode"],
-        ...categoriesState
-      });
-    };
-
-    this.props.dispatch(ActionCreators.load(onLoadData));
+    this.props.dispatch(ActionCreators.load((data) => {
+      this.setState({ isLoading: false });
+    }));
   }
 
   componentWillUnmount() {
     window.removeEventListener('beforeunload', this.onUnload);
-  }
-
-  _getCategoriesState(categories, currentFilter) {
-    const selectionsByCategory = {};
-
-    categories.forEach(c => {
-      selectionsByCategory[c.id] = c["Selections"];
-    });
-
-    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, currentFilter);
-
-    return {
-      categories: categories,
-      selectionsByCategory: selectionsByCategory,
-      filteredSelectionsByCategory: filteredSelectionsByCategory,
-    };
-  }
-
-  _getFilteredSelectionsByCategory(selectionsByCategory, currentFilter) {
-    let filteredSelectionsByCategory = {};
-
-    Object.keys(selectionsByCategory || {}).forEach((key, i) => {
-      let filtered = Array.from(selectionsByCategory[key] || []);
-
-      if (currentFilter != "All") {
-        filtered = filtered.filter((s) => s["fields"]["Location"] == currentFilter);
-      }
-
-      filteredSelectionsByCategory[key] = filtered;
-    });
-
-    return filteredSelectionsByCategory;
   }
 
   onUnload = (e) => {
@@ -262,19 +203,6 @@ class App extends React.Component {
     this.setState({ linkOptionToSelectionModal: selection });
   }
 
-  getFilters() {
-    const { selectionsByCategory } = this.state;
-    const allSelections = Object.values(selectionsByCategory).flat();
-    const locations = {};
-
-    allSelections.forEach((selection) => {
-      const l = selection["fields"]["Location"];
-      if (l && !locations[l]) locations[l] = true;
-    });
-
-    return Object.keys(locations);
-  }
-
   renderCategorySections() {
     const { orderedCategoryIds } = this.props;
     const { filteredSelectionsByCategory } = this.state;
@@ -354,8 +282,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { adminMode } = this.state;
-    const { currentFilter } = this.props;
+    const { adminMode, selectionFilters, currentFilter } = this.props;
     const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
     return (
@@ -366,7 +293,7 @@ class App extends React.Component {
         <div className={wrapperClasses.join(" ")}>
           <FinishSelectionFilters
             current={currentFilter}
-            filters={this.getFilters()}
+            filters={selectionFilters}
             onChange={this.onChangeFilter}
             />
           <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
@@ -386,7 +313,9 @@ class App extends React.Component {
 
 export default connect((reduxState, props) => {
   return {
+    adminMode: reduxState.isAdmin,
     orderedCategoryIds: reduxState.orderedCategoryIds || [],
     currentFilter: reduxState.filter,
+    selectionFilters: reduxState.selectionFilters || [],
   };
 }, null)(App);

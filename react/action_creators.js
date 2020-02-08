@@ -36,6 +36,13 @@ export default {
     }
   },
 
+  updateEach: (updates) => {
+    return {
+      type: Actions.EACH_UPDATE,
+      ...updates
+    }
+  },
+
   searchOptions: (query, callback) => {
     $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
   },

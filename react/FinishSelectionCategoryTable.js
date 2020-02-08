@@ -38,18 +38,6 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
-  onNewSelection = () => {
-    const { category, onClickSelection } = this.props;
-    if (onClickSelection) {
-      onClickSelection({
-        "id": "new" + Math.random().toString(36).substring(2, 15),
-        "fields": {
-          "Category": [category.id],
-        }
-      });
-    }
-  }
-
   onClickTrashSelection = (selection) => {
     const { category, onTrashSelection } = this.props;
 
@@ -63,19 +51,16 @@ class FinishSelectionCategoryTable extends React.Component {
   onChangeCategoryName = (name) => {
     const { category, onSaveCategory } = this.props;
 
-    if (onSaveCategory) {
-      const newCategory = _.clone(category);
-      const newFields = _.clone(category["fields"]);
-
-      newFields["Name"] = name;
-      newCategory["fields"] = newFields;
-
-      onSaveCategory(newCategory);
-    }
+    this.dispatch(ActionCreators.updateEach({
+      categories: [{
+        "id": category["id"],
+        "fields": { ...category["fields"], "Name": name },
+      }]
+    }));
   }
 
   renderSelectionRows() {
-    const { category, orderedSelectionIds, onClickSelection, onClickOption,
+    const { category, orderedSelectionIds,  onClickOption,
       onClickLinkOption, onUnlinkOption, onClickTrashSelection,
       onSaveSelection } = this.props;
     const isAdmin = this.context;
@@ -86,7 +71,6 @@ class FinishSelectionCategoryTable extends React.Component {
         categoryId={category.id}
         index={j}
         key={selectionId}
-        onClick={onClickSelection}
         onClickOption={onClickOption}
         onClickLinkOption={onClickLinkOption}
         onClickUnlinkOption={onUnlinkOption}

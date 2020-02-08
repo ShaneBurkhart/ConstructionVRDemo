@@ -2,6 +2,7 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk';
 
 const _initialState = {
+  isAdmin: false,
   filter: "All",
 };
 
@@ -49,6 +50,13 @@ const computeState = (newState) => {
         .map(o => o["id"]);
     newState.orderedOptionIdsBySelectionId[selectionId] = orderedOptionIds;
   });
+
+  const locations = {};
+  Object.values(newState.selections).forEach((selection) => {
+    const l = selection["fields"]["Location"];
+    if (l && !locations[l]) locations[l] = true;
+  });
+  newState.selectionFilters = Object.keys(locations);
 
   return newState;
 }
@@ -132,6 +140,29 @@ const moveOption = (state, action) => {
   return { ...computeState({ ...state }) }
 }
 
+const eachUpdate = (state, action) => {
+  const categories = action.categories || [];
+  const selections = action.selections || [];
+  const options = action.options || [];
+
+  categories.forEach(c => {
+    const cat = state.categories[c["id"]];
+    if (cat) state.categories[c["id"]] = { ...cat, ...c };
+  });
+
+  selections.forEach(s => {
+    const selection = state.selections[s["id"]];
+    if (selection) state.selections[s["id"]] = { ...selection, ...s };
+  });
+
+  options.forEach(o => {
+    const option = state.options[o["id"]];
+    if (option) state.options[o["id"]] = { ...option, ...o };
+  });
+
+  return { ...computeState({ ...state }) };
+}
+
 const todos = (state = {}, action) => {
   switch (action.type) {
     case 'UPDATE_FILTER':
@@ -142,6 +173,8 @@ const todos = (state = {}, action) => {
       return moveSelection(state, action);
     case 'MOVE_OPTION':
       return moveOption(state, action);
+    case 'EACH_UPDATE':
+      return eachUpdate(state, action);
     case 'FULL_UPDATE':
       const filter = state.filter;
       const options = indexByID(action.options);
