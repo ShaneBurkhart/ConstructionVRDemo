@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from 'underscore';
+import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import AdminContext from './context/AdminContext';
@@ -166,4 +167,11 @@ class FinishSelection extends React.Component {
   }
 }
 
-export default FinishSelection;
+export default connect(
+  (reduxState, props) => {
+    return {
+      selection: reduxState.selections[props.selectionId]
+    }
+  },
+  null
+)(FinishSelection);

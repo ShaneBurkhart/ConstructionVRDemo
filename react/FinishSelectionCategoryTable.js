@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button, Icon } from 'semantic-ui-react'
 
@@ -19,13 +20,12 @@ class FinishSelectionCategoryTable extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {
-      expanded: true,
-    };
+    this.state = { expanded: true };
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.selections == nextProps.selections &&
+    if (this.props.category == nextProps.category &&
+        this.props.category["fields"]["Selections"] == nextProps.category["fields"]["Selections"] &&
         this.state.expanded == nextState.expanded) {
       return false;
     }
@@ -75,17 +75,17 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { category, selections, onClickSelection, onClickOption,
+    const { category, orderedSelectionIds, onClickSelection, onClickOption,
       onClickLinkOption, onUnlinkOption, onClickTrashSelection,
       onSaveSelection } = this.props;
     const isAdmin = this.context;
 
-    return selections.map((selection, j) => (
+    return orderedSelectionIds.map((selectionId, j) => (
       <FinishSelection
-        selection={selection}
+        selectionId={selectionId}
         categoryId={category.id}
         index={j}
-        key={selection["id"]}
+        key={selectionId}
         onClick={onClickSelection}
         onClickOption={onClickOption}
         onClickLinkOption={onClickLinkOption}
@@ -97,10 +97,10 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   render() {
-    const { category, selections, onClickEditCategory } = this.props;
+    const { category, onClickEditCategory } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
-    const count = (selections || []).length;
+    const count = (category["fields"]["Selections"] || []).length;
     let table = null;
 
     if (isAdmin) {
@@ -150,4 +150,13 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 }
 
-export default FinishSelectionCategoryTable;
+export default connect(
+  (reduxState, props) => {
+    const categoryId = props.categoryId;
+    const category = reduxState.categories[categoryId];
+    const orderedSelectionIds = reduxState.filteredOrderedSelectionIdsByCategoryId[categoryId];
+
+    return { category, orderedSelectionIds };
+  },
+  null
+)(FinishSelectionCategoryTable);

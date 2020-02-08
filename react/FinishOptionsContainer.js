@@ -49,7 +49,7 @@ class FinishOptionsContainer extends React.Component {
                     getDraggableStyleOverride={getDraggableStyleOverride}
                     index={i}
                     key={option["id"]}
-                    option={option}
+                    optionId={option["id"]}
                     onClick={_ => { if (onSelectOption) onSelectOption(option) }}
                     onClickUnlink={_ => { if (onUnlinkOption) onUnlinkOption(option) }}
                   />
@@ -72,7 +72,7 @@ class FinishOptionsContainer extends React.Component {
               draggable={draggable}
               index={i}
               key={option["id"]}
-              option={option}
+              optionId={option["id"]}
               onClick={_ => { if (onSelectOption) onSelectOption(option) }}
             />
           ))}

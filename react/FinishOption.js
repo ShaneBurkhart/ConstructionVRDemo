@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from 'underscore';
+import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import AdminControls from './AdminControls';
@@ -117,5 +118,12 @@ class FinishOption extends React.Component {
   }
 }
 
-export default FinishOption;
+export default connect(
+  (reduxState, props) => {
+    return {
+      option: reduxState.options[props.optionId]
+    }
+  },
+  null
+)(FinishOption);
 

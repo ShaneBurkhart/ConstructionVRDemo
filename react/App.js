@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux'
 import * as _ from 'underscore';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
@@ -55,7 +56,7 @@ class App extends React.Component {
 
     window.addEventListener('beforeunload', this.onUnload);
 
-    ActionCreators.load((data) => {
+    const onLoadData = (data) => {
       // Combine selections and options
       const categories = Array.from(data.categories);
       const selections = Array.from(data.selections);
@@ -77,7 +78,9 @@ class App extends React.Component {
         adminMode: data["admin_mode"],
         ...categoriesState
       });
-    })
+    };
+
+    this.props.dispatch(ActionCreators.load(onLoadData));
   }
 
   componentWillUnmount() {
@@ -126,9 +129,7 @@ class App extends React.Component {
   }
 
   onChangeFilter = (filter) => {
-    const { selectionsByCategory } = this.state;
-    const filteredSelectionsByCategory = this._getFilteredSelectionsByCategory(selectionsByCategory, filter );
-    this.setState({ filteredSelectionsByCategory, currentFilter: filter });
+    this.props.dispatch(ActionCreators.updateFilter(filter));
   }
 
   onDragStartSelection = () => {
@@ -140,40 +141,13 @@ class App extends React.Component {
   }
 
   onDragEndSelection = (result) => {
-    const { selectionsByCategory, filteredSelectionsByCategory } = this.state;
     const { source, destination } = result;
     if (!destination) return;
     // Picked it up and dropped it in the same spot.
     if (source.droppableId == destination.droppableId && source.index == destination.index) return;
 
     if (result["type"] == "SELECTION") {
-      const sourceSelectionId = filteredSelectionsByCategory[source.droppableId][source.index]["id"];
-      const sourceSelections = Array.from(selectionsByCategory[source.droppableId]);
-      const sourceSelectionIndex = sourceSelections.findIndex(s => s["id"] == sourceSelectionId);
-
-      let destSelections = sourceSelections;
-      let destSelectionId = null;
-      let destSelectionIndex = null;
-
-      if (source.droppableId != destination.droppableId) {
-        destSelections = Array.from(selectionsByCategory[destination.droppableId]);
-      }
-
-      if (destination.index < filteredSelectionsByCategory[destination.droppableId].length) {
-        destSelectionId = filteredSelectionsByCategory[destination.droppableId][destination.index]["id"];
-        destSelectionIndex = destSelections.findIndex(s => s["id"] == destSelectionId);
-      } else {
-        destSelectionId = filteredSelectionsByCategory[destination.droppableId][destination.index - 1]["id"];
-        // Put after the selection we moved it after.
-        destSelectionIndex = destSelections.findIndex(s => s["id"] == destSelectionId) + 1;
-      }
-
-      // Remove after finding indexes
-      const [removed] = sourceSelections.splice(sourceSelectionIndex, 1);
-
-      selectionsByCategory[source.droppableId] = sourceSelections;
-      destSelections.splice(destSelectionIndex, 0, removed);
-      selectionsByCategory[destination.droppableId] = destSelections;
+      this.props.dispatch(ActionCreators.moveSelection(result.draggableId, source, destination));
     } else if (result["type"] == "OPTION") {
       const [sourceCategory, sourceDroppableId] = source.droppableId.split("/");
       const [destCategory, destDroppableId] = destination.droppableId.split("/");
@@ -209,22 +183,11 @@ class App extends React.Component {
       selectionsByCategory[destCategory] = destSelections;
     }
 
-    const { categories, currentFilter } = this.state;
-
-    // Set updated selections to categories in state and reset
-    const newCategories = Object.keys(selectionsByCategory).map(categoryID => {
-      const selections = selectionsByCategory[categoryID];
-      const category = _.clone(categories.find(c => c.id == categoryID));
-      category["Selections"] = selections;
-      return category;
-    });
-
-    this.setState(this._getCategoriesState(newCategories, currentFilter));
     this._isDragging = false;
   }
 
   onSaveCategories = (categories) => {
-    const { currentFilter } = this.state;
+    const { currentFilter } = this.props;
     const categoriesState = this._getCategoriesState(categories, currentFilter);
 
     this.setState({
@@ -236,7 +199,8 @@ class App extends React.Component {
   }
 
   onSaveCategory = (category) => {
-    const { categories, currentFilter } = this.state;
+    const { categories } = this.state;
+    const { currentFilter } = this.props;
     const catIndex = categories.findIndex(c => c["id"] == category["id"]);
     if (catIndex < 0) return;
 
@@ -249,7 +213,8 @@ class App extends React.Component {
   }
 
   onSaveSelection = (originalCategoryId, selection) => {
-    const { selectionsByCategory, currentFilter } = this.state;
+    const { selectionsByCategory } = this.state;
+    const { currentFilter } = this.props;
     const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategoryId]);
     const selectionId = selection["id"];
     if (!sourceSelectionsForCat) return;
@@ -341,17 +306,17 @@ class App extends React.Component {
   }
 
   renderCategorySections() {
-    const { categories, currentFilter, filteredSelectionsByCategory } = this.state;
+    const { orderedCategoryIds } = this.props;
+    const { filteredSelectionsByCategory } = this.state;
+    const { currentFilter } = this.props;
 
-    return categories.map((category, i) => {
-      const key = category.id;
-      const name = category.fields["Name"];
+    return orderedCategoryIds.map((categoryId, i) => {
+      const key = categoryId;
 
       return (
         <FinishSelectionCategoryTable
-          key={category.id}
-          category={category}
-          selections={filteredSelectionsByCategory[key] || []}
+          key={categoryId}
+          categoryId={categoryId}
           onClickOption={this.onClickOption}
           onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
@@ -419,7 +384,8 @@ class App extends React.Component {
   }
 
   render() {
-    const { currentFilter, adminMode } = this.state;
+    const { adminMode } = this.state;
+    const { currentFilter } = this.props;
     const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
     return (
@@ -448,4 +414,9 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default connect((reduxState, props) => {
+  return {
+    orderedCategoryIds: reduxState.orderedCategoryIds || [],
+    currentFilter: reduxState.filter,
+  };
+}, null)(App);

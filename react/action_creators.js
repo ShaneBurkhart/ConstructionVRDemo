@@ -4,7 +4,29 @@ import _  from 'underscore'
 
 export default {
   load: (callback) => {
-    $.get("/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes", callback);
+    return (dispatch) => {
+      $.get("/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes", (data) => {
+        dispatch({
+          type: Actions.FULL_UPDATE,
+          ...data
+        });
+        callback(data);
+      });
+    }
+  },
+
+  updateFilter: (filter) => {
+    return {
+      type: Actions.UPDATE_FILTER,
+      filter,
+    }
+  },
+
+  moveSelection: (selectionId, source, destination) => {
+    return {
+      type: Actions.MOVE_SELECTION,
+      selectionId, source, destination,
+    }
   },
 
   searchOptions: (query, callback) => {
