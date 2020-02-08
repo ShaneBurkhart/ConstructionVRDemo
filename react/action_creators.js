@@ -19,7 +19,33 @@ export default {
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify({ categories: categories }),
       dataType: "json",
-      complete: callback
+      success: callback
+    });
+  },
+
+  presignedURL: (file, callback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api/temp_upload/presign",
+      data: {
+        filename: file.name,
+        mime: file.type,
+      },
+      dataType: "json",
+      success: callback
+    });
+  },
+
+  uploadFile: (file, presignedURL, callback) => {
+    $.ajax({
+      type: "PUT",
+      url: presignedURL,
+      data: file,
+      dataType: "text",
+      cache : false,
+      contentType : file.type,
+      processData : false,
+      success: callback
     });
   }
 }

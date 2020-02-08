@@ -79,7 +79,7 @@ class FinishOption extends React.Component {
                 </div>
                 <div className="half images">
                   {images.map((image) => (
-                    <a key={image["id"]} href={image["url"]} target="_blank">
+                    <a key={image["id"] || image["url"]} href={image["url"]} target="_blank">
                       <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
                     </a>
                   ))}

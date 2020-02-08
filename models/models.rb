@@ -52,7 +52,7 @@ module Finishes
       self["Name"] != fields["Name"] ||
       self["Order"] != fields["Order"] ||
       (self["Selections"] || []).length != (fields["Selections"] || []).length ||
-      fields["Selections"].map{ |o| self["Selections"].include?(o) }.include?(false)
+      (fields["Selections"] || []).map{ |o| self["Selections"].include?(o) }.include?(false)
     end
   end
 
@@ -81,7 +81,7 @@ module Finishes
       self["Notes"] != fields["Notes"] ||
       self["Category"][0] != fields["Category"][0] ||
       (self["Options"] || []).length != (fields["Options"] || []).length ||
-      fields["Options"].map{ |o| self["Options"].include?(o) }.include?(false)
+      (fields["Options"] || []).map{ |o| self["Options"].include?(o) }.include?(false)
     end
 
     def self.finishes_for_project(project)
@@ -118,13 +118,16 @@ module Finishes
       self["Type"] = fields["Type"]
       self["Info"] = fields["Info"]
       self["URL"] = fields["URL"]
+      self["Image"] = fields["Image"]
     end
 
     def is_different?(fields)
       self["Name"] != fields["Name"] ||
       self["Type"] != fields["Type"] ||
       self["Info"] != fields["Info"] ||
-      self["URL"] != fields["URL"]
+      self["URL"] != fields["URL"] ||
+      (self["Image"] || []).length != (fields["Image"] || []).length ||
+      (fields["Image"] || []).map{ |i| self["Image"].include?(i) }.include?(false)
     end
 
   end

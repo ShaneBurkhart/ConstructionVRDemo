@@ -40,6 +40,7 @@ class FinishOptionsContainer extends React.Component {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
+                style={{ minHeight: 5 }}
               >
                 {options.map((option, i) => (
                   <FinishOption

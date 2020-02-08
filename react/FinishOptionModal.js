@@ -2,7 +2,11 @@ import React from 'react';
 import * as _ from 'underscore';
 import { Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
+import ActionCreators from './action_creators';
 import StyledDropzone from "./StyledDropzone"
+import FocusEditableInput from './FocusEditableInput';
+
+import "./FinishOptionModal.css"
 
 class FinishOptionModal extends React.Component {
   constructor(props) {
@@ -15,6 +19,26 @@ class FinishOptionModal extends React.Component {
       optionId: option["id"] || newId,
       optionFields: _.clone(option["fields"] || {}),
     };
+  }
+
+  onDrop = (acceptedFiles) => {
+    const { optionFields } = this.state;
+    if (optionFields["Image"].length >= 2) return;
+
+    (acceptedFiles || []).forEach(file => {
+      console.log(file);
+      ActionCreators.presignedURL(file, (data) => {
+        ActionCreators.uploadFile(file, data.presignedURL, () => {
+          const newFields = _.clone(this.state.optionFields);
+          const newImages = Array.from(newFields["Image"]);
+
+          newImages.push({ url: data.awsURL });
+          newFields["Image"] = newImages;
+
+          this.setState({ optionFields: newFields });
+        });
+      });
+    });
   }
 
   onChangeFor(attr) {
@@ -37,29 +61,12 @@ class FinishOptionModal extends React.Component {
     const images = optionFields["Image"] || [];
 
     return (
-      <Modal open={true}>
-        <Modal.Header>
-          {optionFields["Name"] || "New Option"}
-          <span style={{ float: "right" }}>
-            <Icon name="close" onClick={onClose} />
-          </span>
-        </Modal.Header>
+      <Modal open={true} className="finish-option-modal">
         <Modal.Content>
+          <div style={{ textAlign: "right" }}>
+            <Icon name="close" onClick={onClose} />
+          </div>
           <Form>
-            <Grid>
-              <Grid.Row>
-                {images.map((image) => (
-                  <Grid.Column width={8} key={image["id"]}>
-                    <Image src={image["url"]} />
-                  </Grid.Column>
-                ))}
-                {images.length < 2 &&
-                  <Grid.Column width={8}>
-                    <StyledDropzone onDrop={acceptedFiles => console.log(acceptedFiles)} />
-                  </Grid.Column>
-                }
-              </Grid.Row>
-            </Grid>
             <Form.Group widths="equal">
               <Form.Input
                 fluid
@@ -68,14 +75,29 @@ class FinishOptionModal extends React.Component {
                 value={optionFields["Name"] || ""}
                 onChange={this.onChangeFor("Name")}
               />
-              <Form.Input
-                fluid
-                label="Category"
-                placeholder="Light Fixtures"
-                value={optionFields["Category"] || ""}
-                onChange={this.onChangeFor("Category")}
-              />
             </Form.Group>
+
+            <div className="field">
+              <label>Images</label>
+              <Grid>
+                <Grid.Row>
+                  {images.map((image) => (
+                    <Grid.Column width={8} key={image["id"] || image["url"]}>
+                      <Image src={image["url"]} />
+                    </Grid.Column>
+                  ))}
+                  {images.length < 2 &&
+                    <Grid.Column width={8}>
+                      <StyledDropzone onDrop={this.onDrop} />
+                      <div className="image-placeholder">
+                        <Icon name="linkify" />
+                        Upload with URL
+                      </div>
+                    </Grid.Column>
+                  }
+                </Grid.Row>
+              </Grid>
+            </div>
             <Form.Input
               label="URL"
               placeholder="http://...."

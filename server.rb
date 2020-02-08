@@ -7,11 +7,19 @@ require 'redis-rack'
 require 'redcarpet'
 require 'json'
 require 'cgi'
+require 'aws-sdk'
+require 'aws-sdk-s3'
+require 'securerandom'
 
 require './util/slack.rb'
 require './util/messages.rb'
 require './models/models.rb'
 require './models/db_models.rb'
+
+Aws.config.update({
+  region: ENV["REGION"],
+  credentials: Aws::Credentials.new(ENV["ACCESS_KEY_ID"], ENV["SECRET_ACCESS_KEY"])
+})
 
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
@@ -84,6 +92,26 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
 end
 
+post '/api/temp_upload/presign' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
+
+  key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
+  signer = Aws::S3::Presigner.new
+  url = signer.presigned_url(:put_object, {
+    bucket: ENV["BUCKET"],
+    key: key,
+    content_type: params["mime"],
+    acl: "public-read"
+  })
+
+  content_type "application/json"
+  {
+    presignedURL: url,
+    awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+  }.to_json
+end
+
 get '/api/finishes/options/search' do
   is_admin_mode = !!session[:is_admin]
   return "Not found" if !is_admin_mode
@@ -140,10 +168,10 @@ post '/api/project/:access_token/finishes/save' do
 
     if old_category.is_different? category_fields
       # Only update if is different than old
-      updated_categories << category["id"]
       old_category.update(category_fields)
       puts old_category.inspect
       old_category.save
+      updated_categories << old_category
     end
 
     selections = category["Selections"]
@@ -156,9 +184,9 @@ post '/api/project/:access_token/finishes/save' do
 
       if old_selection.is_different? selection_fields
         # Only update if is different than old
-        updated_selections << selection["id"]
         old_selection.update(selection_fields)
         old_selection.save
+        updated_selections << old_selection
       end
 
       options = selection["Options"]
@@ -169,9 +197,9 @@ post '/api/project/:access_token/finishes/save' do
 
         if old_option.is_different?(option_fields) and !updated_options.include?(option["id"])
           # Only update if is different than old
-          updated_options << option["id"]
           old_option.update(option_fields)
           old_option.save
+          updated_options << old_option
         end
       end
     end
@@ -179,9 +207,9 @@ post '/api/project/:access_token/finishes/save' do
 
   content_type "application/json"
   {
-    updated_categories: updated_categories,
-    updated_selections: updated_selections,
-    updated_options: updated_options,
+    updated_categories: updated_categories.map{ |c| [c.id, c] }.to_h,
+    updated_selections: updated_selections.map{ |s| [s.id, s] }.to_h,
+    updated_options: updated_options.map{ |o| [o.id, o] }.to_h,
   }.to_json
 end
 
