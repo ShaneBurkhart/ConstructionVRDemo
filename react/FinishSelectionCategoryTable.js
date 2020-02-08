@@ -38,20 +38,26 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
-  onClickTrashSelection = (selection) => {
-    const { category, onTrashSelection } = this.props;
+  onRemoveSelection = (selection) => {
+    const { category } = this.props;
+    const newSelections = category["fields"]["Selections"]
+        .filter(s => s != selection["id"]);
 
-    if (onTrashSelection) {
-      category["Selections"] = Array.from(category["Selections"])
-        .filter(s => s["id"] != selection["id"]);
-      onTrashSelection(category);
-    }
+    this.props.dispatch(ActionCreators.updateEach({
+      categories: [{
+        "id": category["id"],
+        "fields": {
+          ...category["fields"],
+          "Selections": newSelections,
+        },
+      }]
+    }));
   }
 
   onChangeCategoryName = (name) => {
-    const { category, onSaveCategory } = this.props;
+    const { category } = this.props;
 
-    this.dispatch(ActionCreators.updateEach({
+    this.props.dispatch(ActionCreators.updateEach({
       categories: [{
         "id": category["id"],
         "fields": { ...category["fields"], "Name": name },
@@ -60,9 +66,8 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   renderSelectionRows() {
-    const { category, orderedSelectionIds,  onClickOption,
-      onClickLinkOption, onUnlinkOption, onClickTrashSelection,
-      onSaveSelection } = this.props;
+    const { category, orderedSelectionIds, onClickOption,
+      onClickLinkOption, onUnlinkOption, onClickTrashSelection } = this.props;
     const isAdmin = this.context;
 
     return orderedSelectionIds.map((selectionId, j) => (
@@ -74,14 +79,13 @@ class FinishSelectionCategoryTable extends React.Component {
         onClickOption={onClickOption}
         onClickLinkOption={onClickLinkOption}
         onClickUnlinkOption={onUnlinkOption}
-        onClickTrashSelection={this.onClickTrashSelection}
-        onSaveSelection={onSaveSelection}
+        onClickTrashSelection={this.onRemoveSelection}
       />
     ));
   }
 
   render() {
-    const { category, onClickEditCategory } = this.props;
+    const { category } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
     const count = (category["fields"]["Selections"] || []).length;

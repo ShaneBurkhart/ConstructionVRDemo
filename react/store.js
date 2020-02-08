@@ -61,6 +61,16 @@ const computeState = (newState) => {
   return newState;
 }
 
+const reorderCategories = (state, action) => {
+  const { orderedCategoryIds } = action;
+
+  (orderedCategoryIds || []).forEach((cId, i) => {
+    state.categories[cId]["fields"]["Order"] = i;
+  });
+
+  return { ...computeState({ ...state }) };
+};
+
 const moveSelection = (state, action) => {
   const { selectionId, source, destination } = action;
   const sourceCategoryId = source.droppableId;
@@ -169,6 +179,8 @@ const todos = (state = {}, action) => {
       return {
         ...computeState({ ...state, filter: action.filter })
       };
+    case 'REORDER_CATEGORIES':
+      return reorderCategories(state, action);
     case 'MOVE_SELECTION':
       return moveSelection(state, action);
     case 'MOVE_OPTION':

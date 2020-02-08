@@ -1,10 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as _ from 'underscore';
+import { connect } from 'react-redux'
 import { Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import DragDropModal from './DragDropModal';
+import FinishCategoryModalCategory from './FinishCategoryModalCategory';
 import AdminControls from './AdminControls';
 
 class FinishCategoriesModal extends DragDropModal {
@@ -14,46 +16,36 @@ class FinishCategoriesModal extends DragDropModal {
     this._droppableId = Math.random().toString(36).substring(2, 15);
 
     this.state = {
-      categories: props.categories,
+      orderedCategoryIds: props.orderedCategoryIds,
       selectedCategory: props.selectedCategory
     };
   }
 
-  handleCategoryChangeFor = (categoryId) => {
-    return (e, data) => {
-      const categories = Array.from(this.state.categories || []).map(c => {
-        if (c.id != categoryId) return c;
-
-        const newC = _.clone(c);
-        newC.fields["Name"] = e.target.value;
-        return newC;
-      });
-
-      this.setState({ categories });
-    }
-  }
-
   onDragEnd = (result) => {
     const { source, destination } = result;
-    const { categories } = this.state;
-    const newCategories = Array.from(categories);
+    const { orderedCategoryIds } = this.state;
+    const newOrderedCategoryIds = Array.from(orderedCategoryIds);
     if (!destination) return;
 
-    const [removed] = newCategories.splice(source.index, 1);
-    newCategories.splice(destination.index, 0, removed);
+    const [removed] = newOrderedCategoryIds.splice(source.index, 1);
+    newOrderedCategoryIds.splice(destination.index, 0, removed);
 
-    this.setState({ categories: newCategories });
+    this.setState({ orderedCategoryIds: newOrderedCategoryIds });
   }
 
   onSave = () => {
     const { onSave } = this.props;
-    const { categories } = this.state;
-    onSave(categories);
+    const { orderedCategoryIds } = this.state;
+    onSave(orderedCategoryIds);
+  }
+
+  getDraggableStyle = (draggableStyle, isDragging) => {
+    return this.getDraggableStyleOverride(draggableStyle, isDragging);
   }
 
   render() {
     const { onClose } = this.props;
-    const { categories, selectedCategory } = this.state;
+    const { orderedCategoryIds, selectedCategory } = this.state;
 
     return (
       <div {...this.modalsWrapperProps}>
@@ -72,33 +64,13 @@ class FinishCategoriesModal extends DragDropModal {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                   >
-                    {categories.map((c, i) => (
-                      <Draggable
-                        key={c.id}
-                        draggableId={c.id}
-                        type="CATEGORY"
+                    {orderedCategoryIds.map((c, i) => (
+                      <FinishCategoryModalCategory
+                        key={c}
                         index={i}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            style={this.getDraggableStyleOverride(
-                              provided.draggableProps["style"],
-                              snapshot.isDragging
-                            )}
-                          >
-                            <div style={{ display: "flex" }}>
-                              <AdminControls
-                                dragHandleProps={provided.dragHandleProps}
-                              />
-                              <div style={{ width: "100%" }}>
-                                <p>{c.fields["Name"]}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
+                        categoryId={c}
+                        getDraggableStyle={this.getDraggableStyle}
+                      />
                     ))}
                   {provided.placeholder}
                   </div>
@@ -125,4 +97,4 @@ class FinishCategoriesModal extends DragDropModal {
   }
 }
 
-export default FinishCategoriesModal;
+export default connect(null, null)(FinishCategoriesModal);

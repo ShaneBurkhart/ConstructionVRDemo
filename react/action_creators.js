@@ -22,6 +22,13 @@ export default {
     }
   },
 
+  reorderCategories: (orderedCategoryIds) => {
+    return {
+      type: Actions.REORDER_CATEGORIES,
+      orderedCategoryIds
+    }
+  },
+
   moveSelection: (selectionId, source, destination) => {
     return {
       type: Actions.MOVE_SELECTION,

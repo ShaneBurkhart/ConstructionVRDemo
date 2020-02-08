@@ -97,16 +97,9 @@ class App extends React.Component {
     this._isDragging = false;
   }
 
-  onSaveCategories = (categories) => {
-    const { currentFilter } = this.props;
-    const categoriesState = this._getCategoriesState(categories, currentFilter);
-
-    this.setState({
-      selectionModal: null,
-      optionModal: null,
-      categoriesModal: null,
-      ...categoriesState
-    });
+  onReorderCategories = (orderedCategoryIds) => {
+    this.props.dispatch(ActionCreators.reorderCategories(orderedCategoryIds));
+    this.setState({ categoriesModal: null });
   }
 
   onSaveCategory = (category) => {
@@ -189,10 +182,6 @@ class App extends React.Component {
     this.onSaveSelection(selection["fields"]["Category"][0], selection);
   }
 
-  onTrashSelection = (category) => {
-    this.onSaveCategory(category);
-  }
-
   onClickOption = (option, selection) => {
     if (this._isDragging) return;
     this.setState({ selectionModal: selection, optionModal: option });
@@ -219,25 +208,23 @@ class App extends React.Component {
           onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
           onUnlinkOption={this.onUnlinkOption}
-          onTrashSelection={this.onTrashSelection}
-          onSaveSelection={this.onSaveSelection}
-          onSaveCategory={this.onSaveCategory}
         />
       )
     });
   }
 
   renderCategoriesModal() {
-    const { categories, categoriesModal} = this.state;
+    const { orderedCategoryIds } = this.props;
+    const { categoriesModal } = this.state;
     if (!categoriesModal) return "";
 
     return (
       <FinishCategoriesModal
         key={categoriesModal}
-        categories={categories}
+        orderedCategoryIds={orderedCategoryIds}
         selectedCategory={categoriesModal}
         onClose={_ => this.setState({ categoriesModal: null }) }
-        onSave={this.onSaveCategories}
+        onSave={this.onReorderCategories}
       />
     );
   }
