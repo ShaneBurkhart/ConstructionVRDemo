@@ -29,6 +29,13 @@ export default {
     }
   },
 
+  moveOption: (optionId, source, destination) => {
+    return {
+      type: Actions.MOVE_OPTION,
+      optionId, source, destination,
+    }
+  },
+
   searchOptions: (query, callback) => {
     $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
   },

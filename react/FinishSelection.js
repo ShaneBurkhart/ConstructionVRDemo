@@ -25,6 +25,7 @@ class FinishSelection extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     if (this.props.selection == nextProps.selection &&
+        this.props.orderedOptionIds == nextProps.orderedOptionIds &&
         this.props.index == nextProps.index) {
       return false;
     }
@@ -110,11 +111,10 @@ class FinishSelection extends React.Component {
   }
 
   render() {
-    const { selection, index, categoryId, onClick } = this.props;
+    const { selection, orderedOptionIds, index, categoryId, onClick } = this.props;
     const isAdmin = this.context;
 
     const selectionFields = selection["fields"];
-    const options = selection["Options"] || [];
     const rowClasses = ["table-row", "selection", "white" ];
 
     if (isAdmin) {
@@ -142,7 +142,7 @@ class FinishSelection extends React.Component {
                 <FinishOptionsContainer
                   draggable
                   droppableId={`${categoryId}/${selection["id"]}`}
-                  options={options}
+                  orderedOptionIds={orderedOptionIds}
                   onSelectOption={this.onClickOption}
                   onLinkOption={this.onClickLinkOption}
                   onUnlinkOption={this.onClickUnlinkOption}
@@ -159,7 +159,7 @@ class FinishSelection extends React.Component {
             {this.renderSelectionDetails()}
           </div>
           <div className="table-column two-third options-cell">
-            <FinishOptionsContainer options={options} />
+            <FinishOptionsContainer orderedOptionIds={orderedOptionIds} />
           </div>
         </div>
       );
@@ -169,8 +169,10 @@ class FinishSelection extends React.Component {
 
 export default connect(
   (reduxState, props) => {
+    const { selectionId } = props;
     return {
-      selection: reduxState.selections[props.selectionId]
+      selection: reduxState.selections[selectionId],
+      orderedOptionIds: reduxState.orderedOptionIdsBySelectionId[selectionId]
     }
   },
   null

@@ -29,7 +29,7 @@ class FinishOptionsContainer extends React.Component {
   }
 
   render() {
-    const { options, onSelectOption, onUnlinkOption, draggable, droppableId,
+    const { orderedOptionIds, onSelectOption, onUnlinkOption, draggable, droppableId,
       getDraggableStyleOverride } = this.props;
 
     if (draggable) {
@@ -42,14 +42,14 @@ class FinishOptionsContainer extends React.Component {
                 {...provided.droppableProps}
                 style={{ minHeight: 5 }}
               >
-                {options.map((option, i) => (
+                {orderedOptionIds.map((optionId, i) => (
                   <FinishOption
                     draggable={draggable}
-                    draggableId={`${this._draggableId}/${option["id"]}`}
+                    draggableId={`${this._draggableId}/${optionId}`}
                     getDraggableStyleOverride={getDraggableStyleOverride}
                     index={i}
-                    key={option["id"]}
-                    optionId={option["id"]}
+                    key={optionId}
+                    optionId={optionId}
                     onClick={_ => { if (onSelectOption) onSelectOption(option) }}
                     onClickUnlink={_ => { if (onUnlinkOption) onUnlinkOption(option) }}
                   />
@@ -67,12 +67,12 @@ class FinishOptionsContainer extends React.Component {
     } else {
       return (
         <div>
-          {options.map((option, i) => (
+          {orderedOptionIds.map((optionId, i) => (
             <FinishOption
               draggable={draggable}
               index={i}
-              key={option["id"]}
-              optionId={option["id"]}
+              key={optionId}
+              optionId={optionId}
               onClick={_ => { if (onSelectOption) onSelectOption(option) }}
             />
           ))}

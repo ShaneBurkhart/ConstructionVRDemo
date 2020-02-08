@@ -53,6 +53,85 @@ const computeState = (newState) => {
   return newState;
 }
 
+const moveSelection = (state, action) => {
+  const { selectionId, source, destination } = action;
+  const sourceCategoryId = source.droppableId;
+  const destCategoryId = destination.droppableId;
+  const sourceCategory = state.categories[sourceCategoryId];
+  const destCategory = state.categories[destCategoryId];
+  const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
+  const filteredDestCategorySelections = state.filteredOrderedSelectionIdsByCategoryId[destCategoryId];
+  let allDestCategorySelections = allSourceCategorySelections;
+  let destSelectionId = null;
+  let destSelectionIndex = null;
+
+  if (sourceCategoryId != destCategoryId) {
+    allDestCategorySelections = state.orderedSelectionIdsByCategoryId[destCategoryId];
+  }
+
+  if (destination.index < filteredDestCategorySelections.length) {
+    destSelectionId = filteredDestCategorySelections[destination.index];
+    destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId);
+  } else {
+    destSelectionId = filteredDestCategorySelections[destination.index - 1];
+    // Put after the selection we moved it after.
+    destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId) + 1;
+  }
+
+  // Remove id from source category selections
+  // Remove after finding indexes
+  const sourceIndex = allSourceCategorySelections.findIndex(s => s == selectionId);
+  allSourceCategorySelections.splice(sourceIndex, 1);
+
+  // Add id to dest category selections
+  allDestCategorySelections.splice(destSelectionIndex, 0, selectionId);
+
+  // Update order of source category selections
+  sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
+  allSourceCategorySelections.forEach((id, i) => {
+    state.selections[id]["fields"]["Order"] = i;
+  });
+  // Update orders of dest category selections
+  destCategory["fields"]["Selections"] = allDestCategorySelections;
+  allDestCategorySelections.forEach((id, i) => {
+    state.selections[id]["fields"]["Order"] = i;
+  });
+
+  return { ...computeState({ ...state }) }
+}
+
+const moveOption = (state, action) => {
+  const { optionId, source, destination } = action;
+  const [sourceCategory, sourceSelectionId] = source.droppableId.split("/");
+  const [destCategory, destSelectionId] = destination.droppableId.split("/");
+  const sourceSelection = state.selections[sourceSelectionId];
+  const destSelection = state.selections[destSelectionId];
+  const allSourceSelectionOptions = state.orderedOptionIdsBySelectionId[sourceSelectionId];
+  let allDestSelectionOptions = allSourceSelectionOptions;
+
+  if (sourceSelectionId != destSelectionId) {
+    allDestSelectionOptions = state.orderedOptionIdsBySelectionId[destSelectionId];
+  }
+
+  // Remove id from source selection options
+  allSourceSelectionOptions.splice(source.index, 1);
+  // Add id to dest selection options
+  allDestSelectionOptions.splice(destination.index, 0, optionId);
+
+  // Update order of source selection options
+  sourceSelection["fields"]["Options"] = allSourceSelectionOptions;
+  allSourceSelectionOptions.forEach((id, i) => {
+    state.options[id]["fields"]["Order"] = i;
+  });
+  // Update orders of dest selection options
+  destSelection["fields"]["Options"] = allDestSelectionOptions;
+  allDestSelectionOptions.forEach((id, i) => {
+    state.options[id]["fields"]["Order"] = i;
+  });
+
+  return { ...computeState({ ...state }) }
+}
+
 const todos = (state = {}, action) => {
   switch (action.type) {
     case 'UPDATE_FILTER':
@@ -60,53 +139,9 @@ const todos = (state = {}, action) => {
         ...computeState({ ...state, filter: action.filter })
       };
     case 'MOVE_SELECTION':
-      const { selectionId, source, destination } = action;
-      const sourceCategoryId = source.droppableId;
-      const destCategoryId = destination.droppableId;
-      const sourceCategory = state.categories[sourceCategoryId];
-      const destCategory = state.categories[destCategoryId];
-      const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
-      const filteredDestCategorySelections = state.filteredOrderedSelectionIdsByCategoryId[destCategoryId];
-      let allDestCategorySelections = allSourceCategorySelections;
-      let destSelectionId = null;
-      let destSelectionIndex = null;
-
-      if (sourceCategoryId != destCategoryId) {
-        allDestCategorySelections = state.orderedSelectionIdsByCategoryId[destCategoryId];
-      }
-
-      if (destination.index < filteredDestCategorySelections.length) {
-        destSelectionId = filteredDestCategorySelections[destination.index];
-        destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId);
-      } else {
-        destSelectionId = filteredDestCategorySelections[destination.index - 1];
-        // Put after the selection we moved it after.
-        destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId) + 1;
-      }
-
-      // Remove id from source category selections
-      // Remove after finding indexes
-      const sourceIndex = allSourceCategorySelections.findIndex(s => s == selectionId);
-      allSourceCategorySelections.splice(sourceIndex, 1);
-
-      // Add id to dest category selections
-      console.log(destSelectionIndex);
-      allDestCategorySelections.splice(destSelectionIndex, 0, selectionId);
-
-      // Update order of source category selections
-      sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
-      allSourceCategorySelections.forEach((id, i) => {
-        state.selections[id]["fields"]["Order"] = i;
-      });
-      // Update orders of dest category selections
-      destCategory["fields"]["Selections"] = allDestCategorySelections;
-      allDestCategorySelections.forEach((id, i) => {
-        state.selections[id]["fields"]["Order"] = i;
-      });
-
-      return {
-        ...computeState({ ...state }),
-      }
+      return moveSelection(state, action);
+    case 'MOVE_OPTION':
+      return moveOption(state, action);
     case 'FULL_UPDATE':
       const filter = state.filter;
       const options = indexByID(action.options);

@@ -25,7 +25,7 @@ class FinishSelectionCategoryTable extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.category == nextProps.category &&
-        this.props.category["fields"]["Selections"] == nextProps.category["fields"]["Selections"] &&
+        this.props.orderedSelectionIds == nextProps.orderedSelectionIds &&
         this.state.expanded == nextState.expanded) {
       return false;
     }

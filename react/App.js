@@ -149,38 +149,8 @@ class App extends React.Component {
     if (result["type"] == "SELECTION") {
       this.props.dispatch(ActionCreators.moveSelection(result.draggableId, source, destination));
     } else if (result["type"] == "OPTION") {
-      const [sourceCategory, sourceDroppableId] = source.droppableId.split("/");
-      const [destCategory, destDroppableId] = destination.droppableId.split("/");
-      const sourceSelections = Array.from(selectionsByCategory[sourceCategory]);
-
-      const sourceSelectionIndex = sourceSelections.findIndex(s => s["id"] == sourceDroppableId);
-      const sourceSelection = _.clone(sourceSelections[sourceSelectionIndex]);
-      const sourceOptions = Array.from(sourceSelection["Options"]);
-      let destSelections = sourceSelections;
-      let destSelectionIndex = sourceSelectionIndex;
-      let destSelection = sourceSelection;
-      let destOptions = sourceOptions;
-
-      if (sourceCategory != destCategory) {
-        destSelections = Array.from(selectionsByCategory[destCategory]);
-      }
-
-      if (sourceDroppableId != destDroppableId) {
-        destSelectionIndex = destSelections.findIndex(s => s["id"] == destDroppableId);
-        destSelection = _.clone(destSelections[destSelectionIndex]);
-        destOptions = Array.from(destSelection["Options"]);
-      }
-
-      const [removedOption] = sourceOptions.splice(source.index, 1);
-
-      sourceSelection["Options"] = sourceOptions;
-      sourceSelections[sourceSelectionIndex] = sourceSelection;
-      selectionsByCategory[sourceCategory] = sourceSelections;
-
-      destOptions.splice(destination.index, 0, removedOption);
-      destSelection["Options"] = destOptions;
-      destSelections[destSelectionIndex] = destSelection;
-      selectionsByCategory[destCategory] = destSelections;
+      const [random, optionId] = result.draggableId.split("/");
+      this.props.dispatch(ActionCreators.moveOption(optionId, source, destination));
     }
 
     this._isDragging = false;
