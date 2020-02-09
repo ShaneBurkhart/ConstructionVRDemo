@@ -131,7 +131,7 @@ get '/api/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @categories = project.categories.sort { |a,b| a["Order"] <=> b["Order"] }
+  @categories = project.categories
   @selections = project.selections
   @options = project.options
 
@@ -159,57 +159,42 @@ post '/api/project/:access_token/finishes/save' do
   updated_selections = []
   updated_options = []
 
-  categories = body["categories"]
-  categories.each_with_index do |category, i|
+  categories = body["categories"] || []
+  selections = body["selections"] || []
+  options = body["options"] || []
+
+  categories.each do |category|
     old_category = @categories[category["id"]]
-    category_fields = category["fields"]
-    category_fields["Order"] = i
-    category_fields["Selections"] = category["Selections"].map{ |s| s["id"] }
 
-    if old_category.is_different? category_fields
-      # Only update if is different than old
-      old_category.update(category_fields)
-      puts old_category.inspect
-      old_category.save
-      updated_categories << old_category
-    end
+    # Only update if is different than old
+    old_category.update(category["fields"])
+    old_category.save
+    updated_categories << old_category
+  end
 
-    selections = category["Selections"]
-    selections.each_with_index do |selection, j|
-      old_selection = @selections[selection["id"]]
-      selection_fields = selection["fields"]
-      selection_fields["Category"] = [category["id"]]
-      selection_fields["Order"] = j
-      selection_fields["Options"] = selection["Options"].map{ |o| o["id"] }
+  selections.each do |selection|
+    old_selection = @selections[selection["id"]]
 
-      if old_selection.is_different? selection_fields
-        # Only update if is different than old
-        old_selection.update(selection_fields)
-        old_selection.save
-        updated_selections << old_selection
-      end
+    # Only update if is different than old
+    old_selection.update(selection["fields"])
+    old_selection.save
+    updated_selections << old_selection
+  end
 
-      options = selection["Options"]
-      options.each_with_index do |option, k|
-        old_option = @options[option["id"]]
-        old_option = Finishes::Option.find(option["id"]) if old_option.nil?
-        option_fields = option["fields"]
+  options.each do |option|
+    old_option = @options[option["id"]]
 
-        if old_option.is_different?(option_fields) and !updated_options.include?(option["id"])
-          # Only update if is different than old
-          old_option.update(option_fields)
-          old_option.save
-          updated_options << old_option
-        end
-      end
-    end
+    # Only update if is different than old
+    old_option.update(option["fields"])
+    old_option.save
+    updated_options << old_option
   end
 
   content_type "application/json"
   {
-    updated_categories: updated_categories.map{ |c| [c.id, c] }.to_h,
-    updated_selections: updated_selections.map{ |s| [s.id, s] }.to_h,
-    updated_options: updated_options.map{ |o| [o.id, o] }.to_h,
+    categories: updated_categories,
+    selections: updated_selections,
+    options: updated_options,
   }.to_json
 end
 

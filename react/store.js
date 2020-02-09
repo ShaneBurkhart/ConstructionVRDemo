@@ -1,5 +1,6 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk';
+import ActionCreators from './action_creators';
 
 const _initialState = {
   isAdmin: false,
@@ -66,6 +67,7 @@ const reorderCategories = (state, action) => {
 
   (orderedCategoryIds || []).forEach((cId, i) => {
     state.categories[cId]["fields"]["Order"] = i;
+    state.categories[cId]["dirty"] = true;
   });
 
   return { ...computeState({ ...state }) };
@@ -106,13 +108,17 @@ const moveSelection = (state, action) => {
 
   // Update order of source category selections
   sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
+  sourceCategory["dirty"] = true;
   allSourceCategorySelections.forEach((id, i) => {
     state.selections[id]["fields"]["Order"] = i;
+    state.selections[id]["dirty"] = true;
   });
   // Update orders of dest category selections
   destCategory["fields"]["Selections"] = allDestCategorySelections;
+  destCategory["dirty"] = true;
   allDestCategorySelections.forEach((id, i) => {
     state.selections[id]["fields"]["Order"] = i;
+    state.selections[id]["dirty"] = true;
   });
 
   return { ...computeState({ ...state }) }
@@ -138,13 +144,17 @@ const moveOption = (state, action) => {
 
   // Update order of source selection options
   sourceSelection["fields"]["Options"] = allSourceSelectionOptions;
+  sourceSelection["dirty"] = true;
   allSourceSelectionOptions.forEach((id, i) => {
     state.options[id]["fields"]["Order"] = i;
+    state.options[id]["dirty"] = true;
   });
   // Update orders of dest selection options
   destSelection["fields"]["Options"] = allDestSelectionOptions;
+  destSelection["dirty"] = true;
   allDestSelectionOptions.forEach((id, i) => {
     state.options[id]["fields"]["Order"] = i;
+    state.options[id]["dirty"] = true;
   });
 
   return { ...computeState({ ...state }) }
@@ -155,19 +165,22 @@ const eachUpdate = (state, action) => {
   const selections = action.selections || [];
   const options = action.options || [];
 
+  const dirty = { "dirty": true };
+  if (action.noDirty) dirty["dirty"] = null;
+
   categories.forEach(c => {
     const cat = state.categories[c["id"]];
-    if (cat) state.categories[c["id"]] = { ...cat, ...c };
+    if (cat) state.categories[c["id"]] = { ...cat, ...c, ...dirty };
   });
 
   selections.forEach(s => {
     const selection = state.selections[s["id"]];
-    if (selection) state.selections[s["id"]] = { ...selection, ...s };
+    if (selection) state.selections[s["id"]] = { ...selection, ...s, ...dirty };
   });
 
   options.forEach(o => {
     const option = state.options[o["id"]];
-    if (option) state.options[o["id"]] = { ...option, ...o };
+    if (option) state.options[o["id"]] = { ...option, ...o, ...dirty };
   });
 
   return { ...computeState({ ...state }) };
@@ -202,11 +215,41 @@ const todos = (state = {}, action) => {
   }
 }
 
+const _getDirty = (obj) => {
+  return Object.values(obj).reduce((m, c) => {
+    if (c["dirty"] == true) m.push(c);
+    return m;
+  }, []);
+}
+
+const saveToServer = store => next => action => {
+  let result = next(action)
+  const newState = store.getState();
+
+  // Clean up anything that says it's dirty ;)
+  const diff = {
+    categories: _getDirty(newState.categories),
+    selections: _getDirty(newState.selections),
+    options: _getDirty(newState.options),
+  }
+
+  const count = Object.keys(diff).reduce((m,o) => {
+    m += diff[o].length; return m;
+  }, 0);
+
+  console.log(count);
+  console.log(diff);
+
+  if (count > 0) store.dispatch(ActionCreators.saveToServer(diff));
+
+  return result;
+}
+
 export default createStore(
   todos,
   _initialState,
   compose(
-    applyMiddleware(thunk),
+    applyMiddleware(thunk, saveToServer),
     window.__REDUX_DEVTOOLS_EXTENSION__ ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
   ),
 );

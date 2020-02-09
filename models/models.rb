@@ -115,6 +115,7 @@ module Finishes
 
     def update(fields)
       self["Name"] = fields["Name"]
+      self["Order"] = fields["Order"]
       self["Type"] = fields["Type"]
       self["Info"] = fields["Info"]
       self["URL"] = fields["URL"]
@@ -123,6 +124,7 @@ module Finishes
 
     def is_different?(fields)
       self["Name"] != fields["Name"] ||
+      self["Order"] != fields["Order"] ||
       self["Type"] != fields["Type"] ||
       self["Info"] != fields["Info"] ||
       self["URL"] != fields["URL"] ||

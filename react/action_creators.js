@@ -2,7 +2,7 @@ import $ from 'jquery';
 import Actions from './actions'
 import _  from 'underscore'
 
-export default {
+const ActionCreator = {
   load: (callback) => {
     return (dispatch) => {
       $.get("/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes", (data) => {
@@ -43,10 +43,12 @@ export default {
     }
   },
 
-  updateEach: (updates) => {
+  updateEach: (updates, noDirty = false) => {
+    console.log(noDirty);
     return {
       type: Actions.EACH_UPDATE,
-      ...updates
+      ...updates,
+      noDirty
     }
   },
 
@@ -54,16 +56,21 @@ export default {
     $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
   },
 
-  save: (categories, callback) => {
-    console.log("Saving...", categories);
+  saveToServer: (diff) => {
+    console.log('save to server');
+    return (dispatch) => {
+      console.log('save to server');
 
-    $.post({
-      url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({ categories: categories }),
-      dataType: "json",
-      success: callback
-    });
+      $.post({
+        url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({ ...diff }),
+        dataType: "json",
+        success: (data) => {
+          dispatch(ActionCreator.updateEach(data, true));
+        }
+      });
+    };
   },
 
   presignedURL: (file, callback) => {
@@ -91,4 +98,6 @@ export default {
       success: callback
     });
   }
-}
+};
+
+export default ActionCreator;
