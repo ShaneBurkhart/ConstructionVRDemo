@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
 
 import FinishOptionsContainer from './FinishOptionsContainer';
@@ -37,23 +38,17 @@ class FinishSelection extends React.Component {
     return this.markdownConverter.makeHtml(m || "");
   }
 
-  onClickOption = (option) => {
-    const { selection, onClickOption } = this.props;
-    if (onClickOption) onClickOption(option, selection);
-  }
-
   onClickLinkOption = () => {
-    const { selection, onClickLinkOption } = this.props;
-    if (onClickLinkOption) onClickLinkOption(selection);
+    const { selectionId } = this.props;
+    this.props.dispatch(ActionCreators.updateModal({ linkSelectionId: selectionId }));
   }
 
-  onClickUnlinkOption = (option) => {
-    const { selection, onClickUnlinkOption } = this.props;
-    const newSelection = _.clone(selection);
+  onUnlinkOption = (optionId) => {
+    const { selection } = this.props;
 
-    newSelection["Options"] = (newSelection["Options"] || [])
-      .filter(o => o["id"] != option["id"]);
-    if (onClickUnlinkOption) onClickUnlinkOption(newSelection);
+    selection["fields"]["Options"] = (selection["fields"]["Options"] || [])
+      .filter(o => o != optionId);
+    this.props.dispatch(ActionCreators.updateEach({ selections: [selection] }));
   }
 
   onClickTrashSelection = () => {
@@ -61,16 +56,16 @@ class FinishSelection extends React.Component {
     if (onClickTrashSelection) onClickTrashSelection(selection);
   }
 
+  onClickNewOption = () => {
+    const { selectionId } = this.props;
+    this.props.dispatch(ActionCreators.updateModal({ optionId: "new", selectionId }));
+  }
+
   onChangeFor(attr) {
-    const { selection, onSaveSelection } = this.props;
+    const { selection } = this.props;
     return val => {
-      if (onSaveSelection) {
-        const newSelection = _.clone(selection);
-        const newFields = _.clone(selection["fields"]);
-        newFields[attr] = val;
-        newSelection["fields"] = newFields;
-        onSaveSelection(newFields["Category"][0], newSelection);
-      }
+      selection["fields"][attr] = val;
+      this.props.dispatch(ActionCreators.updateEach({ selections: [selection] }));
     }
   }
 
@@ -111,7 +106,7 @@ class FinishSelection extends React.Component {
   }
 
   render() {
-    const { selection, orderedOptionIds, index, categoryId, onClick } = this.props;
+    const { selection, orderedOptionIds, index, onClick } = this.props;
     const isAdmin = this.context;
 
     const selectionFields = selection["fields"];
@@ -141,11 +136,11 @@ class FinishSelection extends React.Component {
               <div className="table-column two-third options-cell">
                 <FinishOptionsContainer
                   draggable
-                  droppableId={`${categoryId}/${selection["id"]}`}
+                  droppableId={`${selection["fields"]["Category"][0]}/${selection["id"]}`}
                   orderedOptionIds={orderedOptionIds}
-                  onSelectOption={this.onClickOption}
+                  onNewOption={this.onClickNewOption}
                   onLinkOption={this.onClickLinkOption}
-                  onUnlinkOption={this.onClickUnlinkOption}
+                  onUnlinkOption={this.onUnlinkOption}
                 />
               </div>
             </div>

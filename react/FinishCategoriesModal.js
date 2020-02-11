@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import { Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import ActionCreators from './action_creators';
 import DragDropModal from './DragDropModal';
 import FinishCategoryModalCategory from './FinishCategoryModalCategory';
 import AdminControls from './AdminControls';
@@ -34,9 +35,13 @@ class FinishCategoriesModal extends DragDropModal {
   }
 
   onSave = () => {
-    const { onSave } = this.props;
     const { orderedCategoryIds } = this.state;
-    onSave(orderedCategoryIds);
+    this.props.dispatch(ActionCreators.reorderCategories(orderedCategoryIds));
+    this.onClose();
+  }
+
+  onClose = () => {
+    this.props.dispatch(ActionCreators.updateModal({ reorderCategories: null }));
   }
 
   getDraggableStyle = (draggableStyle, isDragging) => {
@@ -44,7 +49,6 @@ class FinishCategoriesModal extends DragDropModal {
   }
 
   render() {
-    const { onClose } = this.props;
     const { orderedCategoryIds, selectedCategory } = this.state;
 
     return (
@@ -53,7 +57,7 @@ class FinishCategoriesModal extends DragDropModal {
           <Modal.Header>
             Manage Categories
             <span style={{ float: "right" }}>
-              <Icon name="close" onClick={onClose} />
+              <Icon name="close" onClick={this.onClose} />
             </span>
           </Modal.Header>
           <Modal.Content>
@@ -81,7 +85,7 @@ class FinishCategoriesModal extends DragDropModal {
           <Modal.Actions>
               <Button
                 negative
-                onClick={onClose}
+                onClick={this.onClose}
               >Cancel</Button>
               <Button
                 positive
@@ -97,4 +101,7 @@ class FinishCategoriesModal extends DragDropModal {
   }
 }
 
-export default connect(null, null)(FinishCategoriesModal);
+export default connect((reduxState, props) => {
+  return {
+  };
+}, null)(FinishCategoriesModal);

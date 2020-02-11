@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import ActionCreators from './action_creators';
 import AdminControls from './AdminControls';
 
 import './FinishOption.css';
@@ -22,22 +23,27 @@ class FinishOption extends React.Component {
   }
 
   onClick = (e) => {
-    const { option, onClick } = this.props;
+    const { option } = this.props;
     e.stopPropagation();
-    if (onClick) onClick(option);
+
+    this.props.dispatch(ActionCreators.updateModal({
+      optionId: option["id"],
+      selectionId: option["fields"]["Selections"][0],
+    }));
   }
 
   onClickUnlink = (e) => {
-    const { option, onClickUnlink } = this.props;
+    const { optionId, onClickUnlink } = this.props;
     e.stopPropagation();
-    if (onClickUnlink) onClickUnlink(option);
+    if (onClickUnlink) onClickUnlink(optionId);
   }
 
   render() {
-    const { option, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
+    const { option, optionId, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
     const optionFields = option["fields"];
     const images = (optionFields["Image"] || []).slice(0, 2);
     const classNames = ["finish-option"];
+    const isNewOption = optionId.startsWith("new");
     if (short) classNames.push("short");
 
     if (draggable) {
@@ -46,9 +52,11 @@ class FinishOption extends React.Component {
           draggableId={draggableId}
           type="OPTION"
           index={index}
+          isDragDisabled={isNewOption}
         >
           {(provided, snapshot) => {
             let draggableStyle = provided.draggableProps["style"];
+            const newStyle = { backgroundColor: "#e0e0e0", cursor: "not-allowed" };
 
             if (getDraggableStyleOverride) {
               draggableStyle = getDraggableStyleOverride(
@@ -61,13 +69,13 @@ class FinishOption extends React.Component {
                 className={classNames.join(" ")}
                 ref={provided.innerRef}
                 {...provided.draggableProps}
-                style={draggableStyle}
-                onClick={this.onClick}
+                style={{ ...draggableStyle, ...(isNewOption ? newStyle : {}) }}
+                onClick={isNewOption ? null : this.onClick}
               >
                 <div className="half" style={{ display: "flex", overflow: "hidden" }}>
                   <AdminControls
                     dragHandleProps={provided.dragHandleProps}
-                    onClickUnlink={this.onClickUnlink}
+                    onClickTrash={isNewOption ? null : this.onClickUnlink}
                   />
                   <div>
                     <p className="cell-heading">{optionFields["Name"]}</p>

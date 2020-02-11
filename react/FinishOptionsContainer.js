@@ -14,15 +14,6 @@ class FinishOptionsContainer extends React.Component {
     this._draggableId = Math.random().toString(36).substring(2, 15);
   }
 
-  onNewOption = () => {
-    const { onSelectOption } = this.props;
-    if (onSelectOption) {
-      onSelectOption({
-        "id": "new" + Math.random().toString(36).substring(2, 15),
-      });
-    }
-  }
-
   onLinkOption = () => {
     const { onLinkOption } = this.props;
     if (onLinkOption) onLinkOption();
@@ -30,7 +21,7 @@ class FinishOptionsContainer extends React.Component {
 
   render() {
     const { orderedOptionIds, onSelectOption, onUnlinkOption, draggable, droppableId,
-      getDraggableStyleOverride } = this.props;
+      getDraggableStyleOverride, onNewOption } = this.props;
 
     if (draggable) {
       return (
@@ -51,7 +42,7 @@ class FinishOptionsContainer extends React.Component {
                     key={optionId}
                     optionId={optionId}
                     onClick={_ => { if (onSelectOption) onSelectOption(option) }}
-                    onClickUnlink={_ => { if (onUnlinkOption) onUnlinkOption(option) }}
+                    onClickUnlink={onUnlinkOption}
                   />
                 ))}
                 {provided.placeholder}
@@ -59,7 +50,7 @@ class FinishOptionsContainer extends React.Component {
             )}
           </Droppable>
           <NewFinishOptionPlaceholder
-            onClickNew={this.onNewOption}
+            onClickNew={onNewOption}
             onClickLink={this.onLinkOption}
           />
         </div>

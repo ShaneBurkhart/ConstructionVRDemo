@@ -5,6 +5,7 @@ import ActionCreators from './action_creators';
 const _initialState = {
   isAdmin: false,
   filter: "All",
+  modals: {},
 };
 
 const indexByID = (arr) => {
@@ -160,30 +161,53 @@ const moveOption = (state, action) => {
   return { ...computeState({ ...state }) }
 }
 
+const removeNew = (state, action) => {
+  // Remove new ids
+  Object.keys(state.categories).forEach(o => { if (o.startsWith("new")) delete state.categories[o]; });
+  Object.keys(state.selections).forEach(o => { if (o.startsWith("new")) delete state.selections[o]; });
+  Object.keys(state.options).forEach(o => { if (o.startsWith("new")) delete state.options[o]; });
+  return { ...state };
+};
+
 const eachUpdate = (state, action) => {
   const categories = action.categories || [];
   const selections = action.selections || [];
   const options = action.options || [];
 
   const dirty = { "dirty": true };
-  if (action.noDirty) dirty["dirty"] = null;
+  if (action.serverUpdate) {
+    dirty["dirty"] = null;
+    state = removeNew(state);
+  }
 
   categories.forEach(c => {
     const cat = state.categories[c["id"]];
-    if (cat) state.categories[c["id"]] = { ...cat, ...c, ...dirty };
+    if (cat) {
+      state.categories[c["id"]] = { ...cat, ...c, ...dirty };
+    } else {
+      state.categories[c["id"]] = { ...c, ...dirty };
+    }
   });
 
   selections.forEach(s => {
     const selection = state.selections[s["id"]];
-    if (selection) state.selections[s["id"]] = { ...selection, ...s, ...dirty };
+    if (selection) {
+      state.selections[s["id"]] = { ...selection, ...s, ...dirty };
+    } else {
+      state.selections[s["id"]] = { ...s, ...dirty };
+    }
   });
 
   options.forEach(o => {
     const option = state.options[o["id"]];
-    if (option) state.options[o["id"]] = { ...option, ...o, ...dirty };
+    if (option) {
+      state.options[o["id"]] = { ...option, ...o, ...dirty };
+    } else {
+      state.options[o["id"]] = { ...o, ...dirty };
+    }
   });
 
-  return { ...computeState({ ...state }) };
+  return { ...state, ...computeState({ ...state }) };
 }
 
 const todos = (state = {}, action) => {
@@ -198,6 +222,10 @@ const todos = (state = {}, action) => {
       return moveSelection(state, action);
     case 'MOVE_OPTION':
       return moveOption(state, action);
+    case 'UPDATE_MODAL':
+      return { ...state, modals: { ...state.modals, ...action.modals }};
+    case 'SERVER_UPDATE':
+      return eachUpdate(removeNew(state, action), action);
     case 'EACH_UPDATE':
       return eachUpdate(state, action);
     case 'FULL_UPDATE':
@@ -207,6 +235,7 @@ const todos = (state = {}, action) => {
       const categories = indexByID(action.categories);
 
       return {
+        ...state,
         ...computeState({ filter, options, selections, categories }),
         isAdmin: action.admin_mode,
       }
@@ -225,6 +254,7 @@ const _getDirty = (obj) => {
 const saveToServer = store => next => action => {
   let result = next(action)
   const newState = store.getState();
+  console.log(action.type);
 
   // Clean up anything that says it's dirty ;)
   const diff = {
@@ -237,7 +267,6 @@ const saveToServer = store => next => action => {
     m += diff[o].length; return m;
   }, 0);
 
-  console.log(count);
   console.log(diff);
 
   if (count > 0) store.dispatch(ActionCreators.saveToServer(diff));

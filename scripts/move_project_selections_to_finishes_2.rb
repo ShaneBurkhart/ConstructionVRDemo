@@ -2,18 +2,18 @@ require "./models/models.rb"
 require "./models/old_models.rb"
 
 PROJECTS = [
-  "430 Walnut",
-  "226 Lockwood",
-  "Warrenville",
+  #"430 Walnut",
+  #"226 Lockwood",
+  #"Warrenville",
   "Chroma II",
-  "Olivette",
-  "Pine Lawn Dental",
-  "S1 - Coastal Gray",
-  "S2 - Classy Timeless",
-  "S3 - Taupe & Black",
-  "S4 - Black & White & Gold",
-  "S5 - Modern Farmhouse",
-  "S6 - Glam",
+  #"Olivette",
+  #"Pine Lawn Dental",
+  #"S1 - Coastal Gray",
+  #"S2 - Classy Timeless",
+  #"S3 - Taupe & Black",
+  #"S4 - Black & White & Gold",
+  #"S5 - Modern Farmhouse",
+  #"S6 - Glam",
 ]
 
 PROJECTS.each do |p|
@@ -30,27 +30,43 @@ PROJECTS.each do |p|
       "Order": i,
     })
 
+    j = 0
     selections.each do |s|
-      data = {
+      new_selection = Finishes::Selection.create({
         "Category": [ c.id ],
         "Location": s["Location"],
         "Type": s["Type"],
         "Room": s["Room"],
         "Notes": s["Notes"],
-      }
+        "Order": j,
+      })
 
       if !s["Options"].nil?
         options = []
+        k = 0
         s.finish_options.each do |fo|
-          filter = "'#{fo.id}' = {Old Record ID}"
-          option = Finishes::Option.all(filter: filter).first
-          options << option.id if !option.nil?
-        end
+          data = {
+            "Name": fo["Name"],
+            "Type": fo["Type"],
+            "URL": fo["URL"],
+            "Info": fo["Info"],
+            "Selections": [ new_selection.id ],
+            "Unit Price": fo["Unit Price"],
+            "SketchUp Model URL": fo["SketchUp Model URL"],
+            "Old Record ID": fo.id,
+            "Order": k,
+          }
 
-        data["Options"] = options
+          data["Image"] = fo["Image"].map{ |i| { "url": i["url"] } } unless fo["Image"].nil?
+
+          option = Finishes::Option.create(data)
+          options << option.id
+
+          k += 1
+        end
       end
 
-      Finishes::Selection.create(data)
+      j += 1
 
       sleep(1)
     end

@@ -2,6 +2,25 @@ import $ from 'jquery';
 import Actions from './actions'
 import _  from 'underscore'
 
+let _isSaving = false;
+
+const _saveToServer = (dispatch, diff) => {
+  if (_isSaving) return;
+  _isSaving = true;
+  console.log('sending to server...');
+
+  $.post({
+    url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify({ ...diff }),
+    dataType: "json",
+    success: (data) => {
+      _isSaving = false;
+      dispatch(ActionCreator.updateEach(data, true));
+    }
+  });
+};
+
 const ActionCreator = {
   load: (callback) => {
     return (dispatch) => {
@@ -43,12 +62,16 @@ const ActionCreator = {
     }
   },
 
-  updateEach: (updates, noDirty = false) => {
-    console.log(noDirty);
+  updateModal: (modals) => {
+    return { type: Actions.UPDATE_MODAL, modals };
+  },
+
+  updateEach: (updates, serverUpdate = false) => {
+    if (serverUpdate) console.log("SERVER_UPDATE");
     return {
       type: Actions.EACH_UPDATE,
       ...updates,
-      noDirty
+      serverUpdate,
     }
   },
 
@@ -57,20 +80,8 @@ const ActionCreator = {
   },
 
   saveToServer: (diff) => {
-    console.log('save to server');
-    return (dispatch) => {
-      console.log('save to server');
-
-      $.post({
-        url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
-        contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({ ...diff }),
-        dataType: "json",
-        success: (data) => {
-          dispatch(ActionCreator.updateEach(data, true));
-        }
-      });
-    };
+    console.log('saveToServer()');
+    return (dispatch) => { _saveToServer(dispatch, diff) };
   },
 
   presignedURL: (file, callback) => {

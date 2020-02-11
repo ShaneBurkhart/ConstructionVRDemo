@@ -39,9 +39,6 @@ class App extends React.Component {
     this.state = {
       isLoading: false,
       isSaving: false,
-      categoriesModal: null,
-      selectionModal: null,
-      optionModal: null,
       linkOptionToSelectionModal: null,
     }
   }
@@ -77,8 +74,10 @@ class App extends React.Component {
     this._isDragging = true;
   }
 
-  handleOpenCategoryModalFor = (category) => {
-    return _ => this.setState({ categoriesModal: category });
+  handleOpenCategoryModalFor = (categoryId) => {
+    return _ => this.props.dispatch(ActionCreators.updateModal({
+      reorderCategories: categoryId,
+    }));
   }
 
   onDragEndSelection = (result) => {
@@ -97,101 +96,6 @@ class App extends React.Component {
     this._isDragging = false;
   }
 
-  onReorderCategories = (orderedCategoryIds) => {
-    this.props.dispatch(ActionCreators.reorderCategories(orderedCategoryIds));
-    this.setState({ categoriesModal: null });
-  }
-
-  onSaveCategory = (category) => {
-    const { categories } = this.state;
-    const { currentFilter } = this.props;
-    const catIndex = categories.findIndex(c => c["id"] == category["id"]);
-    if (catIndex < 0) return;
-
-    console.log(category);
-    const newCategories = Array.from(categories);
-    newCategories[catIndex] = _.clone(category);
-    const categoriesState = this._getCategoriesState(newCategories, currentFilter);
-
-    this.setState({ ...categoriesState });
-  }
-
-  onSaveSelection = (originalCategoryId, selection) => {
-    const { selectionsByCategory } = this.state;
-    const { currentFilter } = this.props;
-    const sourceSelectionsForCat = Array.from(selectionsByCategory[originalCategoryId]);
-    const selectionId = selection["id"];
-    if (!sourceSelectionsForCat) return;
-
-    const selectionIndex = sourceSelectionsForCat.findIndex(s => s["id"] == selectionId);
-    const destCategory = (selection["fields"] || {})["Category"][0];
-    let destSelectionsForCat = selectionsByCategory[destCategory];
-
-    if (originalCategoryId == destCategory) {
-      if (selectionIndex == -1) {
-        // If source selection not found, add to end of dest selections.
-        // Not typical path. Shouldn't happen really.
-        destSelectionsForCat.push(selection);
-      } else {
-        destSelectionsForCat[selectionIndex] = selection;
-      }
-    } else {
-      if (selectionIndex != -1) {
-        // Remove selection from source if found index
-        sourceSelectionsForCat.splice(selectionIndex, 1);
-      }
-
-      // Append selection to end of destination.
-      destSelectionsForCat = Array.from(selectionsByCategory[destCategory]);
-      destSelectionsForCat.push(selection);
-    }
-
-    selectionsByCategory[originalCategoryId] = sourceSelectionsForCat;
-    selectionsByCategory[destCategory] = destSelectionsForCat;
-
-    const { categories } = this.state;
-
-    // Set updated selections to categories in state and reset
-    const newCategories = Object.keys(selectionsByCategory).map(categoryID => {
-      const selections = selectionsByCategory[categoryID];
-      const category = _.clone(categories.find(c => c.id == categoryID));
-      category["Selections"] = selections;
-      return category;
-    });
-
-    this.setState({
-      linkOptionToSelectionModal: null,
-      selectionModal: null,
-      optionModal: null,
-      ...this._getCategoriesState(newCategories, currentFilter)
-    });
-  }
-
-  onSaveOption = (optionId, optionFields) => {
-    const { selectionModal, optionModal } = this.props;
-    const optionIdx = selectionModal["Options"].findIndex(o => optionId == o["id"]);
-    if (optionIdx < 0) return;
-
-    const newOption = _.extend({}, optionModal, { "fields": optionFields });
-    selectionModal["Options"][optionIdx] = newOption;
-
-    this.onSaveSelection(selectionModal["fields"]["Category"][0], selectionModal);
-  }
-
-  onUnlinkOption = (selection) => {
-    this.onSaveSelection(selection["fields"]["Category"][0], selection);
-  }
-
-  onClickOption = (option, selection) => {
-    if (this._isDragging) return;
-    this.setState({ selectionModal: selection, optionModal: option });
-  }
-
-  onClickLinkOption = (selection) => {
-    if (this._isDragging) return;
-    this.setState({ linkOptionToSelectionModal: selection });
-  }
-
   renderCategorySections() {
     const { orderedCategoryIds } = this.props;
     const { filteredSelectionsByCategory } = this.state;
@@ -205,54 +109,46 @@ class App extends React.Component {
           key={categoryId}
           categoryId={categoryId}
           onClickOption={this.onClickOption}
-          onClickLinkOption={this.onClickLinkOption}
           onClickEditCategory={this.handleOpenCategoryModalFor(key)}
-          onUnlinkOption={this.onUnlinkOption}
         />
       )
     });
   }
 
   renderCategoriesModal() {
-    const { orderedCategoryIds } = this.props;
-    const { categoriesModal } = this.state;
-    if (!categoriesModal) return "";
+    const { orderedCategoryIds, reorderCategoriesModal } = this.props;
+    if (!reorderCategoriesModal) return "";
 
     return (
       <FinishCategoriesModal
-        key={categoriesModal}
+        key={reorderCategoriesModal}
         orderedCategoryIds={orderedCategoryIds}
-        selectedCategory={categoriesModal}
-        onClose={_ => this.setState({ categoriesModal: null }) }
-        onSave={this.onReorderCategories}
+        selectedCategory={reorderCategoriesModal}
       />
     );
   }
 
   renderOptionModal() {
-    const { optionModal, categories } = this.state;
-    if (!optionModal) return "";
+    const { optionIdModal, selectionIdModal } = this.props;
+    if (!optionIdModal || !selectionIdModal) return "";
 
     return (
       <FinishOptionModal
-        isNew={optionModal["id"].startsWith("new")}
-        option={optionModal}
-        onClose={_ => this.setState({ optionModal: null }) }
-        onSave={this.onSaveOption}
+        key={optionIdModal}
+        optionId={optionIdModal}
+        selectionId={selectionIdModal}
       />
     );
   }
 
   renderLinkOptionToSelectionModal() {
-    const { linkOptionToSelectionModal } = this.state;
-    if (!linkOptionToSelectionModal) return "";
+    const { linkSelectionIdModal } = this.props;
+    if (!linkSelectionIdModal) return "";
 
     return (
       <FinishSelectionLinkOptionModal
-        key={linkOptionToSelectionModal["id"]}
-        selection={linkOptionToSelectionModal}
-        onClose={_ => this.setState({ linkOptionToSelectionModal: null }) }
-        onSave={this.onSaveSelection}
+        key={linkSelectionIdModal}
+        selectionId={linkSelectionIdModal}
       />
     );
   }
@@ -304,5 +200,9 @@ export default connect((reduxState, props) => {
     orderedCategoryIds: reduxState.orderedCategoryIds || [],
     currentFilter: reduxState.filter,
     selectionFilters: reduxState.selectionFilters || [],
+    optionIdModal: reduxState.modals.optionId,
+    selectionIdModal: reduxState.modals.selectionId,
+    linkSelectionIdModal: reduxState.modals.linkSelectionId,
+    reorderCategoriesModal: reduxState.modals.reorderCategories,
   };
 }, null)(App);

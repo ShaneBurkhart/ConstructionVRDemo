@@ -1,10 +1,11 @@
 import React from 'react';
 import * as _ from 'underscore';
+import { connect } from 'react-redux'
 import { Form, Input, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 
-import FinishOption from "./FinishOption"
+import FinishOptionSearchResult from "./FinishOptionSearchResult"
 
 class FinishSelectionLinkOptionModal extends React.Component {
   constructor(props) {
@@ -13,6 +14,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
     const selection = props.selection || {};
 
     this._originalCategory = (selection["fields"] || {})["Category"][0];
+    this.newId = "new" + Math.random().toString(36).substring(2, 15);
 
     this._handleSearch = e => {
       const query = e.target.value;
@@ -56,17 +58,24 @@ class FinishSelectionLinkOptionModal extends React.Component {
   }
 
   onSave = () => {
-    const { onSave, onClose } = this.props;
     const { selection, selectedOption } = this.state;
-    const newOptions = selection["Options"] || [];
+    const newSelectionFields = selection["fields"];
+    const newOptions = newSelectionFields["Options"] || [];
+    const newOption = { ...selectedOption, "id": this.newId };
 
-    newOptions.push(selectedOption);
+    newOption["fields"]["Selections"] = [ selection["id"] ];
+    newOptions.push(newOption["id"]);
+    newSelectionFields["Options"] = newOptions;
 
-    onSave(this._originalCategory, {
-      "id": selection["id"],
-      "fields": selection["fields"],
-      "Options": newOptions
-    });
+    this.props.dispatch(ActionCreators.updateEach({
+      selections: [{ ...selection, "fields": newSelectionFields }],
+      options: [newOption],
+    }));
+    this.onClose();
+  }
+
+  onClose = () => {
+    this.props.dispatch(ActionCreators.updateModal({ linkSelectionId: null }));
   }
 
   renderLoading() {
@@ -81,7 +90,6 @@ class FinishSelectionLinkOptionModal extends React.Component {
   }
 
   render() {
-    const { onClose } = this.props;
     const { selection, options, searchQuery, selectedOption } = this.state;
 
     return (
@@ -94,12 +102,12 @@ class FinishSelectionLinkOptionModal extends React.Component {
             </div>
           </div>
           <span style={{ float: "right" }}>
-            <Icon name="close" onClick={onClose} />
+            <Icon name="close" onClick={this.onClose} />
           </span>
         </Modal.Header>
         <Modal.Content scrolling style={{ height: "100vh", position: "relative" }}>
           {options.map(o => (
-            <FinishOption
+            <FinishOptionSearchResult
               short
               key={o["id"]}
               option={o}
@@ -116,7 +124,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
           </div>
           <Button
             negative
-            onClick={onClose}
+            onClick={this.onClose}
           >Cancel</Button>
           <Button
             positive
@@ -131,4 +139,8 @@ class FinishSelectionLinkOptionModal extends React.Component {
   }
 }
 
-export default FinishSelectionLinkOptionModal;
+export default connect((reduxState, props) => {
+  return {
+    selection: reduxState.selections[props.selectionId],
+  };
+}, null)(FinishSelectionLinkOptionModal);

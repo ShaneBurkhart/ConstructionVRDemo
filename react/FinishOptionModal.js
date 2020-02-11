@@ -1,5 +1,6 @@
 import React from 'react';
 import * as _ from 'underscore';
+import { connect } from 'react-redux'
 import { Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
@@ -15,22 +16,23 @@ class FinishOptionModal extends React.Component {
     const option = props.option || {};
     const newId = "new" + Math.random().toString(36).substring(2, 15);
 
+    this.isNew = (props.optionId || "").startsWith("new");
+
     this.state = {
-      optionId: option["id"] || newId,
+      optionId: this.isNew ? newId : option["id"],
       optionFields: _.clone(option["fields"] || {}),
     };
   }
 
   onDrop = (acceptedFiles) => {
     const { optionFields } = this.state;
-    if (optionFields["Image"].length >= 2) return;
+    if ((optionFields["Image"] || []).length >= 2) return;
 
     (acceptedFiles || []).forEach(file => {
-      console.log(file);
       ActionCreators.presignedURL(file, (data) => {
         ActionCreators.uploadFile(file, data.presignedURL, () => {
           const newFields = _.clone(this.state.optionFields);
-          const newImages = Array.from(newFields["Image"]);
+          const newImages = Array.from(newFields["Image"] || []);
 
           newImages.push({ url: data.awsURL });
           newFields["Image"] = newImages;
@@ -50,13 +52,35 @@ class FinishOptionModal extends React.Component {
   }
 
   onSave = () => {
-    const { onSave } = this.props;
+    const { option, selection } = this.props;
     const { optionId, optionFields } = this.state;
-    onSave(optionId, optionFields);
+    const updates = {};
+
+    optionFields["Selections"] = [ selection["id"] ];
+    const newOption = { ...option, "id": optionId, "fields": optionFields };
+    updates.options = [ newOption ];
+
+    if (this.isNew) {
+      // Update selection too.
+      const newSelectionFields = selection["fields"];
+      const newSelectionOptions = newSelectionFields["Options"] || [];
+
+      newSelectionOptions.push(optionId);
+      newSelectionFields["Options"] = newSelectionOptions;
+      newOption["fields"]["Order"] = newSelectionOptions.length;
+
+      updates.selections = [ { ...selection, "fields": newSelectionFields } ];
+    }
+
+    this.props.dispatch(ActionCreators.updateEach(updates));
+    this.onClose();
+  }
+
+  onClose = () => {
+    this.props.dispatch(ActionCreators.updateModal({ optionId: null }));
   }
 
   render() {
-    const { onClose } = this.props;
     const { optionFields } = this.state;
     const images = optionFields["Image"] || [];
 
@@ -64,7 +88,7 @@ class FinishOptionModal extends React.Component {
       <Modal open={true} className="finish-option-modal">
         <Modal.Content>
           <div style={{ textAlign: "right" }}>
-            <Icon name="close" onClick={onClose} />
+            <Icon name="close" onClick={this.onClose} />
           </div>
           <Form>
             <Form.Group widths="equal">
@@ -115,7 +139,7 @@ class FinishOptionModal extends React.Component {
         <Modal.Actions>
             <Button
               negative
-              onClick={onClose}
+              onClick={this.onClose}
             >Cancel</Button>
             <Button
               positive
@@ -130,5 +154,10 @@ class FinishOptionModal extends React.Component {
   }
 }
 
-export default FinishOptionModal;
+export default connect((reduxState, props) => {
+  return {
+    option: reduxState.options[props.optionId],
+    selection: reduxState.selections[props.selectionId],
+  };
+}, null)(FinishOptionModal);
 

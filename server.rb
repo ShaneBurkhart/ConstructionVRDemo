@@ -151,10 +151,6 @@ post '/api/project/:access_token/finishes/save' do
   return "Not found" if project.nil?
   body = JSON.parse(request.body.read)
 
-  @categories = project.categories.index_by { |c| c.id }
-  @selections = project.selections.index_by { |s| s.id }
-  @options = project.options.index_by { |o| o.id }
-
   updated_categories = []
   updated_selections = []
   updated_options = []
@@ -163,31 +159,69 @@ post '/api/project/:access_token/finishes/save' do
   selections = body["selections"] || []
   options = body["options"] || []
 
+  # All keys should be unique. Keep track of temp ids to new objects
+  new_models = {}
+
+  @options = project.options.index_by { |o| o.id }
+  options.each do |option|
+    if option["id"].starts_with?("new")
+      option_fields = option["fields"].select{ |k,v|
+        ["Name", "Selections", "Type", "Other Type Value", "Image", "Info",
+             "URL", "Unit Price", "Order"].include?(k)
+      }
+      option_fields["Image"] = (option_fields["Image"] || []).map{ |i| { url: i["url"] }}
+
+      new_option = Finishes::Option.create(option_fields)
+      new_models[option["id"]] = new_option
+      updated_options << new_option
+    else
+      old_option = @options[option["id"]]
+
+      # Only update if is different than old
+      old_option.update(option["fields"])
+      old_option.save
+      updated_options << old_option
+    end
+  end
+
+  @selections = project.selections.index_by { |s| s.id }
+  selections.each do |selection|
+    if selection["id"].starts_with?("new")
+      selection_fields = selection["fields"].select{ |k,v|
+        ["Type", "Category", "Location", "Room", "Notes", "Order"].include?(k)
+      }
+
+      new_selection = Finishes::Selection.create(selection_fields)
+      new_models[selection["id"]] = new_selection
+      updated_selections << new_selection
+    else
+      old_selection = @selections[selection["id"]]
+
+      # If the option ID is new, replace with option ID we just saved
+      selection["fields"]["Options"] = (selection["fields"]["Options"] || []).map { |o|
+        o.starts_with?("new") ? new_models[o].id : o
+      }
+
+      # Only update if is different than old
+      old_selection.update(selection["fields"])
+      old_selection.save
+      updated_selections << old_selection
+    end
+  end
+
+  @categories = project.categories.index_by { |c| c.id }
   categories.each do |category|
     old_category = @categories[category["id"]]
+
+    # If the option ID is new, replace with option ID we just saved
+    category["fields"]["Selections"] = (category["fields"]["Selections"] || []).map { |s|
+      s.starts_with?("new") ? new_models[s].id : s
+    }
 
     # Only update if is different than old
     old_category.update(category["fields"])
     old_category.save
     updated_categories << old_category
-  end
-
-  selections.each do |selection|
-    old_selection = @selections[selection["id"]]
-
-    # Only update if is different than old
-    old_selection.update(selection["fields"])
-    old_selection.save
-    updated_selections << old_selection
-  end
-
-  options.each do |option|
-    old_option = @options[option["id"]]
-
-    # Only update if is different than old
-    old_option.update(option["fields"])
-    old_option.save
-    updated_options << old_option
   end
 
   content_type "application/json"
