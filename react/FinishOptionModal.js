@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { connect } from 'react-redux'
-import { Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import { Popup, Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import StyledDropzone from "./StyledDropzone"
@@ -71,8 +71,8 @@ class FinishOptionModal extends React.Component {
     }
   }
 
-  onSave = () => {
-    const { option, selection } = this.props;
+  onSave = (saveAll = false) => {
+    const { option, selection, optionsWithSameName } = this.props;
     const { optionId, optionFields } = this.state;
     const updates = {};
 
@@ -92,6 +92,19 @@ class FinishOptionModal extends React.Component {
       updates.selections = [ { ...selection, "fields": newSelectionFields } ];
     }
 
+    if (!this.isNew && saveAll && optionsWithSameName &&
+              optionsWithSameName.length > 0) {
+      // Add similar options to the updates
+      optionsWithSameName.forEach(o => {
+        const fields = {
+          ...o["fields"], ...optionFields,
+          "Selections": o["fields"]["Selections"],
+          "Image": (optionFields["Image"] || []).map(i=>({ "url": i["url"] })),
+        };
+        updates.options.push({ ...o, "fields": fields });
+      });
+    }
+
     this.props.dispatch(ActionCreators.updateEach(updates));
     this.onClose();
   }
@@ -101,6 +114,7 @@ class FinishOptionModal extends React.Component {
   }
 
   render() {
+    const { optionsWithSameName, option } = this.props;
     const { optionFields, linkUpload } = this.state;
     const images = optionFields["Image"] || [];
 
@@ -156,7 +170,7 @@ class FinishOptionModal extends React.Component {
               </Grid>
             </div>
             <Form.Input
-              label="URL"
+              label="Product URL"
               placeholder="http://...."
               value={optionFields["URL"] || ""}
               onChange={this.onChangeFor("URL")}
@@ -174,13 +188,36 @@ class FinishOptionModal extends React.Component {
               negative
               onClick={this.onClose}
             >Cancel</Button>
-            <Button
-              positive
-              icon='checkmark'
-              labelPosition='right'
-              content='Save'
-              onClick={this.onSave}
-            />
+            {!this.isNew && (optionsWithSameName || []).length > 0 ?
+              <Popup
+                on="click"
+                content={
+                  <div>
+                    <p className="bold">
+                      Do you want to make these changes to all options named "{option["fields"]["Name"]}" in this project?
+                    </p>
+                    <Button color="blue" onClick={_ => this.onSave(false)}>No</Button>
+                    <Button color="green" onClick={_ => this.onSave(true)}>Yes</Button>
+                  </div>
+                }
+                trigger={
+                  <Button
+                    positive
+                    icon='checkmark'
+                    labelPosition='right'
+                    content='Save'
+                  />
+                }
+              />
+              :
+              <Button
+                positive
+                icon='checkmark'
+                labelPosition='right'
+                content='Save'
+                onClick={this.onSave}
+              />
+            }
         </Modal.Actions>
       </Modal>
     );
@@ -188,9 +225,13 @@ class FinishOptionModal extends React.Component {
 }
 
 export default connect((reduxState, props) => {
+  const option = reduxState.options[props.optionId];
   return {
-    option: reduxState.options[props.optionId],
+    option: option,
     selection: reduxState.selections[props.selectionId],
+    optionsWithSameName: Object.values(reduxState.options).filter(o => {
+      return o["fields"]["Name"] == option["fields"]["Name"] && o["id"] != option["id"];
+    }),
   };
 }, null)(FinishOptionModal);
 

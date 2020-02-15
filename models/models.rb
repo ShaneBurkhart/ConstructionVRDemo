@@ -110,7 +110,7 @@ module Finishes
         view: "Searchable",
         filter: "(FIND(\"#{query}\", {Search Text}))",
         max_records: 100,
-      )
+      ).group_by { |o| o["Compare String"] }.values.map { |a| a.first }
     end
 
     def update(fields)
