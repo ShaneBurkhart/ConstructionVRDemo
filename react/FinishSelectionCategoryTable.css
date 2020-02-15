@@ -10,7 +10,6 @@
 
 .selections-category .table .table-row {
     border: 1px solid #bbb;
-    border-top: none;
     overflow: hidden;
 }
 
@@ -30,7 +29,4 @@
 }
 
 @media print {
-    .selections-category h2 {
-        border: none;
-    }
 }

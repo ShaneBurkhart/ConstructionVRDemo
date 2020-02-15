@@ -25,7 +25,7 @@ class AdminControls extends React.Component {
             content={
               <div>
                 <p className="bold">Are you sure?</p>
-                <Button color="red" onClick={onClickTrash}>Delete Selection</Button>
+                <Button color="red" onClick={onClickTrash}>Delete</Button>
               </div>
             }
             trigger={

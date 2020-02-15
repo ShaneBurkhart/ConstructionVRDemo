@@ -225,12 +225,15 @@ class FinishOptionModal extends React.Component {
 }
 
 export default connect((reduxState, props) => {
-  const option = reduxState.options[props.optionId];
+  const { optionId } = props;
+  const option = reduxState.options[optionId];
+  const fields = (option || {})["fields"] || {};
+
   return {
     option: option,
     selection: reduxState.selections[props.selectionId],
     optionsWithSameName: Object.values(reduxState.options).filter(o => {
-      return o["fields"]["Name"] == option["fields"]["Name"] && o["id"] != option["id"];
+      return o["fields"]["Name"] == fields["Name"] && o["id"] != optionId;
     }),
   };
 }, null)(FinishOptionModal);

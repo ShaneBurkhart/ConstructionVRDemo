@@ -72,11 +72,13 @@ class FinishSelection extends React.Component {
   renderSelectionDetails() {
     const { selection } = this.props;
     const selectionFields = selection["fields"];
+    const isAdmin = this.context;
 
     return (
       <div className="info-cell" style={{ width: "100%" }}>
         <div className="cell-heading">
           <FocusEditableInput
+            editable={isAdmin}
             value={selectionFields["Type"]}
             onChange={this.onChangeFor("Type")}
           />
@@ -84,6 +86,7 @@ class FinishSelection extends React.Component {
         <div className="cell-details">
           <span>Location: </span>
           <FocusEditableInput
+            editable={isAdmin}
             value={selectionFields["Location"]}
             onChange={this.onChangeFor("Location")}
           />
@@ -91,11 +94,13 @@ class FinishSelection extends React.Component {
         <div className="cell-details">
           <span>Niche: </span>
           <FocusEditableInput
+            editable={isAdmin}
             value={selectionFields["Room"]}
             onChange={this.onChangeFor("Room")}
           />
         </div>
         <FocusEditableTextarea
+          editable={isAdmin}
           className="notes"
           unfocusedValue={this.getMarkdownHTML(selectionFields["Notes"])}
           value={selectionFields["Notes"]}

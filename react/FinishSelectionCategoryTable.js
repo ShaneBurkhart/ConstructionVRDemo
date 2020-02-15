@@ -108,10 +108,10 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   render() {
-    const { category } = this.props;
+    const { category, orderedSelectionIds } = this.props;
     const { expanded } = this.state;
     const isAdmin = this.context;
-    const count = (category["fields"]["Selections"] || []).length;
+    const count = (orderedSelectionIds || []).length;
     let table = null;
 
     if (isAdmin) {
@@ -145,10 +145,14 @@ class FinishSelectionCategoryTable extends React.Component {
     }
 
     return (
-      <div className="selections-category">
+      <div className={["selections-category", count == 0 ? "no-print" : ""].join(" ")}>
         <h2 onClick={this.onClickCollapse}>
           <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
-          <FocusEditableInput value={category.fields["Name"]} onChange={this.onChangeCategoryName} />
+          <FocusEditableInput
+            editable={isAdmin}
+            value={category.fields["Name"]}
+            onChange={this.onChangeCategoryName}
+          />
           <span className="expand-collapse hide-print">
             <a href="#/">
               {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }

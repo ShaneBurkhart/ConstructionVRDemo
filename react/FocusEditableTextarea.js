@@ -37,10 +37,10 @@ class FocusEditableTextarea extends React.Component {
   }
 
   render() {
-    const { unfocusedValue, className } = this.props;
+    const { editable, unfocusedValue, className } = this.props;
     const { focused, hovering, value } = this.state;
 
-    if (focused) {
+    if (editable && focused) {
       return (
         <div className={className}>
           <TextArea
@@ -71,7 +71,7 @@ class FocusEditableTextarea extends React.Component {
               {value} &nbsp;
             </div>)
           }
-          {hovering && <Icon name="pencil alternate" />}
+          {editable && hovering && <Icon name="pencil alternate" />}
         </div>
       );
     }

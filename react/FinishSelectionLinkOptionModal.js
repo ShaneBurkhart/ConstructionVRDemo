@@ -96,7 +96,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
       <Modal open={true}>
         <Modal.Header style={{ display: "flex" }}>
           <div style={{ width: "100%" }}>
-            <p style={{ marginBottom: 0 }}><span>Link To:</span> {selection["fields"]["Name"]}</p>
+            <p style={{ marginBottom: 0 }}><span>Add To:</span> {selection["fields"]["Name"]}</p>
             <div style={{ fontSize: 14, marginBottom: 0 }}>
               <Input value={searchQuery} onChange={this._handleSearch} placeholder="Search for options..." />
             </div>
@@ -128,9 +128,9 @@ class FinishSelectionLinkOptionModal extends React.Component {
           >Cancel</Button>
           <Button
             positive
-            icon='linkify'
+            icon='circle plus'
             labelPosition='right'
-            content='Link'
+            content='Add'
             onClick={this.onSave}
           />
         </Modal.Actions>

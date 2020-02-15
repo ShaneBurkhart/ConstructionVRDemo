@@ -26,7 +26,7 @@ class NewFinishOptionPlaceholder extends React.Component {
         <div className="half">
           <div className="finish-option-placeholder link hide-print" onClick={this.onClickLink}>
             <Icon name="linkify" />
-            Link From Library
+            Add From Library
           </div>
         </div>
         <div className="half" style={{ paddingLeft: 5 }}>

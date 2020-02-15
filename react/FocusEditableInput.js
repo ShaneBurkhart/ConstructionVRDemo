@@ -37,9 +37,10 @@ class FocusEditableInput extends React.Component {
   }
 
   render() {
+    const { editable } = this.props;
     const { focused, hovering, value } = this.state;
 
-    if (focused) {
+    if (editable && focused) {
       return (
         <Input
           autoFocus
@@ -60,7 +61,7 @@ class FocusEditableInput extends React.Component {
           style={{ display: "inline-block", minWidth: 60 }}
         >
           {value} &nbsp;
-          {hovering && <Icon name="pencil alternate" style={{ fontSize: 16 }} />}
+          {editable && hovering && <Icon name="pencil alternate" style={{ fontSize: 16 }} />}
         </span>
       );
     }
