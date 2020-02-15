@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { connect } from 'react-redux'
-import { Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import { Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import StyledDropzone from "./StyledDropzone"
@@ -21,7 +21,27 @@ class FinishOptionModal extends React.Component {
     this.state = {
       optionId: this.isNew ? newId : option["id"],
       optionFields: _.clone(option["fields"] || {}),
+      linkUpload: "",
     };
+  }
+
+  onClickLinkUpload = () => {
+    const { linkUpload } = this.state;
+    const imgMatch = linkUpload.match(/^(https?:\/\/)?([a-zA-Z0-9_\-]+\.)?[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\/([a-zA-Z0-9_\-\/]+)?\.(jpg|jpeg|png|gif)(\?.*)$/g);
+
+    if (imgMatch) {
+      const newFields = _.clone(this.state.optionFields);
+      const newImages = Array.from(newFields["Image"] || []);
+
+      newImages.push({ url: linkUpload });
+      newFields["Image"] = newImages;
+
+      this.setState({ optionFields: newFields, linkUpload: "" });
+    }
+  }
+
+  onChangeLink = (e) => {
+    this.setState({ linkUpload: e.target.value });
   }
 
   onDrop = (acceptedFiles) => {
@@ -81,7 +101,7 @@ class FinishOptionModal extends React.Component {
   }
 
   render() {
-    const { optionFields } = this.state;
+    const { optionFields, linkUpload } = this.state;
     const images = optionFields["Image"] || [];
 
     return (
@@ -112,10 +132,23 @@ class FinishOptionModal extends React.Component {
                   ))}
                   {images.length < 2 &&
                     <Grid.Column width={8}>
+                      <label>Drop or select a file.</label>
                       <StyledDropzone onDrop={this.onDrop} />
-                      <div className="image-placeholder">
-                        <Icon name="linkify" />
-                        Upload with URL
+                      <label>Or upload using a link.</label>
+                      <div>
+                        <Input
+                          fluid
+                          icon="linkify"
+                          iconPosition="left"
+                          placeholder="https://..."
+                          value={linkUpload}
+                          onChange={this.onChangeLink}
+                          action={{
+                            icon: "upload",
+                            content: "Upload",
+                            onClick: this.onClickLinkUpload,
+                          }}
+                        />
                       </div>
                     </Grid.Column>
                   }
