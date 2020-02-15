@@ -63,6 +63,18 @@ class FinishOptionModal extends React.Component {
     });
   }
 
+  removeImage = (imgId) => {
+    const { optionFields } = this.state;
+    const newImages = optionFields["Image"] || [];
+    const idx = newImages.findIndex(i => i["id"] == imgId);
+
+    if (idx >= 0) {
+      newImages.splice(idx, 1);
+      optionFields["Image"] = newImages;
+      this.setState({ optionFields });
+    }
+  }
+
   onChangeFor(attr) {
     return (e, { value }) => {
       const { optionFields } = this.state;
@@ -142,6 +154,7 @@ class FinishOptionModal extends React.Component {
                   {images.map((image) => (
                     <Grid.Column width={8} key={image["id"] || image["url"]}>
                       <Image src={image["url"]} />
+                      <span><a href="#/ " onClick={_=>this.removeImage(image["id"])}>Remove</a></span>
                     </Grid.Column>
                   ))}
                   {images.length < 2 &&
