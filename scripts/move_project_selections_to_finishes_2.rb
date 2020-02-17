@@ -2,18 +2,18 @@ require "./models/models.rb"
 require "./models/old_models.rb"
 
 PROJECTS = [
-  #"430 Walnut",
-  #"226 Lockwood",
-  #"Warrenville",
+  "430 Walnut",
+  "226 Lockwood",
+  "Warrenville",
   "Chroma II",
-  #"Olivette",
-  #"Pine Lawn Dental",
-  #"S1 - Coastal Gray",
-  #"S2 - Classy Timeless",
-  #"S3 - Taupe & Black",
-  #"S4 - Black & White & Gold",
-  #"S5 - Modern Farmhouse",
-  #"S6 - Glam",
+  "Olivette",
+  "Pine Lawn Dental",
+  "S1 - Coastal Gray",
+  "S2 - Classy Timeless",
+  "S3 - Taupe & Black",
+  "S4 - Black & White & Gold",
+  "S5 - Modern Farmhouse",
+  "S6 - Glam",
 ]
 
 PROJECTS.each do |p|
