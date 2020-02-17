@@ -1,0 +1,15 @@
+.finish-selection-placeholder {
+    background-color: #fafafa;
+    border: 1px solid #bbb;
+    border-top: none;
+    padding: 5px 5px;
+    min-height: 35px;
+    margin-bottom: 5px;
+    color: #cccccc;
+    cursor: pointer;
+}
+
+.finish-selection-placeholder:hover {
+    color: #40A819;
+}
+

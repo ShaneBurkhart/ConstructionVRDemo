@@ -9,7 +9,13 @@ web:
         - .:/app
     env_file:
         - user.env
-    command: "rerun --background ruby server.rb"
+    command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
+
+react_build:
+    image: shaneburkhart/construction-vr-demo
+    volumes:
+        - .:/app
+    command: "npm run watch"
 
 web_prod:
     image: shaneburkhart/construction-vr-demo

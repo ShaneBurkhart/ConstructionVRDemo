@@ -6,7 +6,6 @@ body, html{
     color: #292929;
     background-color: #ffffff;
     margin: 0;
-    font-family: "Roboto";
     font-size: 16px;
 }
 
@@ -19,6 +18,11 @@ body {
 
 *, *:before, *:after {
   box-sizing: inherit;
+}
+
+.ui.input.slim input,
+textarea.slim {
+    padding: 2px 1px;
 }
 
 .admin-section {
@@ -54,27 +58,25 @@ body {
     position: relative;
 }
 
+.flex {
+    display: flex;
+}
+
 .row {
     white-space: nowrap;
     overflow: hidden;
 }
 
 .half {
-    display: inline-block;
     width: 50%;
-    float: left;
 }
 
 .third {
-    display: inline-block;
     width: 33%;
-    float: left;
 }
 
 .two-third {
-    display: inline-block;
     width: 67%;
-    float: left;
 }
 
 .hidden {
@@ -530,7 +532,7 @@ p.filters {
     .break-after { page-break-after: always; }
 }
 
-@media only screen and (max-width: 750px) {
+@media only screen and (max-width: 650px) {
     .half, .third, .two-third {
         width: 100%;
         display: block;

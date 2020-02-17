@@ -1,0 +1,13 @@
+.admin-mode .selection {
+    cursor: pointer;
+}
+
+.admin-mode .selection:hover {
+    background-color: #f0f0f0;
+}
+
+.selection .options-cell {
+    padding: 5px 0 0;
+    border: none;
+}
+

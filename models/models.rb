@@ -12,97 +12,126 @@ Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 # For rendering some HTML
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
-module Content
-  class Links < Airrecord::Table
-    self.base_key = CONTENT_AIRTABLE_APP_ID
-    self.table_name = "Links"
-  end
-end
-
 module Finishes
   class Project < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Projects"
 
+    has_many :categories, class: "Finishes::Category", column: "Categories"
+
+    def selections
+      Finishes::Selection.all(filter: "FIND(\"#{self.id}\", {Project ID}) >= 1")
+    end
+
+    def options
+      Finishes::Option.all(filter: "FIND(\"#{self.id}\", {Project IDs}) >= 1")
+    end
+
+    def units
+      if @units.nil?
+        @units = Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
+      end
+
+      return @units
+    end
+  end
+
+  class Category < Airrecord::Table
+    self.base_key = RENDERING_AIRTABLE_APP_ID
+    self.table_name = "Categories"
+
     has_many :selections, class: "Finishes::Selection", column: "Selections"
+
+    def update(fields)
+      self["Name"] = fields["Name"]
+      self["Order"] = fields["Order"]
+      self["Selections"] = fields["Selections"]
+    end
+
+    def is_different?(fields)
+      self["Name"] != fields["Name"] ||
+      self["Order"] != fields["Order"] ||
+      (self["Selections"] || []).length != (fields["Selections"] || []).length ||
+      (fields["Selections"] || []).map{ |o| self["Selections"].include?(o) }.include?(false)
+    end
   end
 
   class Selection < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Selections"
 
     has_many :options, class: "Finishes::Option", column: "Options"
+
+    def update(fields)
+      self["Order"] = fields["Order"]
+      self["Room"] = fields["Room"]
+      self["Type"] = fields["Type"]
+      self["Location"] = fields["Location"]
+      self["Notes"] = fields["Notes"]
+      self["Category"] = fields["Category"]
+      self["Options"] = fields["Options"]
+    end
+
+    def is_different?(fields)
+      self["Order"] != fields["Order"] ||
+      self["Name"] != fields["Name"] ||
+      self["Room"] != fields["Room"] ||
+      self["Type"] != fields["Type"] ||
+      self["Location"] != fields["Location"] ||
+      self["Notes"] != fields["Notes"] ||
+      self["Category"][0] != fields["Category"][0] ||
+      (self["Options"] || []).length != (fields["Options"] || []).length ||
+      (fields["Options"] || []).map{ |o| self["Options"].include?(o) }.include?(false)
+    end
+
+    def self.finishes_for_project(project)
+      return {} if project.nil?
+      finishes = {}
+
+      project.categories.map do |c|
+        finishes[c["Name"]] = c.selections || []
+      end
+
+      return finishes
+    end
   end
 
   class Option < Airrecord::Table
-    self.base_key = FINISHES_2_AIRTABLE_APP_ID
+    self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Options"
-  end
-end
 
-class FinishOptions < Airrecord::Table
-  self.base_key = FINISHES_AIRTABLE_APP_ID
-  self.table_name = "Finish Options"
-
-  def self.search_for_component(s)
-    # Implement search later
-    FinishOptions.all view: "Has Model"
-  end
-end
-
-class ProjectFinishSelections < Airrecord::Table
-  self.base_key = FINISHES_AIRTABLE_APP_ID
-
-  has_many :finish_options, class: "FinishOptions", column: "Options"
-
-  def self.finishes_for_project(project)
-    return {} if project.nil?
-    views = [
-      "Concepts",
-      "Walls & Millwork",
-      "Flooring",
-      "Cabinets & Countertops",
-      "Tile",
-      "Light Fixtures",
-      "Plumbing Fixtures & Acc.",
-      "Mirrors",
-      "Blinds",
-      "Shelving",
-      "Appliances",
-      "Furniture",
-      "Exterior",
-      "Misc"
-    ]
-    finishes = {}
-    self.table_name = project["Finish Selections Table Name"]
-    self.table_name = project if project.is_a?(String)
-
-    views.each do |view|
-      finishes[view] = self.all(view: view)
+    def self.search_for_component(s)
+      # Implement search later
+      Finishes::Option.all view: "Has Model"
     end
 
-    return finishes
-  end
-end
-
-class Project < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Projects"
-
-  def units
-    if @units.nil?
-      @units = Unit.all(filter: "(FIND(\"#{self.id}\", {Project ID}))", sort: { Name: "asc" }) || []
+    def self.search(query)
+      Finishes::Option.all(
+        view: "Searchable",
+        filter: "(FIND(\"#{query}\", {Search Text}))",
+        max_records: 100,
+      ).group_by { |o| o["Compare String"] }.values.map { |a| a.first }
     end
 
-    return @units
-  end
-
-  def procurement_forms
-    if @procurement_forms.nil?
-      @procurement_forms = ProcurementForm.all(filter: "{Project ID} = '#{self.id}'", sort: { "Created At" => "desc" })
+    def update(fields)
+      self["Name"] = fields["Name"]
+      self["Order"] = fields["Order"]
+      self["Type"] = fields["Type"]
+      self["Info"] = fields["Info"]
+      self["URL"] = fields["URL"]
+      self["Image"] = fields["Image"]
     end
 
-    return @procurement_forms
+    def is_different?(fields)
+      self["Name"] != fields["Name"] ||
+      self["Order"] != fields["Order"] ||
+      self["Type"] != fields["Type"] ||
+      self["Info"] != fields["Info"] ||
+      self["URL"] != fields["URL"] ||
+      (self["Image"] || []).length != (fields["Image"] || []).length ||
+      (fields["Image"] || []).map{ |i| self["Image"].include?(i) }.include?(false)
+    end
+
   end
 end
 
@@ -308,18 +337,6 @@ class FeedbackPermalink < Airrecord::Table
     end
 
     return @project
-  end
-end
-
-class ProcurementForm < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Procurement Forms"
-
-
-  def self.find_by_access_token(access_token)
-    return false if access_token.nil? or access_token == ""
-    records = ProcurementForm.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
-    return records.first
   end
 end
 

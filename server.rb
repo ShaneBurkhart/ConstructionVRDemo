@@ -7,11 +7,19 @@ require 'redis-rack'
 require 'redcarpet'
 require 'json'
 require 'cgi'
+require 'aws-sdk'
+require 'aws-sdk-s3'
+require 'securerandom'
 
 require './util/slack.rb'
 require './util/messages.rb'
 require './models/models.rb'
 require './models/db_models.rb'
+
+Aws.config.update({
+  region: ENV["REGION"],
+  credentials: Aws::Credentials.new(ENV["ACCESS_KEY_ID"], ENV["SECRET_ACCESS_KEY"])
+})
 
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
@@ -28,26 +36,26 @@ end
 
 def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""
-  records = Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{access_token}\", {Access Token}))") || []
   return records.first
 end
 
 def find_project_by_plansource_access_token(ps_access_token)
   return false if ps_access_token.nil? or ps_access_token == ""
-  records = Project.all(filter: "(FIND(\"#{ps_access_token}\", {PlanSource Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{ps_access_token}\", {PlanSource Access Token}))") || []
   return records.first
 end
 
 def find_project_by_admin_access_token(admin_access_token)
   return false if admin_access_token.nil? or admin_access_token == ""
-  records = Project.all(filter: "(FIND(\"#{admin_access_token}\", {Admin Access Token}))") || []
+  records = Finishes::Project.all(filter: "(FIND(\"#{admin_access_token}\", {Admin Access Token}))") || []
   return records.first
 end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
-      finish_options: FinishOptions.search_for_component(s)
+    finish_options: Finish::Options.search_for_component(s)
   }
 end
 
@@ -84,17 +92,155 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
 end
 
-post '/f038c9d4-2809-4050-976a-309445be7c8b/slack/kontent-keeper/webhook' do
-  slack_request = Slack::Events::Request.new(request)
-  slack_request.verify!
+post '/api/temp_upload/presign' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
 
-  puts params.inspect
-  #Content::Links.create(
-    #"Link" => params["link"],
-    #"Description" => params["description"],
-  #)
+  key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
+  signer = Aws::S3::Presigner.new
+  url = signer.presigned_url(:put_object, {
+    bucket: ENV["BUCKET"],
+    key: key,
+    content_type: params["mime"],
+    acl: "public-read"
+  })
 
-  return params[:challenge]
+  content_type "application/json"
+  {
+    presignedURL: url,
+    awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+  }.to_json
+end
+
+get '/api/finishes/options/search' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
+
+  @options = Finishes::Option.search(params["q"] || "")
+
+  content_type "application/json"
+  {
+    admin_mode: is_admin_mode,
+    options: @options,
+  }.to_json
+end
+
+get '/api/project/:access_token/finishes' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  @categories = project.categories
+  @selections = project.selections
+  @options = project.options
+
+  content_type "application/json"
+  {
+    admin_mode: is_admin_mode,
+    categories: @categories,
+    selections: @selections,
+    options: @options,
+  }.to_json
+end
+
+post '/api/project/:access_token/finishes/save' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+  body = JSON.parse(request.body.read)
+
+  updated_categories = []
+  updated_selections = []
+  updated_options = []
+
+  categories = body["categories"] || []
+  selections = body["selections"] || []
+  options = body["options"] || []
+
+  # All keys should be unique. Keep track of temp ids to new objects
+  new_models = {}
+
+  @options = project.options.index_by { |o| o.id }
+  options.each do |option|
+    if option["id"].starts_with?("new")
+      option_fields = option["fields"].select{ |k,v|
+        ["Name", "Selections", "Type", "Other Type Value", "Image", "Info",
+             "URL", "Unit Price", "Order"].include?(k)
+      }
+      option_fields["Image"] = (option_fields["Image"] || []).map{ |i| { url: i["url"] }}
+
+      new_option = Finishes::Option.create(option_fields)
+      new_models[option["id"]] = new_option
+      updated_options << new_option
+    else
+      old_option = @options[option["id"]]
+
+      # Only update if is different than old
+      old_option.update(option["fields"])
+      old_option.save
+      updated_options << old_option
+    end
+  end
+
+  @selections = project.selections.index_by { |s| s.id }
+  selections.each do |selection|
+    if selection["id"].starts_with?("new")
+      selection_fields = selection["fields"].select{ |k,v|
+        ["Type", "Category", "Location", "Room", "Notes", "Order"].include?(k)
+      }
+
+      new_selection = Finishes::Selection.create(selection_fields)
+      new_models[selection["id"]] = new_selection
+      updated_selections << new_selection
+    else
+      old_selection = @selections[selection["id"]]
+
+      # If the option ID is new, replace with option ID we just saved
+      selection["fields"]["Options"] = (selection["fields"]["Options"] || []).map { |o|
+        o.starts_with?("new") ? new_models[o].id : o
+      }
+
+      # Only update if is different than old
+      old_selection.update(selection["fields"])
+      old_selection.save
+      updated_selections << old_selection
+    end
+  end
+
+  @categories = project.categories.index_by { |c| c.id }
+  categories.each do |category|
+    if category["id"].starts_with?("new")
+      category_fields = category["fields"].select{ |k,v|
+        ["Name", "Order"].include?(k)
+      }
+      category_fields["Project"] = [project.id]
+
+      new_category = Finishes::Category.create(category_fields)
+      new_models[category["id"]] = new_category
+      updated_categories << new_category
+    else
+      old_category = @categories[category["id"]]
+
+      # If the option ID is new, replace with option ID we just saved
+      category["fields"]["Selections"] = (category["fields"]["Selections"] || []).map { |s|
+        s.starts_with?("new") ? new_models[s].id : s
+      }
+
+      # Only update if is different than old
+      old_category.update(category["fields"])
+      old_category.save
+      updated_categories << old_category
+    end
+  end
+
+  content_type "application/json"
+  {
+    categories: updated_categories,
+    selections: updated_selections,
+    options: updated_options,
+  }.to_json
 end
 
 # ps_access_token is PlanSource access token. We use that to authenticate the job.
@@ -286,39 +432,11 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  @finish_categories = ProjectFinishSelections.finishes_for_project(project)
-
-  finish_option_ids = []
-
-  @finish_categories.each do |category, finish_selections|
-    finish_selections.each do |finish_selection|
-      finish_option_ids.concat(finish_selection["Options"] || [])
-    end
-  end
-
-  all_finish_options = FinishOptions.find_many(finish_option_ids)
-  finish_options_by_id = all_finish_options.map { |o| [o.id, o] }.to_h
-
-  @options_for_selection = {}
-  @finish_categories.each do |category, finish_selections|
-    finish_selections.each do |finish_selection|
-      options = (finish_selection["Options"] || [])
-      @options_for_selection[finish_selection.id] = options.map { |id| finish_options_by_id[id] }
-    end
-  end
-
-  @location_filters = []
-  @finish_categories.values.flatten.each do |finish|
-    next if finish["Location"].nil?
-    if !@location_filters.include?(finish["Location"])
-      @location_filters << finish["Location"]
-    end
-  end
-
   haml :project_finishes, locals: {
     markdown: MARKDOWN,
     project: project,
     access_token: access_token,
+    no_style: true,
     fixed_width_viewport: true,
     is_admin_mode: is_admin_mode,
   }
@@ -335,50 +453,6 @@ get '/project/:access_token/procurement_forms' do
     project: project,
     access_token: access_token,
   }
-end
-
-get '/project/:access_token/procurement_forms/:id/edit' do
-  is_admin_mode = !!session[:is_admin]
-  access_token = params[:access_token]
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-  return "Not found" if !is_admin_mode
-
-  @procurement_form = ProcurementForm.find(params[:id])
-  return "Not found" if @procurement_form.nil?
-
-  haml :edit_project_procurement_form, locals: {
-    project: project,
-    access_token: access_token,
-    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
-  }
-end
-
-get '/procurement_forms/:access_token' do
-  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
-  return "Not found" if @procurement_form.nil?
-
-  haml :project_procurement_form, locals: {
-    markdown: MARKDOWN,
-    aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"]
-  }
-end
-
-post '/procurement_forms/:access_token/update' do
-  is_admin_mode = !!session[:is_admin]
-  return "Not found" if !is_admin_mode
-
-  @procurement_form = ProcurementForm.find_by_access_token(params[:access_token])
-  return "Not found" if @procurement_form.nil?
-
-  updates = params["updates"]
-  updates.each do |key, val|
-    @procurement_form[key] = val
-  end
-
-  @procurement_form.save
-
-  return 200
 end
 
 get '/project/:access_token/feedbacks' do
