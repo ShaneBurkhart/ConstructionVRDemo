@@ -211,17 +211,28 @@ post '/api/project/:access_token/finishes/save' do
 
   @categories = project.categories.index_by { |c| c.id }
   categories.each do |category|
-    old_category = @categories[category["id"]]
+    if category["id"].starts_with?("new")
+      category_fields = category["fields"].select{ |k,v|
+        ["Name", "Order"].include?(k)
+      }
+      category_fields["Project"] = [project.id]
 
-    # If the option ID is new, replace with option ID we just saved
-    category["fields"]["Selections"] = (category["fields"]["Selections"] || []).map { |s|
-      s.starts_with?("new") ? new_models[s].id : s
-    }
+      new_category = Finishes::Category.create(category_fields)
+      new_models[category["id"]] = new_category
+      updated_categories << new_category
+    else
+      old_category = @categories[category["id"]]
 
-    # Only update if is different than old
-    old_category.update(category["fields"])
-    old_category.save
-    updated_categories << old_category
+      # If the option ID is new, replace with option ID we just saved
+      category["fields"]["Selections"] = (category["fields"]["Selections"] || []).map { |s|
+        s.starts_with?("new") ? new_models[s].id : s
+      }
+
+      # Only update if is different than old
+      old_category.update(category["fields"])
+      old_category.save
+      updated_categories << old_category
+    end
   end
 
   content_type "application/json"
