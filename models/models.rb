@@ -148,7 +148,7 @@ class Unit < Airrecord::Table
 
   def project
     if @project.nil?
-      @project = Project.all(filter: "(FIND(\"#{self.id}\", {Unit IDs}))").first
+      @project = Finishes::Project.all(filter: "(FIND(\"#{self.id}\", {Unit IDs}))").first
     end
 
     return @project
@@ -333,7 +333,7 @@ class FeedbackPermalink < Airrecord::Table
 
   def project
     if @project.nil?
-      @project = Project.find(self["Project"].first)
+      @project = Finishes::Project.find(self["Project"].first)
     end
 
     return @project
