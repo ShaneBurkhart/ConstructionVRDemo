@@ -82,6 +82,13 @@ body {
     position: relative;
 }
 
+.small-container {
+    margin: auto;
+    max-width: 500px;
+    padding: 10px;
+    position: relative;
+}
+
 .row {
     white-space: nowrap;
     overflow: hidden;

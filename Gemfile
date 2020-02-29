@@ -8,6 +8,7 @@ gem 'standalone_migrations'
 gem 'pug'
 gem 'haml'
 gem 'redcarpet'
+gem 'bcrypt'
 
 gem "redis-store"
 gem 'redis-rack'

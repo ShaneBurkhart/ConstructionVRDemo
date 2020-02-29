@@ -446,19 +446,6 @@ get '/project/:access_token/finishes' do
   }
 end
 
-get '/project/:access_token/procurement_forms' do
-  is_admin_mode = !!session[:is_admin]
-  access_token = params[:access_token]
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
-  return "Not found" if !is_admin_mode
-
-  haml :project_procurement_forms, locals: {
-    project: project,
-    access_token: access_token,
-  }
-end
-
 get '/project/:access_token/feedbacks' do
   access_token = params[:access_token]
   project = find_project_by_access_token(access_token)
@@ -704,27 +691,67 @@ post '/project/:access_token/pano/:id/feedback' do
   return fields.to_json
 end
 
-# DEVELOPMENT USE ONLY!
-# USED FOR GENERATING MISSING FEEDBACK IMAGES
-# Uncomment to use.
-#get '/fix_feedback' do
-  #return "Not found" if
-  #@feedbacks = Feedback.all(filter: '{Screenshot} = ""') || []
-  #return "Done." if @feedbacks.count == 0
-  #@feedback = @feedbacks.first
+get "/sign_up" do
+  haml :sign_up
+end
 
-  #haml :fix_feedback, locals: { feedbacks: @feedbacks, aws_identity_pool_id: ENV["AWS_IDENTITY_POOL_ID"] }
-#end
+def validate_sign_up_form(form)
+  errors = {}
 
-#post '/fix_feedback/:id' do
-  #feedback = Feedback.find(params[:id])
-  #return "Not found" if feedback.nil?
+  # Presence validation
+  ["First Name", "Last Name", "Password", "Email", "Team Name"].each do |k|
+    errors[k] = "Need a #{k.downcase}." if form[k].nil?
+  end
 
-  #screenshot = params[:screenshot]
-  #return "Not found" if screenshot.nil?
+  pass = form["Password"] || ""
+  if pass.length < 8
+    errors["Password"] = "Password needs 8+ characters."
+  end
 
-  #feedback["Screenshot"] = [{ url: screenshot[:url], filename: screenshot[:filename] }]
-  #feedback.save
+  return errors.empty? ? nil : errors
+end
 
-  #return 200
-#end
+post "/sign_up" do
+  form = {
+    "First Name" => params[:first_name],
+    "Last Name" => params[:last_name],
+    "Email" => params[:email],
+    "Password" => params[:password],
+    "Team Name" => params[:team_name]
+  }
+
+  errors = validate_sign_up_form(form)
+  if !errors.nil?
+    puts errors.inspect
+    return haml :sign_up, locals: { errors: errors }
+  end
+
+  team = Team.create({ "Name": form["Team Name"] })
+  user = User.new(form.slice("First Name", "Last Name", "Email"))
+  user.teams += [ team ]
+
+  user.hash_password(form["Password"])
+  user.save
+
+  session[:user_id] = user.id
+  session[:is_admin] = true
+
+  return redirect "/projects"
+end
+
+get "/sign_in" do
+  haml :sign_in
+end
+
+post "/sign_in" do
+  email = params[:email]
+  password = params[:password]
+
+  user = User.authenticate(email, password)
+  return haml :sign_in
+
+  session[:user_id] = user.id
+  session[:is_admin] = true
+
+  redirect "/projects"
+end
