@@ -13,36 +13,38 @@ Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 # For rendering some HTML
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 
-class Team < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Teams"
-end
-
-class User < Airrecord::Table
-  self.base_key = RENDERING_AIRTABLE_APP_ID
-  self.table_name = "Users"
-
-  has_many :projects, class: "Finishes::Project", column: "Projects"
-  has_many :teams, class: "Team", column: "Teams"
-
-  def hash_password(password)
-    self["Password Digest"] = BCrypt::Password.create(password)
-  end
-
-  def self.find_by_email(email)
-    return self.all(filter: "FIND(\"#{email}\", {Email}) >= 1").first
-  end
-
-  def self.authenticate(email, pass)
-    user = self.find_by_email(email)
-    return nil if user.nil?
-
-    bpass = BCrypt::Password.new(user["Password Digest"])
-    return bpass == pass ? user : nil
-  end
-end
-
 module Finishes
+  class Team < Airrecord::Table
+    self.base_key = RENDERING_AIRTABLE_APP_ID
+    self.table_name = "Teams"
+
+    has_many :projects, class: "Finishes::Project", column: "Projects"
+  end
+
+  class User < Airrecord::Table
+    self.base_key = RENDERING_AIRTABLE_APP_ID
+    self.table_name = "Users"
+
+    has_many :teams, class: "Finishes::Team", column: "Teams"
+
+    def hash_password(password)
+      self["Password Digest"] = BCrypt::Password.create(password)
+    end
+
+    def self.find_by_email(email)
+      return self.all(filter: "FIND(\"#{email}\", {Email}) >= 1").first
+    end
+
+    def self.authenticate(email, pass)
+      user = self.find_by_email(email)
+      puts user.inspect
+      return nil if user.nil?
+
+      bpass = BCrypt::Password.new(user["Password Digest"])
+      return bpass == pass ? user : nil
+    end
+  end
+
   class Project < Airrecord::Table
     self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Projects"

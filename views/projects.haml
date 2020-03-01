@@ -1,4 +1,10 @@
 .container
-  %h1 All Projects
-  - projects.each do |project|
-    %a{ href: "/project/#{project.id}" }= project["Name"]
+  %h1 Your Projects
+
+  - @current_user.teams.each do |team|
+    %h2= team["Name"]
+
+    - team.projects.each do |project|
+      %p
+        %a{ href: "/project/#{project["Access Token"]}/finishes" }= project["Name"]
+

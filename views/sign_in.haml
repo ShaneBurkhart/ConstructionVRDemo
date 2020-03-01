@@ -4,7 +4,7 @@
   %form.ui.form{ action: "/sign_in", method: :post }
     .field
       %label Email
-      %input{ type: "text", name: "email", placeholder: "mike@architect.com" }
+      %input{ type: "text", name: "email", placeholder: "mike@architect.com", value: defined?(email) ? email : "" }
 
     .field
       %label Password
