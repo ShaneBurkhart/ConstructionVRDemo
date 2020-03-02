@@ -17,14 +17,41 @@
 
     -#We need semantic js api for now.
     %script(src="/semantic.min.js?v=190407")
+    %link(type="text/css" rel="stylesheet" href="/semantic.min.css?v=190407")
 
     - if !defined? no_style
-      %link(type="text/css" rel="stylesheet" href="/semantic.min.css?v=190407")
-
       %link(href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Roboto:300,400,700|Handlee" rel="stylesheet")
       %link(type="text/css" rel="stylesheet" href="/style.css?v=200312")
 
   %body{ class: defined?(is_admin_mode) && is_admin_mode ? "admin-mode" : "" }
+    %header
+      .xlarge-container
+        %nav.ui.text.menu
+          - if current_user
+            .item
+              %a{ href: "/projects" }
+                %i.home.icon
+            .ui.dropdown.item
+              %a.browse.item
+                My Projects
+                %i.dropdown.icon
+              .menu
+                - current_user.teams.each do |team|
+                  .header
+                    %i{ class: "sitemap icon" }
+                    = "Team: " + team["Name"]
+                  - team.projects.each do |project|
+                    .item
+                      %a{ href: "/project/#{project["Access Token"]}" }
+                        = project["Name"]
+
+            .item.right
+              .item
+                %i.user.circle.icon
+                %a{ href: "/user/me" }= current_user["Email"]
+              .item
+                %a{ href: "/logout" } Logout
+
     = yield
 
     - if defined? fixed_width_viewport
@@ -32,3 +59,6 @@
         var $viewportElement = document.head.querySelector("[name~=viewport]");
         var ratio = document.body.clientWidth / 1200;
         $viewportElement.setAttribute('content', 'width=1200, maximum-scale=1.0, initial-scale=' + ratio);
+
+    :javascript
+      $('.ui.dropdown').dropdown({ });

@@ -57,6 +57,8 @@ class FinishVision < Sinatra::Base
 
   use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
 
+  include Includes::CurrentUser
+
   get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
     s = params[:s] || ""
     haml :component_search, locals: {
