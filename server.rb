@@ -99,7 +99,6 @@ post '/api/temp_upload/presign' do
   key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
   signer = Aws::S3::Presigner.new
   url = signer.presigned_url(:put_object, {
-    region: ENV["REGION"],
     bucket: ENV["BUCKET"],
     key: key,
     content_type: params["mime"],
