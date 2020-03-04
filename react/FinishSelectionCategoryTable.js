@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Button, Icon } from 'semantic-ui-react'
+import { Popup, Button, Icon } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
@@ -82,6 +82,14 @@ class FinishSelectionCategoryTable extends React.Component {
     }));
   }
 
+  onRemoveCategory = (selection) => {
+    const { category } = this.props;
+
+    this.props.dispatch(ActionCreators.updateEach({
+      categories: [{ ...category, "DELETE": true }]
+    }));
+  }
+
   onChangeCategoryName = (name) => {
     const { category } = this.props;
 
@@ -90,6 +98,12 @@ class FinishSelectionCategoryTable extends React.Component {
         "id": category["id"],
         "fields": { ...category["fields"], "Name": name },
       }]
+    }));
+  }
+
+  onClickReorderCategories = _ => {
+    this.props.dispatch(ActionCreators.updateModal({
+      reorderCategories: true,
     }));
   }
 
@@ -113,6 +127,8 @@ class FinishSelectionCategoryTable extends React.Component {
     const isAdmin = this.context;
     const count = (orderedSelectionIds || []).length;
     let table = null;
+
+    if (category["DELETE"]) return "";
 
     if (isAdmin) {
       table = (
@@ -146,19 +162,35 @@ class FinishSelectionCategoryTable extends React.Component {
 
     return (
       <div className={["selections-category", count == 0 ? "no-print" : ""].join(" ")}>
-        <h2 onClick={this.onClickCollapse}>
-          <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
-          <FocusEditableInput
-            editable={isAdmin}
-            value={category.fields["Name"]}
-            onChange={this.onChangeCategoryName}
-          />
-          <span className="expand-collapse hide-print">
-            <a href="#/">
-              {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
-            </a>
-          </span>
-        </h2>
+        <header>
+          <h2 onClick={this.onClickCollapse}>
+            <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
+            <FocusEditableInput
+              editable={isAdmin}
+              value={category.fields["Name"]}
+              onChange={this.onChangeCategoryName}
+            />
+            <span className="expand-collapse hide-print">
+              <a href="#/">
+                {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
+              </a>
+            </span>
+
+          </h2>
+          <h2 style={{ width: 200, textAlign: "right" }}>
+            <Button icon="list" onClick={this.onClickReorderCategories} />
+            <Popup
+              on="click"
+              content={
+                <div>
+                  <p className="bold">Are you sure?</p>
+                  <Button color="red" onClick={this.onRemoveCategory}>Delete</Button>
+                </div>
+              }
+              trigger={<Button icon="trash" />}
+            />
+          </h2>
+        </header>
         {expanded && table}
       </div>
     )

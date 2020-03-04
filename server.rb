@@ -211,7 +211,11 @@ post '/api/project/:access_token/finishes/save' do
 
   @categories = project.categories.index_by { |c| c.id }
   categories.each do |category|
-    if category["id"].starts_with?("new")
+    if !category["DELETE"].nil?
+      old_category = @categories[category["id"]]
+      old_category.destroy if !old_category.nil?
+      next
+    elsif category["id"].starts_with?("new")
       category_fields = category["fields"].select{ |k,v|
         ["Name", "Order"].include?(k)
       }

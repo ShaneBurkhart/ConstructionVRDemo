@@ -13,10 +13,12 @@
     overflow: hidden;
 }
 
-.selections-category h2 {
+.selections-category header {
     padding: 5px 15px;
     border: 1px solid #bbb;
     margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
 }
 
 .selections-category h2 span.expand-collapse {

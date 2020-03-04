@@ -169,6 +169,14 @@ const removeNew = (state, action) => {
   return { ...state };
 };
 
+const removeDeleted = (state, action) => {
+  // Remove new ids
+  Object.values(state.categories).forEach(o => { if(o["DELETE"]) delete state.categories[o["id"]] });
+  Object.values(state.selections).forEach(o => { if(o["DELETE"]) delete state.selections[o["id"]] });
+  Object.values(state.options).forEach(o => { if(o["DELETE"]) delete state.options[o["id"]] });
+  return { ...state };
+};
+
 const eachUpdate = (state, action) => {
   const categories = action.categories || [];
   const selections = action.selections || [];
@@ -178,6 +186,7 @@ const eachUpdate = (state, action) => {
   if (action.serverUpdate) {
     dirty["dirty"] = null;
     state = removeNew(state);
+    state = removeDeleted(state);
   }
 
   categories.forEach(c => {
