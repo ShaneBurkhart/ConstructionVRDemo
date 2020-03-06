@@ -177,7 +177,7 @@ class FinishSelectionCategoryTable extends React.Component {
             </span>
 
           </h2>
-          <h2 style={{ width: 200, textAlign: "right" }}>
+          {isAdmin && <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
             <Button icon="list" onClick={this.onClickReorderCategories} />
             <Popup
               on="click"
@@ -189,7 +189,7 @@ class FinishSelectionCategoryTable extends React.Component {
               }
               trigger={<Button icon="trash" />}
             />
-          </h2>
+          </h2>}
         </header>
         {expanded && table}
       </div>
