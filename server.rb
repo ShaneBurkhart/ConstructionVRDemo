@@ -505,6 +505,7 @@ get '/project/:access_token/unit/:id' do
   haml :unit, locals: {
     project: project,
     unit: unit,
+    is_latest_version: unit["Versions"].last == version.id,
     selected_version: version,
     unit_versions: unit.versions,
     feedbacks: feedbacks,

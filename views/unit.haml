@@ -92,7 +92,7 @@
             Scene:
             = screenshot_scene_names[i]
           %img{ src: imgSrc }
-          - if is_admin_mode
+          - if is_admin_mode and is_latest_version
             %a.show-give-feedback{ href: "#" } + Give Feedback
             .feedback-input{ style: "display: none;", data: { unit_version_id: sv["Unit Version"][0], image_url: imgSrc } }
               %textarea{ name: "notes", placeholder: "Enter your feedback here..." }
@@ -113,10 +113,10 @@
         - if is_debug_mode
           .debug-center-window
         .controls
-          - if is_admin_mode
+          - if is_admin_mode and is_latest_version
             %a.feedback-toggle Give Feedback
           %a.fullscreen-toggle Exit
-        - if is_admin_mode
+        - if is_admin_mode and is_latest_version
           .fullscreen-feedback
             .container{ style: "height: 100%; position: relative;" }
               %textarea#fullscreen-feedback-input{ placeholder: "Enter your feedback here..." }
@@ -133,7 +133,7 @@
           .pano-preview{ data: { id: pano["Pano ID"][0] }}
             .name= pano["Pano Name"][0]
 
-      - if is_admin_mode
+      - if is_admin_mode and is_latest_version
         %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
         %input{id: "feedback-is-fix", type: "checkbox", name: "is-fix", checked: true } Fix?
         %br
