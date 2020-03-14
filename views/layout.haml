@@ -24,10 +24,10 @@
       %link(type="text/css" rel="stylesheet" href="/style.css?v=200312")
 
   %body{ class: defined?(is_admin_mode) && is_admin_mode ? "admin-mode" : "" }
-    %header
-      .xlarge-container
-        %nav.ui.text.menu
-          - if current_user
+    - if current_user
+      %header
+        .xlarge-container
+          %nav.ui.text.menu
             .item
               %a{ href: "/projects" }
                 %i.home.icon
@@ -42,15 +42,29 @@
                     = "Team: " + team["Name"]
                   - team.projects.each do |project|
                     .item
-                      %a{ href: "/project/#{project["Access Token"]}" }
+                      %a{ href: "/project/#{project["Access Token"]}/finishes" }
                         = project["Name"]
+            - if current_user.is_admin?
+              .item
+                %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard" }
+                  Rendering Dashboard
 
-            .item.right
-              .item
+            .ui.dropdown.item.right
+              %a.browse.item
                 %i.user.circle.icon
-                %a{ href: "/user/me" }= current_user["Email"]
-              .item
-                %a{ href: "/logout" } Logout
+                = current_user["Email"]
+                %i.dropdown.icon
+              .menu
+                .item
+                  %a Account
+                .item
+                  %a Billing
+                .item
+                  %a My Team
+                .item
+                  %a Teams You're On
+                .item
+                  %a{ href: "/logout" } Logout
 
     = yield
 

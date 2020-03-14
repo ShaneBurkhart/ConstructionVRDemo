@@ -11,6 +11,17 @@ web:
         - user.env
     command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
 
+test:
+    image: shaneburkhart/construction-vr-demo
+    links:
+        - pg
+        - redis
+    volumes:
+        - .:/app
+    env_file:
+        - user.env
+    command: "rerun --background rspec"
+
 react_build:
     image: shaneburkhart/construction-vr-demo
     volumes:

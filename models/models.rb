@@ -37,11 +37,14 @@ module Finishes
 
     def self.authenticate(email, pass)
       user = self.find_by_email(email)
-      puts user.inspect
       return nil if user.nil?
 
       bpass = BCrypt::Password.new(user["Password Digest"])
       return bpass == pass ? user : nil
+    end
+
+    def is_admin?
+      self["Email"] == "shane@finishvisionvr.com"
     end
   end
 

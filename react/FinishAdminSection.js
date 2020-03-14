@@ -51,8 +51,7 @@ class FinishAdminSection extends React.Component {
               color="blue"
               onClick={onClickManageCategories}
             >Reorder Categories</Button>
-          </div>
-          <div style={{ marginBottom: 15 }}>
+
             <Input
               value={newCategoryText}
               onChange={this.onChangeNewCategoryText}

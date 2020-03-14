@@ -6,6 +6,22 @@ module Routes
   class User < Sinatra::Base
     set :views, Proc.new { "/app/views" }
 
+    include Includes::CurrentUser
+
+    register do
+      def no_auth (type)
+        condition do
+          redirect "/projects" if !current_user.nil?
+        end
+      end
+
+      def auth (type)
+        condition do
+          redirect "/sign_in" if current_user.nil?
+        end
+      end
+    end
+
     def validate_sign_up_form(form)
       errors = {}
 
@@ -22,11 +38,18 @@ module Routes
       return errors.empty? ? nil : errors
     end
 
-    get "/sign_up" do
+    get "/logout", :auth => :user do
+      session[:user_id] = nil
+      session[:is_admin] = nil
+
+      redirect "/"
+    end
+
+    get "/sign_up", :no_auth => :user  do
       haml :sign_up
     end
 
-    post "/sign_up" do
+    post "/sign_up", :no_auth => :user do
       form = {
         "First Name" => params[:first_name],
         "Last Name" => params[:last_name],
@@ -37,7 +60,6 @@ module Routes
 
       errors = validate_sign_up_form(form)
       if !errors.nil?
-        puts "errors"
         return haml :sign_up, locals: { errors: errors }
       end
 
@@ -48,22 +70,17 @@ module Routes
       user.hash_password(form["Password"])
       user.save
 
-      puts session.inspect
-      puts "asdfadf"
-
       session[:user_id] = user.id
       session[:is_admin] = true
 
       redirect "/projects"
     end
 
-    get "/sign_in" do
-      puts @current_user.inspect
-      puts session.inspect
+    get "/sign_in", :no_auth => :user do
       haml :sign_in
     end
 
-    post "/sign_in" do
+    post "/sign_in", :no_auth => :user do
       email = params[:email]
       password = params[:password]
 
@@ -72,11 +89,8 @@ module Routes
         return haml :sign_in, locals: { email: email }
       end
 
-      puts session.inspect
       session[:user_id] = user.id
       session[:is_admin] = true
-
-      puts session.inspect
 
       redirect "/projects"
     end

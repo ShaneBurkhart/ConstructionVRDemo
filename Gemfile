@@ -10,6 +10,9 @@ gem 'haml'
 gem 'redcarpet'
 gem 'bcrypt'
 
+gem 'rack-test'
+gem 'rspec'
+
 gem "redis-store"
 gem 'redis-rack'
 
