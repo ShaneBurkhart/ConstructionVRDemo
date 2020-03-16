@@ -12,6 +12,7 @@ gem 'bcrypt'
 
 gem 'rack-test'
 gem 'rspec'
+gem 'capybara'
 
 gem "redis-store"
 gem 'redis-rack'
