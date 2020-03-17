@@ -1,7 +1,7 @@
 %script(src="/underscore.js")
 %script(src="/script.js?v=190429")
 
-= haml :_project_header, locals: { page: "renderings", project: project, access_token: access_token }
+- @project_header_data = { page: "renderings", project: project, access_token: access_token }
 
 - if is_admin_mode
   .admin-section

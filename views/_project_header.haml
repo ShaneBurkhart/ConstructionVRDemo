@@ -1,9 +1,9 @@
-.site-header
-  .xlarge-container
-    %h1= project["Name"]
+.xlarge-container
+  .ui.tabular.menu.hide-print
+    .left.menu
+      %h1.bold= project["Name"]
 
-    .ui.tabular.menu.hide-print
+    .right.tabular.menu
       %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
       %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
 
-.site-header-spacer

@@ -1,0 +1,23 @@
+#site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-bottom: solid 1px #cccccc;
+    background-color: #ffffff;
+    z-index: 999999;
+}
+
+#site-header .xlarge-container {
+    padding: 0;
+    padding-bottom: 5px;
+}
+
+#site-header .ui.text.menu {
+    margin: 0;
+}
+
+#site-header #user-header {
+    color: #ffffff;
+}

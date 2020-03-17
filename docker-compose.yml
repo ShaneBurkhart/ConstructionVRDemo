@@ -9,7 +9,7 @@ web:
         - .:/app
     env_file:
         - user.env
-    command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
+    command: "rerun --ignore views/* --ignore react/* --ignore public/* --background ruby server.rb"
 
 test:
     image: shaneburkhart/construction-vr-demo

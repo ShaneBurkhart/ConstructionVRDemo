@@ -47,34 +47,6 @@ body {
     width: 1200px;
 }
 
-.site-header {
-    position: fixed;
-    background-color: #ffffff;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100%;
-    z-index: 99999;
-}
-
-.site-header .xlarge-container {
-    padding: 0;
-    padding-bottom: 5px;
-}
-
-.site-header h1 {
-    margin-bottom: 0;
-}
-
-.site-header .ui.tabular.menu {
-    margin: 0;
-}
-
-.site-header-spacer {
-    padding-top: 121px;
-}
-
 .container {
     margin: auto;
     max-width: 700px;
