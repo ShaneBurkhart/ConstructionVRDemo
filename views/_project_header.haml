@@ -1,9 +1,7 @@
 .xlarge-container
-  .ui.tabular.menu.hide-print
-    .left.menu
-      %h1.bold= project["Name"]
-
-    .right.tabular.menu
+  %div{ style: "float: right; padding-top: 15px;" }
+    .ui.right.tabular.compact.menu.hide-print
       %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
       %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
 
+  %h1.bold= project["Name"]

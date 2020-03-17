@@ -62,18 +62,19 @@
                     %i.dropdown.icon
                   .menu
                     .item
-                      %a Account
-                    .item
-                      %a Billing
-                    .item
-                      %a My Team
-                    .item
-                      %a Teams You're On
+                      %a{ href: "/account" } Account
+                    - if current_user["Owned Team"].length > 0
+                      .item
+                        %a Invite to Your Team
+                    - else
+                      .item
+                        %a Create Your Own Team
                     .item
                       %a{ href: "/logout" } Logout
 
         - if !@project_header_data.nil?
-          = haml :_project_header, locals: @project_header_data
+          #project-header
+            = haml :_project_header, locals: @project_header_data
 
     - if current_user
       %div.no-print{ style: "padding-bottom: 51px" }

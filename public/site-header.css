@@ -6,11 +6,17 @@
     width: 100%;
     border-bottom: solid 1px #cccccc;
     background-color: #ffffff;
-    z-index: 999999;
+    z-index: 9;
+    box-shadow: 0 1px 5px #555555;
 }
 
-#site-header .xlarge-container {
-    padding: 0;
+#site-header #user-header .xlarge-container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+#site-header #project-header .xlarge-container {
+    padding-top: 0;
     padding-bottom: 5px;
 }
 
@@ -20,4 +26,7 @@
 
 #site-header #user-header {
     color: #ffffff;
+}
+
+#site-header #project-header .xlarge-container > *{
 }
