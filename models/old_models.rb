@@ -1,6 +1,6 @@
 require "airrecord"
 
-RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
+RENDERING_AIRTABLE_APP_ID = ENV["RENDERING_AIRTABLE_APP_ID"]
 
 class FinishOptions < Airrecord::Table
   self.base_key = FINISHES_AIRTABLE_APP_ID

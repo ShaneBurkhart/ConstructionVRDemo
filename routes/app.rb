@@ -107,7 +107,7 @@ module Routes
       unit = Unit.find(params[:id])
       return "Not found" if unit.nil? or !unit.belongs_to_project?(project)
 
-      @version_id = (unit["Current Version"] || [])[0]
+      @version_id = (unit["Current Version"] || [])[0] || unit["Versions"].last
       @version_id = params[:version] if is_admin_mode and !params[:version].nil?
       feedbacks = []
 

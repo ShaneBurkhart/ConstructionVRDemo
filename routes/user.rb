@@ -35,6 +35,10 @@ module Routes
         errors["Password"] = "Password needs 8+ characters."
       end
 
+      if !Finishes::User.find_by_email(form["Email"]).nil?
+        errors["Email"] = "Email already taken. Try a different one or sign in."
+      end
+
       return errors.empty? ? nil : errors
     end
 
@@ -65,7 +69,7 @@ module Routes
 
       team = Finishes::Team.create({ "Name": form["Team Name"] })
       user = Finishes::User.new(form.slice("First Name", "Last Name", "Email"))
-      user.teams += [ team ]
+      user.owned_teams += [ team ]
 
       user.hash_password(form["Password"])
       user.save

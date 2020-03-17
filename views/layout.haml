@@ -25,7 +25,7 @@
 
   %body{ class: defined?(is_admin_mode) && is_admin_mode ? "admin-mode" : "" }
     - if current_user
-      %header
+      %header#site-header
         .xlarge-container
           %nav.ui.text.menu
             .item

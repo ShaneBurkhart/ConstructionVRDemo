@@ -4,10 +4,7 @@ require 'bcrypt'
 
 require "./models/db_models.rb"
 
-RENDERING_AIRTABLE_APP_ID = "appTAmLzyXUW1RxaH"
-FINISHES_AIRTABLE_APP_ID = "app5xuA2wJKN1rkp0"
-FINISHES_2_AIRTABLE_APP_ID = "appWVS9i2byAQv6bn"
-CONTENT_AIRTABLE_APP_ID = "appSLMPJEIk05Sday"
+RENDERING_AIRTABLE_APP_ID = ENV["RENDERING_AIRTABLE_APP_ID"]
 Airrecord.api_key = ENV["AIRTABLES_API_KEY"]
 
 # For rendering some HTML
@@ -25,7 +22,22 @@ module Finishes
     self.base_key = RENDERING_AIRTABLE_APP_ID
     self.table_name = "Users"
 
-    has_many :teams, class: "Finishes::Team", column: "Teams"
+    has_many :team_memberships, class: "Finishes::Team", column: "Team Memberships"
+    has_many :owned_teams, class: "Finishes::Team", column: "Owned Team"
+
+    def teams
+      teams = []
+
+      owned_team = self.owned_team
+      teams << owned_team if !owned_team.nil?
+      teams = teams + (self.team_memberships || [])
+
+      return teams
+    end
+
+    def owned_team
+      return (self.owned_teams || []).first
+    end
 
     def hash_password(password)
       self["Password Digest"] = BCrypt::Password.create(password)
@@ -53,6 +65,10 @@ module Finishes
     self.table_name = "Projects"
 
     has_many :categories, class: "Finishes::Category", column: "Categories"
+
+    def self.find_by_name(name)
+      return self.all(filter: "FIND(\"#{name}\", {Name}) >= 1").first
+    end
 
     def selections
       Finishes::Selection.all(filter: "FIND(\"#{self.id}\", {Project ID}) >= 1")

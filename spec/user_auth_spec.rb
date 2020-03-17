@@ -28,7 +28,6 @@ AUTH_PATHS = [
 
   ["POST", "/api/temp_upload/presign"],
   ["GET", "/api/finishes/options/search"],
-  ["GET", "/api/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/finishes"],
   ["POST", "/api/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/finishes/save"],
 ]
 
@@ -47,44 +46,11 @@ AUTH_AGNOSTIC_PATHS = [
   # Arbitrary UUID. Don't make it an existing UUID.
   ["GET", "/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd"],
   ["GET", "/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/finishes"],
+  ["GET", "/api/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/finishes"],
   ["GET", "/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/unit/rec1dKshaneSwPaKB"],
 ]
 
-ADMIN_USER_EMAIL = "shane@finishvisionvr.com"
-TEST_USER_EMAIL = "test@finishvisionvr.com"
-TEST_USER_PASSWORD = "password"
-
 RSpec.describe "User Authentication" do
-  before :all do
-    # Create a test user
-    user = Finishes::User.find_by_email(TEST_USER_EMAIL)
-    if user.nil?
-      post "/sign_up", {
-        first_name: "Test",
-        last_name: "User",
-        team_name: "Team",
-        email: TEST_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
-      }
-      # Make sure we are logged out
-      get "/logout"
-    end
-
-    # Create admin user
-    admin = Finishes::User.find_by_email(ADMIN_USER_EMAIL)
-    if admin.nil?
-      post "/sign_up", {
-        first_name: "Test",
-        last_name: "User",
-        team_name: "Team",
-        email: ADMIN_USER_EMAIL,
-        password: TEST_USER_PASSWORD,
-      }
-      # Make sure we are logged out
-      get "/logout"
-    end
-  end
-
   context "with no user session" do
     before :each do
       # Make sure we are logged out
