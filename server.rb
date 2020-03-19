@@ -10,6 +10,7 @@ require 'cgi'
 require 'aws-sdk'
 require 'aws-sdk-s3'
 require 'securerandom'
+require 'stripe'
 
 require './util/slack.rb'
 require './util/messages.rb'
@@ -34,6 +35,8 @@ $stdout.sync = true
 Slack.configure do |config|
   config.token = ENV['SLACK_KONTENT_KEEPER_SIGNING_SECRET']
 end
+
+Stripe.api_key = ENV["STRIPE_SECRET_API_KEY"]
 
 def find_project_by_access_token(access_token)
   return false if access_token.nil? or access_token == ""

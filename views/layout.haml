@@ -35,10 +35,10 @@
             .xlarge-container
               %nav.ui.text.menu
                 .item
-                  %a{ href: "/projects" }
+                  %a.white{ href: "/projects" }
                     %i.home.icon
                 .ui.dropdown.item{ style: "padding: 0;"}
-                  %a.browse.item
+                  %a.browse.white
                     Projects
                     %i.dropdown.icon
                   .menu
@@ -52,18 +52,18 @@
                             = project["Name"]
                 - if current_user.is_admin?
                   .item
-                    %a{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard" }
+                    %a.white{ href: "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard" }
                       Rendering Dashboard
 
                 .ui.dropdown.item.right
-                  %a.browse.item
+                  %a.browse.white
                     %i.user.circle.icon
                     = current_user["Email"]
                     %i.dropdown.icon
                   .menu
                     .item
                       %a{ href: "/account" } Account
-                    - if current_user["Owned Team"].length > 0
+                    - if current_user.owns_a_team?
                       .item
                         %a Invite to Your Team
                     - else
@@ -77,9 +77,9 @@
             = haml :_project_header, locals: @project_header_data
 
     - if current_user
-      %div.no-print{ style: "padding-bottom: 51px" }
+      %div.no-print{ style: "padding-bottom: 33px" }
     - if !@project_header_data.nil?
-      %div{ style: "height: 70px;" }
+      %div{ style: "height: 60px;" }
         %h1= @project_header_data[:project]["Name"]
 
     = yield_contents

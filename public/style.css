@@ -527,10 +527,6 @@ p.filters {
     margin-bottom: 0;
 }
 
-.pull-right {
-    float: right;
-}
-
 .break {
     float: none;
     clear: both;

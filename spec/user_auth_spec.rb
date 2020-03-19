@@ -29,6 +29,8 @@ AUTH_PATHS = [
   ["POST", "/api/temp_upload/presign"],
   ["GET", "/api/finishes/options/search"],
   ["POST", "/api/project/9f09f4ba-700d-4cb7-8e98-ab84b7bd6abd/finishes/save"],
+  ["GET", "/account"],
+  ["POST", "/account"],
 ]
 
 # Requests that should be 200 when no user

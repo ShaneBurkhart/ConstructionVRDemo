@@ -1,0 +1,44 @@
+.small-container
+  %form.ui.form{ action: "/sign_in", method: :post }
+    .ui.dividing.header Personal Info
+    .two.fields
+      .field
+        %label First Name
+        %input{ type: "text", name: "first_name", placeholder: "Michael" }
+
+      .field
+        %label Last Name
+        %input{ type: "text", name: "last_name", placeholder: "Jordan" }
+
+    .field
+      %label Email
+      %input{ type: "text", name: "email", placeholder: "mike@architect.com", value: defined?(email) ? email : "" }
+
+    .field
+      %label Password
+      %input{ type: "password", name: "password", placeholder: "*********" }
+
+    .field
+      %label Old Password (if updating password)
+      %input{ type: "password", name: "old_password", placeholder: "*********" }
+
+    - if current_user.owns_a_team?
+      .ui.dividing.header Team Info
+
+      .field
+        %label Team Name
+        %input{ type: "text", name: "team_name", placeholder: "Jordan Architecture + Design" }
+
+      .field
+        %label Team Members
+        - members = current_user.owned_team.members || []
+        - if members.length > 0
+          - current_user.owned_team.members.each do |member|
+            %p= member["Email"]
+        - else
+          %p No Team Members Currently
+
+      .ui.dividing.header Billing
+
+    %button.ui.button{ type: "submit" } Sign In
+

@@ -14,13 +14,21 @@ module Routes
           redirect "/sign_in" if current_user.nil?
         end
       end
+
+      def payment_required(null)
+        condition do
+          if current_user and current_user.owns_a_team? and current_user.owned_team.payment_required?
+            redirect "/update_subscription"
+          end
+        end
+      end
     end
 
-    get "/projects", :auth => :user do
+    get "/projects", :auth => :user, :payment_required => true do
       haml :projects
     end
 
-    get '/project/:access_token' do
+    get '/project/:access_token', :payment_required => true do
       is_admin_mode = !!session[:is_admin]
       access_token = params[:access_token]
       project = find_project_by_access_token(access_token)
@@ -49,7 +57,7 @@ module Routes
       }
     end
 
-    get '/project/:access_token/finishes' do
+    get '/project/:access_token/finishes', :payment_required => true do
       is_admin_mode = !!session[:is_admin]
       access_token = params[:access_token]
       project = find_project_by_access_token(access_token)
@@ -95,7 +103,7 @@ module Routes
       }
     end
 
-    get '/project/:access_token/unit/:id' do
+    get '/project/:access_token/unit/:id', :payment_required => true do
       access_token = params[:access_token]
       is_debug_mode = !!params[:debug] || !!session[:is_admin]
       is_admin_mode = !!session[:is_admin]

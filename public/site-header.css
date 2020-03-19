@@ -20,13 +20,21 @@
     padding-bottom: 5px;
 }
 
+#site-header #project-header h1 {
+    padding-top: 0;
+}
+
 #site-header .ui.text.menu {
+    min-height: auto;
     margin: 0;
 }
 
 #site-header #user-header {
-    color: #ffffff;
+    color: #f8f8f8;
+    background-color: #333333;
+    border-bottom: 1px solid #eeeeee;
 }
 
-#site-header #project-header .xlarge-container > *{
+#site-header #user-header a.white {
+    color: #f8f8f8;
 }

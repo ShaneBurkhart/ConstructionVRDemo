@@ -1,0 +1,79 @@
+<script src="https://js.stripe.com/v3/"></script>
+
+.xlarge-container
+  %h1 Update Your Subscription
+
+  .ui.grid
+    .five.wide.column
+      .ui.raised.segments
+        .ui.center.aligned.secondary.segment
+          .ui.statistic
+            .label Freelancer Plan
+            .value $20
+            .label per month
+        .ui.center.aligned.segment
+          %p All features
+        .ui.center.aligned.segment
+          %p 1 User
+        .ui.center.aligned.segment
+          %p Email Support
+        .ui.center.aligned.segment
+          %p For Freelance Architects & Designers
+        .ui.center.aligned.segment
+          .ui.button.blue#freelancer-payment Select Freelancer Plan
+    .five.wide.column
+      .ui.raised.segments
+        .ui.center.aligned.secondary.segment
+          .ui.statistic
+            .label Team Plan - Monthly
+            .value $40
+            .label per user / month
+        .ui.center.aligned.segment
+          %p All features
+        .ui.center.aligned.segment
+          %p Add Users to Your Team
+        .ui.center.aligned.segment
+          %p Email & Phone Support
+        .ui.center.aligned.segment
+          %p For Architecture & Design Teams
+        .ui.center.aligned.segment
+          .ui.button.blue#team-monthly-payment Select Team Plan
+    .five.wide.column
+      .ui.raised.segments
+        .ui.center.aligned.secondary.segment
+          .ui.statistic
+            .label Team Plan - Yearly
+            .value $330
+            .label per user / year
+        .ui.center.aligned.segment
+          %p All features
+        .ui.center.aligned.segment
+          %p Save 30% with Yearly!
+        .ui.center.aligned.segment
+          %p Email & Phone Support
+        .ui.center.aligned.segment
+          %p For Architecture & Design Teams
+        .ui.center.aligned.segment
+          .ui.button.blue#team-yearly-payment Select Team Plan
+    .five.wide.column
+
+:javascript
+  var stripe = Stripe('#{stripe_pub_key}');
+
+  $("#freelancer-payment").click(function () {
+    stripe.redirectToCheckout({
+      sessionId: "#{checkout_sessions[:freelancer].id}",
+    });
+  });
+
+  $("#team-monthly-payment").click(function () {
+    stripe.redirectToCheckout({
+      sessionId: "#{checkout_sessions[:team_monthly].id}",
+    });
+  });
+
+  $("#team-yearly-payment").click(function () {
+    stripe.redirectToCheckout({
+      sessionId: "#{checkout_sessions[:team_yearly].id}",
+    });
+  });

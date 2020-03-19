@@ -2,6 +2,8 @@ require 'sinatra/base'
 
 require './models/models.rb'
 
+require 'stripe'
+
 module Routes
   class User < Sinatra::Base
     set :views, Proc.new { "/app/views" }
@@ -40,6 +42,63 @@ module Routes
       end
 
       return errors.empty? ? nil : errors
+    end
+
+    get "/update_subscription", :auth => :user do
+      checkout_sessions = {}
+
+      success_url = "http://127.0.0.1:3000/projects"
+      cancel_url = "http://127.0.0.1:3000/update_subscription"
+
+      checkout_sessions[:freelancer] = Stripe::Checkout::Session.create({
+        payment_method_types: ["card"],
+        subscription_data: {
+          items: [
+            { plan: ENV["STRIPE_FREELANCER_PLAN_ID"] }
+          ],
+        },
+        success_url: success_url,
+        cancel_url: cancel_url,
+      })
+      checkout_sessions[:team_monthly] = Stripe::Checkout::Session.create({
+        payment_method_types: ["card"],
+        subscription_data: {
+          items: [
+            {
+              plan: ENV["STRIPE_MONTHLY_TEAM_PLAN_ID"],
+              quantity: current_user.owned_team.total_users,
+            }
+          ],
+        },
+        success_url: success_url,
+        cancel_url: cancel_url,
+      })
+      checkout_sessions[:team_yearly] = Stripe::Checkout::Session.create({
+        payment_method_types: ["card"],
+        subscription_data: {
+          items: [
+            {
+              plan: ENV["STRIPE_YEARLY_TEAM_PLAN_ID"],
+              quantity: current_user.owned_team.total_users,
+            }
+          ],
+        },
+        success_url: success_url,
+        cancel_url: cancel_url,
+      })
+
+      haml :payment_required, locals: {
+        checkout_sessions: checkout_sessions,
+        stripe_pub_key: ENV["STRIPE_PUBLISHABLE_API_KEY"],
+      }
+    end
+
+    get "/account", :auth => :user do
+      haml :account
+    end
+
+    post "/account", :auth => :user do
+      redirect "/account"
     end
 
     get "/logout", :auth => :user do

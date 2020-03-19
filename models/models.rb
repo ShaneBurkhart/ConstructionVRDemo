@@ -16,6 +16,20 @@ module Finishes
     self.table_name = "Teams"
 
     has_many :projects, class: "Finishes::Project", column: "Projects"
+    has_many :members, class: "Finishes::User", column: "Members"
+
+    def total_users
+      return (self.members || []).length + 1
+    end
+
+    def paid_until
+      return nil if self["Paid Until"].nil?
+      return Date.parse(self["Paid Until"])
+    end
+
+    def payment_required?
+      return (self["Paid Until"].nil? or self.paid_until < Date.today)
+    end
   end
 
   class User < Airrecord::Table
@@ -33,6 +47,10 @@ module Finishes
       teams = teams + (self.team_memberships || [])
 
       return teams
+    end
+
+    def owns_a_team?
+      return (self["Owned Team"] || []).length > 0
     end
 
     def owned_team

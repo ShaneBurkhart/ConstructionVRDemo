@@ -9,6 +9,7 @@ gem 'pug'
 gem 'haml'
 gem 'redcarpet'
 gem 'bcrypt'
+gem 'stripe'
 
 gem 'rack-test'
 gem 'rspec'

@@ -12,17 +12,20 @@ RSpec.describe "Site Header Visibility", type: :feature do
 
     it "should show a header on .../renderings unit picker" do
       visit "/project/#{@project["Access Token"]}"
-      expect(page.has_selector?("#site-header")).to be_truthy
+      expect(page.has_selector?("#user-header")).to be_truthy
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
 
     it "should show a header on .../renderings unit viewer" do
       visit "/project/#{@project["Access Token"]}/unit/#{@unit.id}"
-      expect(page.has_selector?("#site-header")).to be_truthy
+      expect(page.has_selector?("#user-header")).to be_truthy
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
 
     it "should show a header on .../finishes" do
       visit "/project/#{@project["Access Token"]}/finishes"
-      expect(page.has_selector?("#site-header")).to be_truthy
+      expect(page.has_selector?("#user-header")).to be_truthy
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
   end
 
@@ -34,17 +37,20 @@ RSpec.describe "Site Header Visibility", type: :feature do
 
     it "should not show a header on .../renderings unit picker" do
       visit "/project/#{@project["Access Token"]}"
-      expect(page.has_selector?("#site-header")).to be_falsey
+      expect(page.has_selector?("#user-header")).to be_falsey
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
 
     it "should not show a header on .../renderings unit viewer" do
       visit "/project/#{@project["Access Token"]}/unit/#{@unit.id}"
-      expect(page.has_selector?("#site-header")).to be_falsey
+      expect(page.has_selector?("#user-header")).to be_falsey
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
 
     it "should not show a header on .../finishes" do
       visit "/project/#{@project["Access Token"]}/finishes"
-      expect(page.has_selector?("#site-header")).to be_falsey
+      expect(page.has_selector?("#user-header")).to be_falsey
+      expect(page.has_selector?("#project-header")).to be_truthy
     end
   end
 end

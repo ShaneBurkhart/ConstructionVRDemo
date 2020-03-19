@@ -1,7 +1,18 @@
 .small-container
-  %h1 Welcome Back!
+  %h1 Ready to Get Organized?
+
+  %p You get a 30 day free trial!
+  %p No need to enter a credit card until your trial is up.
 
   %form.ui.form{ action: "/sign_up", method: :post }
+    .field
+      %label Email
+      %input{ type: "text", name: "email", placeholder: "mike@architect.com" }
+
+    .field
+      %label Password
+      %input{ type: "password", name: "password", placeholder: "*********" }
+
     .two.fields
       .field
         %label First Name
@@ -14,14 +25,6 @@
     .field
       %label Team Name
       %input{ type: "text", name: "team_name", placeholder: "Jordan Architecture + Design" }
-
-    .field
-      %label Email
-      %input{ type: "text", name: "email", placeholder: "mike@architect.com" }
-
-    .field
-      %label Password
-      %input{ type: "password", name: "password", placeholder: "*********" }
 
     %button.ui.button{ type: "submit" } Sign In
 

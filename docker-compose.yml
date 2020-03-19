@@ -11,6 +11,14 @@ web:
         - user.env
     command: "rerun --ignore views/* --ignore react/* --ignore public/* --background ruby server.rb"
 
+stripe_webhooks:
+    image: stripe/stripe-cli
+    links:
+        - web
+    env_file:
+        - user.env
+    command: "--api-key $${STRIPE_SECRET_API_KEY} listen --forward-to=web:3000/stripe/hooks"
+
 test:
     image: shaneburkhart/construction-vr-demo
     links:
