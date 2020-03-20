@@ -82,7 +82,6 @@ const moveSelection = (state, action) => {
   const sourceCategory = state.categories[sourceCategoryId];
   const destCategory = state.categories[destCategoryId];
   const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
-  const filteredDestCategorySelections = state.filteredOrderedSelectionIdsByCategoryId[destCategoryId];
   let allDestCategorySelections = allSourceCategorySelections;
   let destSelectionId = null;
   let destSelectionIndex = null;
@@ -266,6 +265,50 @@ const updateCategory = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const batchUpdateSelections = (state, action) => {
+  const { updates } = action;
+
+  (updates || []).forEach(update => {
+    const selectionId = update["id"];
+    const fieldsToUpdate = update["fields"];
+    const oldFields = state.selections[selectionId]["fields"];
+    const newFields = { ...oldFields, ...fieldsToUpdate };
+    const oldCategoryId = (oldFields["Category"] || [])[0];
+    const newCategoryId = (fieldsToUpdate["Category"] || [])[0];
+
+    state.selections[selectionId]["fields"] = newFields;
+
+    // Move selection if has new category. Remove from old, add to new.
+    // Order doesn't matter since that's a computed property.
+    if (newCategoryId && oldCategoryId != newCategoryId) {
+      const oldSelections = state.categories[oldCategoryId]["fields"]["Selections"] || [];
+      const newSelections = state.categories[newCategoryId]["fields"]["Selections"] || [];
+      const oldIndex = oldSelections.findIndex(s => s == selectionId);
+
+      oldSelections.splice(oldIndex, 1);
+      state.categories[oldCategoryId]["fields"]["Selections"] = oldSelections;
+
+      newSelections.push(selectionId);
+      state.categories[newCategoryId]["fields"]["Selections"] = newSelections;
+    }
+  });
+
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const moveCategory = (state, action) => {
+  const { categoryId, newPosition } = action;
+  const orderedCategories = Object.values(state.categories)
+          .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
+
+  const startIndex = orderedCategories.findIndex(c => c["id"] == categoryId);
+  const [category] = orderedCategories.splice(startIndex, 1);
+  orderedCategories.splice(newPosition, 0, category);
+
+  orderedCategories.forEach((c, i) => state.categories[c["id"]]["fields"]["Order"] = i);
+  return { ...state, ...computeState({ ...state }) };
+}
+
 const todos = (state = {}, action) => {
   console.log(action);
 
@@ -282,6 +325,12 @@ const todos = (state = {}, action) => {
       return updateSelection(state, action);
     case Actions.UPDATE_CATEGORY:
       return updateCategory(state, action);
+    case Actions.MOVE_SELECTION:
+      return moveSelection(state, action);
+    case Actions.MOVE_CATEGORY:
+      return moveCategory(state, action);
+    case Actions.BATCH_UPDATE_SELECTIONS:
+      return batchUpdateSelections(state, action);
 
     case 'UPDATE_FILTER':
       return {
@@ -289,8 +338,6 @@ const todos = (state = {}, action) => {
       };
     case 'REORDER_CATEGORIES':
       return reorderCategories(state, action);
-    case 'MOVE_SELECTION':
-      return moveSelection(state, action);
     case 'MOVE_OPTION':
       return moveOption(state, action);
     case 'UPDATE_MODAL':
@@ -325,7 +372,6 @@ const _getDirty = (obj) => {
 const saveToServer = store => next => action => {
   let result = next(action)
   const newState = store.getState();
-  //console.log(action.type);
 
   // Clean up anything that says it's dirty ;)
   const diff = {

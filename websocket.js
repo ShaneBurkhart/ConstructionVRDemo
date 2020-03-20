@@ -8,12 +8,16 @@ var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
 var Actions = require("./common/actions.js");
 
+async function _findProjectByAccessToken(projectAccessToken) {
+  var projectResults = await base("Projects").select({
+    filterByFormula: `FIND(\"${projectAccessToken}\", {Access Token}) >= 1`
+  }).all();
+  return projectResults[0];
+}
+
 async function addNewCategory(categoryName, projectAccessToken) {
   try {
-    var projectResults = await base("Projects").select({
-      filterByFormula: `FIND(\"${projectAccessToken}\", {Access Token}) >= 1`
-    }).all();
-    var project = projectResults[0];
+    var project = await _findProjectByAccessToken(projectAccessToken);
     var newCategory = await base("Categories").create([
       { "fields": {
         "Name": categoryName,
@@ -85,8 +89,73 @@ async function updateCategory(categoryId, fieldsToUpdate) {
   }
 }
 
+async function moveSelection(selectionId, destCategoryId, newPosition, projectAccessToken) {
+  try {
+    const selection = await base("Selections").find(selectionId);
+    const sourceCategoryId = selection["fields"]["Category"][0];
+    const sourceSelections = await base("Selections").select({
+      filterByFormula: `{Category ID} = \"${sourceCategoryId}\"`,
+      sort: [{ field: "Order", direction: "asc" }],
+    }).all();
+    let destSelections = sourceSelections;
+
+    if (sourceCategoryId != destCategoryId) {
+      destSelections = await base("Selections").select({
+        filterByFormula: `{Category ID} = \"${destCategoryId}\"`,
+        sort: [{ field: "Order", direction: "asc" }],
+      }).all();
+    }
+
+    const sourceIndex = sourceSelections.findIndex(s => s["id"] == selectionId);
+    const [toMove] = sourceSelections.splice(sourceIndex, 1);
+
+    destSelections.splice(newPosition, 0, toMove);
+
+    const updates = [];
+    sourceSelections.forEach((s, i) => updates.push({
+      "id": s["id"],
+      "fields": { "Order": i, "Category": [ sourceCategoryId ] },
+    }));
+    if (sourceCategoryId != destCategoryId) {
+      destSelections.forEach((s, i) => updates.push({
+        "id": s["id"],
+        "fields": { "Order": i, "Category": [ destCategoryId ] },
+      }));
+    }
+
+    await base("Selections").update(updates);
+    return updates;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function moveCategory(categoryId, newPosition, projectAccessToken) {
+  try {
+    var project = await _findProjectByAccessToken(projectAccessToken);
+    var categories = await base("Categories").select({
+      filterByFormula: `{Project ID} = \"${project.id}\"`
+    }).all();
+
+    const orderedCategories = Object.values(categories)
+            .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
+
+    const startIndex = orderedCategories.findIndex(c => c["id"] == categoryId);
+    const [category] = orderedCategories.splice(startIndex, 1);
+    orderedCategories.splice(newPosition, 0, category);
+
+    const updates = orderedCategories.map((c, i) => {
+      return { "id": c["id"], "fields": { "Order": i } };
+    });
+
+    await base("Categories").update(updates);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 io.on('connection', function(socket){
-  console.log('a user connected');
+  console.log('New Connections!');
 
   socket.on(Actions.ADD_NEW_SELECTION, function(data){
     addNewSelection(data.categoryId).then((newSelection) => {
@@ -141,6 +210,25 @@ io.on('connection', function(socket){
     updateCategory(data.categoryId, data.fieldsToUpdate).then(() => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_CATEGORY,
+        ...data,
+      });
+    });
+  });
+
+  socket.on(Actions.MOVE_SELECTION, function(data){
+    const { selectionId, destCategoryId, newPosition, project_token } = data;
+    moveSelection(selectionId, destCategoryId, newPosition, project_token)
+      .then((updates) => {
+        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
+        });
+      });
+  });
+
+  socket.on(Actions.MOVE_CATEGORY, function(data){
+    moveCategory(data.categoryId, data.newPosition, data.project_token).then(() => {
+      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        type: Actions.MOVE_CATEGORY,
         ...data,
       });
     });

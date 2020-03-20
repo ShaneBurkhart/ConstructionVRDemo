@@ -7,6 +7,7 @@ import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
 
+import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import FinishSelectionFilters from './FinishSelectionFilters';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
 import FinishCategoriesModal from './FinishCategoriesModal';
@@ -83,13 +84,34 @@ class App extends React.Component {
   }
 
   onDragEndSelection = (result) => {
+    const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilter } = this.props;
     const { source, destination } = result;
     if (!destination) return;
     // Picked it up and dropped it in the same spot.
     if (source.droppableId == destination.droppableId && source.index == destination.index) return;
 
+    const selectionId = result.draggableId;
+    const destCategoryId = destination.droppableId;
+
     if (result["type"] == "SELECTION") {
-      this.props.dispatch(ActionCreators.moveSelection(result.draggableId, source, destination));
+      const destFilteredOrderedSelectionIds = filteredOrderedSelectionIdsByCategoryId[destCategoryId];
+      const destAllOrderedSelectionIds = orderedSelectionIdsByCategoryId[destCategoryId];
+      let newPosition = destination.index;
+
+      if (currentFilter != "All") {
+        // If we have a filter set,
+        // Find real index from filtered index. Find the card we place it after.
+        if (newPosition < destFilteredOrderedSelectionIds.length) {
+          const destSelectionId = destFilteredOrderedSelectionIds[newPosition];
+          newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId);
+        } else {
+          // Put after the selection we moved it after.
+          const destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
+          newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId) + 1;
+        }
+      }
+
+      ActionCreators.moveSelection(selectionId, destCategoryId, newPosition);
     } else if (result["type"] == "OPTION") {
       const [random, optionId] = result.draggableId.split("/");
       this.props.dispatch(ActionCreators.moveOption(optionId, source, destination));
@@ -100,7 +122,6 @@ class App extends React.Component {
 
   renderCategorySections() {
     const { orderedCategoryIds } = this.props;
-    const { filteredSelectionsByCategory } = this.state;
     const { currentFilter } = this.props;
 
     return orderedCategoryIds.map((categoryId, i) => {
@@ -168,12 +189,13 @@ class App extends React.Component {
 
   render() {
     const { adminMode, selectionFilters, currentFilter } = this.props;
+    const { orderedCategoryIds } = this.props;
     const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
     return (
       <AdminContext.Provider value={adminMode}>
-        {adminMode && <FinishAdminSection
-          onClickManageCategories={this.handleOpenCategoryModalFor(true)}
+        {adminMode && <FinishCategoriesDrawer
+          orderedCategoryIds={orderedCategoryIds}
         />}
         <div className={wrapperClasses.join(" ")}>
           <FinishSelectionFilters
@@ -185,7 +207,6 @@ class App extends React.Component {
             {this.renderCategorySections()}
           </DragDropContext>
           <div className="modal-container">
-            {adminMode && this.renderCategoriesModal()}
             {adminMode && this.renderOptionModal()}
             {adminMode && this.renderLinkOptionToSelectionModal()}
             {this.renderLoading()}
@@ -206,5 +227,7 @@ export default connect((reduxState, props) => {
     selectionIdModal: reduxState.modals.selectionId,
     linkSelectionIdModal: reduxState.modals.linkSelectionId,
     reorderCategoriesModal: reduxState.modals.reorderCategories,
+    orderedSelectionIdsByCategoryId: reduxState.orderedSelectionIdsByCategoryId,
+    filteredOrderedSelectionIdsByCategoryId: reduxState.filteredOrderedSelectionIdsByCategoryId,
   };
 }, null)(App);

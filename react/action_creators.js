@@ -35,6 +35,7 @@ const _saveToServer = (dispatch, diff) => {
 };
 
 const emit = (event, data) => {
+  console.log("Emitting: ", event, data);
   socket.emit(event, { project_token: PROJECT_ACCESS_TOKEN, ...data });
 };
 
@@ -75,6 +76,14 @@ const ActionCreator = {
     emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
   },
 
+  moveSelection: (selectionId, destCategoryId, newPosition) => {
+    emit(Actions.MOVE_SELECTION, { selectionId, destCategoryId, newPosition });
+  },
+
+  moveCategory: (categoryId, newPosition) => {
+    emit(Actions.MOVE_CATEGORY, { categoryId, newPosition });
+  },
+
   updateFilter: (filter) => {
     return {
       type: Actions.UPDATE_FILTER,
@@ -86,13 +95,6 @@ const ActionCreator = {
     return {
       type: Actions.REORDER_CATEGORIES,
       orderedCategoryIds
-    }
-  },
-
-  moveSelection: (selectionId, source, destination) => {
-    return {
-      type: Actions.MOVE_SELECTION,
-      selectionId, source, destination,
     }
   },
 

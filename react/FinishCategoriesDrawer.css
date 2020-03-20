@@ -1,0 +1,10 @@
+.categories-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    border-right: 1px solid #cccccc;
+    background-color: #ffffff;
+    padding: 10px;
+}

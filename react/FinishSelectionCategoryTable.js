@@ -118,7 +118,10 @@ class FinishSelectionCategoryTable extends React.Component {
     }
 
     return (
-      <div className={["selections-category", count == 0 ? "no-print" : ""].join(" ")}>
+      <div
+        id={category["id"]}
+        className={["selections-category", count == 0 ? "no-print" : ""].join(" ")}
+      >
         <header>
           <h2 onClick={this.onClickCollapse}>
             <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
@@ -135,7 +138,6 @@ class FinishSelectionCategoryTable extends React.Component {
 
           </h2>
           {isAdmin && <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
-            <Button icon="list" onClick={this.onClickReorderCategories} />
             <Popup
               on="click"
               content={

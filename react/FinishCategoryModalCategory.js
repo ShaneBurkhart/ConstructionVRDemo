@@ -7,7 +7,7 @@ import AdminControls from './AdminControls';
 
 class FinishCategoryModalCategory extends React.Component {
   render() {
-    const { index, categoryId, category, getDraggableStyle } = this.props;
+    const { index, categoryId, category } = this.props;
 
     return (
       <Draggable
@@ -20,17 +20,15 @@ class FinishCategoryModalCategory extends React.Component {
           <div
             ref={provided.innerRef}
             {...provided.draggableProps}
-            style={getDraggableStyle(
-              provided.draggableProps["style"],
-              snapshot.isDragging
-            )}
           >
             <div style={{ display: "flex" }}>
               <AdminControls
                 dragHandleProps={provided.dragHandleProps}
               />
               <div style={{ width: "100%" }}>
-                <p>{category.fields["Name"]}</p>
+                <p>
+                  <a href={`#${categoryId}`}>{category.fields["Name"]}</a>
+                </p>
               </div>
             </div>
           </div>

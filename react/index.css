@@ -16,6 +16,10 @@ body {
     position: relative;
 }
 
+body.admin-mode {
+    padding-left: 250px;
+}
+
 *, *:before, *:after {
   box-sizing: inherit;
 }
@@ -530,6 +534,9 @@ p.filters {
 @media print {
     .hide-print { display: none !important; }
     .break-after { page-break-after: always; }
+    body {
+        padding: 0 !important;
+    }
 }
 
 @media only screen and (max-width: 650px) {
