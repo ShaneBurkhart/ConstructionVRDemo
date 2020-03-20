@@ -2,7 +2,7 @@ import $ from 'jquery';
 import Actions from '../common/actions'
 import _  from 'underscore'
 
-var socket = require('socket.io-client')('http://127.0.0.1:3001');
+var socket = require('socket.io-client')('http://construction-vr.shaneburkhart.com/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45');
 var _dispatch = null;
 
 socket.on('connect', function(){

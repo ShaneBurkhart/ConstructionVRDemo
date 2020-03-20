@@ -27,16 +27,24 @@ react_build:
         - .:/app
     command: "npm run watch"
 
-#web_prod:
-    #image: shaneburkhart/construction-vr-demo
-    #ports:
-        #- "4567:4567"
-    #links:
-        #- pg
-        #- redis
-    #env_file:
-        #- user.env
-    #command: "ruby server.rb"
+web_prod:
+    image: shaneburkhart/construction-vr-demo
+    ports:
+        - "4567:4567"
+    links:
+        - pg
+        - redis
+    env_file:
+        - user.env
+    command: "ruby server.rb"
+
+websocket_prod:
+    image: shaneburkhart/construction-vr-demo
+    ports:
+        - "4568:3000"
+    env_file:
+        - user.env
+    command: "node websocket.js"
 
 pg:
     image: postgres
