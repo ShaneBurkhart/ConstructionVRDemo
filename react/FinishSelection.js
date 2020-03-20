@@ -64,8 +64,7 @@ class FinishSelection extends React.Component {
   onChangeFor(attr) {
     const { selection } = this.props;
     return val => {
-      selection["fields"][attr] = val;
-      this.props.dispatch(ActionCreators.updateEach({ selections: [selection] }));
+      ActionCreators.updateSelection(selection["id"], { [attr]: val });
     }
   }
 

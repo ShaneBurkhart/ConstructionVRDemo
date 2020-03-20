@@ -27,6 +27,7 @@ MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)
 $stdout.sync = true
 
 set :bind, '0.0.0.0'
+set :sockets, []
 
 use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
 
@@ -142,6 +143,31 @@ get '/api/project/:access_token/finishes' do
     selections: @selections,
     options: @options,
   }.to_json
+end
+
+get '/api/project/:access_token/finishes/socket' do
+  is_admin_mode = !!session[:is_admin]
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  if request.websocket?
+    request.websocket do |ws|
+      ws.onopen do
+        ws.send("Hello World!")
+        settings.sockets << ws
+      end
+      ws.onmessage do |msg|
+        EM.next_tick { settings.sockets.each{|s| s.send(msg) } }
+      end
+      ws.onclose do
+        warn("websocket closed")
+        settings.sockets.delete(ws)
+      end
+    end
+  else
+    halt 500, "Invalid request."
+  end
 end
 
 post '/api/project/:access_token/finishes/save' do

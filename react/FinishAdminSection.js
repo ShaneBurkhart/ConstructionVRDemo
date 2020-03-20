@@ -20,22 +20,11 @@ class FinishAdminSection extends React.Component {
   }
 
   onClickAddCategory = () => {
-    const { categories } = this.props;
     const { newCategoryText } = this.state;
     if (newCategoryText.length == 0) return;
 
-    const newId = "new" + Math.random().toString(36).substring(2, 15);
-    const updates = [{ "id": newId, "fields": {
-      "Name": newCategoryText,
-      "Order": 0,
-    }}];
+    ActionCreators.addNewCategory(newCategoryText);
 
-    Object.values(categories || {}).forEach(c => {
-      c["fields"]["Order"] += 1;
-      updates.push(c);
-    });
-
-    this.props.dispatch(ActionCreators.updateEach({ "categories": updates }));
     this.setState({ newCategoryText: "" });
   }
 

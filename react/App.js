@@ -21,6 +21,8 @@ class App extends React.Component {
   constructor(props) {
     super(props)
 
+    ActionCreators.updateDispatch(this.props.dispatch);
+
     this._isDragging = false;
 
     this._superSetState = this.setState;

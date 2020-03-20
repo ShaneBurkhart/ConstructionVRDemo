@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rake'
 gem 'sinatra'
+gem 'sinatra-websocket'
 gem 'pg'
 gem 'activerecord'
 gem 'standalone_migrations'

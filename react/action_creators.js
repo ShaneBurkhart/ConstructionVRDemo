@@ -1,6 +1,19 @@
 import $ from 'jquery';
-import Actions from './actions'
+import Actions from '../common/actions'
 import _  from 'underscore'
+
+var socket = require('socket.io-client')('http://127.0.0.1:3001');
+var _dispatch = null;
+
+socket.on('connect', function(){
+  console.log("New connection established.");
+});
+socket.on('disconnect', function(){
+  console.log("No connection/dropped.");
+});
+socket.on(Actions.EXECUTE_CLIENT_EVENT, function(data){
+  if (_dispatch) _dispatch(data);
+});
 
 let _isSaving = false;
 
@@ -21,6 +34,10 @@ const _saveToServer = (dispatch, diff) => {
   });
 };
 
+const emit = (event, data) => {
+  socket.emit(event, { project_token: PROJECT_ACCESS_TOKEN, ...data });
+};
+
 const ActionCreator = {
   load: (callback) => {
     return (dispatch) => {
@@ -32,6 +49,30 @@ const ActionCreator = {
         callback(data);
       });
     }
+  },
+
+  addNewSelection: (categoryId) => {
+    emit(Actions.ADD_NEW_SELECTION, { categoryId });
+  },
+
+  addNewCategory: (categoryName) => {
+    emit(Actions.ADD_NEW_CATEGORY, { categoryName });
+  },
+
+  removeSelection: (selectionId) => {
+    emit(Actions.REMOVE_SELECTION, { selectionId });
+  },
+
+  removeCategory: (categoryId) => {
+    emit(Actions.REMOVE_CATEGORY, { categoryId });
+  },
+
+  updateSelection: (selectionId, fieldsToUpdate) => {
+    emit(Actions.UPDATE_SELECTION, { selectionId, fieldsToUpdate });
+  },
+
+  updateCategory: (categoryId, fieldsToUpdate) => {
+    emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
   },
 
   updateFilter: (filter) => {
@@ -81,7 +122,7 @@ const ActionCreator = {
 
   saveToServer: (diff) => {
     console.log('saveToServer()');
-    return (dispatch) => { _saveToServer(dispatch, diff) };
+    //return (dispatch) => { _saveToServer(dispatch, diff) };
   },
 
   presignedURL: (file, callback) => {
@@ -108,6 +149,10 @@ const ActionCreator = {
       processData : false,
       success: callback
     });
+  },
+
+  updateDispatch: (dispatch) => {
+    _dispatch = dispatch;
   }
 };
 

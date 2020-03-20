@@ -1,6 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk';
 import ActionCreators from './action_creators';
+import Actions from '../common/actions'
 
 const _initialState = {
   isAdmin: false,
@@ -219,8 +220,69 @@ const eachUpdate = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const addNewSelection = (state, action) => {
+  var categorySelections = state.categories[action.categoryId]["fields"]["Selections"] || [];
+
+  categorySelections.push(action.id);
+  state.categories[action.categoryId]["fields"]["Selections"] = categorySelections;
+
+  state.selections[action.id] = { id: action.id, fields: action.newSelection };
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const addNewCategory = (state, action) => {
+  state.categories[action.id] = { id: action.id, fields: action.newCategory };
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const removeSelection = (state, action) => {
+  var selection = state.selections[action.selectionId];
+  var categoryId = selection["fields"]["Category"][0];
+  var categorySelections = state.categories[categoryId]["fields"]["Selections"] || [];
+
+  categorySelections.splice(categorySelections.indexOf(action.selectionId), 1);
+  delete state.selections[action.selectionId];
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const removeCategory = (state, action) => {
+  delete state.categories[action.categoryId];
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const updateSelection = (state, action) => {
+  const { selectionId, fieldsToUpdate } = action;
+  const newFields = { ...state.selections[selectionId]["fields"], ...fieldsToUpdate };
+
+  state.selections[selectionId]["fields"] = newFields;
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const updateCategory = (state, action) => {
+  const { categoryId, fieldsToUpdate } = action;
+  const newFields = { ...state.categories[categoryId]["fields"], ...fieldsToUpdate };
+
+  state.categories[categoryId]["fields"] = newFields;
+  return { ...state, ...computeState({ ...state }) };
+}
+
 const todos = (state = {}, action) => {
+  console.log(action);
+
   switch (action.type) {
+    case Actions.ADD_NEW_SELECTION:
+      return addNewSelection(state, action);
+    case Actions.ADD_NEW_CATEGORY:
+      return addNewCategory(state, action);
+    case Actions.REMOVE_SELECTION:
+      return removeSelection(state, action);
+    case Actions.REMOVE_CATEGORY:
+      return removeCategory(state, action);
+    case Actions.UPDATE_SELECTION:
+      return updateSelection(state, action);
+    case Actions.UPDATE_CATEGORY:
+      return updateCategory(state, action);
+
     case 'UPDATE_FILTER':
       return {
         ...computeState({ ...state, filter: action.filter })
@@ -263,7 +325,7 @@ const _getDirty = (obj) => {
 const saveToServer = store => next => action => {
   let result = next(action)
   const newState = store.getState();
-  console.log(action.type);
+  //console.log(action.type);
 
   // Clean up anything that says it's dirty ;)
   const diff = {
@@ -276,9 +338,9 @@ const saveToServer = store => next => action => {
     m += diff[o].length; return m;
   }, 0);
 
-  console.log(diff);
+  //console.log(diff);
 
-  if (count > 0) store.dispatch(ActionCreators.saveToServer(diff));
+  //if (count > 0) store.dispatch(ActionCreators.saveToServer(diff));
 
   return result;
 }

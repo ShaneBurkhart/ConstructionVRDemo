@@ -25,6 +25,7 @@ class FinishSelectionCategoryTable extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.category == nextProps.category &&
+        (this.props.category["fields"]["Selections"] || []).length == (nextProps.category["fields"]["Selections"] || []).length &&
         this.props.orderedSelectionIds == nextProps.orderedSelectionIds &&
         this.state.expanded == nextState.expanded) {
       return false;
@@ -40,65 +41,21 @@ class FinishSelectionCategoryTable extends React.Component {
 
   onNewSelection = () => {
     const { category } = this.props;
-    const newSelections = (category["fields"]["Selections"] || []);
-    const newSelection = {
-      "id": "new" + Math.random().toString(36).substring(2, 15),
-      "fields": {
-        "Type": "New Selection",
-        "Location": "Amenities",
-        "Room": "Study Lounge",
-        "Category": [ category["id"] ],
-        "Order": newSelections.length,
-      }
-    }
-
-    newSelections.push(newSelection["id"]);
-
-    this.props.dispatch(ActionCreators.updateEach({
-      selections: [ newSelection ],
-      categories: [{
-        "id": category["id"],
-        "fields": {
-          ...category["fields"],
-          "Selections": newSelections,
-        },
-      }]
-    }));
+    ActionCreators.addNewSelection(category["id"]);
   }
 
   onRemoveSelection = (selection) => {
-    const { category } = this.props;
-    const newSelections = category["fields"]["Selections"]
-        .filter(s => s != selection["id"]);
-
-    this.props.dispatch(ActionCreators.updateEach({
-      categories: [{
-        "id": category["id"],
-        "fields": {
-          ...category["fields"],
-          "Selections": newSelections,
-        },
-      }]
-    }));
+    ActionCreators.removeSelection(selection["id"]);
   }
 
   onRemoveCategory = (selection) => {
     const { category } = this.props;
-
-    this.props.dispatch(ActionCreators.updateEach({
-      categories: [{ ...category, "DELETE": true }]
-    }));
+    ActionCreators.removeCategory(category["id"]);
   }
 
   onChangeCategoryName = (name) => {
     const { category } = this.props;
-
-    this.props.dispatch(ActionCreators.updateEach({
-      categories: [{
-        "id": category["id"],
-        "fields": { ...category["fields"], "Name": name },
-      }]
-    }));
+    ActionCreators.updateCategory(category["id"], { "Name": name });
   }
 
   onClickReorderCategories = _ => {
