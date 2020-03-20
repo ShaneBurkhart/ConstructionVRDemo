@@ -15,25 +15,6 @@ socket.on(Actions.EXECUTE_CLIENT_EVENT, function(data){
   if (_dispatch) _dispatch(data);
 });
 
-let _isSaving = false;
-
-const _saveToServer = (dispatch, diff) => {
-  if (_isSaving) return;
-  _isSaving = true;
-  console.log('sending to server...');
-
-  $.post({
-    url: "/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes/save",
-    contentType: 'application/json; charset=utf-8',
-    data: JSON.stringify({ ...diff }),
-    dataType: "json",
-    success: (data) => {
-      _isSaving = false;
-      dispatch(ActionCreator.updateEach(data, true));
-    }
-  });
-};
-
 const emit = (event, data) => {
   console.log("Emitting: ", event, data);
   socket.emit(event, { project_token: PROJECT_ACCESS_TOKEN, ...data });
@@ -52,6 +33,10 @@ const ActionCreator = {
     }
   },
 
+  addNewOption: (selectionId, fields) => {
+    emit(Actions.ADD_NEW_OPTION, { selectionId, fields });
+  },
+
   addNewSelection: (categoryId) => {
     emit(Actions.ADD_NEW_SELECTION, { categoryId });
   },
@@ -68,12 +53,20 @@ const ActionCreator = {
     emit(Actions.REMOVE_CATEGORY, { categoryId });
   },
 
+  updateOption: (optionId, fieldsToUpdate) => {
+    emit(Actions.UPDATE_OPTION, { optionId, fieldsToUpdate });
+  },
+
   updateSelection: (selectionId, fieldsToUpdate) => {
     emit(Actions.UPDATE_SELECTION, { selectionId, fieldsToUpdate });
   },
 
   updateCategory: (categoryId, fieldsToUpdate) => {
     emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
+  },
+
+  moveOption: (optionId, destSelectionId, newPosition) => {
+    emit(Actions.MOVE_OPTION, { optionId, destSelectionId, newPosition });
   },
 
   moveSelection: (selectionId, destCategoryId, newPosition) => {
@@ -91,40 +84,12 @@ const ActionCreator = {
     }
   },
 
-  reorderCategories: (orderedCategoryIds) => {
-    return {
-      type: Actions.REORDER_CATEGORIES,
-      orderedCategoryIds
-    }
-  },
-
-  moveOption: (optionId, source, destination) => {
-    return {
-      type: Actions.MOVE_OPTION,
-      optionId, source, destination,
-    }
-  },
-
   updateModal: (modals) => {
     return { type: Actions.UPDATE_MODAL, modals };
   },
 
-  updateEach: (updates, serverUpdate = false) => {
-    if (serverUpdate) console.log("SERVER_UPDATE");
-    return {
-      type: Actions.EACH_UPDATE,
-      ...updates,
-      serverUpdate,
-    }
-  },
-
   searchOptions: (query, callback) => {
     $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
-  },
-
-  saveToServer: (diff) => {
-    console.log('saveToServer()');
-    //return (dispatch) => { _saveToServer(dispatch, diff) };
   },
 
   presignedURL: (file, callback) => {

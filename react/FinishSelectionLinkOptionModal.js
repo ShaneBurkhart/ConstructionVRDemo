@@ -61,16 +61,10 @@ class FinishSelectionLinkOptionModal extends React.Component {
     const { selection, selectedOption } = this.state;
     const newSelectionFields = selection["fields"];
     const newOptions = newSelectionFields["Options"] || [];
-    const newOption = { ...selectedOption, "id": this.newId };
+    const optionFields = _.pick(selectedOption["fields"], "Name", "Image", "URL", "Info");
+    optionFields["Image"] = (optionFields["Image"] || []).map(img => ({ url: img["url"] }));
 
-    newOption["fields"]["Selections"] = [ selection["id"] ];
-    newOptions.push(newOption["id"]);
-    newSelectionFields["Options"] = newOptions;
-
-    this.props.dispatch(ActionCreators.updateEach({
-      selections: [{ ...selection, "fields": newSelectionFields }],
-      options: [newOption],
-    }));
+    ActionCreators.addNewOption(selection["id"], optionFields);
     this.onClose();
   }
 

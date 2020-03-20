@@ -219,6 +219,16 @@ const eachUpdate = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const addNewOption = (state, action) => {
+  var selectionOptions = state.selections[action.selectionId]["fields"]["Options"] || [];
+
+  selectionOptions.push(action.id);
+  state.selections[action.selectionId]["fields"]["Options"] = selectionOptions;
+
+  state.options[action.id] = { id: action.id, fields: action.newOption };
+  return { ...state, ...computeState({ ...state }) };
+}
+
 const addNewSelection = (state, action) => {
   var categorySelections = state.categories[action.categoryId]["fields"]["Selections"] || [];
 
@@ -262,6 +272,37 @@ const updateCategory = (state, action) => {
   const newFields = { ...state.categories[categoryId]["fields"], ...fieldsToUpdate };
 
   state.categories[categoryId]["fields"] = newFields;
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const batchUpdateOptions = (state, action) => {
+  const { updates } = action;
+
+  (updates || []).forEach(update => {
+    const optionId = update["id"];
+    const fieldsToUpdate = update["fields"];
+    const oldFields = state.options[optionId]["fields"];
+    const newFields = { ...oldFields, ...fieldsToUpdate };
+    const oldSelectionId = (oldFields["Selections"] || [])[0];
+    const newSelectionId = (fieldsToUpdate["Selections"] || [])[0];
+
+    state.options[optionId]["fields"] = newFields;
+
+    // Move selection if has new category. Remove from old, add to new.
+    // Order doesn't matter since that's a computed property.
+    if (newSelectionId && oldSelectionId != newSelectionId) {
+      const oldOptions = state.selections[oldSelectionId]["fields"]["Options"] || [];
+      const newOptions = state.selections[newSelectionId]["fields"]["Options"] || [];
+      const oldIndex = oldOptions.findIndex(s => s == optionId);
+
+      oldOptions.splice(oldIndex, 1);
+      state.selections[oldSelectionId]["fields"]["Options"] = oldOptions;
+
+      newOptions.push(optionId);
+      state.selections[newSelectionId]["fields"]["Options"] = newOptions;
+    }
+  });
+
   return { ...state, ...computeState({ ...state }) };
 }
 
@@ -313,6 +354,8 @@ const todos = (state = {}, action) => {
   console.log(action);
 
   switch (action.type) {
+    case Actions.ADD_NEW_OPTION:
+      return addNewOption(state, action);
     case Actions.ADD_NEW_SELECTION:
       return addNewSelection(state, action);
     case Actions.ADD_NEW_CATEGORY:
@@ -329,6 +372,8 @@ const todos = (state = {}, action) => {
       return moveSelection(state, action);
     case Actions.MOVE_CATEGORY:
       return moveCategory(state, action);
+    case Actions.BATCH_UPDATE_OPTIONS:
+      return batchUpdateOptions(state, action);
     case Actions.BATCH_UPDATE_SELECTIONS:
       return batchUpdateSelections(state, action);
 
@@ -336,8 +381,6 @@ const todos = (state = {}, action) => {
       return {
         ...computeState({ ...state, filter: action.filter })
       };
-    case 'REORDER_CATEGORIES':
-      return reorderCategories(state, action);
     case 'MOVE_OPTION':
       return moveOption(state, action);
     case 'UPDATE_MODAL':
@@ -369,33 +412,11 @@ const _getDirty = (obj) => {
   }, []);
 }
 
-const saveToServer = store => next => action => {
-  let result = next(action)
-  const newState = store.getState();
-
-  // Clean up anything that says it's dirty ;)
-  const diff = {
-    categories: _getDirty(newState.categories),
-    selections: _getDirty(newState.selections),
-    options: _getDirty(newState.options),
-  }
-
-  const count = Object.keys(diff).reduce((m,o) => {
-    m += diff[o].length; return m;
-  }, 0);
-
-  //console.log(diff);
-
-  //if (count > 0) store.dispatch(ActionCreators.saveToServer(diff));
-
-  return result;
-}
-
 export default createStore(
   todos,
   _initialState,
   compose(
-    applyMiddleware(thunk, saveToServer),
+    applyMiddleware(thunk),
     window.__REDUX_DEVTOOLS_EXTENSION__ ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
   ),
 );

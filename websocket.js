@@ -15,21 +15,21 @@ async function _findProjectByAccessToken(projectAccessToken) {
   return projectResults[0];
 }
 
-async function addNewCategory(categoryName, projectAccessToken) {
+async function addNewOption(selectionId, fields) {
   try {
-    var project = await _findProjectByAccessToken(projectAccessToken);
-    var newCategory = await base("Categories").create([
+    var selection = await base("Selections").find(selectionId);
+    var newOption = await base("Options").create([
       { "fields": {
-        "Name": categoryName,
-        "Project": [ project.id ],
-        "Order": project.fields["Categories"].length,
+        "Selections": [ selection["id"] ],
+        "Order": (selection.fields["Options"] || []).length,
+        ...fields,
       } }
     ]);
   } catch (e) {
     console.log(e);
   }
 
-  return newCategory[0];
+  return newOption[0];
 }
 
 async function addNewSelection(categoryId) {
@@ -49,6 +49,23 @@ async function addNewSelection(categoryId) {
   }
 
   return newSelection[0];
+}
+
+async function addNewCategory(categoryName, projectAccessToken) {
+  try {
+    var project = await _findProjectByAccessToken(projectAccessToken);
+    var newCategory = await base("Categories").create([
+      { "fields": {
+        "Name": categoryName,
+        "Project": [ project.id ],
+        "Order": project.fields["Categories"].length,
+      } }
+    ]);
+  } catch (e) {
+    console.log(e);
+  }
+
+  return newCategory[0];
 }
 
 async function removeSelection(selectionId) {
@@ -84,6 +101,47 @@ async function updateCategory(categoryId, fieldsToUpdate) {
       "id": categoryId,
       "fields": fieldsToUpdate,
     }]);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function moveOption(optionId, destSelectionId, newPosition, projectAccessToken) {
+  try {
+    const option = await base("Options").find(optionId);
+    const sourceSelectionId = option["fields"]["Selections"][0];
+    const sourceOptions = await base("Options").select({
+      filterByFormula: `{Selection ID} = \"${sourceSelectionId}\"`,
+      sort: [{ field: "Order", direction: "asc" }],
+    }).all();
+    let destOptions = sourceOptions;
+
+    if (sourceSelectionId != destSelectionId) {
+      destOptions = await base("Options").select({
+        filterByFormula: `{Selection ID} = \"${destSelectionId}\"`,
+        sort: [{ field: "Order", direction: "asc" }],
+      }).all();
+    }
+
+    const sourceIndex = sourceOptions.findIndex(s => s["id"] == optionId);
+    const [toMove] = sourceOptions.splice(sourceIndex, 1);
+
+    destOptions.splice(newPosition, 0, toMove);
+
+    const updates = [];
+    sourceOptions.forEach((s, i) => updates.push({
+      "id": s["id"],
+      "fields": { "Order": i, "Selections": [ sourceSelectionId ] },
+    }));
+    if (sourceSelectionId != destSelectionId) {
+      destOptions.forEach((s, i) => updates.push({
+        "id": s["id"],
+        "fields": { "Order": i, "Selections": [ destSelectionId ] },
+      }));
+    }
+
+    await base("Options").update(updates);
+    return updates;
   } catch (e) {
     console.log(e);
   }
@@ -157,6 +215,17 @@ async function moveCategory(categoryId, newPosition, projectAccessToken) {
 io.on('connection', function(socket){
   console.log('New Connections!');
 
+  socket.on(Actions.ADD_NEW_OPTION, function(data){
+    addNewOption(data.selectionId, data.fields).then((newOption) => {
+      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        id: newOption.id,
+        newOption: newOption.fields,
+        type: Actions.ADD_NEW_OPTION,
+        ...data,
+      });
+    });
+  });
+
   socket.on(Actions.ADD_NEW_SELECTION, function(data){
     addNewSelection(data.categoryId).then((newSelection) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
@@ -213,6 +282,16 @@ io.on('connection', function(socket){
         ...data,
       });
     });
+  });
+
+  socket.on(Actions.MOVE_OPTION, function(data){
+    const { optionId, destSelectionId, newPosition, project_token } = data;
+    moveOption(optionId, destSelectionId, newPosition, project_token)
+      .then((updates) => {
+        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates,
+        });
+      });
   });
 
   socket.on(Actions.MOVE_SELECTION, function(data){

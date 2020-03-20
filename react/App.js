@@ -10,7 +10,6 @@ import AdminContext from './context/AdminContext';
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import FinishSelectionFilters from './FinishSelectionFilters';
 import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
-import FinishCategoriesModal from './FinishCategoriesModal';
 import FinishSelectionLinkOptionModal from './FinishSelectionLinkOptionModal';
 import FinishAdminSection from './FinishAdminSection';
 import FinishOptionModal from './FinishOptionModal';
@@ -77,12 +76,6 @@ class App extends React.Component {
     this._isDragging = true;
   }
 
-  handleOpenCategoryModalFor = (categoryId) => {
-    return _ => this.props.dispatch(ActionCreators.updateModal({
-      reorderCategories: categoryId,
-    }));
-  }
-
   onDragEndSelection = (result) => {
     const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilter } = this.props;
     const { source, destination } = result;
@@ -106,7 +99,7 @@ class App extends React.Component {
           newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId);
         } else {
           // Put after the selection we moved it after.
-          const destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
+          destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
           newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId) + 1;
         }
       }
@@ -114,7 +107,9 @@ class App extends React.Component {
       ActionCreators.moveSelection(selectionId, destCategoryId, newPosition);
     } else if (result["type"] == "OPTION") {
       const [random, optionId] = result.draggableId.split("/");
-      this.props.dispatch(ActionCreators.moveOption(optionId, source, destination));
+      const [destCategory, destSelectionId] = destination.droppableId.split("/");
+
+      ActionCreators.moveOption(optionId, destSelectionId, destination.index);
     }
 
     this._isDragging = false;
@@ -132,23 +127,9 @@ class App extends React.Component {
           key={categoryId}
           categoryId={categoryId}
           onClickOption={this.onClickOption}
-          onClickEditCategory={this.handleOpenCategoryModalFor(key)}
         />
       )
     });
-  }
-
-  renderCategoriesModal() {
-    const { orderedCategoryIds, reorderCategoriesModal } = this.props;
-    if (!reorderCategoriesModal) return "";
-
-    return (
-      <FinishCategoriesModal
-        key={reorderCategoriesModal}
-        orderedCategoryIds={orderedCategoryIds}
-        selectedCategory={reorderCategoriesModal}
-      />
-    );
   }
 
   renderOptionModal() {

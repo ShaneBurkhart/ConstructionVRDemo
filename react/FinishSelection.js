@@ -45,10 +45,9 @@ class FinishSelection extends React.Component {
 
   onUnlinkOption = (optionId) => {
     const { selection } = this.props;
+    const newOptions = (selection["fields"]["Options"] || []).filter(o => o != optionId);
 
-    selection["fields"]["Options"] = (selection["fields"]["Options"] || [])
-      .filter(o => o != optionId);
-    this.props.dispatch(ActionCreators.updateEach({ selections: [selection] }));
+    ActionCreators.updateSelection(selection["id"], { "Options": newOptions });
   }
 
   onClickTrashSelection = () => {

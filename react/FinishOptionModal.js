@@ -84,40 +84,15 @@ class FinishOptionModal extends React.Component {
   }
 
   onSave = (saveAll = false) => {
-    const { option, selection, optionsWithSameName } = this.props;
+    const { option, selection } = this.props;
     const { optionId, optionFields } = this.state;
-    const updates = {};
-
-    optionFields["Selections"] = [ selection["id"] ];
-    const newOption = { ...option, "id": optionId, "fields": optionFields };
-    updates.options = [ newOption ];
 
     if (this.isNew) {
-      // Update selection too.
-      const newSelectionFields = selection["fields"];
-      const newSelectionOptions = newSelectionFields["Options"] || [];
-
-      newSelectionOptions.push(optionId);
-      newSelectionFields["Options"] = newSelectionOptions;
-      newOption["fields"]["Order"] = newSelectionOptions.length;
-
-      updates.selections = [ { ...selection, "fields": newSelectionFields } ];
+      ActionCreators.addNewOption(selection["id"], optionFields);
+    } else {
+      ActionCreators.updateOption(optionId, optionFields);
     }
 
-    if (!this.isNew && saveAll && optionsWithSameName &&
-              optionsWithSameName.length > 0) {
-      // Add similar options to the updates
-      optionsWithSameName.forEach(o => {
-        const fields = {
-          ...o["fields"], ...optionFields,
-          "Selections": o["fields"]["Selections"],
-          "Image": (optionFields["Image"] || []).map(i=>({ "url": i["url"] })),
-        };
-        updates.options.push({ ...o, "fields": fields });
-      });
-    }
-
-    this.props.dispatch(ActionCreators.updateEach(updates));
     this.onClose();
   }
 
