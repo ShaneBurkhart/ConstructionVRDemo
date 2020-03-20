@@ -1,6 +1,8 @@
 var app = require('express')();
 var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+var io = require('socket.io')(http, {
+  path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45/socket.io",
+});
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
