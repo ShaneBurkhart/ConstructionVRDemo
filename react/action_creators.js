@@ -3,7 +3,7 @@ import Actions from '../common/actions'
 import _  from 'underscore'
 
 var socket = require('socket.io-client')({
-  path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45/socket.io",
+  path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 })
 var _dispatch = null;
 
