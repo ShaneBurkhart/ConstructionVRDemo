@@ -154,7 +154,14 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
       }));
     }
 
-    await base("Options").update(updates);
+    const chunks = [];
+    const chunkSize = 10;
+    for (var i = 0; i < updates.length; i += chunkSize) {
+        const updatesChunk = updates.slice(i,i + chunkSize);
+        chunks.push(base("Options").update(updates));
+    }
+
+    await Promise.all(chunks);
     return updates;
   } catch (e) {
     console.log(e);
@@ -195,7 +202,14 @@ async function moveSelection(selectionId, destCategoryId, newPosition, projectAc
       }));
     }
 
-    await base("Selections").update(updates);
+    const chunks = [];
+    const chunkSize = 10;
+    for (var i = 0; i < updates.length; i += chunkSize) {
+        const updatesChunk = updates.slice(i,i + chunkSize);
+        chunks.push(base("Selections").update(updates));
+    }
+
+    await Promise.all(chunks);
     return updates;
   } catch (e) {
     console.log(e);
@@ -220,7 +234,15 @@ async function moveCategory(categoryId, newPosition, projectAccessToken) {
       return { "id": c["id"], "fields": { "Order": i } };
     });
 
-    await base("Categories").update(updates);
+    const chunks = [];
+    const chunkSize = 10;
+    for (var i = 0; i < updates.length; i += chunkSize) {
+        const updatesChunk = updates.slice(i,i + chunkSize);
+        chunks.push(base("Categories").update(updates));
+    }
+
+    await Promise.all(chunks);
+    return updates;
   } catch (e) {
     console.log(e);
   }
