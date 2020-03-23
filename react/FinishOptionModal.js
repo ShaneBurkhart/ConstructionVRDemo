@@ -20,7 +20,7 @@ class FinishOptionModal extends React.Component {
 
     this.state = {
       optionId: this.isNew ? newId : option["id"],
-      optionFields: _.clone(option["fields"] || {}),
+      optionFields: _.pick(option["fields"] || {}, "Name", "Info", "URL", "Image"),
       linkUpload: "",
     };
   }

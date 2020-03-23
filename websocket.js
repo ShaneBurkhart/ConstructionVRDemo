@@ -3,6 +3,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 });
+//var io = require('socket.io')(http);
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
@@ -81,6 +82,17 @@ async function removeSelection(selectionId) {
 async function removeCategory(categoryId) {
   try {
     await base("Categories").destroy([ categoryId ]);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function updateOption(optionId, fieldsToUpdate) {
+  try {
+    await base("Options").update([{
+      "id": optionId,
+      "fields": fieldsToUpdate,
+    }]);
   } catch (e) {
     console.log(e);
   }
@@ -263,6 +275,15 @@ io.on('connection', function(socket){
     removeCategory(data.categoryId).then(() => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.REMOVE_CATEGORY,
+        ...data,
+      });
+    });
+  });
+
+  socket.on(Actions.UPDATE_OPTION, function(data){
+    updateOption(data.optionId, data.fieldsToUpdate).then(() => {
+      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        type: Actions.UPDATE_OPTION,
         ...data,
       });
     });

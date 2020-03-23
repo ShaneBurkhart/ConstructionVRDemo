@@ -5,6 +5,8 @@ import _  from 'underscore'
 var socket = require('socket.io-client')({
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 })
+//var socket = require('socket.io-client')("127.0.0.1:3001");
+
 var _dispatch = null;
 
 socket.on('connect', function(){

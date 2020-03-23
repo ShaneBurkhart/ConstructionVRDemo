@@ -170,7 +170,7 @@ export default connect(
     const { selectionId } = props;
     return {
       selection: reduxState.selections[selectionId],
-      orderedOptionIds: reduxState.orderedOptionIdsBySelectionId[selectionId]
+      orderedOptionIds: reduxState.orderedOptionIdsBySelectionId[selectionId],
     }
   },
   null

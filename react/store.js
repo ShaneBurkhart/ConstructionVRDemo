@@ -259,6 +259,14 @@ const removeCategory = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const updateOption = (state, action) => {
+  const { optionId, fieldsToUpdate } = action;
+  const newFields = { ...state.options[optionId]["fields"], ...fieldsToUpdate };
+
+  state.options[optionId]["fields"] = newFields;
+  return { ...state, ...computeState({ ...state }) };
+}
+
 const updateSelection = (state, action) => {
   const { selectionId, fieldsToUpdate } = action;
   const newFields = { ...state.selections[selectionId]["fields"], ...fieldsToUpdate };
@@ -364,6 +372,8 @@ const todos = (state = {}, action) => {
       return removeSelection(state, action);
     case Actions.REMOVE_CATEGORY:
       return removeCategory(state, action);
+    case Actions.UPDATE_OPTION:
+      return updateOption(state, action);
     case Actions.UPDATE_SELECTION:
       return updateSelection(state, action);
     case Actions.UPDATE_CATEGORY:
