@@ -158,7 +158,7 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
     const chunkSize = 10;
     for (var i = 0; i < updates.length; i += chunkSize) {
         const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Options").update(updates));
+        chunks.push(base("Options").update(updatesChunk));
     }
 
     await Promise.all(chunks);
@@ -206,7 +206,7 @@ async function moveSelection(selectionId, destCategoryId, newPosition, projectAc
     const chunkSize = 10;
     for (var i = 0; i < updates.length; i += chunkSize) {
         const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Selections").update(updates));
+        chunks.push(base("Selections").update(updatesChunk));
     }
 
     await Promise.all(chunks);
@@ -238,7 +238,7 @@ async function moveCategory(categoryId, newPosition, projectAccessToken) {
     const chunkSize = 10;
     for (var i = 0; i < updates.length; i += chunkSize) {
         const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Categories").update(updates));
+        chunks.push(base("Categories").update(updatesChunk));
     }
 
     await Promise.all(chunks);
