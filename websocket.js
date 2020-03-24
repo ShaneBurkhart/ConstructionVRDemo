@@ -3,13 +3,50 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 });
-//var io = require('socket.io')(http);
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
 var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
 var Actions = require("./common/actions.js");
+
+const redis = require('redis')
+const session = require('express-session')
+
+let RedisStore = require('connect-redis')(session)
+let redisClient = redis.createClient(6379, "redis")
+let sessionMiddleware = session({
+  store: new RedisStore({ client: redisClient }),
+  secret: '0e409cf7-0aed-4189-96f3-13a80a3c5675',
+  resave: false,
+});
+
+app.use(sessionMiddleware);
+io.use(function(socket, next) {
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
+
+app.get("/api2/admin/login/:admin_token", function (req, res) {
+  const adminToken = req.params["admin_token"];
+  const project = _findProjectByAdminToken(adminToken)
+  if (!project) return res.status(404).send('Not found');
+
+  let redirect_to = req.query["redirect_to"];
+  if (!redirect_to || redirect_to.length == 0) {
+    redirect_to = `/project/${project["fields"]["Access Token"]}`
+  }
+
+  req.session["is_admin"] = true;
+
+  res.redirect(redirect_to);
+});
+
+async function _findProjectByAdminToken(projectAdminToken) {
+  var projectResults = await base("Projects").select({
+    filterByFormula: `FIND(\"${projectAdminToken}\", {Admin Access Token}) >= 1`
+  }).all();
+  return projectResults[0];
+}
 
 async function _findProjectByAccessToken(projectAccessToken) {
   var projectResults = await base("Projects").select({
@@ -284,6 +321,10 @@ async function moveCategory(categoryId, newPosition, projectAccessToken) {
 
 io.on('connection', function(socket){
   console.log('New Connections!');
+  if (!socket.request.session["is_admin"]) {
+    // Updates only connection.  No write access unless is_admin.
+    return;
+  }
 
   socket.on(Actions.ADD_NEW_OPTION, function(data){
     addNewOption(data.selectionId, data.fields).then((newOption) => {

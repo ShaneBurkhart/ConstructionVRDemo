@@ -7,6 +7,7 @@ require 'redis-rack'
 require 'redcarpet'
 require 'json'
 require 'cgi'
+require 'uri'
 require 'aws-sdk'
 require 'aws-sdk-s3'
 require 'securerandom'
@@ -325,7 +326,8 @@ get '/admin/login/:admin_token' do
   # linked hotspots in the app.
   session[:is_admin] = true
 
-  redirect redirect_to
+  # Log admin in on the websocket server too
+  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{URI::encode(redirect_to)}"
 end
 
 post '/admin/linked_hotspot/set' do

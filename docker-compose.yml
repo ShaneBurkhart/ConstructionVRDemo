@@ -1,7 +1,5 @@
 web:
     image: shaneburkhart/construction-vr-demo
-    ports:
-        - "3000:4567"
     links:
         - pg
         - redis
@@ -13,8 +11,8 @@ web:
 
 websocket:
     image: shaneburkhart/construction-vr-demo
-    ports:
-        - "3001:3000"
+    links:
+        - redis
     volumes:
         - .:/app
     env_file:
@@ -29,8 +27,6 @@ react_build:
 
 web_prod:
     image: shaneburkhart/construction-vr-demo
-    ports:
-        - "4567:4567"
     links:
         - pg
         - redis
@@ -40,16 +36,14 @@ web_prod:
 
 websocket_prod:
     image: shaneburkhart/construction-vr-demo
-    ports:
-        - "4568:3000"
+    links:
+        - redis
     env_file:
         - user.env
     command: "node websocket.js"
 
 pg:
     image: postgres
-    ports:
-        - "5432:5432"
     environment:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
@@ -76,3 +70,23 @@ notification_worker:
 redis:
     image: redis:3.2
     command: "redis-server --save '' --appendonly no"
+
+nginx:
+    image: nginx:1.17
+    ports:
+        - "3000:3000"
+    volumes:
+        - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    links:
+        - web
+        - websocket
+
+nginx_prod:
+    image: nginx:1.17
+    ports:
+        - "3001:80"
+    volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    links:
+        - web_prod
+        - websocket_prod
