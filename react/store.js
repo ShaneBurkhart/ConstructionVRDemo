@@ -64,161 +64,6 @@ const computeState = (newState) => {
   return newState;
 }
 
-const reorderCategories = (state, action) => {
-  const { orderedCategoryIds } = action;
-
-  (orderedCategoryIds || []).forEach((cId, i) => {
-    state.categories[cId]["fields"]["Order"] = i;
-    state.categories[cId]["dirty"] = true;
-  });
-
-  return { ...computeState({ ...state }) };
-};
-
-const moveSelection = (state, action) => {
-  const { selectionId, source, destination } = action;
-  const sourceCategoryId = source.droppableId;
-  const destCategoryId = destination.droppableId;
-  const sourceCategory = state.categories[sourceCategoryId];
-  const destCategory = state.categories[destCategoryId];
-  const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
-  let allDestCategorySelections = allSourceCategorySelections;
-  let destSelectionId = null;
-  let destSelectionIndex = null;
-
-  if (sourceCategoryId != destCategoryId) {
-    allDestCategorySelections = state.orderedSelectionIdsByCategoryId[destCategoryId];
-  }
-
-  if (destination.index < filteredDestCategorySelections.length) {
-    destSelectionId = filteredDestCategorySelections[destination.index];
-    destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId);
-  } else {
-    destSelectionId = filteredDestCategorySelections[destination.index - 1];
-    // Put after the selection we moved it after.
-    destSelectionIndex = allDestCategorySelections.findIndex(s => s == destSelectionId) + 1;
-  }
-
-  // Remove id from source category selections
-  // Remove after finding indexes
-  const sourceIndex = allSourceCategorySelections.findIndex(s => s == selectionId);
-  allSourceCategorySelections.splice(sourceIndex, 1);
-
-  // Add id to dest category selections
-  allDestCategorySelections.splice(destSelectionIndex, 0, selectionId);
-
-  // Update order of source category selections
-  sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
-  sourceCategory["dirty"] = true;
-  allSourceCategorySelections.forEach((id, i) => {
-    state.selections[id]["fields"]["Order"] = i;
-    state.selections[id]["dirty"] = true;
-  });
-  // Update orders of dest category selections
-  destCategory["fields"]["Selections"] = allDestCategorySelections;
-  destCategory["dirty"] = true;
-  allDestCategorySelections.forEach((id, i) => {
-    state.selections[id]["fields"]["Order"] = i;
-    state.selections[id]["dirty"] = true;
-  });
-
-  return { ...computeState({ ...state }) }
-}
-
-const moveOption = (state, action) => {
-  const { optionId, source, destination } = action;
-  const [sourceCategory, sourceSelectionId] = source.droppableId.split("/");
-  const [destCategory, destSelectionId] = destination.droppableId.split("/");
-  const sourceSelection = state.selections[sourceSelectionId];
-  const destSelection = state.selections[destSelectionId];
-  const allSourceSelectionOptions = state.orderedOptionIdsBySelectionId[sourceSelectionId];
-  let allDestSelectionOptions = allSourceSelectionOptions;
-
-  if (sourceSelectionId != destSelectionId) {
-    allDestSelectionOptions = state.orderedOptionIdsBySelectionId[destSelectionId];
-  }
-
-  // Remove id from source selection options
-  allSourceSelectionOptions.splice(source.index, 1);
-  // Add id to dest selection options
-  allDestSelectionOptions.splice(destination.index, 0, optionId);
-
-  // Update order of source selection options
-  sourceSelection["fields"]["Options"] = allSourceSelectionOptions;
-  sourceSelection["dirty"] = true;
-  allSourceSelectionOptions.forEach((id, i) => {
-    state.options[id]["fields"]["Order"] = i;
-    state.options[id]["dirty"] = true;
-  });
-  // Update orders of dest selection options
-  destSelection["fields"]["Options"] = allDestSelectionOptions;
-  destSelection["dirty"] = true;
-  allDestSelectionOptions.forEach((id, i) => {
-    state.options[id]["fields"]["Order"] = i;
-    state.options[id]["dirty"] = true;
-  });
-
-  return { ...computeState({ ...state }) }
-}
-
-const removeNew = (state, action) => {
-  // Remove new ids
-  Object.keys(state.categories).forEach(o => { if (o.startsWith("new")) delete state.categories[o]; });
-  Object.keys(state.selections).forEach(o => { if (o.startsWith("new")) delete state.selections[o]; });
-  Object.keys(state.options).forEach(o => { if (o.startsWith("new")) delete state.options[o]; });
-  return { ...state };
-};
-
-const removeDeleted = (state, action) => {
-  // Remove new ids
-  Object.values(state.categories).forEach(o => { if(o["DELETE"]) delete state.categories[o["id"]] });
-  Object.values(state.selections).forEach(o => { if(o["DELETE"]) delete state.selections[o["id"]] });
-  Object.values(state.options).forEach(o => { if(o["DELETE"]) delete state.options[o["id"]] });
-  return { ...state };
-};
-
-const eachUpdate = (state, action) => {
-  const categories = action.categories || [];
-  const selections = action.selections || [];
-  const options = action.options || [];
-
-  const dirty = { "dirty": true };
-  if (action.serverUpdate) {
-    dirty["dirty"] = null;
-    state = removeNew(state);
-    state = removeDeleted(state);
-  }
-
-  categories.forEach(c => {
-    const cat = state.categories[c["id"]];
-    if (cat) {
-      state.categories[c["id"]] = { ...cat, ...c, ...dirty };
-    } else {
-      state.categories[c["id"]] = { ...c, ...dirty };
-    }
-  });
-
-  selections.forEach(s => {
-    const selection = state.selections[s["id"]];
-    if (selection) {
-      state.selections[s["id"]] = { ...selection, ...s, ...dirty };
-    } else {
-      state.selections[s["id"]] = { ...s, ...dirty };
-    }
-  });
-
-  options.forEach(o => {
-    const option = state.options[o["id"]];
-    if (option) {
-      state.options[o["id"]] = { ...option, ...o, ...dirty };
-    } else {
-      state.options[o["id"]] = { ...o, ...dirty };
-    }
-  });
-
-  return { ...state, ...computeState({ ...state }) };
-}
-
 const addNewOption = (state, action) => {
   var selectionOptions = state.selections[action.selectionId]["fields"]["Options"] || [];
 
@@ -296,18 +141,22 @@ const batchUpdateOptions = (state, action) => {
 
     state.options[optionId]["fields"] = newFields;
 
-    // Move selection if has new category. Remove from old, add to new.
+    // Move option if has new selection. Remove from old, add to new.
     // Order doesn't matter since that's a computed property.
     if (newSelectionId && oldSelectionId != newSelectionId) {
       const oldOptions = state.selections[oldSelectionId]["fields"]["Options"] || [];
       const newOptions = state.selections[newSelectionId]["fields"]["Options"] || [];
       const oldIndex = oldOptions.findIndex(s => s == optionId);
 
-      oldOptions.splice(oldIndex, 1);
-      state.selections[oldSelectionId]["fields"]["Options"] = oldOptions;
+      if (oldIndex >= 0) {
+        oldOptions.splice(oldIndex, 1);
+        state.selections[oldSelectionId]["fields"]["Options"] = oldOptions;
+      }
 
-      newOptions.push(optionId);
-      state.selections[newSelectionId]["fields"]["Options"] = newOptions;
+      if (!newOptions.includes(optionId)) {
+        newOptions.push(optionId);
+        state.selections[newSelectionId]["fields"]["Options"] = newOptions;
+      }
     }
   });
 
@@ -334,11 +183,15 @@ const batchUpdateSelections = (state, action) => {
       const newSelections = state.categories[newCategoryId]["fields"]["Selections"] || [];
       const oldIndex = oldSelections.findIndex(s => s == selectionId);
 
-      oldSelections.splice(oldIndex, 1);
-      state.categories[oldCategoryId]["fields"]["Selections"] = oldSelections;
+      if (oldIndex >= 0) {
+        oldSelections.splice(oldIndex, 1);
+        state.categories[oldCategoryId]["fields"]["Selections"] = oldSelections;
+      }
 
-      newSelections.push(selectionId);
-      state.categories[newCategoryId]["fields"]["Selections"] = newSelections;
+      if (!newSelections.includes(selectionId)) {
+        newSelections.push(selectionId);
+        state.categories[newCategoryId]["fields"]["Selections"] = newSelections;
+      }
     }
   });
 
@@ -356,6 +209,79 @@ const moveCategory = (state, action) => {
 
   orderedCategories.forEach((c, i) => state.categories[c["id"]]["fields"]["Order"] = i);
   return { ...state, ...computeState({ ...state }) };
+}
+
+const moveSelection = (state, action) => {
+  const { selectionId, destCategoryId, newPosition } = action;
+  const selection = state.selections[selectionId]
+  const sourceCategoryId = selection["fields"]["Category"][0];
+  const sourceCategory = state.categories[sourceCategoryId];
+  const destCategory = state.categories[destCategoryId];
+  const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
+  let allDestCategorySelections = allSourceCategorySelections;
+  let destSelectionId = null;
+
+  if (sourceCategoryId != destCategoryId) {
+    allDestCategorySelections = state.orderedSelectionIdsByCategoryId[destCategoryId];
+  }
+
+  // Remove id from source category selections
+  // Remove after finding indexes
+  const sourceIndex = allSourceCategorySelections.findIndex(s => s == selectionId);
+  allSourceCategorySelections.splice(sourceIndex, 1);
+
+  // Add id to dest category selections
+  allDestCategorySelections.splice(newPosition, 0, selectionId);
+
+  // Update order of source category selections
+  sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
+  allSourceCategorySelections.forEach((id, i) => {
+    state.selections[id]["fields"]["Order"] = i;
+  });
+  if (sourceCategoryId != destCategoryId) {
+    // Update orders of dest category selections
+    destCategory["fields"]["Selections"] = allDestCategorySelections;
+    allDestCategorySelections.forEach((id, i) => {
+      state.selections[id]["fields"]["Order"] = i;
+    });
+  }
+
+  return { ...computeState({ ...state }) }
+}
+
+const moveOption = (state, action) => {
+  const { optionId, destSelectionId, newPosition } = action;
+  const option = state.options[optionId]
+  const sourceSelectionId = option["fields"]["Selections"][0];
+  const sourceSelection = state.selections[sourceSelectionId];
+  const destSelection = state.selections[destSelectionId];
+  const allSourceSelectionOptions = state.orderedOptionIdsBySelectionId[sourceSelectionId];
+  let allDestSelectionOptions = allSourceSelectionOptions;
+
+  if (sourceSelectionId != destSelectionId) {
+    allDestSelectionOptions = state.orderedOptionIdsBySelectionId[destSelectionId];
+  }
+
+  // Remove id from source selection options
+  const sourceIndex = allSourceSelectionOptions.findIndex(o => o == optionId);
+  allSourceSelectionOptions.splice(sourceIndex, 1);
+  // Add id to dest selection options
+  allDestSelectionOptions.splice(newPosition, 0, optionId);
+
+  // Update order of source selection options
+  sourceSelection["fields"]["Options"] = allSourceSelectionOptions;
+  allSourceSelectionOptions.forEach((id, i) => {
+    state.options[id]["fields"]["Order"] = i;
+  });
+  if (sourceSelectionId != destSelectionId) {
+    // Update orders of dest selection options
+    destSelection["fields"]["Options"] = allDestSelectionOptions;
+    allDestSelectionOptions.forEach((id, i) => {
+      state.options[id]["fields"]["Order"] = i;
+    });
+  }
+
+  return { ...computeState({ ...state }) }
 }
 
 const todos = (state = {}, action) => {
@@ -386,19 +312,15 @@ const todos = (state = {}, action) => {
       return batchUpdateOptions(state, action);
     case Actions.BATCH_UPDATE_SELECTIONS:
       return batchUpdateSelections(state, action);
+    case Actions.MOVE_SELECTION:
+      return moveSelection(state, action);
+    case Actions.MOVE_OPTION:
+      return moveOption(state, action);
 
     case 'UPDATE_FILTER':
-      return {
-        ...computeState({ ...state, filter: action.filter })
-      };
-    case 'MOVE_OPTION':
-      return moveOption(state, action);
+      return { ...computeState({ ...state, filter: action.filter }) };
     case 'UPDATE_MODAL':
       return { ...state, modals: { ...state.modals, ...action.modals }};
-    case 'SERVER_UPDATE':
-      return eachUpdate(removeNew(state, action), action);
-    case 'EACH_UPDATE':
-      return eachUpdate(state, action);
     case 'FULL_UPDATE':
       const filter = state.filter;
       const options = indexByID(action.options);

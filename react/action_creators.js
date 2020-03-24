@@ -19,6 +19,10 @@ socket.on(Actions.EXECUTE_CLIENT_EVENT, function(data){
   if (_dispatch) _dispatch(data);
 });
 
+const dispatch = (action) => {
+  if (_dispatch) _dispatch(action);
+}
+
 const emit = (event, data) => {
   console.log("Emitting: ", event, data);
   socket.emit(event, { project_token: PROJECT_ACCESS_TOKEN, ...data });
@@ -70,10 +74,12 @@ const ActionCreator = {
   },
 
   moveOption: (optionId, destSelectionId, newPosition) => {
+    dispatch({ type: Actions.MOVE_OPTION, optionId, destSelectionId, newPosition });
     emit(Actions.MOVE_OPTION, { optionId, destSelectionId, newPosition });
   },
 
   moveSelection: (selectionId, destCategoryId, newPosition) => {
+    dispatch({ type: Actions.MOVE_SELECTION, selectionId, destCategoryId, newPosition });
     emit(Actions.MOVE_SELECTION, { selectionId, destCategoryId, newPosition });
   },
 
