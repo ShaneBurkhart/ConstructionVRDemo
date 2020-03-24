@@ -97,7 +97,7 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
     }];
 
     if (updateAll) {
-      const optionName = fieldsToUpdate["Name"];
+      const optionName = option["fields"]["Name"];
       const optionsWithSameName = await base("Options").select({
         filterByFormula: `AND(FIND(\"${optionName}\", {Name}) >= 1, FIND(\"${projectId}\", {Project IDs}) >= 1)`,
       }).all();
