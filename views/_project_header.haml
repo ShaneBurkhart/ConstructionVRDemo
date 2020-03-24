@@ -4,6 +4,7 @@
 
     .ui.tabular.menu.hide-print
       %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
-      %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
+      - if (project.units || []).length > 0
+        %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
 
 .site-header-spacer

@@ -78,12 +78,12 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   prefix = params[:p] || ""
 
   if !["Floor Plans", "Screenshots", "Panos"].include? prefix
-    return redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+    return redirect "http://#{request.env["HTTP_HOST"]}/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
   end
 
   unit_version = UnitVersion.find(unit_version_id)
   if unit_version.nil?
-    return redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+    return redirect "http://#{request.env["HTTP_HOST"]}/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
   end
 
   unit_version["#{prefix} Started At"] = nil
@@ -91,7 +91,7 @@ get '/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard/restart' do
   unit_version["Notified At"] = nil
   unit_version.save
 
-  redirect "/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
+  redirect "http://#{request.env["HTTP_HOST"]}/cdd3e3ea-b1bb-453b-96d3-35d344ebc598/rendering/dashboard"
 end
 
 post '/api/temp_upload/presign' do
@@ -436,6 +436,11 @@ get '/project/:access_token' do
   return "Not found" if project.nil?
 
   units = project.units
+  if units.nil? or units.length == 0
+    return redirect "http://#{request.env["HTTP_HOST"]}/project/#{access_token}/finishes"
+  end
+
+
   units.each do |unit|
       @version_id = (unit["Current Version"] || [])[0]
 
@@ -563,7 +568,7 @@ get '/project/:access_token/unit/:id/set_description' do
   unit["Details"] = description
   unit.save
 
-  return redirect "/project/#{access_token}/unit/#{unit_id}"
+  return redirect "http://#{request.env["HTTP_HOST"]}/project/#{access_token}/unit/#{unit_id}"
 end
 
 get '/project/:access_token/unit/:id/set_visibility' do
@@ -583,7 +588,7 @@ get '/project/:access_token/unit/:id/set_visibility' do
   unit["Hidden?"] = set_hidden
   unit.save
 
-  return redirect "/project/#{access_token}/unit/#{unit_id}"
+  return redirect "http://#{request.env["HTTP_HOST"]}/project/#{access_token}/unit/#{unit_id}"
 end
 
 get '/project/:access_token/unit/:id/set_current_version' do
@@ -602,13 +607,13 @@ get '/project/:access_token/unit/:id/set_current_version' do
 
   unit_version = UnitVersion.find(unit_version_id)
   if unit_version.nil?
-    return redirect "/project/#{access_token}/unit/#{unit_id}"
+    return redirect "http://#{request.env["HTTP_HOST"]}/project/#{access_token}/unit/#{unit_id}"
   end
 
   unit["Current Version"] = [unit_version_id]
   unit.save
 
-  return redirect "/project/#{access_token}/unit/#{unit_id}"
+  return redirect "http://#{request.env["HTTP_HOST"]}/project/#{access_token}/unit/#{unit_id}"
 end
 
 
