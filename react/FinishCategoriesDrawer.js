@@ -108,7 +108,7 @@ class FinishCategoriesDrawer extends React.Component {
             onChange={this.onChangeNewCategoryText}
           />
         </Segment>
-        <Segment vertical>
+        <Segment vertical className="categories-section">
           <label>Click to Jump to Category</label>
 
           <Segment vertical>
