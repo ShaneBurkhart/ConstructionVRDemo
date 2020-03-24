@@ -203,7 +203,7 @@ class FinishOptionModal extends React.Component {
                 icon='checkmark'
                 labelPosition='right'
                 content='Save'
-                onClick={this.onSave}
+                onClick={_ => this.onSave(false)}
               />
             }
         </Modal.Actions>
