@@ -87,12 +87,46 @@ async function removeCategory(categoryId) {
   }
 }
 
-async function updateOption(optionId, fieldsToUpdate) {
+async function updateOption(optionId, fieldsToUpdate, updateAll) {
   try {
-    await base("Options").update([{
+    const option = await base("Options").find(optionId);
+    const projectId = option["fields"]["Project IDs"];
+    const updates = [{
       "id": optionId,
       "fields": fieldsToUpdate,
-    }]);
+    }];
+
+    if (updateAll) {
+      const optionName = fieldsToUpdate["Name"];
+      const optionsWithSameName = await base("Options").select({
+        filterByFormula: `AND(FIND(\"${optionName}\", {Name}) >= 1, FIND(\"${projectId}\", {Project IDs}) >= 1)`,
+      }).all();
+
+      optionsWithSameName.forEach(option => {
+        if (option["id"] == optionId) return;
+        const copyFieldsToUpdate = { ...fieldsToUpdate };
+
+        if (fieldsToUpdate["Image"]) {
+          copyFieldsToUpdate["Image"] = fieldsToUpdate["Image"].map(i => ({ url: i["url"] }));
+        }
+
+        updates.push({
+          "id": option["id"],
+          "fields": copyFieldsToUpdate,
+        });
+      });
+    }
+
+    const chunks = [];
+    const chunkSize = 10;
+    for (var i = 0; i < updates.length; i += chunkSize) {
+        const updatesChunk = updates.slice(i,i + chunkSize);
+        chunks.push(base("Options").update(updatesChunk));
+    }
+
+    await Promise.all(chunks);
+    return updates;
+    await base("Options").update([]);
   } catch (e) {
     console.log(e);
   }
@@ -303,11 +337,16 @@ io.on('connection', function(socket){
   });
 
   socket.on(Actions.UPDATE_OPTION, function(data){
-    updateOption(data.optionId, data.fieldsToUpdate).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.UPDATE_OPTION,
-        ...data,
-      });
+    updateOption(data.optionId, data.fieldsToUpdate, data.updateAll).then((updates) => {
+      if (data.updateAll) {
+        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates
+        });
+      } else {
+        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.UPDATE_OPTION, ...data
+        });
+      }
     });
   });
 

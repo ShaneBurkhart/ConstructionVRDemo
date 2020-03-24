@@ -61,8 +61,8 @@ const ActionCreator = {
     emit(Actions.REMOVE_CATEGORY, { categoryId });
   },
 
-  updateOption: (optionId, fieldsToUpdate) => {
-    emit(Actions.UPDATE_OPTION, { optionId, fieldsToUpdate });
+  updateOption: (optionId, fieldsToUpdate, updateAll) => {
+    emit(Actions.UPDATE_OPTION, { optionId, fieldsToUpdate, updateAll });
   },
 
   updateSelection: (selectionId, fieldsToUpdate) => {

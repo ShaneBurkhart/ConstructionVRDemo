@@ -90,7 +90,7 @@ class FinishOptionModal extends React.Component {
     if (this.isNew) {
       ActionCreators.addNewOption(selection["id"], optionFields);
     } else {
-      ActionCreators.updateOption(optionId, optionFields);
+      ActionCreators.updateOption(optionId, optionFields, saveAll);
     }
 
     this.onClose();
