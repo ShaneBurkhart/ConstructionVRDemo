@@ -41,7 +41,9 @@ class FinishSelectionCategoryTable extends React.Component {
 
   onNewSelection = () => {
     const { category, filter } = this.props;
-    ActionCreators.addNewSelection(category["id"], { "Location": filter });
+    let fields = { "Location": filter };
+    if (filter == "All") fields = null;
+    ActionCreators.addNewSelection(category["id"], fields);
   }
 
   onRemoveSelection = (selection) => {
