@@ -9,7 +9,6 @@ import AdminContext from './context/AdminContext';
 import FinishOptionsContainer from './FinishOptionsContainer';
 import AdminControls from './AdminControls';
 import FocusEditableInput from './FocusEditableInput';
-import FocusEditableTextarea from './FocusEditableTextarea';
 
 import "./FinishSelection.css"
 
@@ -97,13 +96,6 @@ class FinishSelection extends React.Component {
             onChange={this.onChangeFor("Room")}
           />
         </div>
-        <FocusEditableTextarea
-          editable={isAdmin}
-          className="notes"
-          unfocusedValue={this.getMarkdownHTML(selectionFields["Notes"])}
-          value={selectionFields["Notes"]}
-          onChange={this.onChangeFor("Notes")}
-        />
       </div>
     );
   }
