@@ -40,8 +40,8 @@ class FinishSelectionCategoryTable extends React.Component {
   }
 
   onNewSelection = () => {
-    const { category } = this.props;
-    ActionCreators.addNewSelection(category["id"]);
+    const { category, filter } = this.props;
+    ActionCreators.addNewSelection(category["id"], { "Location": filter });
   }
 
   onRemoveSelection = (selection) => {
@@ -161,8 +161,9 @@ export default connect(
     const categoryId = props.categoryId;
     const category = reduxState.categories[categoryId];
     const orderedSelectionIds = reduxState.filteredOrderedSelectionIdsByCategoryId[categoryId];
+    const filter = reduxState.filter;
 
-    return { category, orderedSelectionIds };
+    return { category, orderedSelectionIds, filter };
   },
   null
 )(FinishSelectionCategoryTable);

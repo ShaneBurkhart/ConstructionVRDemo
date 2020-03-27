@@ -72,7 +72,7 @@ async function addNewOption(selectionId, fields) {
   return newOption[0];
 }
 
-async function addNewSelection(categoryId) {
+async function addNewSelection(categoryId, fields) {
   try {
     var category = await base("Categories").find(categoryId);
     var newSelection = await base("Selections").create([
@@ -80,6 +80,7 @@ async function addNewSelection(categoryId) {
         "Type": "New Selection",
         "Location": "Amenities",
         "Room": "Study Lounge",
+        ...fields,
         "Category": [ category["id"] ],
         "Order": (category.fields["Selections"] || []).length,
       } }
@@ -338,7 +339,7 @@ io.on('connection', function(socket){
   });
 
   socket.on(Actions.ADD_NEW_SELECTION, function(data){
-    addNewSelection(data.categoryId).then((newSelection) => {
+    addNewSelection(data.categoryId, data.fields).then((newSelection) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newSelection.id,
         newSelection: newSelection.fields,

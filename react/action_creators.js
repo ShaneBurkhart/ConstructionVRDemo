@@ -44,8 +44,8 @@ const ActionCreator = {
     emit(Actions.ADD_NEW_OPTION, { selectionId, fields });
   },
 
-  addNewSelection: (categoryId) => {
-    emit(Actions.ADD_NEW_SELECTION, { categoryId });
+  addNewSelection: (categoryId, fields) => {
+    emit(Actions.ADD_NEW_SELECTION, { categoryId, fields });
   },
 
   addNewCategory: (categoryName) => {
