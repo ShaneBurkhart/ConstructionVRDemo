@@ -4,6 +4,9 @@ var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 });
 
+const { Sequelize } = require('sequelize');
+const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
+
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
 var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
@@ -440,6 +443,17 @@ io.on('connection', function(socket){
   });
 });
 
+async function _testPostgresConnection () {
+  try {
+    await sequelize.authenticate();
+    console.log('Postgres connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+}
+
 http.listen(3000, function(){
-  console.log('listening on *:3000');
+  _testPostgresConnection().then(function () {
+    console.log('listening on *:3000');
+  });
 });
