@@ -4,42 +4,50 @@ IMAGE_TAG=shaneburkhart/${NAME}
 
 all: run
 
-run:
-	docker-compose -p ${NAME} up -d
-
 build:
 	docker build -t ${IMAGE_TAG} -f Dockerfile .
 
-db:
-	docker-compose -p ${NAME} run --rm web_prod rake db:migrate
+run:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
 
 c:
-	docker-compose -p ${NAME} run --rm web /bin/bash
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
 db_models:
-	docker-compose -p ${NAME} run --rm web irb -r ./models/db_models.rb
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web irb -r ./models/db_models.rb
 
 clean:
-	docker-compose -p ${NAME} down || true
-	docker-compose -p ${NAME} rm -f || true
+	docker-compose -f docker-compose.dev.yml -p ${NAME} down || true
+	docker-compose -f docker-compose.dev.yml -p ${NAME} rm -f || true
 
 ps:
-	docker-compose ps
+	docker-compose -f docker-compose.dev.yml -p ${NAME} ps
 
 logs:
-	docker-compose -p ${NAME} logs -f
+	docker-compose -f docker-compose.dev.yml -p ${NAME} logs -f
 
 rerun_photos:
-	docker-compose -p ${NAME} run --rm web_prod /app/scripts/rerun-photos.rb
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web_prod /app/scripts/rerun-photos.rb
+
+########### PROD #################
+prod_clean:
+	docker-compose -f docker-compose.yml -p ${NAME} down || true
+	docker-compose -f docker-compose.yml -p ${NAME} rm -f || true
+
+prod_run:
+	docker-compose -f docker-compose.yml -p ${NAME} up -d
+
+prod_db:
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web_prod rake db:migrate
 
 prod:
 	git checkout master
 	git pull origin master
 	$(MAKE) build
-	$(MAKE) clean
-	$(MAKE) run
-	$(MAKE) db
-	$(MAKE) run
+	$(MAKE) prod_clean
+	$(MAKE) prod_run
+	$(MAKE) prod_db
+	$(MAKE) prod_run
 
 deploy_prod:
 	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo; make prod;"
