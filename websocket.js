@@ -6,6 +6,8 @@ var io = require('socket.io')(http, {
 
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
+var Project = require("./models/project.js");
+var Category = require("./models/category.js");
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })

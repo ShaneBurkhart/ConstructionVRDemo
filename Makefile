@@ -13,6 +13,9 @@ run:
 c:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
+db:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
+
 db_models:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web irb -r ./models/db_models.rb
 
@@ -28,6 +31,9 @@ logs:
 
 rerun_photos:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web_prod /app/scripts/rerun-photos.rb
+
+#generate_migration:
+	#npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
 
 ########### PROD #################
 prod_clean:
