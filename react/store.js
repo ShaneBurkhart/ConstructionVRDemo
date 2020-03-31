@@ -180,26 +180,35 @@ const batchUpdateSelections = (state, action) => {
     const fieldsToUpdate = update["fields"];
     const oldFields = state.selections[selectionId];
     const newFields = { ...oldFields, ...fieldsToUpdate };
-    const oldCategoryId = (oldFields["Category"] || [])[0];
-    const newCategoryId = (fieldsToUpdate["Category"] || [])[0];
+    const oldCategoryId = oldFields.CategoryId;
+    const newCategoryId = fieldsToUpdate.CategoryId;
 
     state.selections[selectionId] = newFields;
 
     // Move selection if has new category. Remove from old, add to new.
     // Order doesn't matter since that's a computed property.
     if (newCategoryId && oldCategoryId != newCategoryId) {
-      const oldSelections = state.categories[oldCategoryId]["Selections"] || [];
-      const newSelections = state.categories[newCategoryId]["Selections"] || [];
+      const oldSelections = [ ...(state.categories[oldCategoryId].Selections || []) ];
+      const newSelections = [ ...(state.categories[newCategoryId].Selections || []) ];
       const oldIndex = oldSelections.findIndex(s => s == selectionId);
+      let newCategory;
 
       if (oldIndex >= 0) {
+        newCategory = { ...state.categories[oldCategoryId] };
+
         oldSelections.splice(oldIndex, 1);
-        state.categories[oldCategoryId]["Selections"] = oldSelections;
+        newCategory.Selections = oldSelections;
+
+        state.categories[oldCategoryId] = newCategory;
       }
 
       if (!newSelections.includes(selectionId)) {
+        newCategory = { ...state.categories[newCategoryId] };
+
         newSelections.push(selectionId);
-        state.categories[newCategoryId]["Selections"] = newSelections;
+        newCategory.Selections = newSelections;
+
+        state.categories[newCategoryId] = newCategory;
       }
     }
   });
@@ -224,14 +233,14 @@ const moveSelection = (state, action) => {
   const { selectionId, destCategoryId, newPosition } = action;
   const selection = state.selections[selectionId]
   const sourceCategoryId = selection.CategoryId;
-  const sourceCategory = state.categories[sourceCategoryId];
-  const destCategory = state.categories[destCategoryId];
-  const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
+  const sourceCategory = { ...state.categories[sourceCategoryId] };
+  const destCategory = { ...state.categories[destCategoryId] };
+  const allSourceCategorySelections = [ ...state.orderedSelectionIdsByCategoryId[sourceCategoryId] ];
   let allDestCategorySelections = allSourceCategorySelections;
   let destSelectionId = null;
 
   if (sourceCategoryId != destCategoryId) {
-    allDestCategorySelections = state.orderedSelectionIdsByCategoryId[destCategoryId];
+    allDestCategorySelections = [ ...state.orderedSelectionIdsByCategoryId[destCategoryId] ];
   }
 
   // Remove id from source category selections
@@ -243,16 +252,25 @@ const moveSelection = (state, action) => {
   allDestCategorySelections.splice(newPosition, 0, selectionId);
 
   // Update order of source category selections
-  sourceCategory["Selections"] = allSourceCategorySelections;
   allSourceCategorySelections.forEach((id, i) => {
-    state.selections[id].order = i;
+    const newSelection = state.selections[id];
+    newSelection.order = i;
+    newSelection.CategoryId = sourceCategory.id;
+    state.selections[id] = newSelection
   });
+  sourceCategory.Selections = allSourceCategorySelections;
+  state.categories[sourceCategoryId] = sourceCategory;
+
   if (sourceCategoryId != destCategoryId) {
     // Update orders of dest category selections
-    destCategory["Selections"] = allDestCategorySelections;
     allDestCategorySelections.forEach((id, i) => {
-      state.selections[id].order = i;
+      const newSelection = state.selections[id];
+      newSelection.order = i;
+      newSelection.CategoryId = destCategory.id;
+      state.selections[id] = newSelection
     });
+    destCategory.Selections = allDestCategorySelections;
+    state.categories[destCategoryId] = destCategory;
   }
 
   return { ...computeState({ ...state }) }

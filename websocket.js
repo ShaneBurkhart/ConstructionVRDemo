@@ -269,19 +269,20 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
 
 async function moveSelection(selectionId, destCategoryId, newPosition, projectAccessToken) {
   try {
-    const selection = await base("Selections").find(selectionId);
-    const sourceCategoryId = selection["fields"]["Category"][0];
-    const sourceSelections = await base("Selections").select({
-      filterByFormula: `{Category ID} = \"${sourceCategoryId}\"`,
-      sort: [{ field: "Order", direction: "asc" }],
-    }).all();
+    const selectionResults = await models.Selection.findAll({ where: { id: selectionId } });
+    const selection = selectionResults[0];
+    const sourceCategoryId = selection.CategoryId;
+    const sourceSelections = await models.Selection.findAll({
+      where: { CategoryId: sourceCategoryId },
+      order:[[ "order", "asc" ]]
+    });
     let destSelections = sourceSelections;
 
     if (sourceCategoryId != destCategoryId) {
-      destSelections = await base("Selections").select({
-        filterByFormula: `{Category ID} = \"${destCategoryId}\"`,
-        sort: [{ field: "Order", direction: "asc" }],
-      }).all();
+      destSelections = await models.Selection.findAll({
+        where: { CategoryId: destCategoryId },
+        order:[[ "order", "asc" ]]
+      });
     }
 
     const sourceIndex = sourceSelections.findIndex(s => s["id"] == selectionId);
@@ -292,23 +293,24 @@ async function moveSelection(selectionId, destCategoryId, newPosition, projectAc
     const updates = [];
     sourceSelections.forEach((s, i) => updates.push({
       "id": s["id"],
-      "fields": { "Order": i, "Category": [ sourceCategoryId ] },
+      "fields": { order: i, CategoryId: sourceCategoryId },
     }));
     if (sourceCategoryId != destCategoryId) {
       destSelections.forEach((s, i) => updates.push({
         "id": s["id"],
-        "fields": { "Order": i, "Category": [ destCategoryId ] },
+        "fields": { order: i, CategoryId: destCategoryId },
       }));
     }
 
-    const chunks = [];
-    const chunkSize = 10;
-    for (var i = 0; i < updates.length; i += chunkSize) {
-        const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Selections").update(updatesChunk));
+    const updatePromises = [];
+    for (var i = 0; i < updates.length; i++) {
+      const update = updates[i];
+      updatePromises.push(models.Selection.update(update["fields"], {
+        where: { id: update["id"] }
+      }))
     }
 
-    await Promise.all(chunks);
+    await Promise.all(updatePromises);
     return updates;
   } catch (e) {
     console.log(e);
