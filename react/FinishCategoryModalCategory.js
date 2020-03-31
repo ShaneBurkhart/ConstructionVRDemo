@@ -12,7 +12,7 @@ class FinishCategoryModalCategory extends React.Component {
     return (
       <Draggable
         key={categoryId}
-        draggableId={categoryId}
+        draggableId={categoryId + ""}
         type="CATEGORY"
         index={index}
       >
@@ -27,7 +27,7 @@ class FinishCategoryModalCategory extends React.Component {
               />
               <div style={{ width: "100%" }}>
                 <p>
-                  <a href={`#${categoryId}`}>{category.fields["Name"]}</a>
+                  <a href={`#${categoryId}`}>{category.name}</a>
                 </p>
               </div>
             </div>

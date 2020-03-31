@@ -1,7 +1,8 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Selection = sequelize.define('Selection', {
-    category_id: DataTypes.INTEGER,
+    ProjectId: DataTypes.BIGINT,
+    CategoryId: DataTypes.BIGINT,
     room: DataTypes.STRING,
     type: DataTypes.STRING,
     location: DataTypes.STRING,
@@ -12,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     Selection.hasMany(models.Option);
     Selection.belongsTo(models.Category);
+    Selection.belongsTo(models.Project);
   };
   return Selection;
 };

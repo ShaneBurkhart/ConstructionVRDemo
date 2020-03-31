@@ -1,6 +1,6 @@
 import React from 'react';
-import * as _ from 'underscore';
 import { connect } from 'react-redux'
+import * as _ from 'underscore';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import ActionCreators from './action_creators';
@@ -24,8 +24,8 @@ class FinishSelection extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    if (this.props.selection == nextProps.selection &&
-        this.props.orderedOptionIds == nextProps.orderedOptionIds &&
+    if (_.isEqual(this.props.selection, nextProps.selection) &&
+        _.isEqual(this.props.orderedOptionIds, nextProps.orderedOptionIds) &&
         this.props.index == nextProps.index) {
       return false;
     }
@@ -44,7 +44,7 @@ class FinishSelection extends React.Component {
 
   onUnlinkOption = (optionId) => {
     const { selection } = this.props;
-    const newOptions = (selection["fields"]["Options"] || []).filter(o => o != optionId);
+    const newOptions = (selection.Options || []).filter(o => o != optionId);
 
     ActionCreators.updateSelection(selection["id"], { "Options": newOptions });
   }
@@ -68,7 +68,6 @@ class FinishSelection extends React.Component {
 
   renderSelectionDetails() {
     const { selection } = this.props;
-    const selectionFields = selection["fields"];
     const isAdmin = this.context;
 
     return (
@@ -76,24 +75,24 @@ class FinishSelection extends React.Component {
         <div className="cell-heading">
           <FocusEditableInput
             editable={isAdmin}
-            value={selectionFields["Type"]}
-            onChange={this.onChangeFor("Type")}
+            value={selection.type}
+            onChange={this.onChangeFor("type")}
           />
         </div>
         <div className="cell-details">
           <span>Location: </span>
           <FocusEditableInput
             editable={isAdmin}
-            value={selectionFields["Location"]}
-            onChange={this.onChangeFor("Location")}
+            value={selection.location}
+            onChange={this.onChangeFor("location")}
           />
         </div>
         <div className="cell-details">
           <span>Niche: </span>
           <FocusEditableInput
             editable={isAdmin}
-            value={selectionFields["Room"]}
-            onChange={this.onChangeFor("Room")}
+            value={selection.room}
+            onChange={this.onChangeFor("room")}
           />
         </div>
       </div>
@@ -104,13 +103,12 @@ class FinishSelection extends React.Component {
     const { selection, orderedOptionIds, index, onClick } = this.props;
     const isAdmin = this.context;
 
-    const selectionFields = selection["fields"];
     const rowClasses = ["table-row", "selection", "white" ];
 
     if (isAdmin) {
       return (
         <Draggable
-          draggableId={selection["id"]}
+          draggableId={selection.id + ""}
           type="SELECTION"
           index={index}
           >
@@ -131,7 +129,7 @@ class FinishSelection extends React.Component {
               <div className="table-column two-third options-cell">
                 <FinishOptionsContainer
                   draggable
-                  droppableId={`${selection["fields"]["Category"][0]}/${selection["id"]}`}
+                  droppableId={`${selection.CategoryId}/${selection.id}`}
                   orderedOptionIds={orderedOptionIds}
                   onNewOption={this.onClickNewOption}
                   onLinkOption={this.onClickLinkOption}

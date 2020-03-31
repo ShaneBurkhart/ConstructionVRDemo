@@ -6,7 +6,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT,
       },
       name: {
         type: Sequelize.STRING
@@ -14,8 +14,8 @@ module.exports = {
       order: {
         type: Sequelize.INTEGER
       },
-      project_id: {
-        type: Sequelize.INTEGER,
+      ProjectId: {
+        type: Sequelize.BIGINT,
         references: {
           model: "Projects",
           key: 'id'

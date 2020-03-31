@@ -21,23 +21,23 @@ const computeState = (newState) => {
 
   // Ordered Categories
   newState.orderedCategoryIds = Object.values(categories)
-      .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
-      .map(c => c["id"]);
+      .sort((a,b) => a.order - b.order)
+      .map(c => c.id);
 
   // Ordered Selections
   newState.orderedSelectionIdsByCategoryId = {};
   newState.filteredOrderedSelectionIdsByCategoryId = {};
   newState.orderedCategoryIds.forEach((categoryId) => {
     const category = categories[categoryId];
-    const selectionsForCategory = (category["fields"]["Selections"] || [])
+    const selectionsForCategory = (category.Selections || [])
         .map(s => (selections[s]));
     const orderedSelectionIds = selectionsForCategory
-        .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
-        .map(s => s["id"]);
+        .sort((a,b) => a.order - b.order)
+        .map(s => s.id);
     const filteredOrderedSelectionIds = selectionsForCategory
-        .filter((s) => (filter == null || filter == "All" || s["fields"]["Location"] == filter))
-        .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
-        .map(s => s["id"]);
+        .filter((s) => (filter == null || filter == "All" || s.location == filter))
+        .sort((a,b) => a.order - b.order)
+        .map(s => s.id);
     newState.filteredOrderedSelectionIdsByCategoryId[categoryId] = filteredOrderedSelectionIds;
     newState.orderedSelectionIdsByCategoryId[categoryId] = orderedSelectionIds;
   });
@@ -46,17 +46,17 @@ const computeState = (newState) => {
   newState.orderedOptionIdsBySelectionId = {};
   Object.keys(selections).forEach((selectionId) => {
     const selection = selections[selectionId];
-    const optionsForSelection = (selection["fields"]["Options"] || [])
+    const optionsForSelection = (selection.Options || [])
         .map(o => (options[o]));
     const orderedOptionIds= optionsForSelection
-        .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
-        .map(o => o["id"]);
+        .sort((a,b) => a.order - b.order)
+        .map(o => o.id);
     newState.orderedOptionIdsBySelectionId[selectionId] = orderedOptionIds;
   });
 
   const locations = {};
   Object.values(newState.selections).forEach((selection) => {
-    const l = selection["fields"]["Location"];
+    const l = selection.location;
     if (l && !locations[l]) locations[l] = true;
   });
   newState.selectionFilters = Object.keys(locations);
@@ -65,34 +65,34 @@ const computeState = (newState) => {
 }
 
 const addNewOption = (state, action) => {
-  var selectionOptions = state.selections[action.selectionId]["fields"]["Options"] || [];
+  var selectionOptions = state.selections[action.selectionId]["Options"] || [];
 
   selectionOptions.push(action.id);
-  state.selections[action.selectionId]["fields"]["Options"] = selectionOptions;
+  state.selections[action.selectionId]["Options"] = selectionOptions;
 
-  state.options[action.id] = { id: action.id, fields: action.newOption };
+  state.options[action.id] = { id: action.id, ...action.newOption };
   return { ...state, ...computeState({ ...state }) };
 }
 
 const addNewSelection = (state, action) => {
-  var categorySelections = state.categories[action.categoryId]["fields"]["Selections"] || [];
+  var categorySelections = state.categories[action.categoryId]["Selections"] || [];
 
   categorySelections.push(action.id);
-  state.categories[action.categoryId]["fields"]["Selections"] = categorySelections;
+  state.categories[action.categoryId]["Selections"] = categorySelections;
 
-  state.selections[action.id] = { id: action.id, fields: action.newSelection };
+  state.selections[action.id] = { id: action.id, ...action.newSelection };
   return { ...state, ...computeState({ ...state }) };
 }
 
 const addNewCategory = (state, action) => {
-  state.categories[action.id] = { id: action.id, fields: action.newCategory };
+  state.categories[action.id] = { id: action.id, ...action.newCategory };
   return { ...state, ...computeState({ ...state }) };
 }
 
 const removeSelection = (state, action) => {
   var selection = state.selections[action.selectionId];
-  var categoryId = selection["fields"]["Category"][0];
-  var categorySelections = state.categories[categoryId]["fields"]["Selections"] || [];
+  var categoryId = selection["Category"][0];
+  var categorySelections = state.categories[categoryId]["Selections"] || [];
 
   categorySelections.splice(categorySelections.indexOf(action.selectionId), 1);
   delete state.selections[action.selectionId];
@@ -106,25 +106,25 @@ const removeCategory = (state, action) => {
 
 const updateOption = (state, action) => {
   const { optionId, fieldsToUpdate } = action;
-  const newFields = { ...state.options[optionId]["fields"], ...fieldsToUpdate };
+  const newFields = { ...state.options[optionId], ...fieldsToUpdate };
 
-  state.options[optionId]["fields"] = newFields;
+  state.options[optionId] = newFields;
   return { ...state, ...computeState({ ...state }) };
 }
 
 const updateSelection = (state, action) => {
   const { selectionId, fieldsToUpdate } = action;
-  const newFields = { ...state.selections[selectionId]["fields"], ...fieldsToUpdate };
+  const newFields = { ...state.selections[selectionId], ...fieldsToUpdate };
 
-  state.selections[selectionId]["fields"] = newFields;
+  state.selections[selectionId] = newFields;
   return { ...state, ...computeState({ ...state }) };
 }
 
 const updateCategory = (state, action) => {
   const { categoryId, fieldsToUpdate } = action;
-  const newFields = { ...state.categories[categoryId]["fields"], ...fieldsToUpdate };
+  const newFields = { ...state.categories[categoryId], ...fieldsToUpdate };
 
-  state.categories[categoryId]["fields"] = newFields;
+  state.categories[categoryId] = newFields;
   return { ...state, ...computeState({ ...state }) };
 }
 
@@ -134,28 +134,37 @@ const batchUpdateOptions = (state, action) => {
   (updates || []).forEach(update => {
     const optionId = update["id"];
     const fieldsToUpdate = update["fields"];
-    const oldFields = state.options[optionId]["fields"];
+    const oldFields = state.options[optionId];
     const newFields = { ...oldFields, ...fieldsToUpdate };
-    const oldSelectionId = (oldFields["Selections"] || [])[0];
-    const newSelectionId = (fieldsToUpdate["Selections"] || [])[0];
+    const oldSelectionId = oldFields.SelectionId;
+    const newSelectionId = fieldsToUpdate.SelectionId;
 
-    state.options[optionId]["fields"] = newFields;
+    state.options[optionId] = newFields;
 
     // Move option if has new selection. Remove from old, add to new.
     // Order doesn't matter since that's a computed property.
     if (newSelectionId && oldSelectionId != newSelectionId) {
-      const oldOptions = state.selections[oldSelectionId]["fields"]["Options"] || [];
-      const newOptions = state.selections[newSelectionId]["fields"]["Options"] || [];
+      const oldOptions = [ ...(state.selections[oldSelectionId].Options || []) ];
+      const newOptions = [ ...(state.selections[newSelectionId].Options || []) ];
       const oldIndex = oldOptions.findIndex(s => s == optionId);
+      let newSelection;
 
       if (oldIndex >= 0) {
+        newSelection = { ...state.selections[oldSelectionId] };
+
         oldOptions.splice(oldIndex, 1);
-        state.selections[oldSelectionId]["fields"]["Options"] = oldOptions;
+        newSelection.Options = oldOptions;
+
+        state.selections[oldSelectionId] = newSelection;
       }
 
       if (!newOptions.includes(optionId)) {
+        newSelection = state.selections[newSelectionId];
+
         newOptions.push(optionId);
-        state.selections[newSelectionId]["fields"]["Options"] = newOptions;
+        newSelection.Options = newOptions;
+
+        state.selections[newSelectionId] = newSelection;
       }
     }
   });
@@ -169,28 +178,28 @@ const batchUpdateSelections = (state, action) => {
   (updates || []).forEach(update => {
     const selectionId = update["id"];
     const fieldsToUpdate = update["fields"];
-    const oldFields = state.selections[selectionId]["fields"];
+    const oldFields = state.selections[selectionId];
     const newFields = { ...oldFields, ...fieldsToUpdate };
     const oldCategoryId = (oldFields["Category"] || [])[0];
     const newCategoryId = (fieldsToUpdate["Category"] || [])[0];
 
-    state.selections[selectionId]["fields"] = newFields;
+    state.selections[selectionId] = newFields;
 
     // Move selection if has new category. Remove from old, add to new.
     // Order doesn't matter since that's a computed property.
     if (newCategoryId && oldCategoryId != newCategoryId) {
-      const oldSelections = state.categories[oldCategoryId]["fields"]["Selections"] || [];
-      const newSelections = state.categories[newCategoryId]["fields"]["Selections"] || [];
+      const oldSelections = state.categories[oldCategoryId]["Selections"] || [];
+      const newSelections = state.categories[newCategoryId]["Selections"] || [];
       const oldIndex = oldSelections.findIndex(s => s == selectionId);
 
       if (oldIndex >= 0) {
         oldSelections.splice(oldIndex, 1);
-        state.categories[oldCategoryId]["fields"]["Selections"] = oldSelections;
+        state.categories[oldCategoryId]["Selections"] = oldSelections;
       }
 
       if (!newSelections.includes(selectionId)) {
         newSelections.push(selectionId);
-        state.categories[newCategoryId]["fields"]["Selections"] = newSelections;
+        state.categories[newCategoryId]["Selections"] = newSelections;
       }
     }
   });
@@ -201,20 +210,20 @@ const batchUpdateSelections = (state, action) => {
 const moveCategory = (state, action) => {
   const { categoryId, newPosition } = action;
   const orderedCategories = Object.values(state.categories)
-          .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
+          .sort((a,b) => a.order - b.order)
 
   const startIndex = orderedCategories.findIndex(c => c["id"] == categoryId);
   const [category] = orderedCategories.splice(startIndex, 1);
   orderedCategories.splice(newPosition, 0, category);
 
-  orderedCategories.forEach((c, i) => state.categories[c["id"]]["fields"]["Order"] = i);
+  orderedCategories.forEach((c, i) => state.categories[c.id].order = i);
   return { ...state, ...computeState({ ...state }) };
 }
 
 const moveSelection = (state, action) => {
   const { selectionId, destCategoryId, newPosition } = action;
   const selection = state.selections[selectionId]
-  const sourceCategoryId = selection["fields"]["Category"][0];
+  const sourceCategoryId = selection.CategoryId;
   const sourceCategory = state.categories[sourceCategoryId];
   const destCategory = state.categories[destCategoryId];
   const allSourceCategorySelections = state.orderedSelectionIdsByCategoryId[sourceCategoryId];
@@ -234,15 +243,15 @@ const moveSelection = (state, action) => {
   allDestCategorySelections.splice(newPosition, 0, selectionId);
 
   // Update order of source category selections
-  sourceCategory["fields"]["Selections"] = allSourceCategorySelections;
+  sourceCategory["Selections"] = allSourceCategorySelections;
   allSourceCategorySelections.forEach((id, i) => {
-    state.selections[id]["fields"]["Order"] = i;
+    state.selections[id].order = i;
   });
   if (sourceCategoryId != destCategoryId) {
     // Update orders of dest category selections
-    destCategory["fields"]["Selections"] = allDestCategorySelections;
+    destCategory["Selections"] = allDestCategorySelections;
     allDestCategorySelections.forEach((id, i) => {
-      state.selections[id]["fields"]["Order"] = i;
+      state.selections[id].order = i;
     });
   }
 
@@ -252,14 +261,14 @@ const moveSelection = (state, action) => {
 const moveOption = (state, action) => {
   const { optionId, destSelectionId, newPosition } = action;
   const option = state.options[optionId]
-  const sourceSelectionId = option["fields"]["Selections"][0];
-  const sourceSelection = state.selections[sourceSelectionId];
-  const destSelection = state.selections[destSelectionId];
-  const allSourceSelectionOptions = state.orderedOptionIdsBySelectionId[sourceSelectionId];
+  const sourceSelectionId = option.SelectionId;
+  const sourceSelection = { ...state.selections[sourceSelectionId] };
+  const destSelection = { ...state.selections[destSelectionId] };
+  const allSourceSelectionOptions = [ ...state.orderedOptionIdsBySelectionId[sourceSelectionId] ];
   let allDestSelectionOptions = allSourceSelectionOptions;
 
   if (sourceSelectionId != destSelectionId) {
-    allDestSelectionOptions = state.orderedOptionIdsBySelectionId[destSelectionId];
+    allDestSelectionOptions = [ ...state.orderedOptionIdsBySelectionId[destSelectionId] ];
   }
 
   // Remove id from source selection options
@@ -269,16 +278,25 @@ const moveOption = (state, action) => {
   allDestSelectionOptions.splice(newPosition, 0, optionId);
 
   // Update order of source selection options
-  sourceSelection["fields"]["Options"] = allSourceSelectionOptions;
   allSourceSelectionOptions.forEach((id, i) => {
-    state.options[id]["fields"]["Order"] = i;
+    const newOption = { ...state.options[id] };
+    newOption.order = i;
+    newOption.SelectionId = sourceSelection.id;
+    state.options[id] = newOption;
   });
+  sourceSelection.Options = allSourceSelectionOptions;
+  state.selections[sourceSelectionId] = sourceSelection;
+
   if (sourceSelectionId != destSelectionId) {
     // Update orders of dest selection options
-    destSelection["fields"]["Options"] = allDestSelectionOptions;
     allDestSelectionOptions.forEach((id, i) => {
-      state.options[id]["fields"]["Order"] = i;
+      const newOption = { ...state.options[id] };
+      newOption.order = i;
+      newOption.SelectionId = destSelection.id;
+      state.options[id] = newOption;
     });
+    destSelection.Options = allDestSelectionOptions;
+    state.selections[destSelectionId] = destSelection;
   }
 
   return { ...computeState({ ...state }) }
@@ -326,6 +344,27 @@ const todos = (state = {}, action) => {
       const options = indexByID(action.options);
       const selections = indexByID(action.selections);
       const categories = indexByID(action.categories);
+
+      Object.keys(categories).forEach(categoryId => {
+        const categorySelections = action.selections.reduce((memo, s) => {
+          if (s.CategoryId == categoryId) memo.push(s.id); return memo;
+        }, [])
+        categories[categoryId].Selections = categorySelections;
+      });
+
+      Object.keys(selections).forEach(selectionId => {
+        const selectionOptions = action.options.reduce((memo, o) => {
+          if (o.SelectionId == selectionId) memo.push(o.id); return memo;
+        }, [])
+        selections[selectionId].Options = selectionOptions;
+      });
+
+      Object.keys(options).forEach(optionId => {
+        const optionImages = action.optionImages.reduce((memo, oi) => {
+          if (oi.OptionId == optionId) memo.push(oi); return memo;
+        }, [])
+        options[optionId].Images = optionImages;
+      });
 
       return {
         ...state,

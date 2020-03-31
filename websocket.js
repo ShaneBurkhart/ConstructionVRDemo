@@ -6,8 +6,7 @@ var io = require('socket.io')(http, {
 
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
-var Project = require("./models/project.js");
-var Category = require("./models/category.js");
+var models = require("./models/index.js");
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
@@ -31,6 +30,27 @@ io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
 
+app.get("/api2/project/:access_token/finishes", function (req, res) {
+  const projectAccessToken = req.params["access_token"];
+  const adminMode = !!req.session["is_admin"];
+  _findProjectByAccessToken(projectAccessToken).then(function (project) {
+    Promise.all([
+      project.getCategories(),
+      project.getSelections(),
+      project.getOptions(),
+      project.getOptionImages(),
+    ]).then(function (results) {
+      res.json({
+        admin_mode: adminMode,
+        categories: results[0],
+        selections: results[1],
+        options: results[2],
+        optionImages: results[3],
+      });
+    });
+  });
+});
+
 app.get("/api2/admin/login/:admin_token", function (req, res) {
   const adminToken = req.params["admin_token"];
   const project = _findProjectByAdminToken(adminToken)
@@ -47,16 +67,16 @@ app.get("/api2/admin/login/:admin_token", function (req, res) {
 });
 
 async function _findProjectByAdminToken(projectAdminToken) {
-  var projectResults = await base("Projects").select({
-    filterByFormula: `FIND(\"${projectAdminToken}\", {Admin Access Token}) >= 1`
-  }).all();
+  const projectResults = await models.Project.findAll({
+    where: { adminAccessToken: projectAdminToken },
+  });
   return projectResults[0];
 }
 
 async function _findProjectByAccessToken(projectAccessToken) {
-  var projectResults = await base("Projects").select({
-    filterByFormula: `FIND(\"${projectAccessToken}\", {Access Token}) >= 1`
-  }).all();
+  const projectResults = await models.Project.findAll({
+    where: { accessToken: projectAccessToken },
+  });
   return projectResults[0];
 }
 
@@ -199,19 +219,20 @@ async function updateCategory(categoryId, fieldsToUpdate) {
 
 async function moveOption(optionId, destSelectionId, newPosition, projectAccessToken) {
   try {
-    const option = await base("Options").find(optionId);
-    const sourceSelectionId = option["fields"]["Selections"][0];
-    const sourceOptions = await base("Options").select({
-      filterByFormula: `{Selection ID} = \"${sourceSelectionId}\"`,
-      sort: [{ field: "Order", direction: "asc" }],
-    }).all();
+    const optionResults = await models.Option.findAll({ where: { id: optionId } });
+    const option = optionResults[0];
+    const sourceSelectionId = option.SelectionId;
+    const sourceOptions = await models.Option.findAll({
+      where: { SelectionId: sourceSelectionId },
+      order:[[ "order", "asc" ]]
+    });
     let destOptions = sourceOptions;
 
     if (sourceSelectionId != destSelectionId) {
-      destOptions = await base("Options").select({
-        filterByFormula: `{Selection ID} = \"${destSelectionId}\"`,
-        sort: [{ field: "Order", direction: "asc" }],
-      }).all();
+      destOptions = await models.Option.findAll({
+        where: { SelectionId: destSelectionId },
+        order:[[ "order", "asc" ]]
+      });
     }
 
     const sourceIndex = sourceOptions.findIndex(s => s["id"] == optionId);
@@ -222,23 +243,24 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
     const updates = [];
     sourceOptions.forEach((s, i) => updates.push({
       "id": s["id"],
-      "fields": { "Order": i, "Selections": [ sourceSelectionId ] },
+      "fields": { order: i, SelectionId: sourceSelectionId },
     }));
     if (sourceSelectionId != destSelectionId) {
       destOptions.forEach((s, i) => updates.push({
         "id": s["id"],
-        "fields": { "Order": i, "Selections": [ destSelectionId ] },
+        "fields": { order: i, SelectionId: destSelectionId },
       }));
     }
 
-    const chunks = [];
-    const chunkSize = 10;
-    for (var i = 0; i < updates.length; i += chunkSize) {
-        const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Options").update(updatesChunk));
+    const updatePromises = [];
+    for (var i = 0; i < updates.length; i++) {
+      const update = updates[i];
+      updatePromises.push(models.Option.update(update["fields"], {
+        where: { id: update["id"] }
+      }))
     }
 
-    await Promise.all(chunks);
+    await Promise.all(updatePromises);
     return updates;
   } catch (e) {
     console.log(e);

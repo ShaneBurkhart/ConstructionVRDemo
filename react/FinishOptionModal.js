@@ -20,7 +20,7 @@ class FinishOptionModal extends React.Component {
 
     this.state = {
       optionId: this.isNew ? newId : option["id"],
-      optionFields: _.pick(option["fields"] || {}, "Name", "Info", "URL", "Image"),
+      optionFields: option || {},
       linkUpload: "",
     };
   }
@@ -31,10 +31,10 @@ class FinishOptionModal extends React.Component {
 
     if (imgMatch) {
       const newFields = _.clone(this.state.optionFields);
-      const newImages = Array.from(newFields["Image"] || []);
+      const newImages = Array.from(newFields.Images || []);
 
       newImages.push({ url: linkUpload });
-      newFields["Image"] = newImages;
+      newFields.Images = newImages;
 
       this.setState({ optionFields: newFields, linkUpload: "" });
     }
@@ -46,16 +46,16 @@ class FinishOptionModal extends React.Component {
 
   onDrop = (acceptedFiles) => {
     const { optionFields } = this.state;
-    if ((optionFields["Image"] || []).length >= 2) return;
+    if ((optionFields.Images || []).length >= 2) return;
 
     (acceptedFiles || []).forEach(file => {
       ActionCreators.presignedURL(file, (data) => {
         ActionCreators.uploadFile(file, data.presignedURL, () => {
           const newFields = _.clone(this.state.optionFields);
-          const newImages = Array.from(newFields["Image"] || []);
+          const newImages = Array.from(newFields.Images || []);
 
           newImages.push({ url: data.awsURL });
-          newFields["Image"] = newImages;
+          newFields.Images = newImages;
 
           this.setState({ optionFields: newFields });
         });
@@ -65,12 +65,12 @@ class FinishOptionModal extends React.Component {
 
   removeImage = (imgId) => {
     const { optionFields } = this.state;
-    const newImages = optionFields["Image"] || [];
+    const newImages = optionFields.Images || [];
     const idx = newImages.findIndex(i => i["id"] == imgId);
 
     if (idx >= 0) {
       newImages.splice(idx, 1);
-      optionFields["Image"] = newImages;
+      optionFields.Images = newImages;
       this.setState({ optionFields });
     }
   }
@@ -103,7 +103,7 @@ class FinishOptionModal extends React.Component {
   render() {
     const { optionsWithSameName, option } = this.props;
     const { optionFields, linkUpload } = this.state;
-    const images = optionFields["Image"] || [];
+    const images = optionFields.Images || [];
 
     return (
       <Modal open={true} className="finish-option-modal">
@@ -117,8 +117,8 @@ class FinishOptionModal extends React.Component {
                 fluid
                 label="Name"
                 placeholder='CANARM 7" Disc Light LED - White'
-                value={optionFields["Name"] || ""}
-                onChange={this.onChangeFor("Name")}
+                value={optionFields.name || ""}
+                onChange={this.onChangeFor("name")}
               />
             </Form.Group>
 
@@ -160,14 +160,14 @@ class FinishOptionModal extends React.Component {
             <Form.Input
               label="Product URL"
               placeholder="http://...."
-              value={optionFields["URL"] || ""}
-              onChange={this.onChangeFor("URL")}
+              value={optionFields.url || ""}
+              onChange={this.onChangeFor("url")}
             />
             <Form.TextArea
               label='Notes'
               placeholder='Add notes about this option...'
-              value={optionFields["Info"] || ""}
-              onChange={this.onChangeFor("Info")}
+              value={optionFields.info || ""}
+              onChange={this.onChangeFor("info")}
             />
           </Form>
         </Modal.Content>
@@ -182,7 +182,7 @@ class FinishOptionModal extends React.Component {
                 content={
                   <div>
                     <p className="bold">
-                      Do you want to make these changes to all options named "{option["fields"]["Name"]}" in this project?
+                      Do you want to make these changes to all options named "{option.name}" in this project?
                     </p>
                     <Button color="blue" onClick={_ => this.onSave(false)}>No</Button>
                     <Button color="green" onClick={_ => this.onSave(true)}>Yes</Button>
@@ -215,13 +215,13 @@ class FinishOptionModal extends React.Component {
 export default connect((reduxState, props) => {
   const { optionId } = props;
   const option = reduxState.options[optionId];
-  const fields = (option || {})["fields"] || {};
+  const fields = option;
 
   return {
     option: option,
     selection: reduxState.selections[props.selectionId],
     optionsWithSameName: Object.values(reduxState.options).filter(o => {
-      return o["fields"]["Name"] == fields["Name"] && o["id"] != optionId;
+      return o.name == fields.name && o.id != optionId;
     }),
   };
 }, null)(FinishOptionModal);

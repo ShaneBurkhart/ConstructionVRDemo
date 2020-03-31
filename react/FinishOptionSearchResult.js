@@ -30,8 +30,8 @@ class FinishOptionSearchResult extends React.Component {
 
   render() {
     const { option, short, index } = this.props;
-    const optionFields = option["fields"];
-    const images = (optionFields["Image"] || []).slice(0, 2);
+    const optionFields = option;
+    const images = (optionFields.Images || []).slice(0, 2);
     const classNames = ["finish-option"];
     if (short) classNames.push("short");
 
@@ -41,11 +41,11 @@ class FinishOptionSearchResult extends React.Component {
         onClick={this.onClick}
       >
         <div className="half">
-          <p className="cell-heading">{optionFields["Name"]}</p>
-          {!!optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+          <p className="cell-heading">{optionFields.name}</p>
+          {!!optionFields.unitPrice && <p>Price: ${optionFields.unitPrice}</p>}
           <div
             className="notes"
-            dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+            dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields.info) }}
             />
         </div>
         <div className="half images">

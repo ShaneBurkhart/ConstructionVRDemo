@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux'
+import * as _ from 'underscore';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Popup, Button, Icon } from 'semantic-ui-react'
 
@@ -25,8 +26,8 @@ class FinishSelectionCategoryTable extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.category == nextProps.category &&
-        (this.props.category["fields"]["Selections"] || []).length == (nextProps.category["fields"]["Selections"] || []).length &&
-        this.props.orderedSelectionIds == nextProps.orderedSelectionIds &&
+        _.isEqual(this.props.category.Selections, nextProps.category.Selections) &&
+        _.isEqual(this.props.orderedSelectionIds, nextProps.orderedSelectionIds) &&
         this.state.expanded == nextState.expanded) {
       return false;
     }
@@ -41,7 +42,7 @@ class FinishSelectionCategoryTable extends React.Component {
 
   onNewSelection = () => {
     const { category, filter } = this.props;
-    let fields = { "Location": filter };
+    let fields = { "location": filter };
     if (filter == "All") fields = null;
     ActionCreators.addNewSelection(category["id"], fields);
   }
@@ -92,7 +93,7 @@ class FinishSelectionCategoryTable extends React.Component {
     if (isAdmin) {
       table = (
         <div>
-          <Droppable droppableId={category.id} type="SELECTION">
+          <Droppable droppableId={category.id + ""} type="SELECTION">
             {(provided, snapshot) => (
               <div className="table" ref={provided.innerRef} {...provided.droppableProps} >
                 <div className="table-row">
@@ -129,7 +130,7 @@ class FinishSelectionCategoryTable extends React.Component {
             <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
             <FocusEditableInput
               editable={isAdmin}
-              value={category.fields["Name"]}
+              value={category.name}
               onChange={this.onChangeCategoryName}
             />
             <span className="expand-collapse hide-print">

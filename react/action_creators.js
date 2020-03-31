@@ -30,7 +30,7 @@ const emit = (event, data) => {
 const ActionCreator = {
   load: (callback) => {
     return (dispatch) => {
-      $.get("/api/project/" + PROJECT_ACCESS_TOKEN + "/finishes", (data) => {
+      $.get("/api2/project/" + PROJECT_ACCESS_TOKEN + "/finishes", (data) => {
         dispatch({
           type: Actions.FULL_UPDATE,
           ...data

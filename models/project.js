@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
   Project.associate = function(models) {
     // associations can be defined here
     Project.hasMany(models.Category);
+    Project.hasMany(models.Selection);
+    Project.hasMany(models.Option);
+    Project.hasMany(models.OptionImage);
   };
+
   return Project;
 };

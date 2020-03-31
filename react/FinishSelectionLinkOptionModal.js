@@ -13,7 +13,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
 
     const selection = props.selection || {};
 
-    this._originalCategory = (selection["fields"] || {})["Category"][0];
+    this._originalCategory = selection.CategoryId;
     this.newId = "new" + Math.random().toString(36).substring(2, 15);
 
     this._handleSearch = e => {
@@ -59,12 +59,12 @@ class FinishSelectionLinkOptionModal extends React.Component {
 
   onSave = () => {
     const { selection, selectedOption } = this.state;
-    const newSelectionFields = selection["fields"];
-    const newOptions = newSelectionFields["Options"] || [];
-    const optionFields = _.pick(selectedOption["fields"], "Name", "Image", "URL", "Info");
-    optionFields["Image"] = (optionFields["Image"] || []).map(img => ({ url: img["url"] }));
+    const newSelectionFields = selection;
+    const newOptions = newSelection.Options || [];
+    const optionFields = selectedOption;
+    optionFields.Images = (optionFields.Images || []).map(img => ({ url: img.url }));
 
-    ActionCreators.addNewOption(selection["id"], optionFields);
+    ActionCreators.addNewOption(selection.id, optionFields);
     this.onClose();
   }
 
@@ -90,7 +90,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
       <Modal open={true}>
         <Modal.Header style={{ display: "flex" }}>
           <div style={{ width: "100%" }}>
-            <p style={{ marginBottom: 0 }}><span>Add To:</span> {selection["fields"]["Name"]}</p>
+            <p style={{ marginBottom: 0 }}><span>Add To:</span> {selection.name}</p>
             <div style={{ fontSize: 14, marginBottom: 0 }}>
               <Input value={searchQuery} onChange={this._handleSearch} placeholder="Search for options..." />
             </div>
@@ -113,7 +113,7 @@ class FinishSelectionLinkOptionModal extends React.Component {
         <Modal.Actions style={{ display: "flex" }}>
           <div style={{ width: "100%", textAlign: "left" }}>
             <p style={{ fontSize: 14, lineHeight: 1.2 }}>
-              <span className="bold">Selected:</span> {selectedOption && selectedOption["fields"]["Name"]}
+              <span className="bold">Selected:</span> {selectedOption && selectedOption.name}
             </p>
           </div>
           <Button

@@ -6,12 +6,19 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.BIGINT,
       },
-      option_id: {
-        type: Sequelize.INTEGER,
+      OptionId: {
+        type: Sequelize.BIGINT,
         references: {
           model: "Options",
+          key: 'id'
+        },
+      },
+      ProjectId: {
+        type: Sequelize.BIGINT,
+        references: {
+          model: "Projects",
           key: 'id'
         },
       },

@@ -28,7 +28,7 @@ class FinishOption extends React.Component {
 
     this.props.dispatch(ActionCreators.updateModal({
       optionId: option["id"],
-      selectionId: option["fields"]["Selections"][0],
+      selectionId: option.Selections[0],
     }));
   }
 
@@ -40,10 +40,9 @@ class FinishOption extends React.Component {
 
   render() {
     const { option, optionId, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
-    const optionFields = option["fields"];
-    const images = (optionFields["Image"] || []).slice(0, 2);
+    const images = (option.Images || []).slice(0, 2);
     const classNames = ["finish-option"];
-    const isNewOption = optionId.startsWith("new");
+    const isNewOption = optionId == "new";
     if (short) classNames.push("short");
 
     if (draggable) {
@@ -78,18 +77,18 @@ class FinishOption extends React.Component {
                     onClickTrash={isNewOption ? null : this.onClickUnlink}
                   />
                   <div>
-                    <p className="cell-heading">{optionFields["Name"]}</p>
-                    {optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+                    <p className="cell-heading">{option.name}</p>
+                    {option.unitPrice && <p>Price: ${option.unitPrice}</p>}
                     <div
                       className="notes"
-                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(option.info) }}
                       />
                   </div>
                 </div>
                 <div className="half images">
                   {images.map((image) => (
-                    <a key={image["id"] || image["url"]} href={image["url"]} target="_blank">
-                      <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
+                    <a key={image.id || image.url} href={image.url} target="_blank">
+                      <img className={images.length == 1 ? "one" : "two"} src={image.url} />
                     </a>
                   ))}
                 </div>
@@ -106,17 +105,17 @@ class FinishOption extends React.Component {
           onClick={this.onClick}
         >
           <div className="half">
-            <p className="cell-heading">{optionFields["Name"]}</p>
-            {!!optionFields["Unit Price"] && <p>Price: ${optionFields["Unit Price"]}</p>}
+            <p className="cell-heading">{option.name}</p>
+            {!!option.unitPrice && <p>Price: ${option.unitPrice}</p>}
             <div
               className="notes"
-              dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields["Info"]) }}
+              dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(option.info) }}
               />
           </div>
           <div className="half images">
             {images.map((image) => (
-              <a key={image["id"]} href={image["url"]} target="_blank">
-                <img className={images.length == 1 ? "one" : "two"} src={image["url"]} />
+              <a key={image.id} href={image.url} target="_blank">
+                <img className={images.length == 1 ? "one" : "two"} src={image.url} />
               </a>
             ))}
           </div>

@@ -1,22 +1,24 @@
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
-var Project = sequelize.import("../models/project.js");
-var Category = sequelize.import("../models/category.js");
-var Selection = sequelize.import("../models/selection.js");
-var Option = sequelize.import("../models/option.js");
-var OptionImage = sequelize.import("../models/optionimage.js");
+var models = require("../models/index.js");
 
 var Airtable = require('airtable');
 Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
 var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
+async function wait(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
 async function addCategory(category, projectId) {
   let c;
   try {
-    c = await Category.create({
+    c = await models.Category.create({
       name: category["fields"]["Name"],
       order: category["fields"]["Order"],
-      project_id: projectId,
+      ProjectId: projectId,
     });
   } catch (e) {
     console.log(e);
@@ -25,16 +27,17 @@ async function addCategory(category, projectId) {
   return c;
 }
 
-async function addSelection(selection, categoryId) {
+async function addSelection(selection, categoryId, projectId) {
   let c;
   try {
-    c = await Selection.create({
+    c = await models.Selection.create({
       room: selection["fields"]["Room"],
       type: selection["fields"]["Type"],
       location: selection["fields"]["Location"],
       notes: selection["fields"]["Notes"],
       order: selection["fields"]["Order"],
-      category_id: categoryId,
+      CategoryId: categoryId,
+      ProjectId: projectId,
     });
   } catch (e) {
     console.log(e);
@@ -43,16 +46,18 @@ async function addSelection(selection, categoryId) {
   return c;
 }
 
-async function addOption(option, selectionId) {
+async function addOption(option, selectionId, projectId) {
   let c;
   try {
-    c = await Option.create({
+    c = await models.Option.create({
       name: option["fields"]["Name"],
       type: option["fields"]["Type"],
       url: option["fields"]["URL"],
       info: option["fields"]["Info"],
       order: option["fields"]["Order"],
-      selection_id: selectionId,
+      unitPrice: option["fields"]["Unit Price"],
+      SelectionId: selectionId,
+      ProjectId: projectId,
     });
   } catch (e) {
     console.log(e);
@@ -61,12 +66,13 @@ async function addOption(option, selectionId) {
   return c;
 }
 
-async function addOptionImage(optionImage, optionId) {
+async function addOptionImage(optionImage, optionId, projectId) {
   let c;
   try {
-    c = await OptionImage.create({
+    c = await models.OptionImage.create({
       url: optionImage["url"],
-      option_id: optionId,
+      OptionId: optionId,
+      ProjectId: projectId,
     });
   } catch (e) {
     console.log(e);
@@ -78,11 +84,13 @@ async function addOptionImage(optionImage, optionId) {
 (async () => {
   console.log("Migrating...");
 
-  var projects = await base("Projects").select({ }).all();
+  //var projects = await base("Projects").select({ }).all();
+  await wait(1000);
 
-  for (var k in projects) {
-    const project = projects[k];
-    const p = await Project.create({
+  //for (var k in projects) {
+    //const project = projects[k];
+    var project = await base("Projects").find("recpKqIt1OcoBNe62");
+    const p = await models.Project.create({
       name: project["fields"]["Name"],
       accessToken: project["fields"]["Access Token"],
       adminAccessToken: project["fields"]["Admin Access Token"],
@@ -93,25 +101,28 @@ async function addOptionImage(optionImage, optionId) {
     for (var i in categoryIds) {
       var category = await base("Categories").find(categoryIds[i]);
       var c = await addCategory(category, p.id);
+      await wait(1000);
 
       const selectionIds = category["fields"]["Selections"] || [];
       for (var j in selectionIds) {
         var selection = await base("Selections").find(selectionIds[j]);
-        var s = await addSelection(selection, c.id);
+        var s = await addSelection(selection, c.id, p.id);
+        await wait(1000);
 
         const optionIds = selection["fields"]["Options"] || [];
         for (var l in optionIds) {
           var option = await base("Options").find(optionIds[l]);
-          var o = await addOption(option, s.id);
+          var o = await addOption(option, s.id, p.id);
+          await wait(1000);
 
           var images = option["fields"]["Image"] || [];
           for (var h in images) {
-            var oi = await addOptionImage(images[h], o.id);
+            var oi = await addOptionImage(images[h], o.id, p.id);
           }
         }
       }
     }
-  }
+  //}
 
   console.log("Done!");
 })();
