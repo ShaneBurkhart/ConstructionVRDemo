@@ -81,57 +81,71 @@ async function _findProjectByAccessToken(projectAccessToken) {
 }
 
 async function addNewOption(selectionId, fields) {
+  let newOption;
+
   try {
-    var selection = await base("Selections").find(selectionId);
-    var newOption = await base("Options").create([
-      { "fields": {
-        "Selections": [ selection["id"] ],
-        "Order": (selection.fields["Options"] || []).length,
-        ...fields,
-      } }
-    ]);
+    var selectionResults = await models.Selection.findAll({
+      where: { id: selectionId }
+    });
+    const selection = selectionResults[0];
+    const selectionOptions = await selection.getOptions();
+
+    newOption = await models.Option.create({
+      SelectionId: selection.id,
+      ProjectId: selection.ProjectId,
+      order: (selectionOptions || []).length,
+      ...fields,
+    });
   } catch (e) {
     console.log(e);
   }
 
-  return newOption[0];
+  return newOption;
 }
 
 async function addNewSelection(categoryId, fields) {
+  let newSelection;
+
   try {
-    var category = await base("Categories").find(categoryId);
-    var newSelection = await base("Selections").create([
-      { "fields": {
-        "Type": "New Selection",
-        "Location": "Amenities",
-        "Room": "Study Lounge",
-        ...fields,
-        "Category": [ category["id"] ],
-        "Order": (category.fields["Selections"] || []).length,
-      } }
-    ]);
+    const categoryResults = await models.Category.findAll({
+      where: { id: categoryId }
+    });
+    const category = categoryResults[0];
+    const categorySelections = await category.getSelections();
+
+    newSelection = await models.Selection.create({
+      type: "New Selection",
+      location: "Amenities",
+      room: "Study Lounge",
+      ...fields,
+      CategoryId: category.id,
+      ProjectId: category.ProjectId,
+      order: (categorySelections || []).length,
+    });
   } catch (e) {
     console.log(e);
   }
 
-  return newSelection[0];
+  return newSelection;
 }
 
 async function addNewCategory(categoryName, projectAccessToken) {
+  let newCategory;
+
   try {
     var project = await _findProjectByAccessToken(projectAccessToken);
-    var newCategory = await base("Categories").create([
-      { "fields": {
-        "Name": categoryName,
-        "Project": [ project.id ],
-        "Order": project.fields["Categories"].length,
-      } }
-    ]);
+    const projectCategories = await project.getCategories();
+
+    newCategory = await models.Category.create({
+      name: categoryName,
+      ProjectId: project.id,
+      order: (projectCategories || []).length,
+    });
   } catch (e) {
     console.log(e);
   }
 
-  return newCategory[0];
+  return newCategory;
 }
 
 async function removeSelection(selectionId) {
@@ -359,7 +373,7 @@ io.on('connection', function(socket){
     addNewOption(data.selectionId, data.fields).then((newOption) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newOption.id,
-        newOption: newOption.fields,
+        newOption: newOption,
         type: Actions.ADD_NEW_OPTION,
         ...data,
       });
@@ -370,7 +384,7 @@ io.on('connection', function(socket){
     addNewSelection(data.categoryId, data.fields).then((newSelection) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newSelection.id,
-        newSelection: newSelection.fields,
+        newSelection: newSelection,
         type: Actions.ADD_NEW_SELECTION,
         ...data,
       });
@@ -381,7 +395,7 @@ io.on('connection', function(socket){
     addNewCategory(data.categoryName, data.project_token).then((newCategory) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newCategory.id,
-        newCategory: newCategory.fields,
+        newCategory: newCategory,
         type: Actions.ADD_NEW_CATEGORY,
         ...data,
       });

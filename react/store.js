@@ -65,20 +65,24 @@ const computeState = (newState) => {
 }
 
 const addNewOption = (state, action) => {
-  var selectionOptions = state.selections[action.selectionId]["Options"] || [];
+  var newSelection = { ...state.selections[action.selectionId] };
+  var selectionOptions = [ ...(newSelection.Options || []) ];
 
   selectionOptions.push(action.id);
-  state.selections[action.selectionId]["Options"] = selectionOptions;
+  newSelection.Options = selectionOptions;
+  state.selections[action.selectionId] = newSelection;
 
   state.options[action.id] = { id: action.id, ...action.newOption };
   return { ...state, ...computeState({ ...state }) };
 }
 
 const addNewSelection = (state, action) => {
-  var categorySelections = state.categories[action.categoryId]["Selections"] || [];
+  const newCategory = { ...state.categories[action.categoryId] };
+  var categorySelections = [ ...(newCategory.Selections || []) ];
 
   categorySelections.push(action.id);
-  state.categories[action.categoryId]["Selections"] = categorySelections;
+  newCategory.Selections = categorySelections;
+  state.categories[action.categoryId] = newCategory;
 
   state.selections[action.id] = { id: action.id, ...action.newSelection };
   return { ...state, ...computeState({ ...state }) };

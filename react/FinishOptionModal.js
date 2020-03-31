@@ -215,7 +215,7 @@ class FinishOptionModal extends React.Component {
 export default connect((reduxState, props) => {
   const { optionId } = props;
   const option = reduxState.options[optionId];
-  const fields = option;
+  const fields = option || {};
 
   return {
     option: option,
