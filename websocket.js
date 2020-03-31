@@ -320,29 +320,28 @@ async function moveSelection(selectionId, destCategoryId, newPosition, projectAc
 async function moveCategory(categoryId, newPosition, projectAccessToken) {
   try {
     var project = await _findProjectByAccessToken(projectAccessToken);
-    var categories = await base("Categories").select({
-      filterByFormula: `{Project ID} = \"${project.id}\"`
-    }).all();
-
-    const orderedCategories = Object.values(categories)
-            .sort((a,b) => a["fields"]["Order"] - b["fields"]["Order"])
+    var orderedCategories = await models.Category.findAll({
+      where: { ProjectId: project.id },
+      order:[[ "order", "asc" ]]
+    });
 
     const startIndex = orderedCategories.findIndex(c => c["id"] == categoryId);
     const [category] = orderedCategories.splice(startIndex, 1);
     orderedCategories.splice(newPosition, 0, category);
 
     const updates = orderedCategories.map((c, i) => {
-      return { "id": c["id"], "fields": { "Order": i } };
+      return { id: c.id, "fields": { order: i } };
     });
 
-    const chunks = [];
-    const chunkSize = 10;
-    for (var i = 0; i < updates.length; i += chunkSize) {
-        const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Categories").update(updatesChunk));
+    const updatePromises = [];
+    for (var i = 0; i < updates.length; i++) {
+      const update = updates[i];
+      updatePromises.push(models.Category.update(update["fields"], {
+        where: { id: update["id"] }
+      }))
     }
 
-    await Promise.all(chunks);
+    await Promise.all(updatePromises);
     return updates;
   } catch (e) {
     console.log(e);
@@ -460,12 +459,12 @@ io.on('connection', function(socket){
   });
 
   socket.on(Actions.MOVE_CATEGORY, function(data){
-    moveCategory(data.categoryId, data.newPosition, data.project_token).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.MOVE_CATEGORY,
-        ...data,
+    moveCategory(data.categoryId, data.newPosition, data.project_token)
+      .then((updates) => {
+        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.BATCH_UPDATE_CATEGORIES, ...data, updates
+        });
       });
-    });
   });
 });
 

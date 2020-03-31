@@ -83,6 +83,7 @@ const ActionCreator = {
   },
 
   moveCategory: (categoryId, newPosition) => {
+    dispatch({ type: Actions.MOVE_CATEGORY, categoryId, newPosition });
     emit(Actions.MOVE_CATEGORY, { categoryId, newPosition });
   },
 

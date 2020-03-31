@@ -216,6 +216,21 @@ const batchUpdateSelections = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const batchUpdateCategories = (state, action) => {
+  const { updates } = action;
+
+  (updates || []).forEach(update => {
+    const categoryId = update["id"];
+    const fieldsToUpdate = update["fields"];
+    const oldFields = state.categories[categoryId];
+    const newFields = { ...oldFields, ...fieldsToUpdate };
+
+    state.categories[categoryId] = newFields;
+  });
+
+  return { ...state, ...computeState({ ...state }) };
+}
+
 const moveCategory = (state, action) => {
   const { categoryId, newPosition } = action;
   const orderedCategories = Object.values(state.categories)
@@ -225,7 +240,11 @@ const moveCategory = (state, action) => {
   const [category] = orderedCategories.splice(startIndex, 1);
   orderedCategories.splice(newPosition, 0, category);
 
-  orderedCategories.forEach((c, i) => state.categories[c.id].order = i);
+  orderedCategories.forEach((c, i) => {
+    const newCategory = { ...state.categories[c.id] };
+    newCategory.order = i;
+    state.categories[c.id] = newCategory;
+  });
   return { ...state, ...computeState({ ...state }) };
 }
 
@@ -342,12 +361,14 @@ const todos = (state = {}, action) => {
       return updateCategory(state, action);
     case Actions.MOVE_SELECTION:
       return moveSelection(state, action);
-    case Actions.MOVE_CATEGORY:
-      return moveCategory(state, action);
     case Actions.BATCH_UPDATE_OPTIONS:
       return batchUpdateOptions(state, action);
     case Actions.BATCH_UPDATE_SELECTIONS:
       return batchUpdateSelections(state, action);
+    case Actions.BATCH_UPDATE_CATEGORIES:
+      return batchUpdateCategories(state, action);
+    case Actions.MOVE_CATEGORY:
+      return moveCategory(state, action);
     case Actions.MOVE_SELECTION:
       return moveSelection(state, action);
     case Actions.MOVE_OPTION:
