@@ -16,6 +16,14 @@ c:
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
+rebuild_db:
+	$(MAKE) clean
+	rm -rf data/pg
+	$(MAKE) run
+	sleep 90
+	$(MAKE) db
+
+
 db_models:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web irb -r ./models/db_models.rb
 

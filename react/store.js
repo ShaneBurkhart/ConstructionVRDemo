@@ -94,12 +94,17 @@ const addNewCategory = (state, action) => {
 }
 
 const removeSelection = (state, action) => {
-  var selection = state.selections[action.selectionId];
-  var categoryId = selection["Category"][0];
-  var categorySelections = state.categories[categoryId]["Selections"] || [];
+  const selection = state.selections[action.selectionId];
+  const categoryId = selection.CategoryId;
+  const category = { ...state.categories[categoryId] };
+  const categorySelections = [ ...(category.Selections || []) ];
 
   categorySelections.splice(categorySelections.indexOf(action.selectionId), 1);
+  category.Selections = categorySelections;
+  state.categories[categoryId] = category
+
   delete state.selections[action.selectionId];
+
   return { ...state, ...computeState({ ...state }) };
 }
 

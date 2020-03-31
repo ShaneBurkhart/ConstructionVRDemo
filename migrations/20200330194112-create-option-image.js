@@ -12,8 +12,9 @@ module.exports = {
         type: Sequelize.BIGINT,
         references: {
           model: "Options",
-          key: 'id'
+          key: 'id',
         },
+        onDelete: "SET NULL"
       },
       ProjectId: {
         type: Sequelize.BIGINT,
@@ -21,6 +22,7 @@ module.exports = {
           model: "Projects",
           key: 'id'
         },
+        onDelete: "SET NULL"
       },
       url: {
         type: Sequelize.TEXT

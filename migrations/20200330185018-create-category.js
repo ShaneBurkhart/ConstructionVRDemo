@@ -18,8 +18,9 @@ module.exports = {
         type: Sequelize.BIGINT,
         references: {
           model: "Projects",
-          key: 'id'
+          key: 'id',
         },
+        onDelete: "SET NULL"
       },
       createdAt: {
         allowNull: false,

@@ -12,15 +12,17 @@ module.exports = {
         type: Sequelize.BIGINT,
         references: {
           model: "Categories",
-          key: 'id'
+          key: 'id',
         },
+        onDelete: "SET NULL"
       },
       ProjectId: {
         type: Sequelize.BIGINT,
         references: {
           model: "Projects",
-          key: 'id'
+          key: 'id',
         },
+        onDelete: "SET NULL"
       },
       room: {
         type: Sequelize.STRING

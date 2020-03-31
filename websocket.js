@@ -150,7 +150,7 @@ async function addNewCategory(categoryName, projectAccessToken) {
 
 async function removeSelection(selectionId) {
   try {
-    await base("Selections").destroy([ selectionId ]);
+    await models.Selection.destroy({ where: { id: selectionId }});
   } catch (e) {
     console.log(e);
   }
@@ -158,7 +158,7 @@ async function removeSelection(selectionId) {
 
 async function removeCategory(categoryId) {
   try {
-    await base("Categories").destroy([ categoryId ]);
+    await models.Category.destroy({ where: { id: categoryId } });
   } catch (e) {
     console.log(e);
   }
