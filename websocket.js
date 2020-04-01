@@ -113,10 +113,10 @@ async function addNewOption(selectionId, fields) {
     const selectionOptions = await selection.getOptions();
 
     newOption = await models.Option.create({
+      ...fields,
       SelectionId: selectionId,
       ProjectId: selection.ProjectId,
       order: (selectionOptions || []).length,
-      ...fields,
     });
 
     if (fields.Images) {
@@ -325,6 +325,11 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
 
     destOptions.splice(newPosition, 0, toMove);
 
+    console.log(sourceOptions);
+    console.log(sourceSelectionId, destSelectionId);
+
+    sourceOptions.forEach((s, i) => console.log(s["id"]));
+
     const updates = [];
     sourceOptions.forEach((s, i) => updates.push({
       "id": s["id"],
@@ -337,15 +342,14 @@ async function moveOption(optionId, destSelectionId, newPosition, projectAccessT
       }));
     }
 
-    const updatePromises = [];
     for (var i = 0; i < updates.length; i++) {
       const update = updates[i];
-      updatePromises.push(models.Option.update(update["fields"], {
+      console.log(update);
+      await models.Option.update(update["fields"], {
         where: { id: update["id"] }
-      }))
+      })
     }
 
-    await Promise.all(updatePromises);
     return updates;
   } catch (e) {
     console.log(e);

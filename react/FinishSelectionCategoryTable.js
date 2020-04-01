@@ -58,7 +58,7 @@ class FinishSelectionCategoryTable extends React.Component {
 
   onChangeCategoryName = (name) => {
     const { category } = this.props;
-    ActionCreators.updateCategory(category["id"], { "Name": name });
+    ActionCreators.updateCategory(category["id"], { name });
   }
 
   onClickReorderCategories = _ => {
