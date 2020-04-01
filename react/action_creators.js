@@ -52,6 +52,10 @@ const ActionCreator = {
     emit(Actions.ADD_NEW_CATEGORY, { categoryName });
   },
 
+  removeOption: (optionId) => {
+    emit(Actions.REMOVE_OPTION, { optionId });
+  },
+
   removeSelection: (selectionId) => {
     emit(Actions.REMOVE_SELECTION, { selectionId });
   },
@@ -99,7 +103,7 @@ const ActionCreator = {
   },
 
   searchOptions: (query, callback) => {
-    $.get("/api/finishes/options/search?q=" + encodeURIComponent(query), callback);
+    $.get("/api2/finishes/options/search?q=" + encodeURIComponent(query), callback);
   },
 
   presignedURL: (file, callback) => {

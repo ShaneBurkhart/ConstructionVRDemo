@@ -72,7 +72,10 @@ const addNewOption = (state, action) => {
   newSelection.Options = selectionOptions;
   state.selections[action.selectionId] = newSelection;
 
-  state.options[action.id] = { id: action.id, ...action.newOption };
+  const newOption = { id: action.id, ...action.newOption };
+  newOption.Images = newOption.OptionImages;
+  state.options[action.id] = newOption;
+
   return { ...state, ...computeState({ ...state }) };
 }
 
@@ -90,6 +93,21 @@ const addNewSelection = (state, action) => {
 
 const addNewCategory = (state, action) => {
   state.categories[action.id] = { id: action.id, ...action.newCategory };
+  return { ...state, ...computeState({ ...state }) };
+}
+
+const removeOption = (state, action) => {
+  const option = state.options[action.optionId];
+  const selectionId = option.SelectionId;
+  const selection = { ...state.selections[selectionId] };
+  const selectionOptions = [ ...(selection.Options || []) ];
+
+  selectionOptions.splice(selectionOptions.indexOf(action.optionId), 1);
+  selection.Options = selectionOptions;
+  state.selections[selectionId] = selection;
+
+  delete state.options[action.optionId];
+
   return { ...state, ...computeState({ ...state }) };
 }
 
@@ -358,6 +376,8 @@ const todos = (state = {}, action) => {
       return addNewSelection(state, action);
     case Actions.ADD_NEW_CATEGORY:
       return addNewCategory(state, action);
+    case Actions.REMOVE_OPTION:
+      return removeOption(state, action);
     case Actions.REMOVE_SELECTION:
       return removeSelection(state, action);
     case Actions.REMOVE_CATEGORY:

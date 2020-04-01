@@ -30,6 +30,28 @@ io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
 
+app.get("/api2/finishes/options/search", function (req, res) {
+  const adminMode = !!req.session["is_admin"];
+  const searchQuery = req.query["q"] || "";
+  const dbSearchQuery = `%${searchQuery}%`
+
+  models.Option.findAll({
+    where: {
+      [Sequelize.Op.or]: {
+        name: { [Sequelize.Op.iLike]: dbSearchQuery },
+        type: { [Sequelize.Op.iLike]: dbSearchQuery },
+        info: { [Sequelize.Op.iLike]: dbSearchQuery }
+      }
+    },
+    include: [
+      { model: models.OptionImage }
+    ],
+    limit: 100,
+  }).then(function (results) {
+    res.json({ options: results });
+  });
+});
+
 app.get("/api2/project/:access_token/finishes", function (req, res) {
   const projectAccessToken = req.params["access_token"];
   const adminMode = !!req.session["is_admin"];
@@ -91,16 +113,32 @@ async function addNewOption(selectionId, fields) {
     const selectionOptions = await selection.getOptions();
 
     newOption = await models.Option.create({
-      SelectionId: selection.id,
+      SelectionId: selectionId,
       ProjectId: selection.ProjectId,
       order: (selectionOptions || []).length,
       ...fields,
     });
+
+    if (fields.Images) {
+      for (var i in fields.Images) {
+        const img = fields.Images[i];
+        const optionImage = await models.OptionImage.create({
+          ProjectId: selection.ProjectId,
+          OptionId: newOption.id,
+          url: img["url"]
+        });
+      }
+    }
   } catch (e) {
     console.log(e);
   }
 
-  return newOption;
+  const optionResults = await models.Option.findAll({
+    where: { id: newOption.id },
+    include: [ { model: models.OptionImage } ]
+  });
+
+  return optionResults[0];
 }
 
 async function addNewSelection(categoryId, fields) {
@@ -146,6 +184,15 @@ async function addNewCategory(categoryName, projectAccessToken) {
   }
 
   return newCategory;
+}
+
+async function removeOption(optionId) {
+  try {
+    // Only unlink so the option stays in the library.
+    await models.Option.update({ SelectionId: null }, { where: { id: optionId } });
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 async function removeSelection(selectionId) {
@@ -199,27 +246,36 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
       const update = updates[i];
       const images = update["fields"].Images;
 
-      updatePromises.push(models.Option.update(update["fields"], {
+      await models.Option.update(update["fields"], {
         where: { id: update["id"] }
-      }).then(function (updatedOption) {
-        if (images) {
-          const imagePromises = [];
-          images.forEach(img => {
-            if (!img.id) {
-              imagePromises.push(models.OptionImage.create({
-                ProjectId: update["fields"].ProjectId,
-                OptionId: update["id"],
-                url: img.url
-              }));
-            }
-          });
+      });
 
-          return Promise.all(imagePromises);
+      if (images) {
+        const imageIds = images.map(img => img.id).filter(i => !!i);
+        if (imageIds) {
+          // Remove option images that are not used
+          await models.OptionImage.destroy({
+            where: {
+              [Sequelize.Op.not]: { id: imageIds },
+              OptionId: update["id"]
+            }
+          })
         }
-      }));
+
+        for (var j = 0; j < images.length; j++) {
+          const img = images[j];
+          if (!img.id) {
+            const optionImage = await models.OptionImage.create({
+              ProjectId: update["fields"].ProjectId,
+              OptionId: update["id"],
+              url: img.url
+            });
+            images[j] = optionImage;
+          }
+        }
+      }
     }
 
-    await Promise.all(updatePromises);
     return updates;
   } catch (e) {
     console.log(e);
@@ -228,10 +284,9 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
 
 async function updateSelection(selectionId, fieldsToUpdate) {
   try {
-    await base("Selections").update([{
-      "id": selectionId,
-      "fields": fieldsToUpdate,
-    }]);
+    await models.Selection.update(fieldsToUpdate, {
+      where: { id: selectionId }
+    });
   } catch (e) {
     console.log(e);
   }
@@ -239,10 +294,9 @@ async function updateSelection(selectionId, fieldsToUpdate) {
 
 async function updateCategory(categoryId, fieldsToUpdate) {
   try {
-    await base("Categories").update([{
-      "id": categoryId,
-      "fields": fieldsToUpdate,
-    }]);
+    await models.Category.update(fieldsToUpdate, {
+      where: { id: categoryId }
+    });
   } catch (e) {
     console.log(e);
   }
@@ -419,6 +473,15 @@ io.on('connection', function(socket){
     });
   });
 
+  socket.on(Actions.REMOVE_OPTION, function(data){
+    removeOption(data.optionId).then(() => {
+      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        type: Actions.REMOVE_OPTION,
+        ...data,
+      });
+    });
+  });
+
   socket.on(Actions.REMOVE_SELECTION, function(data){
     removeSelection(data.selectionId).then(() => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
@@ -453,6 +516,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.UPDATE_SELECTION, function(data){
     updateSelection(data.selectionId, data.fieldsToUpdate).then(() => {
+      console.log("update");
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_SELECTION,
         ...data,

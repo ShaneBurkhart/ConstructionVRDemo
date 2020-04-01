@@ -24,7 +24,10 @@ class FinishSelectionLinkOptionModal extends React.Component {
 
     this._debounceSearch = _.debounce(q => {
       ActionCreators.searchOptions(q, (data) => {
-        const options = Array.from(data.options);
+        const options = Array.from(data.options).map(option => {
+          option.Images = option.OptionImages;
+          return option;
+        });
 
         this.setState({
           isLoading: false,
@@ -44,7 +47,10 @@ class FinishSelectionLinkOptionModal extends React.Component {
 
   componentDidMount() {
     ActionCreators.searchOptions("", (data) => {
-      const options = Array.from(data.options);
+      const options = Array.from(data.options).map(option => {
+        option.Images = option.OptionImages;
+        return option;
+      });
 
       this.setState({
         isLoading: false,
@@ -60,9 +66,13 @@ class FinishSelectionLinkOptionModal extends React.Component {
   onSave = () => {
     const { selection, selectedOption } = this.state;
     const newSelectionFields = selection;
-    const newOptions = newSelection.Options || [];
+    const newOptions = newSelectionFields.Options || [];
     const optionFields = selectedOption;
+
+    optionFields.SelectionId = selection.id;
     optionFields.Images = (optionFields.Images || []).map(img => ({ url: img.url }));
+    delete optionFields.id;
+
 
     ActionCreators.addNewOption(selection.id, optionFields);
     this.onClose();

@@ -46,7 +46,7 @@ class FinishSelection extends React.Component {
     const { selection } = this.props;
     const newOptions = (selection.Options || []).filter(o => o != optionId);
 
-    ActionCreators.updateSelection(selection["id"], { "Options": newOptions });
+    ActionCreators.removeOption(optionId);
   }
 
   onClickTrashSelection = () => {
