@@ -10,7 +10,7 @@ web:
 websocket:
     image: shaneburkhart/construction-vr-demo
     links:
-        -pg
+        - pg
         - redis
     env_file:
         - user.env

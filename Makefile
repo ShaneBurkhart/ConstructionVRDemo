@@ -52,7 +52,6 @@ prod_run:
 	docker-compose -f docker-compose.yml -p ${NAME} up -d
 
 prod_db:
-	docker-compose -f docker-compose.yml -p ${NAME} run --rm web rake db:migrate
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
 prod:
