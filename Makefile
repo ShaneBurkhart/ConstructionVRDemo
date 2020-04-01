@@ -44,6 +44,9 @@ rerun_photos:
 	#npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
 
 ########### PROD #################
+prod_c:
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web /bin/bash
+
 prod_clean:
 	docker-compose -f docker-compose.yml -p ${NAME} down || true
 	docker-compose -f docker-compose.yml -p ${NAME} rm -f || true
