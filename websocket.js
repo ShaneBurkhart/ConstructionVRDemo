@@ -150,7 +150,7 @@ async function addNewCategory(categoryName, projectAccessToken) {
 
 async function removeSelection(selectionId) {
   try {
-    await models.Selection.destroy({ where: { id: selectionId }});
+    await models.Selection.destroy({ where: { id: selectionId } });
   } catch (e) {
     console.log(e);
   }
@@ -166,44 +166,61 @@ async function removeCategory(categoryId) {
 
 async function updateOption(optionId, fieldsToUpdate, updateAll) {
   try {
-    const option = await base("Options").find(optionId);
-    const projectId = option["fields"]["Project IDs"];
+    const option = await models.Option.findAll({ where: { id: optionId } });
+    const projectId = option.ProjectId;
     const updates = [{
       "id": optionId,
       "fields": fieldsToUpdate,
     }];
 
     if (updateAll) {
-      const optionName = option["fields"]["Name"];
-      const optionsWithSameName = await base("Options").select({
-        filterByFormula: `AND(FIND(\"${optionName}\", {Name}) >= 1, FIND(\"${projectId}\", {Project IDs}) >= 1)`,
-      }).all();
+      const optionName = option.name;
+      const optionsWithSameName = await models.Option.findAll({
+        where: { name: optionName, ProjectId: projectId }
+      });
 
       optionsWithSameName.forEach(option => {
-        if (option["id"] == optionId) return;
+        if (option.id == optionId) return;
         const copyFieldsToUpdate = { ...fieldsToUpdate };
 
-        if (fieldsToUpdate["Image"]) {
-          copyFieldsToUpdate["Image"] = fieldsToUpdate["Image"].map(i => ({ url: i["url"] }));
+        if (fieldsToUpdate.Images) {
+          copyFieldsToUpdate.Images = fieldsToUpdate.Images.map(i => ({ url: i["url"] }));
         }
 
         updates.push({
-          "id": option["id"],
+          "id": option.id,
           "fields": copyFieldsToUpdate,
         });
       });
     }
 
-    const chunks = [];
-    const chunkSize = 10;
-    for (var i = 0; i < updates.length; i += chunkSize) {
-        const updatesChunk = updates.slice(i,i + chunkSize);
-        chunks.push(base("Options").update(updatesChunk));
+    const updatePromises = [];
+    for (var i = 0; i < updates.length; i++) {
+      const update = updates[i];
+      const images = update["fields"].Images;
+
+      updatePromises.push(models.Option.update(update["fields"], {
+        where: { id: update["id"] }
+      }).then(function (updatedOption) {
+        if (images) {
+          const imagePromises = [];
+          images.forEach(img => {
+            if (!img.id) {
+              imagePromises.push(models.OptionImage.create({
+                ProjectId: update["fields"].ProjectId,
+                OptionId: update["id"],
+                url: img.url
+              }));
+            }
+          });
+
+          return Promise.all(imagePromises);
+        }
+      }));
     }
 
-    await Promise.all(chunks);
+    await Promise.all(updatePromises);
     return updates;
-    await base("Options").update([]);
   } catch (e) {
     console.log(e);
   }

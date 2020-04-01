@@ -28,7 +28,7 @@ class FinishOption extends React.Component {
 
     this.props.dispatch(ActionCreators.updateModal({
       optionId: option["id"],
-      selectionId: option.Selections[0],
+      selectionId: option.SelectionId,
     }));
   }
 
