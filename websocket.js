@@ -189,7 +189,7 @@ async function addNewCategory(categoryName, projectAccessToken) {
 async function removeOption(optionId) {
   try {
     // Only unlink so the option stays in the library.
-    await models.Option.update({ SelectionId: null }, { where: { id: optionId } });
+    await models.Option.update({ ProjectId: null, SelectionId: null }, { where: { id: optionId } });
   } catch (e) {
     console.log(e);
   }
@@ -213,7 +213,8 @@ async function removeCategory(categoryId) {
 
 async function updateOption(optionId, fieldsToUpdate, updateAll) {
   try {
-    const option = await models.Option.findAll({ where: { id: optionId } });
+    const optionResults = await models.Option.findAll({ where: { id: optionId } });
+    const option = optionResults[0];
     const projectId = option.ProjectId;
     const updates = [{
       "id": optionId,
@@ -228,7 +229,8 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
 
       optionsWithSameName.forEach(option => {
         if (option.id == optionId) return;
-        const copyFieldsToUpdate = { ...fieldsToUpdate };
+        // Remove id when updating other option records
+        const copyFieldsToUpdate = { ...fieldsToUpdate, id: undefined };
 
         if (fieldsToUpdate.Images) {
           copyFieldsToUpdate.Images = fieldsToUpdate.Images.map(i => ({ url: i["url"] }));
@@ -252,15 +254,13 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
 
       if (images) {
         const imageIds = images.map(img => img.id).filter(i => !!i);
-        if (imageIds) {
-          // Remove option images that are not used
-          await models.OptionImage.destroy({
-            where: {
-              [Sequelize.Op.not]: { id: imageIds },
-              OptionId: update["id"]
-            }
-          })
-        }
+        const whereClause = {
+          OptionId: update["id"]
+        };
+
+        if (imageIds && imageIds.length) whereClause[Sequelize.Op.not] = { id: imageIds };
+        // Destroy all option images that aren't in update
+        await models.OptionImage.destroy({ where: whereClause })
 
         for (var j = 0; j < images.length; j++) {
           const img = images[j];
