@@ -84,12 +84,12 @@ async function addOptionImage(optionImage, optionId, projectId) {
 (async () => {
   console.log("Migrating...");
 
-  //var projects = await base("Projects").select({ }).all();
+  var projects = await base("Projects").select({ }).all();
   await wait(1000);
 
-  //for (var k in projects) {
-    //const project = projects[k];
-    var project = await base("Projects").find("recpKqIt1OcoBNe62");
+  for (var k in projects) {
+    const project = projects[k];
+    //var project = await base("Projects").find("recpKqIt1OcoBNe62");
     const p = await models.Project.create({
       name: project["fields"]["Name"],
       accessToken: project["fields"]["Access Token"],
@@ -122,7 +122,7 @@ async function addOptionImage(optionImage, optionId, projectId) {
         }
       }
     }
-  //}
+  }
 
   console.log("Done!");
 })();
