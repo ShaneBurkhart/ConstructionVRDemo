@@ -38,7 +38,7 @@ logs:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} logs -f
 
 rerun_photos:
-	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web_prod /app/scripts/rerun-photos.rb
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /app/scripts/rerun-photos.rb
 
 #generate_migration:
 	#npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
@@ -52,7 +52,8 @@ prod_run:
 	docker-compose -f docker-compose.yml -p ${NAME} up -d
 
 prod_db:
-	docker-compose -f docker-compose.yml -p ${NAME} run --rm web_prod rake db:migrate
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web rake db:migrate
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
 prod:
 	git checkout master
