@@ -13,6 +13,9 @@ run:
 c:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
+c_node:
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"
+
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
@@ -46,6 +49,9 @@ rerun_photos:
 ########### PROD #################
 prod_c:
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web /bin/bash
+
+prod_c_node:
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"
 
 prod_clean:
 	docker-compose -f docker-compose.yml -p ${NAME} down || true
