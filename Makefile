@@ -64,8 +64,8 @@ prod_db:
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
 prod:
-	#git checkout master
-	#git pull origin master
+	git checkout master
+	git pull origin master
 	$(MAKE) build
 	$(MAKE) prod_clean
 	$(MAKE) prod_run
