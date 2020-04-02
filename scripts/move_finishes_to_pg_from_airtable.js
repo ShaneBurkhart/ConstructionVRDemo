@@ -86,6 +86,12 @@ async function addOptionImage(optionImage, optionId, projectId) {
 
   var projects = await base("Projects").select({ }).all();
   await wait(1000);
+  var categories = await base("Categories").select({ }).all();
+  await wait(1000);
+  var selections = await base("Selections").select({ }).all();
+  await wait(1000);
+  var options = await base("Options").select({ }).all();
+  await wait(1000);
 
   for (var k in projects) {
     const project = projects[k];
@@ -99,21 +105,18 @@ async function addOptionImage(optionImage, optionId, projectId) {
     const categoryIds = project["fields"]["Categories"] || [];
 
     for (var i in categoryIds) {
-      var category = await base("Categories").find(categoryIds[i]);
+      var category = categories.find(c => c["id"] == categoryIds[i]);
       var c = await addCategory(category, p.id);
-      await wait(1000);
 
       const selectionIds = category["fields"]["Selections"] || [];
       for (var j in selectionIds) {
-        var selection = await base("Selections").find(selectionIds[j]);
+        var selection = selections.find(c => c["id"] == selectionIds[j]);
         var s = await addSelection(selection, c.id, p.id);
-        await wait(1000);
 
         const optionIds = selection["fields"]["Options"] || [];
         for (var l in optionIds) {
-          var option = await base("Options").find(optionIds[l]);
+          var option = options.find(c => c["id"] == optionIds[l]);
           var o = await addOption(option, s.id, p.id);
-          await wait(1000);
 
           var images = option["fields"]["Image"] || [];
           for (var h in images) {
