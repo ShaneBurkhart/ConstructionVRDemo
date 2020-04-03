@@ -73,5 +73,5 @@ prod:
 	$(MAKE) prod_run
 
 deploy_prod:
-	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo; make prod;"
+	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
 
