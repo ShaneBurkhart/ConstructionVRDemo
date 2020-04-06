@@ -84,7 +84,7 @@ async function addOptionImage(optionImage, optionId, projectId) {
 (async () => {
   console.log("Migrating...");
 
-  var projects = await base("Projects").select({ }).all();
+  var projects = await base("Projects").select({ filterByFormula: "{Name} = 'Olivette'" }).all();
   await wait(1000);
   var categories = await base("Categories").select({ }).all();
   await wait(1000);
@@ -96,15 +96,22 @@ async function addOptionImage(optionImage, optionId, projectId) {
   for (var k in projects) {
     const project = projects[k];
     //var project = await base("Projects").find("recpKqIt1OcoBNe62");
-    const p = await models.Project.create({
-      name: project["fields"]["Name"],
-      accessToken: project["fields"]["Access Token"],
-      adminAccessToken: project["fields"]["Admin Access Token"],
-    });
+    //const p = await models.Project.create({
+      //name: project["fields"]["Name"],
+      //accessToken: project["fields"]["Access Token"],
+      //adminAccessToken: project["fields"]["Admin Access Token"],
+    //});
+    const pResults = await models.Project.findAll({
+      where: {
+        accessToken: project["fields"]["Access Token"],
+      }
+    }).all();
+    const p = pResults[0];
 
     const categoryIds = project["fields"]["Categories"] || [];
 
     for (var i in categoryIds) {
+      if (categoryIds[i] != "rec6AnPeWrnuzPGuc") continue;
       var category = categories.find(c => c["id"] == categoryIds[i]);
       var c = await addCategory(category, p.id);
 
