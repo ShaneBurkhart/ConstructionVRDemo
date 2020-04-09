@@ -219,8 +219,10 @@ const batchUpdateSelections = (state, action) => {
   (updates || []).forEach(update => {
     const selectionId = update["id"];
     const fieldsToUpdate = update["fields"];
-    const oldFields = state.selections[selectionId];
-    const newFields = { ...oldFields, ...fieldsToUpdate };
+    const oldFields = state.selections[selectionId] || {};
+    const newFields = {
+      SelectionLocations: [], ...oldFields, ...fieldsToUpdate, id: selectionId
+    };
     const oldCategoryId = oldFields.CategoryId;
     const newCategoryId = fieldsToUpdate.CategoryId;
 
@@ -229,7 +231,7 @@ const batchUpdateSelections = (state, action) => {
     // Move selection if has new category. Remove from old, add to new.
     // Order doesn't matter since that's a computed property.
     if (newCategoryId && oldCategoryId != newCategoryId) {
-      const oldSelections = [ ...(state.categories[oldCategoryId].Selections || []) ];
+      const oldSelections = [ ...((state.categories[oldCategoryId] || {}).Selections || []) ];
       const newSelections = [ ...(state.categories[newCategoryId].Selections || []) ];
       const oldIndex = oldSelections.findIndex(s => s == selectionId);
       let newCategory;

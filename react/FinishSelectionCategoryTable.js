@@ -40,11 +40,9 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
-  onNewSelection = () => {
-    const { category, filter } = this.props;
-    let fields = { "location": filter };
-    if (filter == "All") fields = null;
-    ActionCreators.addNewSelection(category["id"], fields);
+  onNewSelection = (addToFront = false) => {
+    const { category } = this.props;
+    ActionCreators.addNewSelection(category["id"], { order: addToFront ? 0 : undefined });
   }
 
   onRemoveSelection = (selection) => {
@@ -141,6 +139,8 @@ class FinishSelectionCategoryTable extends React.Component {
 
           </h2>
           {isAdmin && <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
+            <Button icon="plus" onClick={this.onNewSelection} />
+            <Button icon="sort alphabet down" />
             <Popup
               on="click"
               content={
@@ -164,9 +164,8 @@ export default connect(
     const categoryId = props.categoryId;
     const category = reduxState.categories[categoryId];
     const orderedSelectionIds = reduxState.filteredOrderedSelectionIdsByCategoryId[categoryId];
-    const filter = reduxState.filter;
 
-    return { category, orderedSelectionIds, filter };
+    return { category, orderedSelectionIds };
   },
   null
 )(FinishSelectionCategoryTable);

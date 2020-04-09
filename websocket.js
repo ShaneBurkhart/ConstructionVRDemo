@@ -144,7 +144,7 @@ async function addNewOption(selectionId, fields) {
 }
 
 async function addNewSelection(categoryId, fields) {
-  let newSelection;
+  let updates;
 
   try {
     const categoryResults = await models.Category.findAll({
@@ -152,8 +152,7 @@ async function addNewSelection(categoryId, fields) {
     });
     const category = categoryResults[0];
     const categorySelections = await category.getSelections();
-
-    newSelection = await models.Selection.create({
+    const newFields = {
       type: "New Selection",
       location: "Amenities",
       room: "Study Lounge",
@@ -161,12 +160,23 @@ async function addNewSelection(categoryId, fields) {
       CategoryId: category.id,
       ProjectId: category.ProjectId,
       order: (categorySelections || []).length,
-    });
+    };
+
+    newSelection = await models.Selection.create(newFields);
+
+    if (fields.order != undefined && fields.order != null && fields.order >= 0) {
+      updates = await moveSelection(newSelection.id, categoryId, 0);
+      const newIndex = updates.findIndex(u => u.id == newSelection.id);
+      updates[newIndex] = { id: newSelection.id, fields: { ...newFields, ...updates[newIndex].fields } }
+    } else {
+      updates = [{ id: newSelection.id, fields: newFields }];
+    }
+
   } catch (e) {
     console.log(e);
   }
 
-  return newSelection;
+  return updates;
 }
 
 async function addNewCategory(categoryName, projectAccessToken) {
@@ -485,11 +495,10 @@ io.on('connection', function(socket){
   });
 
   socket.on(Actions.ADD_NEW_SELECTION, function(data){
-    addNewSelection(data.categoryId, data.fields).then((newSelection) => {
+    addNewSelection(data.categoryId, data.fields).then((updates) => {
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
-        id: newSelection.id,
-        newSelection: newSelection,
-        type: Actions.ADD_NEW_SELECTION,
+        updates: updates,
+        type: Actions.BATCH_UPDATE_SELECTIONS,
         ...data,
       });
     });
