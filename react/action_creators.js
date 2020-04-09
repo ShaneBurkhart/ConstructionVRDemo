@@ -4,6 +4,7 @@ import _  from 'underscore'
 
 var socket = require('socket.io-client')({
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
+  query: { projectAccessToken: PROJECT_ACCESS_TOKEN }
 })
 
 var _dispatch = null;

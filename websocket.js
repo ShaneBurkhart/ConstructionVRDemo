@@ -506,6 +506,10 @@ async function moveCategory(categoryId, newPosition, projectAccessToken) {
 
 io.on('connection', function(socket){
   console.log('New Connections!');
+
+  const projectAccessToken = socket.handshake.query.projectAccessToken;
+  socket.join(projectAccessToken)
+
   if (!socket.request.session["is_admin"]) {
     // Updates only connection.  No write access unless is_admin.
     return;
@@ -513,7 +517,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.ADD_NEW_OPTION, function(data){
     addNewOption(data.selectionId, data.fields).then((newOption) => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newOption.id,
         newOption: newOption,
         type: Actions.ADD_NEW_OPTION,
@@ -524,7 +528,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.ADD_NEW_SELECTION, function(data){
     addNewSelection(data.categoryId, data.fields).then((updates) => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         updates: updates,
         type: Actions.BATCH_UPDATE_SELECTIONS,
         ...data,
@@ -534,7 +538,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.ADD_NEW_CATEGORY, function(data){
     addNewCategory(data.categoryName, data.project_token).then((newCategory) => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         id: newCategory.id,
         newCategory: newCategory,
         type: Actions.ADD_NEW_CATEGORY,
@@ -545,7 +549,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.REMOVE_OPTION, function(data){
     removeOption(data.optionId).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.REMOVE_OPTION,
         ...data,
       });
@@ -554,7 +558,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.REMOVE_SELECTION, function(data){
     removeSelection(data.selectionId).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.REMOVE_SELECTION,
         ...data,
       });
@@ -563,7 +567,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.REMOVE_CATEGORY, function(data){
     removeCategory(data.categoryId).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.REMOVE_CATEGORY,
         ...data,
       });
@@ -573,11 +577,11 @@ io.on('connection', function(socket){
   socket.on(Actions.UPDATE_OPTION, function(data){
     updateOption(data.optionId, data.fieldsToUpdate, data.updateAll).then((updates) => {
       if (data.updateAll) {
-        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates
         });
       } else {
-        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.UPDATE_OPTION, ...data
         });
       }
@@ -586,7 +590,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.UPDATE_SELECTION, function(data){
     updateSelection(data.selectionId, data.fieldsToUpdate).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_SELECTION,
         ...data,
       });
@@ -595,7 +599,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.UPDATE_CATEGORY, function(data){
     updateCategory(data.categoryId, data.fieldsToUpdate).then(() => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_CATEGORY,
         ...data,
       });
@@ -604,7 +608,7 @@ io.on('connection', function(socket){
 
   socket.on(Actions.ALPHABETIZE_SELECTIONS, function(data){
     alphabetizeSelections(data.categoryId).then((updates) => {
-      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
       });
     });
@@ -614,7 +618,7 @@ io.on('connection', function(socket){
     const { optionId, destSelectionId, newPosition, project_token } = data;
     moveOption(optionId, destSelectionId, newPosition, project_token)
       .then((updates) => {
-        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates,
         });
       });
@@ -624,7 +628,7 @@ io.on('connection', function(socket){
     const { selectionId, destCategoryId, newPosition, project_token } = data;
     moveSelection(selectionId, destCategoryId, newPosition, project_token)
       .then((updates) => {
-        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
         });
       });
@@ -633,7 +637,7 @@ io.on('connection', function(socket){
   socket.on(Actions.MOVE_CATEGORY, function(data){
     moveCategory(data.categoryId, data.newPosition, data.project_token)
       .then((updates) => {
-        io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.BATCH_UPDATE_CATEGORIES, ...data, updates
         });
       });
