@@ -76,6 +76,10 @@ const ActionCreator = {
     emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
   },
 
+  alphabetizeSelections: (categoryId) => {
+    emit(Actions.ALPHABETIZE_SELECTIONS, { categoryId });
+  },
+
   moveOption: (optionId, destSelectionId, newPosition) => {
     dispatch({ type: Actions.MOVE_OPTION, optionId, destSelectionId, newPosition });
     emit(Actions.MOVE_OPTION, { optionId, destSelectionId, newPosition });

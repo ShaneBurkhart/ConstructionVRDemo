@@ -40,6 +40,11 @@ class FinishSelectionCategoryTable extends React.Component {
     this.setState({ expanded: !expanded });
   }
 
+  onClickAlphabetizeSelections = () => {
+    const { category } = this.props;
+    ActionCreators.alphabetizeSelections(category["id"]);
+  }
+
   onNewSelection = (addToFront = false) => {
     const { category } = this.props;
     ActionCreators.addNewSelection(category["id"], { order: addToFront ? 0 : undefined });
@@ -140,7 +145,7 @@ class FinishSelectionCategoryTable extends React.Component {
           </h2>
           {isAdmin && <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
             <Button icon="plus" onClick={this.onNewSelection} />
-            <Button icon="sort alphabet down" />
+            <Button icon="sort alphabet down" onClick={this.onClickAlphabetizeSelections} />
             <Popup
               on="click"
               content={

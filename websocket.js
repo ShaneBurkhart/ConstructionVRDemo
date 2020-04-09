@@ -341,6 +341,34 @@ async function updateCategory(categoryId, fieldsToUpdate) {
   }
 }
 
+async function alphabetizeSelections(categoryId) {
+  let updates;
+
+  try {
+    const selections = await models.Selection.findAll({
+      where: { CategoryId: categoryId },
+    });
+
+    updates = (selections || []).sort((a, b) => (
+      a.type.localeCompare(b.type)
+    )).map((s, i) => ({
+      id: s.id,
+      fields: { order: i }
+    }));
+
+    for (var i = 0; i < updates.length; i++) {
+      const update = updates[i];
+      await models.Selection.update(update["fields"], {
+        where: { id: update["id"] }
+      });
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  return updates;
+}
+
 async function moveOption(optionId, destSelectionId, newPosition, projectAccessToken) {
   try {
     const optionResults = await models.Option.findAll({ where: { id: optionId } });
@@ -570,6 +598,14 @@ io.on('connection', function(socket){
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_CATEGORY,
         ...data,
+      });
+    });
+  });
+
+  socket.on(Actions.ALPHABETIZE_SELECTIONS, function(data){
+    alphabetizeSelections(data.categoryId).then((updates) => {
+      io.emit(Actions.EXECUTE_CLIENT_EVENT, {
+        type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
       });
     });
   });
