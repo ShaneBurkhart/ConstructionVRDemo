@@ -61,6 +61,7 @@ app.get("/api2/project/:access_token/finishes", function (req, res) {
       project.getSelections(),
       project.getOptions(),
       project.getOptionImages(),
+      project.getSelectionLocations(),
     ]).then(function (results) {
       res.json({
         admin_mode: adminMode,
@@ -68,6 +69,7 @@ app.get("/api2/project/:access_token/finishes", function (req, res) {
         selections: results[1],
         options: results[2],
         optionImages: results[3],
+        selectionLocations: results[4],
       });
     });
   });
@@ -284,9 +286,36 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
 
 async function updateSelection(selectionId, fieldsToUpdate) {
   try {
+    const selectionLocations = fieldsToUpdate.SelectionLocations;
+
     await models.Selection.update(fieldsToUpdate, {
       where: { id: selectionId }
     });
+    const selectionResults = await models.Selection.findAll({
+      where: { id: selectionId }
+    });
+    const selection = selectionResults[0];
+
+    if (selectionLocations) {
+      const ids = selectionLocations.map(i => i.id).filter(i => !!i);
+      const whereClause = { SelectionId: selectionId };
+
+      if (ids && ids.length) whereClause[Sequelize.Op.not] = { id: ids };
+      // Destroy all option images that aren't in update
+      await models.SelectionLocation.destroy({ where: whereClause })
+
+      for (var j = 0; j < selectionLocations.length; j++) {
+        const sl = selectionLocations[j];
+        if (!sl.id) {
+          const selectionLocation = await models.SelectionLocation.create({
+            ProjectId: selection.ProjectId,
+            SelectionId: selectionId,
+            location: sl.location
+          });
+          selectionLocations[j] = selectionLocation;
+        }
+      }
+    }
   } catch (e) {
     console.log(e);
   }
@@ -520,7 +549,6 @@ io.on('connection', function(socket){
 
   socket.on(Actions.UPDATE_SELECTION, function(data){
     updateSelection(data.selectionId, data.fieldsToUpdate).then(() => {
-      console.log("update");
       io.emit(Actions.EXECUTE_CLIENT_EVENT, {
         type: Actions.UPDATE_SELECTION,
         ...data,

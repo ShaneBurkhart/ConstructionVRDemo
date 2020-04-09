@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { createRef } from 'react';
 import { connect } from 'react-redux'
 import * as _ from 'underscore';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Segment, Input, Label, Icon, Button, Popup, Checkbox, Dropdown } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import AdminContext from './context/AdminContext';
 
+import AddSelectionLocationPopup from './AddSelectionLocationButtonPopup';
 import FinishOptionsContainer from './FinishOptionsContainer';
 import AdminControls from './AdminControls';
 import FocusEditableInput from './FocusEditableInput';
@@ -49,6 +51,28 @@ class FinishSelection extends React.Component {
     ActionCreators.removeOption(optionId);
   }
 
+  onAddLocation = (name) => {
+    const { selection } = this.props;
+    const newLocations = [ ...selection.SelectionLocations ];
+
+    newLocations.push({
+      location: name,
+      SelectionId: selection.id,
+      ProjectId: selection.ProjectId
+    });
+
+    this.onChangeFor("SelectionLocations")(newLocations);
+  }
+
+  onRemoveLocation = (name) => {
+    const { selection } = this.props;
+    const newLocations = [ ...selection.SelectionLocations ].filter(sl => (
+      sl.location != name
+    ));
+
+    this.onChangeFor("SelectionLocations")(newLocations);
+  }
+
   onClickTrashSelection = () => {
     const { selection, onClickTrashSelection } = this.props;
     if (onClickTrashSelection) onClickTrashSelection(selection);
@@ -67,7 +91,7 @@ class FinishSelection extends React.Component {
   }
 
   renderSelectionDetails() {
-    const { selection } = this.props;
+    const { selection, selectionFilters } = this.props;
     const isAdmin = this.context;
 
     return (
@@ -80,19 +104,24 @@ class FinishSelection extends React.Component {
           />
         </div>
         <div className="cell-details">
-          <span>Location: </span>
-          <FocusEditableInput
-            editable={isAdmin}
-            value={selection.location}
-            onChange={this.onChangeFor("location")}
-          />
-        </div>
-        <div className="cell-details">
-          <span>Niche: </span>
-          <FocusEditableInput
-            editable={isAdmin}
-            value={selection.room}
-            onChange={this.onChangeFor("room")}
+          <p>Locations:</p>
+          {(selection.SelectionLocations || []).sort((a, b) => (
+            a.location.localeCompare(b.location)
+          )).map(sl => (
+            <div
+              key={sl.id || Math.random().toString(36).substring(2, 15)}
+              style={{ marginBottom: 3 }}
+            >
+              <Label basic size="tiny">
+                {sl.location}
+                <Icon className="hide-print" name="close" onClick={_=>this.onRemoveLocation(sl.location)} />
+              </Label>
+            </div>
+          ))}
+          <AddSelectionLocationPopup
+            selection={selection}
+            locations={selectionFilters.locations}
+            onAddLocation={this.onAddLocation}
           />
         </div>
       </div>
@@ -161,6 +190,7 @@ export default connect(
     return {
       selection: reduxState.selections[selectionId],
       orderedOptionIds: reduxState.orderedOptionIdsBySelectionId[selectionId],
+      selectionFilters: reduxState.selectionFilters,
     }
   },
   null

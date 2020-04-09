@@ -5,7 +5,9 @@ import Actions from '../common/actions'
 
 const _initialState = {
   isAdmin: false,
-  filter: "All",
+  filters: {
+    locations: null,
+  },
   modals: {},
 };
 
@@ -14,10 +16,26 @@ const indexByID = (arr) => {
 }
 
 const computeState = (newState) => {
-  const filter = newState.filter;
+  const filters = newState.filters;
   const options = newState.options;
   const selections = newState.selections;
   const categories = newState.categories;
+
+  const locations = {};
+  Object.values(newState.selections).forEach((selection) => {
+    const selectionLocations = selection.SelectionLocations || [];
+    if (selectionLocations.length == 0) locations["Not Specified"] = true;
+    selectionLocations.forEach(sl => {
+      const l = sl.location;
+      if (l && !locations[l]) locations[l] = true;
+    });
+  });
+  newState.selectionFilters = { locations: Object.keys(locations) };
+
+  if (filters.locations == null) {
+    filters.locations = newState.selectionFilters.locations;
+    newState.filters = filters;
+  }
 
   // Ordered Categories
   newState.orderedCategoryIds = Object.values(categories)
@@ -35,8 +53,11 @@ const computeState = (newState) => {
         .sort((a,b) => a.order - b.order)
         .map(s => s.id);
     const filteredOrderedSelectionIds = selectionsForCategory
-        .filter((s) => (filter == null || filter == "All" || s.location == filter))
-        .sort((a,b) => a.order - b.order)
+        .filter((s) => {
+          const selectionLocations = s.SelectionLocations || [];
+          if (filters.locations.includes("Not Specified") && selectionLocations.length == 0) return true;
+          return selectionLocations.map(sl=>filters.locations.includes(sl.location)).includes(true);
+        }).sort((a,b) => a.order - b.order)
         .map(s => s.id);
     newState.filteredOrderedSelectionIdsByCategoryId[categoryId] = filteredOrderedSelectionIds;
     newState.orderedSelectionIdsByCategoryId[categoryId] = orderedSelectionIds;
@@ -53,13 +74,6 @@ const computeState = (newState) => {
         .map(o => o.id);
     newState.orderedOptionIdsBySelectionId[selectionId] = orderedOptionIds;
   });
-
-  const locations = {};
-  Object.values(newState.selections).forEach((selection) => {
-    const l = selection.location;
-    if (l && !locations[l]) locations[l] = true;
-  });
-  newState.selectionFilters = Object.keys(locations);
 
   return newState;
 }
@@ -403,12 +417,12 @@ const todos = (state = {}, action) => {
     case Actions.MOVE_OPTION:
       return moveOption(state, action);
 
-    case 'UPDATE_FILTER':
-      return { ...computeState({ ...state, filter: action.filter }) };
+    case Actions.UPDATE_FILTERS:
+      return { ...computeState({ ...state, filters: { ...state.filters, ...action.filters } }) };
     case 'UPDATE_MODAL':
       return { ...state, modals: { ...state.modals, ...action.modals }};
     case 'FULL_UPDATE':
-      const filter = state.filter;
+      const filters = state.filters;
       const options = indexByID(action.options);
       const selections = indexByID(action.selections);
       const categories = indexByID(action.categories);
@@ -424,7 +438,11 @@ const todos = (state = {}, action) => {
         const selectionOptions = action.options.reduce((memo, o) => {
           if (o.SelectionId == selectionId) memo.push(o.id); return memo;
         }, [])
+        const selectionLocations = action.selectionLocations.reduce((memo, sl) => {
+          if (sl.SelectionId == selectionId) memo.push(sl); return memo;
+        }, [])
         selections[selectionId].Options = selectionOptions;
+        selections[selectionId].SelectionLocations = selectionLocations;
       });
 
       Object.keys(options).forEach(optionId => {
@@ -436,7 +454,7 @@ const todos = (state = {}, action) => {
 
       return {
         ...state,
-        ...computeState({ filter, options, selections, categories }),
+        ...computeState({ filters, options, selections, categories }),
         isAdmin: action.admin_mode,
       }
     default:

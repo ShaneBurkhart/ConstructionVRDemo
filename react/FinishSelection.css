@@ -11,3 +11,11 @@
     border: none;
 }
 
+.selection .cell-details .label:hover {
+    background-color: #ffffff;
+    cursor: pointer !important;
+}
+
+.selection .cell-details .label .dropdown:hover {
+    cursor: pointer !important;
+}

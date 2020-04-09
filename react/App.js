@@ -179,11 +179,6 @@ class App extends React.Component {
           orderedCategoryIds={orderedCategoryIds}
         />}
         <div className={wrapperClasses.join(" ")}>
-          <FinishSelectionFilters
-            current={currentFilter}
-            filters={selectionFilters}
-            onChange={this.onChangeFilter}
-            />
           <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
             {this.renderCategorySections()}
           </DragDropContext>

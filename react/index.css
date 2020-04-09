@@ -29,6 +29,10 @@ textarea.slim {
     padding: 2px 1px;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 .admin-section {
     background-color: #eeeeee;
     padding: 20px 0px;

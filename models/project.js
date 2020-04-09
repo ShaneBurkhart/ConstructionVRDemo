@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     Project.hasMany(models.Selection);
     Project.hasMany(models.Option);
     Project.hasMany(models.OptionImage);
+    Project.hasMany(models.SelectionLocation);
   };
 
   return Project;

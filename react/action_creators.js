@@ -91,10 +91,10 @@ const ActionCreator = {
     emit(Actions.MOVE_CATEGORY, { categoryId, newPosition });
   },
 
-  updateFilter: (filter) => {
+  updateFilters: (filters) => {
     return {
-      type: Actions.UPDATE_FILTER,
-      filter,
+      type: Actions.UPDATE_FILTERS,
+      filters,
     }
   },
 
