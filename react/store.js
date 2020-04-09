@@ -313,7 +313,7 @@ const moveSelection = (state, action) => {
 
   // Update order of source category selections
   allSourceCategorySelections.forEach((id, i) => {
-    const newSelection = state.selections[id];
+    const newSelection = { ...state.selections[id] };
     newSelection.order = i;
     newSelection.CategoryId = sourceCategory.id;
     state.selections[id] = newSelection
@@ -324,7 +324,7 @@ const moveSelection = (state, action) => {
   if (sourceCategoryId != destCategoryId) {
     // Update orders of dest category selections
     allDestCategorySelections.forEach((id, i) => {
-      const newSelection = state.selections[id];
+      const newSelection = { ...state.selections[id] };
       newSelection.order = i;
       newSelection.CategoryId = destCategory.id;
       state.selections[id] = newSelection
@@ -402,8 +402,6 @@ const todos = (state = {}, action) => {
       return updateSelection(state, action);
     case Actions.UPDATE_CATEGORY:
       return updateCategory(state, action);
-    case Actions.MOVE_SELECTION:
-      return moveSelection(state, action);
     case Actions.BATCH_UPDATE_OPTIONS:
       return batchUpdateOptions(state, action);
     case Actions.BATCH_UPDATE_SELECTIONS:

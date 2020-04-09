@@ -77,16 +77,17 @@ class App extends React.Component {
   }
 
   onDragEndSelection = (result) => {
+    console.log(result);
     const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilter } = this.props;
     const { source, destination } = result;
     if (!destination) return;
     // Picked it up and dropped it in the same spot.
     if (source.droppableId == destination.droppableId && source.index == destination.index) return;
 
-    const selectionId = result.draggableId;
-    const destCategoryId = destination.droppableId;
 
     if (result["type"] == "SELECTION") {
+      const selectionId = result.draggableId;
+      const destCategoryId = destination.droppableId;
       const destFilteredOrderedSelectionIds = filteredOrderedSelectionIdsByCategoryId[destCategoryId];
       const destAllOrderedSelectionIds = orderedSelectionIdsByCategoryId[destCategoryId];
       let newPosition = destination.index;
@@ -99,7 +100,7 @@ class App extends React.Component {
           newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId);
         } else {
           // Put after the selection we moved it after.
-          destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
+          const destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
           newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId) + 1;
         }
       }
@@ -110,6 +111,15 @@ class App extends React.Component {
       const [destCategory, destSelectionId] = destination.droppableId.split("/");
 
       ActionCreators.moveOption(optionId, destSelectionId, destination.index);
+    } else if (result["type"] == "CATEGORY") {
+      const { orderedCategoryIds } = this.props;
+      const categoryId = result.draggableId;
+      const newOrderedCategoryIds = Array.from(orderedCategoryIds);
+
+      const [toMove] = newOrderedCategoryIds.splice(source.index, 1);
+      newOrderedCategoryIds.splice(destination.index, 0, toMove);
+
+      ActionCreators.moveCategory(categoryId, destination.index);
     }
 
     this._isDragging = false;
@@ -175,19 +185,20 @@ class App extends React.Component {
 
     return (
       <AdminContext.Provider value={adminMode}>
-        {adminMode && <FinishCategoriesDrawer
-          orderedCategoryIds={orderedCategoryIds}
-        />}
-        <div className={wrapperClasses.join(" ")}>
-          <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
+        <DragDropContext onDragEnd={this.onDragEndSelection} onDragStart={this.onDragStartSelection} >
+          {adminMode && <FinishCategoriesDrawer
+            orderedCategoryIds={orderedCategoryIds}
+          />}
+          <div className={wrapperClasses.join(" ")}>
             {this.renderCategorySections()}
-          </DragDropContext>
-          <div className="modal-container">
-            {adminMode && this.renderOptionModal()}
-            {adminMode && this.renderLinkOptionToSelectionModal()}
-            {this.renderLoading()}
+
+            <div className="modal-container">
+              {adminMode && this.renderOptionModal()}
+              {adminMode && this.renderLinkOptionToSelectionModal()}
+              {this.renderLoading()}
+            </div>
           </div>
-        </div>
+        </DragDropContext>
       </AdminContext.Provider>
     );
   }

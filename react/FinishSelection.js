@@ -73,6 +73,11 @@ class FinishSelection extends React.Component {
     this.onChangeFor("SelectionLocations")(newLocations);
   }
 
+  onMoveToCategory = (category) => {
+    const { selection } = this.props;
+    ActionCreators.moveSelection(selection.id, category.id, 0);
+  }
+
   onClickTrashSelection = () => {
     const { selection, onClickTrashSelection } = this.props;
     if (onClickTrashSelection) onClickTrashSelection(selection);
@@ -141,32 +146,48 @@ class FinishSelection extends React.Component {
           type="SELECTION"
           index={index}
           >
-          {(provided, snapshot) => (
-            <div
-              className={rowClasses.join(" ")}
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              //onClick={_ => onClick(selection)}
-            >
-              <div className="table-column third flex">
-                <AdminControls
-                  dragHandleProps={provided.dragHandleProps}
-                  onClickTrash={this.onClickTrashSelection}
-                />
-                {this.renderSelectionDetails()}
+          {(provided, snapshot) => {
+            if (snapshot.isDragging) {
+              return (
+                <div
+                  className={rowClasses.join(" ")}
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  style={{ ...provided.draggableProps.style, width: 200, maxHeight: 200, overflow: "hidden" }}
+                >
+                  <div className="table-column flex">
+                    {this.renderSelectionDetails()}
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div
+                className={rowClasses.join(" ")}
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+              >
+                <div className="table-column third flex">
+                  <AdminControls
+                    dragHandleProps={provided.dragHandleProps}
+                    onClickTrash={this.onClickTrashSelection}
+                    onMoveToCategory={this.onMoveToCategory}
+                  />
+                  {this.renderSelectionDetails()}
+                </div>
+                <div className="table-column two-third options-cell">
+                  <FinishOptionsContainer
+                    draggable
+                    droppableId={`${selection.CategoryId}/${selection.id}`}
+                    orderedOptionIds={orderedOptionIds}
+                    onNewOption={this.onClickNewOption}
+                    onLinkOption={this.onClickLinkOption}
+                    onUnlinkOption={this.onUnlinkOption}
+                  />
+                </div>
               </div>
-              <div className="table-column two-third options-cell">
-                <FinishOptionsContainer
-                  draggable
-                  droppableId={`${selection.CategoryId}/${selection.id}`}
-                  orderedOptionIds={orderedOptionIds}
-                  onNewOption={this.onClickNewOption}
-                  onLinkOption={this.onClickLinkOption}
-                  onUnlinkOption={this.onUnlinkOption}
-                />
-              </div>
-            </div>
-          )}
+            )
+          }}
         </Draggable>
       );
     } else {

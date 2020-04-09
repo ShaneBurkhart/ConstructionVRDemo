@@ -13,47 +13,29 @@ class CategoriesDnD extends React.Component {
     super(props)
 
     this._droppableId = Math.random().toString(36).substring(2, 15);
-
-    this.state = { orderedCategoryIds: props.orderedCategoryIds };
-  }
-
-  onDragEnd = (result) => {
-    const { orderedCategoryIds } = this.state;
-    const { source, destination } = result;
-    if (!destination) return;
-
-    const newOrderedCategoryIds = Array.from(orderedCategoryIds);
-    const [toMove] = newOrderedCategoryIds.splice(source.index, 1);
-    newOrderedCategoryIds.splice(destination.index, 0, toMove);
-    this.setState({ orderedCategoryIds: newOrderedCategoryIds });
-
-    ActionCreators.moveCategory(result.draggableId, destination.index);
   }
 
   render() {
-    const { onDragEnd } = this.props;
-    const { orderedCategoryIds } = this.state;
+    const { orderedCategoryIds } = this.props;
 
     return (
-      <DragDropContext onDragEnd={this.onDragEnd} >
-        <Droppable droppableId={this._droppableId} type="CATEGORY">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {orderedCategoryIds.map((c, i) => (
-                <FinishCategoryModalCategory
-                  key={c}
-                  index={i}
-                  categoryId={c}
-                />
-              ))}
-            {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <Droppable droppableId={this._droppableId} type="CATEGORY">
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {orderedCategoryIds.map((c, i) => (
+              <FinishCategoryModalCategory
+                key={c}
+                index={i}
+                categoryId={c}
+              />
+            ))}
+          {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     )
   }
 
