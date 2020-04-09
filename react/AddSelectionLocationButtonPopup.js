@@ -77,7 +77,7 @@ class AddSelectionLocationPopup extends React.Component {
                     <Segment
                       vertical
                       key={option.value}
-                      style={{ padding: 5 }}
+                      style={{ padding: 5, cursor: "pointer" }}
                       onClick={_=>this.onAdd(option.value)}
                     >
                       {option.text}
@@ -86,7 +86,7 @@ class AddSelectionLocationPopup extends React.Component {
                   {currentSearch &&
                     <Segment
                       vertical
-                      style={{ padding: 5 }}
+                      style={{ padding: 5, cursor: "pointer" }}
                       onClick={_=>this.onAdd(currentSearch)}
                     >
                       {`+ Add "${currentSearch}"`}
