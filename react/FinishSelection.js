@@ -119,15 +119,15 @@ class FinishSelection extends React.Component {
             >
               <Label basic size="tiny">
                 {sl.location}
-                <Icon className="hide-print" name="close" onClick={_=>this.onRemoveLocation(sl.location)} />
+                {isAdmin && <Icon className="hide-print" name="close" onClick={_=>this.onRemoveLocation(sl.location)} />}
               </Label>
             </div>
           ))}
-          <AddSelectionLocationPopup
+          {isAdmin && <AddSelectionLocationPopup
             selection={selection}
             locations={selectionFilters.locations}
             onAddLocation={this.onAddLocation}
-          />
+          />}
         </div>
       </div>
     );
