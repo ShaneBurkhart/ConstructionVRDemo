@@ -460,6 +460,7 @@ get '/project/:access_token' do
     units: units,
     access_token: access_token,
     is_admin_mode: is_admin_mode,
+    page_title: project["Name"] + " - Renderings",
   }
 end
 
@@ -473,6 +474,7 @@ get '/project/:access_token/finishes' do
     markdown: MARKDOWN,
     project: project,
     access_token: access_token,
+    page_title: project["Name"] + " - Finishes",
     no_style: true,
     fixed_width_viewport: true,
     is_admin_mode: is_admin_mode,
@@ -538,6 +540,7 @@ get '/project/:access_token/unit/:id' do
   haml :unit, locals: {
     project: project,
     unit: unit,
+    page_title: unit["Name"] + " - " + project["Name"] + " - Renderings",
     is_latest_version: unit["Versions"].last == version.id,
     selected_version: version,
     unit_versions: unit.versions,
