@@ -13,6 +13,7 @@ import FinishSelectionCategoryTable from './FinishSelectionCategoryTable';
 import FinishSelectionLinkOptionModal from './FinishSelectionLinkOptionModal';
 import FinishAdminSection from './FinishAdminSection';
 import FinishOptionModal from './FinishOptionModal';
+import FloatingProjectButton from './FloatingProjectButton';
 
 import './App.css';
 import './FinishSelectionTable.css';
@@ -200,6 +201,8 @@ class App extends React.Component {
               {adminMode && this.renderLinkOptionToSelectionModal()}
               {this.renderLoading()}
             </div>
+
+            <FloatingProjectButton name={PROJECT_NAME} />
           </div>
         </DragDropContext>
       </AdminContext.Provider>
