@@ -32,8 +32,22 @@ const computeState = (newState) => {
   });
   newState.selectionFilters = { locations: Object.keys(locations) };
 
+  const wordDensity = {};
+  Object.keys(locations).forEach(l => {
+    const parts = l.split(/\s+/) || [];
+    parts.forEach(p => {
+      if (!p.match(/[a-zA-Z]/)) return;
+      wordDensity[p] = (wordDensity[p] || 0) + 1;
+    });
+  });
+  const sortedQuickSearches = Object.keys(wordDensity)
+    .map(k=>[k,wordDensity[k]])
+    .sort((a,b)=>b[1]-a[1])
+    .map(a=>a[0]);
+  newState.quickSearches = { locations: sortedQuickSearches };
+
   if (filters.locations == null) {
-    filters.locations = newState.selectionFilters.locations;
+    filters.locations = [];
     newState.filters = filters;
   }
 
@@ -55,8 +69,13 @@ const computeState = (newState) => {
     const filteredOrderedSelectionIds = selectionsForCategory
         .filter((s) => {
           const selectionLocations = s.SelectionLocations || [];
-          if (filters.locations.includes("Not Specified") && selectionLocations.length == 0) return true;
-          return selectionLocations.map(sl=>filters.locations.includes(sl.location)).includes(true);
+          // Show all if no filters
+          if (filters.locations.length == 0) return true;
+          // Show unspecified always
+          if (selectionLocations.length == 0) return true;
+          return selectionLocations.map(sl=>(
+            filters.locations.map(l=>sl.location.includes(l)).includes(true)
+          )).includes(true);
         }).sort((a,b) => a.order - b.order)
         .map(s => s.id);
     newState.filteredOrderedSelectionIdsByCategoryId[categoryId] = filteredOrderedSelectionIds;

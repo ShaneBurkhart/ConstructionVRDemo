@@ -17,7 +17,7 @@ body {
 }
 
 body.admin-mode {
-    padding-left: 250px;
+    padding-left: 300px;
 }
 
 *, *:before, *:after {

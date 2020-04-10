@@ -7,7 +7,7 @@ import AdminControls from './AdminControls';
 
 class FinishCategoryModalCategory extends React.Component {
   render() {
-    const { index, categoryId, category } = this.props;
+    const { index, categoryId, category, shownSelectionCount } = this.props;
 
     return (
       <Draggable
@@ -27,7 +27,7 @@ class FinishCategoryModalCategory extends React.Component {
               />
               <div style={{ width: "100%" }}>
                 <p>
-                  <a href={`#${categoryId}`}>{category.name}</a>
+                  <a href={`#${categoryId}`}>{category.name} ({shownSelectionCount})</a>
                 </p>
               </div>
             </div>
@@ -41,5 +41,6 @@ class FinishCategoryModalCategory extends React.Component {
 export default connect((reduxState, props) => {
   return {
     category: reduxState.categories[props.categoryId],
+    shownSelectionCount: (reduxState.filteredOrderedSelectionIdsByCategoryId[props.categoryId] || []).length,
   };
 }, null)(FinishCategoryModalCategory);

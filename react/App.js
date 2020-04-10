@@ -68,8 +68,8 @@ class App extends React.Component {
     }
   }
 
-  onChangeFilter = (filter) => {
-    this.props.dispatch(ActionCreators.updateFilter(filter));
+  onChangeFilters = (filters) => {
+    this.props.dispatch(ActionCreators.updateFilters(filters));
   }
 
   onDragStartSelection = () => {
@@ -78,7 +78,7 @@ class App extends React.Component {
 
   onDragEndSelection = (result) => {
     console.log(result);
-    const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilter } = this.props;
+    const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilters } = this.props;
     const { source, destination } = result;
     if (!destination) return;
     // Picked it up and dropped it in the same spot.
@@ -92,17 +92,14 @@ class App extends React.Component {
       const destAllOrderedSelectionIds = orderedSelectionIdsByCategoryId[destCategoryId];
       let newPosition = destination.index;
 
-      if (currentFilter != "All") {
-        // If we have a filter set,
-        // Find real index from filtered index. Find the card we place it after.
-        if (newPosition < destFilteredOrderedSelectionIds.length) {
-          const destSelectionId = destFilteredOrderedSelectionIds[newPosition];
-          newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId);
-        } else {
-          // Put after the selection we moved it after.
-          const destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
-          newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId) + 1;
-        }
+      // Find real index from filtered index. Find the card we place it after.
+      if (newPosition < destFilteredOrderedSelectionIds.length) {
+        const destSelectionId = destFilteredOrderedSelectionIds[newPosition];
+        newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId);
+      } else {
+        // Put after the selection we moved it after.
+        const destSelectionId = destFilteredOrderedSelectionIds[newPosition - 1];
+        newPosition = destAllOrderedSelectionIds.findIndex(s => s == destSelectionId) + 1;
       }
 
       ActionCreators.moveSelection(selectionId, destCategoryId, newPosition);
@@ -127,7 +124,6 @@ class App extends React.Component {
 
   renderCategorySections() {
     const { orderedCategoryIds } = this.props;
-    const { currentFilter } = this.props;
 
     return orderedCategoryIds.map((categoryId, i) => {
       const key = categoryId;
@@ -179,7 +175,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { adminMode, selectionFilters, currentFilter } = this.props;
+    const { adminMode, selectionFilters, currentFilters, quickSearches } = this.props;
     const { orderedCategoryIds } = this.props;
     const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
@@ -190,6 +186,13 @@ class App extends React.Component {
             orderedCategoryIds={orderedCategoryIds}
           />}
           <div className={wrapperClasses.join(" ")}>
+            <FinishSelectionFilters
+              currentFilters={currentFilters}
+              filters={selectionFilters}
+              quickSearches={quickSearches}
+              onChangeFilters={this.onChangeFilters}
+            />
+
             {this.renderCategorySections()}
 
             <div className="modal-container">
@@ -208,8 +211,9 @@ export default connect((reduxState, props) => {
   return {
     adminMode: reduxState.isAdmin,
     orderedCategoryIds: reduxState.orderedCategoryIds || [],
-    currentFilter: reduxState.filter,
-    selectionFilters: reduxState.selectionFilters || [],
+    currentFilters: reduxState.filters,
+    selectionFilters: reduxState.selectionFilters || {},
+    quickSearches: reduxState.quickSearches || {},
     optionIdModal: reduxState.modals.optionId,
     selectionIdModal: reduxState.modals.selectionId,
     linkSelectionIdModal: reduxState.modals.linkSelectionId,
