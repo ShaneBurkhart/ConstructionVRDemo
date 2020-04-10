@@ -24,7 +24,6 @@ const computeState = (newState) => {
   const locations = {};
   Object.values(newState.selections).forEach((selection) => {
     const selectionLocations = selection.SelectionLocations || [];
-    if (selectionLocations.length == 0) locations["Not Specified"] = true;
     selectionLocations.forEach(sl => {
       const l = sl.location;
       if (l && !locations[l]) locations[l] = true;

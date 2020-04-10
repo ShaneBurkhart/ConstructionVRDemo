@@ -24,7 +24,7 @@ class FinishSelectionFilters extends React.Component {
     const { currentFilters, filters, quickSearches } = this.props;
     const locationFilters = filters.locations || [];
     const currentLocationFilters = currentFilters.locations || [];
-    const quickSearchLocations =  quickSearches.locations || [];
+    const quickSearchLocations =  [ ...(quickSearches.locations || []) ];
     const quickSearchOptions = quickSearchLocations.splice(0,8).filter(q=>(
       !currentLocationFilters.includes(q)
     ));
