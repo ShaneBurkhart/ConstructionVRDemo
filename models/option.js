@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     manufacturer: DataTypes.STRING,
     itemNum: DataTypes.STRING,
     style: DataTypes.STRING,
+    size: DataTypes.STRING,
     info: DataTypes.TEXT,
     order: DataTypes.INTEGER
   }, {});

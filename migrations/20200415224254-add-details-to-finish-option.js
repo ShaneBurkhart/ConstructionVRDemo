@@ -9,13 +9,13 @@ module.exports = {
         }, { transaction: t }),
         queryInterface.addColumn('Options', 'itemNum', {
           type: Sequelize.DataTypes.STRING,
-        }, { transaction: t })
+        }, { transaction: t }),
         queryInterface.addColumn('Options', 'style', {
           type: Sequelize.DataTypes.STRING,
-        }, { transaction: t })
+        }, { transaction: t }),
         queryInterface.addColumn('Options', 'size', {
           type: Sequelize.DataTypes.STRING,
-        }, { transaction: t })
+        }, { transaction: t }),
       ]);
     });
   },
