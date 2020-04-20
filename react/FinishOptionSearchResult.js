@@ -1,6 +1,7 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { connect } from 'react-redux'
+import { Segment, Input, Label, Icon, Button, Popup, Checkbox, Dropdown } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import AdminControls from './AdminControls';
@@ -21,6 +22,12 @@ class FinishOptionSearchResult extends React.Component {
     return this.markdownConverter.makeHtml(m || "");
   }
 
+  getSafeURL(url) {
+    if (!url) return url;
+    if (url.startsWith("http")) return url;
+    return `http://${url}`;
+  }
+
   onClick = (e) => {
     const { option, onClick } = this.props;
     e.stopPropagation();
@@ -30,8 +37,7 @@ class FinishOptionSearchResult extends React.Component {
 
   render() {
     const { option, short, index } = this.props;
-    const optionFields = option;
-    const images = (optionFields.Images || []).slice(0, 2);
+    const images = (option.Images || []).slice(0, 2);
     const classNames = ["finish-option"];
     if (short) classNames.push("short");
 
@@ -41,11 +47,24 @@ class FinishOptionSearchResult extends React.Component {
         onClick={this.onClick}
       >
         <div className="half">
-          <p className="cell-heading">{optionFields.name}</p>
-          {!!optionFields.unitPrice && <p>Price: ${optionFields.unitPrice}</p>}
+          <p className="cell-heading">{option.name}</p>
+          {(option.manufacturer || option.itemNum || option.unitPrice || option.style || option.size) &&
+            <Popup
+              content={
+                <div>
+                  {option.manufacturer && <p style={{ margin: 0 }}><span className="bold">Manufacturer: </span>{option.manufacturer}</p>}
+                  {option.itemNum && <p style={{ margin: 0 }}><span className="bold">Item #: </span>{option.itemNum}</p>}
+                  {option.unitPrice && <p style={{ margin: 0 }}><span className="bold">Unit Price: </span>${option.unitPrice}</p>}
+                  {option.style && <p style={{ margin: 0 }}><span className="bold">Style/Color: </span>{option.style}</p>}
+                  {option.size && <p style={{ margin: 0 }}><span className="bold">Size: </span>{option.size}</p>}
+                </div>
+              }
+              trigger={<a>Option Details</a>}
+            />
+          }
           <div
             className="notes"
-            dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(optionFields.info) }}
+            dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(option.info) }}
             />
         </div>
         <div className="half images">
