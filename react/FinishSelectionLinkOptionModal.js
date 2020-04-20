@@ -102,7 +102,9 @@ class FinishSelectionLinkOptionModal extends React.Component {
           <div style={{ width: "100%" }}>
             <p style={{ marginBottom: 0 }}><span>Add To:</span> {selection.name}</p>
             <div style={{ fontSize: 14, marginBottom: 0 }}>
-              <Input value={searchQuery} onChange={this._handleSearch} placeholder="Search for options..." />
+              <Input value={searchQuery} onChange={this._handleSearch} placeholder="Search for options..." >
+                <input autoFocus />
+              </Input>
             </div>
           </div>
           <span style={{ float: "right" }}>
