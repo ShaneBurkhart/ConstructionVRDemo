@@ -36,6 +36,7 @@ app.get("/api2/finishes/options/search", function (req, res) {
   const dbSearchQuery = `%${searchQuery}%`
 
   models.Option.findAll({
+    attributes: [[ sequelize.fn('min', sequelize.col('id')), "id" ], 'name', "type", "info", "unitPrice", "manufacturer", "itemNum", "style", "size" ],
     where: {
       [Sequelize.Op.or]: {
         name: { [Sequelize.Op.iLike]: dbSearchQuery },
@@ -43,12 +44,15 @@ app.get("/api2/finishes/options/search", function (req, res) {
         info: { [Sequelize.Op.iLike]: dbSearchQuery }
       }
     },
-    include: [
-      { model: models.OptionImage }
-    ],
+    group: [ "name", "type", "info", "unitPrice", "manufacturer", "itemNum", "style", "size" ],
     limit: 100,
-  }).then(function (results) {
-    res.json({ options: results });
+  }).then(function (idResults) {
+    models.Option.findAll({
+      where: { id: idResults.map(r => r.id) },
+      include: [ { model: models.OptionImage } ]
+    }).then(results => {
+      res.json({ options: results });
+    });
   });
 });
 
