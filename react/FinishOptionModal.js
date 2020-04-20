@@ -1,7 +1,7 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { connect } from 'react-redux'
-import { Popup, Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import { Label, Popup, Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import StyledDropzone from "./StyledDropzone"
@@ -112,16 +112,6 @@ class FinishOptionModal extends React.Component {
             <Icon name="close" onClick={this.onClose} />
           </div>
           <Form>
-            <Form.Group widths="equal">
-              <Form.Input
-                fluid
-                label="Name"
-                placeholder='CANARM 7" Disc Light LED - White'
-                value={optionFields.name || ""}
-                onChange={this.onChangeFor("name")}
-              />
-            </Form.Group>
-
             <div className="field">
               <label>Images</label>
               <Grid>
@@ -157,12 +147,67 @@ class FinishOptionModal extends React.Component {
                 </Grid.Row>
               </Grid>
             </div>
-            <Form.Input
-              label="Product URL"
-              placeholder="http://...."
-              value={optionFields.url || ""}
-              onChange={this.onChangeFor("url")}
-            />
+            <Form.Group widths="equal">
+              <Form.Input
+                fluid
+                label="Name"
+                placeholder='CANARM 7" Disc Light LED - White'
+                value={optionFields.name || ""}
+                onChange={this.onChangeFor("name")}
+              />
+              <Form.Input
+                label="Product URL"
+                placeholder="http://...."
+                value={optionFields.url || ""}
+                onChange={this.onChangeFor("url")}
+              />
+            </Form.Group>
+            <Form.Group widths="equal">
+              <Form.Input
+                fluid
+                label="Manufacturer"
+                placeholder='Canarm'
+                value={optionFields.manufacturer || ""}
+                onChange={this.onChangeFor("manufacturer")}
+              />
+              <Form.Input
+                fluid
+                label="Item #"
+                placeholder='CHR-001'
+                value={optionFields.itemNum || ""}
+                onChange={this.onChangeFor("itemNum")}
+              />
+              <Form.Field>
+                <label>Unit Price</label>
+                <Input
+                  fluid
+                  labelPosition="left"
+                  placeholder='10.21'
+                  value={optionFields.unitPrice || ""}
+                  onChange={this.onChangeFor("unitPrice")}
+                >
+                  <Label basic>$</Label>
+                  <input />
+                </Input>
+              </Form.Field>
+            </Form.Group>
+            <Form.Group widths="equal">
+              <Form.Input
+                fluid
+                label="Style/Color"
+                placeholder='Turquoise'
+                value={optionFields.style || ""}
+                onChange={this.onChangeFor("style")}
+              />
+              <Form.Input
+                fluid
+                label="Size"
+                placeholder='24"'
+                value={optionFields.size || ""}
+                onChange={this.onChangeFor("size")}
+              />
+              <div className="field" />
+            </Form.Group>
             <Form.TextArea
               label='Notes'
               placeholder='Add notes about this option...'

@@ -15,11 +15,18 @@ class FinishOption extends React.Component {
     super(props);
 
     this.markdownConverter = new showdown.Converter();
+    this.state = { showDetails: false };
   }
 
   getMarkdownHTML(markdown) {
     const m = (markdown || "").replace(/\n/g, "<br>");
     return this.markdownConverter.makeHtml(m || "");
+  }
+
+  getSafeURL(url) {
+    if (!url) return url;
+    if (url.includes("http://")) return url;
+    return `http://${url}`;
   }
 
   onClick = (e) => {
@@ -38,8 +45,15 @@ class FinishOption extends React.Component {
     if (onClickUnlink) onClickUnlink(optionId);
   }
 
+  onToggleShowDetails = (e) => {
+    e.stopPropagation();
+    const { showDetails } = this.state;
+    this.setState({ showDetails: !showDetails });
+  }
+
   render() {
     const { option, optionId, short, index, draggable, draggableId, getDraggableStyleOverride } = this.props;
+    const { showDetails } = this.state;
     const images = (option.Images || []).slice(0, 2);
     const classNames = ["finish-option"];
     const isNewOption = optionId == "new";
@@ -71,18 +85,36 @@ class FinishOption extends React.Component {
                 style={{ ...draggableStyle, ...(isNewOption ? newStyle : {}) }}
                 onClick={isNewOption ? null : this.onClick}
               >
-                <div className="half" style={{ display: "flex", overflow: "hidden" }}>
+                <div className="half" style={{ display: "flex", overflow: "hidden", wordBreak: "break-word" }}>
                   <AdminControls
                     dragHandleProps={provided.dragHandleProps}
                     onClickTrash={isNewOption ? null : this.onClickUnlink}
                   />
                   <div>
                     <p className="cell-heading">{option.name}</p>
-                    {option.unitPrice && <p>Price: ${option.unitPrice}</p>}
-                    <div
-                      className="notes"
-                      dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(option.info) }}
-                      />
+                    {(option.manufacturer || option.itemNum || option.unitPrice || option.style || option.size || option.url) &&
+                      <div className="option-details">
+                        <div className="show-print" style={{ display: showDetails ? "block" : "none" }}>
+                          {option.url && <p className="hide-print"><span className="bold">
+                              Product Website: </span><a href={this.getSafeURL(option.url)} target="_blank" onClick={e=>e.stopPropagation()}>Link</a>
+                          </p>}
+                          {option.manufacturer && <p><span className="bold">Manufacturer: </span>{option.manufacturer}</p>}
+                          {option.itemNum && <p><span className="bold">Item #: </span>{option.itemNum}</p>}
+                          {option.unitPrice && <p><span className="bold">Unit Price: </span>${option.unitPrice}</p>}
+                          {option.style && <p><span className="bold">Style/Color: </span>{option.style}</p>}
+                          {option.size && <p><span className="bold">Size: </span>{option.size}</p>}
+                        </div>
+                        <p className="hide-print"><a onClick={this.onToggleShowDetails}>{showDetails ? "Hide details" : "Show details"}</a></p>
+                      </div>
+                    }
+                    {option.info &&
+                      <div>
+                        <div
+                          className="notes"
+                          dangerouslySetInnerHTML={{ __html: this.getMarkdownHTML(option.info) }}
+                          />
+                      </div>
+                    }
                   </div>
                 </div>
                 <div className="half images">
