@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
     unitPrice: DataTypes.STRING,
     type: DataTypes.STRING,
     url: DataTypes.STRING,
+    manufacturer: DataTypes.STRING,
+    itemNum: DataTypes.STRING,
+    style: DataTypes.STRING,
     info: DataTypes.TEXT,
     order: DataTypes.INTEGER
   }, {});

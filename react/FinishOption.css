@@ -19,6 +19,10 @@
     line-height: 1.5;
 }
 
+.finish-option .option-details p {
+    font-size: 14px;
+}
+
 .finish-option p.cell-heading {
     line-height: 1.2;
     font-weight: bold;

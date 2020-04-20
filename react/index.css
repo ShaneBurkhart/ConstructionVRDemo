@@ -536,6 +536,7 @@ p.filters {
 }
 
 @media print {
+    .show-print { display: block !important; }
     .hide-print { display: none !important; }
     .break-after { page-break-after: always; }
     body {
