@@ -25,7 +25,7 @@ class FinishOption extends React.Component {
 
   getSafeURL(url) {
     if (!url) return url;
-    if (url.includes("http://")) return url;
+    if (url.startsWith("http")) return url;
     return `http://${url}`;
   }
 
