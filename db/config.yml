@@ -19,3 +19,13 @@ production:
     database: mydb
     pool: 5
 
+test:
+    host: pg
+    port: 5432
+    username: postgres
+    password: postgres
+    adapter: postgresql
+    encoding: unicode
+    database: mydb
+    pool: 5
+

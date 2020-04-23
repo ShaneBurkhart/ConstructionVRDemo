@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
@@ -8,14 +9,12 @@ const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
 var models = require("./models/index.js");
 
-var Airtable = require('airtable');
-Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
-var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
-
 var Actions = require("./common/actions.js");
 
 const redis = require('redis')
 const session = require('express-session')
+
+app.use(express.urlencoded());
 
 let RedisStore = require('connect-redis')(session)
 let redisClient = redis.createClient(6379, "redis")
@@ -76,6 +75,84 @@ app.get("/api2/project/:access_token/finishes", function (req, res) {
         selectionLocations: results[4],
       });
     });
+  });
+});
+
+app.post("/api2/create/user_email", function (req, res) {
+  const email = req.body.email;
+
+  models.User.findAll({ where: { email: email } }).then(async (userResults) => {
+    let user = userResults[0];
+
+    if (!user) {
+      const isValid = /[^@]+@[^\.]+\..+/.test(email);
+      if (!isValid) return res.redirect(`/create/user_email?email_error=${encodeURIComponent("Invalid email format.")}`);
+      // Create user w/ email
+      user = await models.User.create({ email: email });
+    }
+
+    await user.refreshConfirmationCode();
+
+    // Save to session for later access
+    req.session["create_user_id"] = user.id;
+
+    res.redirect("/create/user_email");
+  });
+});
+
+app.post("/api2/create/confirm_email", function (req, res) {
+  const code = req.body.code;
+  const createUserId = req.session["create_user_id"];
+  if (!createUserId) return res.redirect("/create/user_email");
+
+  models.User.findAll({ where: { id: createUserId } }).then(async (userResults) => {
+    let user = userResults[0];
+    if (!user) return res.redirect("/create/user_email");
+    if (!await user.confirmEmail(code)) return res.redirect("/create/confirm_email");
+    res.redirect("/create/team");
+  });
+});
+
+app.post("/api2/create/team", function (req, res) {
+  const team_name = req.body.team_name;
+  const createUserId = req.session["create_user_id"];
+  if (!createUserId) return res.redirect("/create/user_email");
+  if (!team_name) return res.redirect("/create/team");
+
+  req.session["create_team_name"] = team_name;
+
+  res.redirect("/create/user_details");
+});
+
+app.post("/api2/create/user_details", function (req, res) {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const password = req.body.password;
+
+  const createUserId = req.session["create_user_id"];
+  const createTeamName = req.session["create_team_name"];
+  if (!createUserId) return res.redirect("/create/user_email");
+  if (!createTeamName) return res.redirect("/create/team");
+
+  if (!firstName || !lastName) return res.redirect("/create/user_details");
+  if (!password || !models.User.validatePassword(password)) return res.redirect("/create/user_details");
+
+  models.User.findAll({ where: { id: createUserId } }).then(async (userResults) => {
+    let user = userResults[0];
+    if (!user) return res.redirect("/create/user_email");
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    await user.setPassword(password);
+    await user.save();
+
+    const ownedTeams = await user.getOwnedTeams();
+    if (ownedTeams && ownedTeams.length > 0) return res.redirect("/create/user_email");
+
+    const team = await models.Team.create({ name: createTeamName });
+    await user.addOwnedTeam(team);
+
+    res.redirect("http://app.finishvision.com/projects");
   });
 });
 
@@ -657,8 +734,12 @@ async function _testPostgresConnection () {
   }
 }
 
-http.listen(3000, function(){
-  _testPostgresConnection().then(function () {
-    console.log('listening on *:3000');
+if (require.main === module) {
+  http.listen(3000, function(){
+    _testPostgresConnection().then(function () {
+      console.log('listening on *:3000');
+    });
   });
-});
+}
+
+module.exports = app;
