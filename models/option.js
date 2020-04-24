@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Option = sequelize.define('Option', {
     ProjectId: DataTypes.BIGINT,
     SelectionId: DataTypes.BIGINT,
+    TeamId: DataTypes.BIGINT,
     name: DataTypes.STRING,
     unitPrice: DataTypes.STRING,
     type: DataTypes.STRING,
@@ -19,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     Option.hasMany(models.OptionImage);
     Option.belongsTo(models.Selection);
     Option.belongsTo(models.Project);
+    Option.hasOne(models.Team);
   };
   return Option;
 };
