@@ -96,7 +96,6 @@ end
 
 post '/api/temp_upload/presign' do
   is_admin_mode = !!session[:is_admin]
-  return "Not found" if !is_admin_mode
 
   key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
   signer = Aws::S3::Presigner.new
