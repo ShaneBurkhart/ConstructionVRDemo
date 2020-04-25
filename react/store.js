@@ -187,6 +187,11 @@ const updateCategory = (state, action) => {
   return { ...state, ...computeState({ ...state }) };
 }
 
+const updateProject = (state, action) => {
+  const { fieldsToUpdate } = action;
+  return { ...state, projectName: fieldsToUpdate.name };
+}
+
 const batchUpdateOptions = (state, action) => {
   const { updates } = action;
 
@@ -422,6 +427,8 @@ const todos = (state = {}, action) => {
       return updateSelection(state, action);
     case Actions.UPDATE_CATEGORY:
       return updateCategory(state, action);
+    case Actions.UPDATE_PROJECT:
+      return updateProject(state, action);
     case Actions.BATCH_UPDATE_OPTIONS:
       return batchUpdateOptions(state, action);
     case Actions.BATCH_UPDATE_SELECTIONS:
@@ -473,6 +480,7 @@ const todos = (state = {}, action) => {
       return {
         ...state,
         ...computeState({ filters, options, selections, categories }),
+        projectName: action.projectName,
         isAdmin: action.admin_mode,
       }
     default:

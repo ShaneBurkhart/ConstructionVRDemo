@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -14,6 +15,8 @@ var Actions = require("./common/actions.js");
 const redis = require('redis')
 const session = require('express-session')
 
+app.set('view engine', 'pug')
+
 app.use(express.urlencoded());
 
 let RedisStore = require('connect-redis')(session)
@@ -27,6 +30,84 @@ let sessionMiddleware = session({
 app.use(sessionMiddleware);
 io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
+});
+
+const authenticate = (req, res, next) => {
+  if (!req.user) return res.redirect("/login");
+  next();
+}
+
+app.use((req, res, next) => {
+  const userId = req.session["user_id"];
+  if (userId) {
+    models.User.findAll({ where: { id: userId } }).then(results => {
+      const user = results[0];
+      if (user) {
+        req.user = user;
+        res.locals.user = user;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
+if (process.env.NODE_ENV == "development") {
+  app.get("/api2/login", (req, res) => {
+    res.render("login");
+  });
+}
+
+app.get("/projects", authenticate, (req, res) => {
+  const user = req.user;
+  Promise.all([
+    user.getOwnedTeams({
+      include: [ { model: models.Project } ],
+      order: [[ models.Project, "updatedAt",  "desc" ]]
+    }),
+    user.getEditorTeams({ include: [ { model: models.Project } ] }),
+  ]).then(results => {
+    res.render("Projects", { ownedTeam: results[0][0], memberTeams: results[1] });
+  });
+});
+
+app.get("/projects/:access_token/finishes", (req, res) => {
+  const projectAccessToken = req.params["access_token"];
+
+  models.Project.findAll({
+    where: { accessToken: projectAccessToken }
+  }).then(projects => {
+    const project = projects[0];
+    res.render("project_finishes", { project });
+  });
+});
+
+app.get("/projects/new", authenticate, (req, res) => {
+  const user = req.user;
+
+  user.getOwnedTeams().then(async (ownedTeams) => {
+    const ownedTeam = ownedTeams[0];
+    if (!ownedTeam) return res.redirect("/projects");
+
+    const newProject = await ownedTeam.createProject({ name: "New Project" });
+    const newCategories = await Promise.all([
+      newProject.createCategory({ name: "Concepts", order: 1 }),
+      newProject.createCategory({ name: "Paint", order: 2 }),
+      newProject.createCategory({ name: "Tile", order: 3 }),
+      newProject.createCategory({ name: "Light Fixtures", order: 4 }),
+      newProject.createCategory({ name: "Furniture", order: 5 }),
+    ]);
+    const newSelections = await Promise.all([
+      newCategories[0].createSelection({ ProjectId: newProject.id, type: "Lounge", order: 1 }),
+      newCategories[1].createSelection({ ProjectId: newProject.id, type: "PT1", order: 1 }),
+      newCategories[1].createSelection({ ProjectId: newProject.id, type: "PT2", order: 2 }),
+      newCategories[2].createSelection({ ProjectId: newProject.id, type: "T1", order: 1 }),
+      newCategories[2].createSelection({ ProjectId: newProject.id, type: "T2", order: 2 }),
+    ]);
+
+    res.redirect(`/projects/${newProject.accessToken}/finishes`);
+  });
 });
 
 app.get("/api2/finishes/options/search", function (req, res) {
@@ -57,7 +138,8 @@ app.get("/api2/finishes/options/search", function (req, res) {
 
 app.get("/api2/project/:access_token/finishes", function (req, res) {
   const projectAccessToken = req.params["access_token"];
-  const adminMode = !!req.session["is_admin"];
+  const user = req.user;
+
   _findProjectByAccessToken(projectAccessToken).then(function (project) {
     Promise.all([
       project.getCategories(),
@@ -65,16 +147,31 @@ app.get("/api2/project/:access_token/finishes", function (req, res) {
       project.getOptions(),
       project.getOptionImages(),
       project.getSelectionLocations(),
+      models.TeamMembership.canUserEditProject(user, project),
     ]).then(function (results) {
       res.json({
-        admin_mode: adminMode,
+        projectName: project.name,
         categories: results[0],
         selections: results[1],
         options: results[2],
         optionImages: results[3],
         selectionLocations: results[4],
+        admin_mode: results[5],
       });
     });
+  });
+});
+
+app.post("/api2/login", function (req, res) {
+  const email = (req.body.email || "").toLowerCase();
+  const password = req.body.password;
+
+  models.User.login(email, password).then(user => {
+    if (!user) return res.redirect("/login");
+
+    req.session["user_id"] = user.id;
+
+    res.redirect("/projects");
   });
 });
 
@@ -422,6 +519,16 @@ async function updateCategory(categoryId, fieldsToUpdate) {
   }
 }
 
+async function updateProject(projectAccessToken, fieldsToUpdate) {
+  try {
+    await models.Project.update(_.pick(fieldsToUpdate, "name"), {
+      where: { accessToken: projectAccessToken }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 async function alphabetizeSelections(categoryId) {
   let updates;
 
@@ -591,137 +698,155 @@ io.on('connection', function(socket){
   const projectAccessToken = socket.handshake.query.projectAccessToken;
   socket.join(projectAccessToken)
 
-  if (!socket.request.session["is_admin"]) {
-    // Updates only connection.  No write access unless is_admin.
-    return;
-  }
 
-  socket.on(Actions.ADD_NEW_OPTION, function(data){
-    addNewOption(data.selectionId, data.fields).then((newOption) => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        id: newOption.id,
-        newOption: newOption,
-        type: Actions.ADD_NEW_OPTION,
-        ...data,
-      });
-    });
-  });
+  const userId = socket.request.session["user_id"];
+  if (!userId) return;
 
-  socket.on(Actions.ADD_NEW_SELECTION, function(data){
-    addNewSelection(data.categoryId, data.fields).then((updates) => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        updates: updates,
-        type: Actions.BATCH_UPDATE_SELECTIONS,
-        ...data,
-      });
-    });
-  });
+  Promise.all([
+    models.User.findAll({ where: { id: userId } }),
+    models.Project.findAll({ where: { accessToken: projectAccessToken } }),
+  ]).then(async (results) => {
+    const user = results[0][0];
+    const project = results[1][0];
 
-  socket.on(Actions.ADD_NEW_CATEGORY, function(data){
-    addNewCategory(data.categoryName, data.project_token).then((newCategory) => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        id: newCategory.id,
-        newCategory: newCategory,
-        type: Actions.ADD_NEW_CATEGORY,
-        ...data,
-      });
-    });
-  });
+    if (!models.TeamMembership.canUserEditProject(user, project)) return;
 
-  socket.on(Actions.REMOVE_OPTION, function(data){
-    removeOption(data.optionId).then(() => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.REMOVE_OPTION,
-        ...data,
-      });
-    });
-  });
-
-  socket.on(Actions.REMOVE_SELECTION, function(data){
-    removeSelection(data.selectionId).then(() => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.REMOVE_SELECTION,
-        ...data,
-      });
-    });
-  });
-
-  socket.on(Actions.REMOVE_CATEGORY, function(data){
-    removeCategory(data.categoryId).then(() => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.REMOVE_CATEGORY,
-        ...data,
-      });
-    });
-  });
-
-  socket.on(Actions.UPDATE_OPTION, function(data){
-    updateOption(data.optionId, data.fieldsToUpdate, data.updateAll).then((updates) => {
-      if (data.updateAll) {
+    socket.on(Actions.ADD_NEW_OPTION, function(data){
+      addNewOption(data.selectionId, data.fields).then((newOption) => {
         io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-          type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates
-        });
-      } else {
-        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-          type: Actions.UPDATE_OPTION, ...data
-        });
-      }
-    });
-  });
-
-  socket.on(Actions.UPDATE_SELECTION, function(data){
-    updateSelection(data.selectionId, data.fieldsToUpdate).then(() => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.UPDATE_SELECTION,
-        ...data,
-      });
-    });
-  });
-
-  socket.on(Actions.UPDATE_CATEGORY, function(data){
-    updateCategory(data.categoryId, data.fieldsToUpdate).then(() => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.UPDATE_CATEGORY,
-        ...data,
-      });
-    });
-  });
-
-  socket.on(Actions.ALPHABETIZE_SELECTIONS, function(data){
-    alphabetizeSelections(data.categoryId).then((updates) => {
-      io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-        type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
-      });
-    });
-  });
-
-  socket.on(Actions.MOVE_OPTION, function(data){
-    const { optionId, destSelectionId, newPosition, project_token } = data;
-    moveOption(optionId, destSelectionId, newPosition, project_token)
-      .then((updates) => {
-        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-          type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates,
+          id: newOption.id,
+          newOption: newOption,
+          type: Actions.ADD_NEW_OPTION,
+          ...data,
         });
       });
-  });
+    });
 
-  socket.on(Actions.MOVE_SELECTION, function(data){
-    const { selectionId, destCategoryId, newPosition, project_token } = data;
-    moveSelection(selectionId, destCategoryId, newPosition, project_token)
-      .then((updates) => {
+    socket.on(Actions.ADD_NEW_SELECTION, function(data){
+      addNewSelection(data.categoryId, data.fields).then((updates) => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          updates: updates,
+          type: Actions.BATCH_UPDATE_SELECTIONS,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.ADD_NEW_CATEGORY, function(data){
+      addNewCategory(data.categoryName, data.project_token).then((newCategory) => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          id: newCategory.id,
+          newCategory: newCategory,
+          type: Actions.ADD_NEW_CATEGORY,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.REMOVE_OPTION, function(data){
+      removeOption(data.optionId).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.REMOVE_OPTION,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.REMOVE_SELECTION, function(data){
+      removeSelection(data.selectionId).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.REMOVE_SELECTION,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.REMOVE_CATEGORY, function(data){
+      removeCategory(data.categoryId).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.REMOVE_CATEGORY,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.UPDATE_OPTION, function(data){
+      updateOption(data.optionId, data.fieldsToUpdate, data.updateAll).then((updates) => {
+        if (data.updateAll) {
+          io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+            type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates
+          });
+        } else {
+          io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+            type: Actions.UPDATE_OPTION, ...data
+          });
+        }
+      });
+    });
+
+    socket.on(Actions.UPDATE_SELECTION, function(data){
+      updateSelection(data.selectionId, data.fieldsToUpdate).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.UPDATE_SELECTION,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.UPDATE_CATEGORY, function(data){
+      updateCategory(data.categoryId, data.fieldsToUpdate).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.UPDATE_CATEGORY,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.UPDATE_PROJECT, function(data){
+      updateProject(projectAccessToken, data.fieldsToUpdate).then(() => {
+        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+          type: Actions.UPDATE_PROJECT,
+          ...data,
+        });
+      });
+    });
+
+    socket.on(Actions.ALPHABETIZE_SELECTIONS, function(data){
+      alphabetizeSelections(data.categoryId).then((updates) => {
         io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
           type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
         });
       });
-  });
+    });
 
-  socket.on(Actions.MOVE_CATEGORY, function(data){
-    moveCategory(data.categoryId, data.newPosition, data.project_token)
-      .then((updates) => {
-        io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
-          type: Actions.BATCH_UPDATE_CATEGORIES, ...data, updates
+    socket.on(Actions.MOVE_OPTION, function(data){
+      const { optionId, destSelectionId, newPosition, project_token } = data;
+      moveOption(optionId, destSelectionId, newPosition, project_token)
+        .then((updates) => {
+          io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+            type: Actions.BATCH_UPDATE_OPTIONS, ...data, updates,
+          });
         });
-      });
+    });
+
+    socket.on(Actions.MOVE_SELECTION, function(data){
+      const { selectionId, destCategoryId, newPosition, project_token } = data;
+      moveSelection(selectionId, destCategoryId, newPosition, project_token)
+        .then((updates) => {
+          io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+            type: Actions.BATCH_UPDATE_SELECTIONS, ...data, updates,
+          });
+        });
+    });
+
+    socket.on(Actions.MOVE_CATEGORY, function(data){
+      moveCategory(data.categoryId, data.newPosition, data.project_token)
+        .then((updates) => {
+          io.to(projectAccessToken).emit(Actions.EXECUTE_CLIENT_EVENT, {
+            type: Actions.BATCH_UPDATE_CATEGORIES, ...data, updates
+          });
+        });
+    });
   });
 });
 

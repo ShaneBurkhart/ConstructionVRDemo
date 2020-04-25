@@ -1,0 +1,23 @@
+extends layout.pug
+
+block site_style
+
+block content
+    if false
+        .site-header
+          .xlarge-container
+            h1= project.name
+
+                .ui.tabular.menu.hide-print
+                  a.item(href="/project/" + project.accessToken + "/finishes" class="active") Finish Selections
+
+        .site-header-spacer
+
+    #finishes-app
+
+    script.
+      var PROJECT_ACCESS_TOKEN = "#{project.accessToken}";
+      var PROJECT_NAME = "#{project.name}";
+
+    script(src="/dist/finishes_app.js?v=04192004")
+

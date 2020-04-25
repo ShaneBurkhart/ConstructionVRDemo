@@ -6,5 +6,18 @@ module.exports = (sequelize, DataTypes) => {
   TeamMembership.associate = function(models) {
     // associations can be defined here
   };
+
+  TeamMembership.canUserEditProject = async function (user, project) {
+    if (!project || !user) return false;
+    const memberships = await TeamMembership.findAll({
+      where: {
+        UserId: user.id,
+        TeamId: project.TeamId,
+        role: ["owner", "editor"],
+      }
+    });
+    return memberships.length > 0;
+  }
+
   return TeamMembership;
 };

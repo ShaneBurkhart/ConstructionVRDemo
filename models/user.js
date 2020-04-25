@@ -57,9 +57,23 @@ module.exports = (sequelize, DataTypes) => {
     return true;
   }
 
+  User.prototype.checkPassword = async function (password) {
+    return await bcrypt.compare(password, this.passwordDigest);
+  }
+
   User.prototype.setPassword = async function (password) {
     const passwordDigest = await bcrypt.hash(password, 10);
     this.passwordDigest = passwordDigest;
+  }
+
+  User.login = async (email, password) => {
+    const user = (await User.findAll({ where: { email: email } }))[0];
+    if (!user) return null;
+
+    const isMatch = await user.checkPassword(password);
+    if (!isMatch) return null;
+
+    return user;
   }
 
   User.validatePassword = function (password) {

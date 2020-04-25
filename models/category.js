@@ -10,5 +10,14 @@ module.exports = (sequelize, DataTypes) => {
     Category.hasMany(models.Selection);
     Category.belongsTo(models.Project);
   };
+
+  const bumpProjectUpdatedAt = (category, options) => {
+    return sequelize.models.Project.update({ updatedAt: new Date() }, {
+      where: { ProjectId: category.ProjectId }
+    });
+  }
+
+  Category.addHook("afterUpdate", bumpProjectUpdatedAt)
+
   return Category;
 };
