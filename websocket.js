@@ -167,12 +167,17 @@ app.post("/api2/login", function (req, res) {
   const password = req.body.password;
 
   models.User.login(email, password).then(user => {
-    if (!user) return res.redirect("/login");
+    if (!user) return res.redirect(`/login?login_error=${encodeURIComponent("Incorrect email or password.")}`);
 
     req.session["user_id"] = user.id;
 
     res.redirect("/projects");
   });
+});
+
+app.get("/api2/logout", function (req, res) {
+  req.session["user_id"] = null;
+  res.redirect("/login");
 });
 
 app.post("/api2/create/user_email", function (req, res) {
@@ -205,7 +210,7 @@ app.post("/api2/create/confirm_email", function (req, res) {
   models.User.findAll({ where: { id: createUserId } }).then(async (userResults) => {
     let user = userResults[0];
     if (!user) return res.redirect("/create/user_email");
-    if (!await user.confirmEmail(code)) return res.redirect("/create/confirm_email");
+    if (!await user.confirmEmail(code)) return res.redirect(`/create/confirm_email?code_error=${encodeURIComponent("Invalid confirmation code.")}`);
     res.redirect("/create/team");
   });
 });
@@ -214,7 +219,7 @@ app.post("/api2/create/team", function (req, res) {
   const team_name = req.body.team_name;
   const createUserId = req.session["create_user_id"];
   if (!createUserId) return res.redirect("/create/user_email");
-  if (!team_name) return res.redirect("/create/team");
+  if (!team_name) return res.redirect(`/create/team?team_error=${encodeURIComponent("Invalid team name.")}`);
 
   req.session["create_team_name"] = team_name;
 
@@ -231,8 +236,15 @@ app.post("/api2/create/user_details", function (req, res) {
   if (!createUserId) return res.redirect("/create/user_email");
   if (!createTeamName) return res.redirect("/create/team");
 
-  if (!firstName || !lastName) return res.redirect("/create/user_details");
-  if (!password || !models.User.validatePassword(password)) return res.redirect("/create/user_details");
+  const errors = {};
+  if (!firstName) errors["first_name_error"] = "Please add a first name.";
+  if (!lastName) errors["last_name_error"] = "Please add a last name.";
+  if (!password || !models.User.validatePassword(password)) errors["password_error"] = "Invalid password. Must be at least 8 characters.";
+
+  if (Object.keys(errors).length > 0) {
+    const errorQuery = Object.keys(errors).map(k => `${k}=${encodeURIComponent(errors[k])}`).join("&");
+    return res.redirect(`/create/user_details?${errorQuery}`);
+  }
 
   models.User.findAll({ where: { id: createUserId } }).then(async (userResults) => {
     let user = userResults[0];
