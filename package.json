@@ -12,6 +12,7 @@
     "file-loader": "^5.0.2",
     "pg": "^8.0.0",
     "pg-hstore": "^2.3.3",
+    "pug": "^2.0.4",
     "react": "^16.12.0",
     "react-beautiful-dnd": "^12.2.0",
     "react-dom": "^16.12.0",
@@ -26,7 +27,8 @@
     "showdown": "^1.9.1",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
-    "url-loader": "^3.0.0"
+    "url-loader": "^3.0.0",
+    "uuid": "^7.0.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",
@@ -42,13 +44,15 @@
     "supertest": "^4.0.2",
     "underscore": "^1.9.2",
     "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-merge": "^4.2.2"
   },
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
     "watch_test": "jest --watch",
-    "build": "webpack",
-    "watch": "webpack --watch"
+    "build_prod": "webpack -p --config webpack.prod.js",
+    "build": "webpack --config webpack.dev.js",
+    "watch": "webpack --config webpack.dev.js --watch"
   },
   "repository": {
     "type": "git",

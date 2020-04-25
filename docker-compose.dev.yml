@@ -35,7 +35,7 @@ jest_tests:
         - .:/app
     env_file:
         - user.env
-    command: "npm run watch_test"
+    command: "true"
 
 pg:
     image: postgres
