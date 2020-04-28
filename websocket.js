@@ -240,13 +240,24 @@ async function updateOption(optionId, fieldsToUpdate, updateAll) {
     if (updateAll) {
       const optionName = option.name;
       const optionsWithSameName = await models.Option.findAll({
-        where: { name: optionName, ProjectId: projectId }
+        where: {
+          name: optionName,
+          ProjectId: projectId,
+          [Sequelize.Op.not]: { SelectionId: null },
+        }
       });
 
       optionsWithSameName.forEach(option => {
         if (option.id == optionId) return;
         // Remove id when updating other option records
-        const copyFieldsToUpdate = { ...fieldsToUpdate, id: undefined };
+        const copyFieldsToUpdate = {
+          ...fieldsToUpdate,
+          SelectionId: option.SelectionId,
+          order: option.order,
+          id: undefined,
+          createdAt: undefined,
+          updatedAt: undefined,
+        };
 
         if (fieldsToUpdate.Images) {
           copyFieldsToUpdate.Images = fieldsToUpdate.Images.map(i => ({ url: i["url"] }));
