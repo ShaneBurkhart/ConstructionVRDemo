@@ -221,7 +221,7 @@ class FinishOptionModal extends React.Component {
               negative
               onClick={this.onClose}
             >Cancel</Button>
-            {!this.isNew && (optionsWithSameName || []).length > 0 ?
+            {!this.isNew && false && (optionsWithSameName || []).length > 0 ?
               <Popup
                 on="click"
                 content={
