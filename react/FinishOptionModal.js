@@ -13,7 +13,7 @@ class FinishOptionModal extends React.Component {
   constructor(props) {
     super(props);
 
-    const option = props.option || {};
+    const option = { ...(props.option || {}) };
     const newId = "new" + Math.random().toString(36).substring(2, 15);
 
     this.isNew = (props.optionId || "").startsWith("new");
@@ -65,7 +65,7 @@ class FinishOptionModal extends React.Component {
 
   removeImage = (imgId) => {
     const { optionFields } = this.state;
-    const newImages = optionFields.Images || [];
+    const newImages = [ ...(optionFields.Images || []) ];
     const idx = newImages.findIndex(i => i["id"] == imgId);
 
     if (idx >= 0) {
