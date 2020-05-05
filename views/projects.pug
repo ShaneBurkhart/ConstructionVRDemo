@@ -1,0 +1,34 @@
+extends layout.pug
+
+block content
+    .container
+        h1 Projects Dashboard
+
+        if ownedTeam
+            h2= ownedTeam.name
+            p
+                a.ui.green.button(href="/projects/new") + Create Project
+
+            table.ui.celled.table
+                thead
+                    tr
+                        th Name
+                        th Last Updated
+                tbody
+                    each project in ownedTeam.Projects
+                        tr
+                            td
+                                a(href="/projects/" + project.accessToken + "/finishes")= project.name
+                            td= project.prettyUpdatedAt()
+
+        if memberTeams.length > 0
+            h2 Teams shared with you
+
+            each team in memberTeams
+                h2= team.name
+
+                each project in team.Projects
+                    p= project.name
+
+
+

@@ -10,11 +10,18 @@ build:
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
 
+test:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run jest_tests npm run test
+
+test_from_scratch:
+	$(MAKE) rebuild_db
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run jest_tests npm run test
+
 c:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
 c_node:
-	docker-compose -f docker-compose.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"
 
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate

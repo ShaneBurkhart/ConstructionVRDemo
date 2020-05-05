@@ -14,8 +14,9 @@ RUN npm install
 
 ADD . /app/
 
-RUN npm run build
+RUN npm run build_prod
 
-EXPOSE 4567
+# If we put production before install, we don't have the tools to build js.
+ENV NODE_ENV production
 
 CMD ["ruby", "server.rb"]

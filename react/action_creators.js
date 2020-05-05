@@ -77,6 +77,10 @@ const ActionCreator = {
     emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
   },
 
+  updateProject: (fieldsToUpdate) => {
+    emit(Actions.UPDATE_PROJECT, { fieldsToUpdate });
+  },
+
   alphabetizeSelections: (categoryId) => {
     emit(Actions.ALPHABETIZE_SELECTIONS, { categoryId });
   },

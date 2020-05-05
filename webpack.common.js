@@ -3,12 +3,6 @@ const webpack = require("webpack");
 
 module.exports = {
   entry: "./react/index.js",
-  mode: "development",
-  //watch: true,
-  //watchOptions: {
-    //aggregateTimeout: 3000,
-    //poll: 5000,
-  //},
   module: {
     rules: [
       {

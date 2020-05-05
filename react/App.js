@@ -14,6 +14,7 @@ import FinishSelectionLinkOptionModal from './FinishSelectionLinkOptionModal';
 import FinishAdminSection from './FinishAdminSection';
 import FinishOptionModal from './FinishOptionModal';
 import FloatingProjectButton from './FloatingProjectButton';
+import FocusEditableInput from './FocusEditableInput';
 
 import './App.css';
 import './FinishSelectionTable.css';
@@ -52,6 +53,9 @@ class App extends React.Component {
     window.addEventListener('beforeunload', this.onUnload);
 
     this.props.dispatch(ActionCreators.load((data) => {
+      if (data.admin_mode) {
+        document.body.classList.add("admin-mode");
+      }
       this.setState({ isLoading: false });
     }));
   }
@@ -123,6 +127,10 @@ class App extends React.Component {
     this._isDragging = false;
   }
 
+  onChangeProjectName = (name) => {
+    this.props.dispatch(ActionCreators.updateProject({ name }));
+  }
+
   renderCategorySections() {
     const { orderedCategoryIds } = this.props;
 
@@ -177,7 +185,7 @@ class App extends React.Component {
 
   render() {
     const { adminMode, selectionFilters, currentFilters, quickSearches } = this.props;
-    const { orderedCategoryIds } = this.props;
+    const { orderedCategoryIds, projectName } = this.props;
     const wrapperClasses = ["xlarge-container", adminMode ? "admin-mode" : ""];
 
     return (
@@ -187,6 +195,14 @@ class App extends React.Component {
             orderedCategoryIds={orderedCategoryIds}
           />}
           <div className={wrapperClasses.join(" ")}>
+            <h1>
+              <FocusEditableInput
+                key={projectName}
+                editable={adminMode}
+                value={projectName}
+                onChange={this.onChangeProjectName}
+              />
+            </h1>
             <FinishSelectionFilters
               currentFilters={currentFilters}
               filters={selectionFilters}
@@ -202,7 +218,7 @@ class App extends React.Component {
               {this.renderLoading()}
             </div>
 
-            <FloatingProjectButton name={PROJECT_NAME} />
+            <FloatingProjectButton name={projectName} />
           </div>
         </DragDropContext>
       </AdminContext.Provider>
@@ -213,6 +229,7 @@ class App extends React.Component {
 export default connect((reduxState, props) => {
   return {
     adminMode: reduxState.isAdmin,
+    projectName: reduxState.projectName,
     orderedCategoryIds: reduxState.orderedCategoryIds || [],
     currentFilters: reduxState.filters,
     selectionFilters: reduxState.selectionFilters || {},

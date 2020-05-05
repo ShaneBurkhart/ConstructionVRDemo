@@ -1,0 +1,25 @@
+html
+    head
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+
+        block site_style
+            link(type="text/css" rel="stylesheet" href="/semantic.min.css?v=190407")
+            link(href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Roboto:300,400,700|Handlee" rel="stylesheet")
+            link(type="text/css" rel="stylesheet" href="/style.css?v=200312")
+
+        link(type="text/css" rel="stylesheet" href="/user_header.css?v=200312")
+
+        script(crossorigin="anonymous" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" src="https://code.jquery.com/jquery-2.2.4.min.js")
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js")
+        script(src="/semantic.min.js?v=190407")
+
+    body(class=user ? "user-header" : "")
+        if user
+            #user-header.hide-print
+                .link-containers
+                    .left
+                        a(href="/projects") Projects
+                    .right
+                        a(href="/projects")= user.email
+
+        block content

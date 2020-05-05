@@ -58,7 +58,11 @@ class FocusEditableInput extends React.Component {
           onClick={this.onClick}
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
-          style={{ display: "inline-block", minWidth: 60 }}
+          style={{
+            display: "inline-block",
+            minWidth: 60,
+            cursor: editable ? "pointer" : "initial"
+          }}
         >
           {value} &nbsp;
           {editable && hovering && <Icon name="pencil alternate" style={{ fontSize: 16 }} />}
