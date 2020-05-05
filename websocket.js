@@ -59,6 +59,13 @@ if (process.env.NODE_ENV == "development") {
   });
 }
 
+function appHandler(req, res) {
+  res.render("app");
+}
+
+app.get("/app*", appHandler)
+app.get("/app", appHandler)
+
 app.get("/projects", authenticate, (req, res) => {
   const user = req.user;
   Promise.all([

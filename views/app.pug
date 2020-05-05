@@ -1,0 +1,11 @@
+extends layout.pug
+
+block content
+    #finishes-app
+
+    script.
+      var PROJECT_ACCESS_TOKEN = "#{project.accessToken}";
+      var PROJECT_NAME = "#{project.name}";
+
+    script(src="/dist/finishes_app.js?v=04192004")
+
