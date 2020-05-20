@@ -87,16 +87,14 @@
       - screenshot_scene_names = selected_version.get_screenshot_scene_names
       - selected_version.screenshot_versions.each_with_index do |sv, i|
         .screenshot
-          - fullImgSrc = sv["Image URL"]
-          - largeImgSrc = sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/")
+          - imgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
           %h4
             Scene:
             = screenshot_scene_names[i]
-          %a{ href: fullImgSrc, target: "_blank" }
-            %img{ src: largeImgSrc }
+          %img{ src: imgSrc }
           - if is_admin_mode and is_latest_version
             %a.show-give-feedback{ href: "#" } + Give Feedback
-            .feedback-input{ style: "display: none;", data: { unit_version_id: sv["Unit Version"][0], image_url: fullImgSrc } }
+            .feedback-input{ style: "display: none;", data: { unit_version_id: sv["Unit Version"][0], image_url: imgSrc } }
               %textarea{ name: "notes", placeholder: "Enter your feedback here..." }
               %br
               %button.screenshot-feedback-submit Submit Feedback
