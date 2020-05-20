@@ -1,9 +1,7 @@
 var async = require('async');
 var path = require('path');
 var AWS = require('aws-sdk');
-var gm = require('gm').subClass({
-    imageMagick: true
-});
+var sharp = require('sharp');
 var util = require('util');
 var s3 = new AWS.S3();
 
@@ -48,21 +46,26 @@ var createResizeTask = function (bucket, key, destKey, extension, photoSize) {
 
       function tranform(response, transformCallback) {
         // autoOrient() to fix photo orientation when not corrected by camera
-        gm(response.Body).autoOrient().size(function(err, size) {
+        var img = sharp(response.Body).rotate();
+
+        img.metadata(function(err, metadata) {
+          console.log("Measuring Size.");
           if (err) return transformCallback(err);
+          console.log("Calculating Size.");
 
           var scalingFactor = Math.min(
-            photoSize.max_width / size.width,
-            photoSize.max_height / size.height
+            photoSize.max_width / metadata.width,
+            photoSize.max_height / metadata.height
           );
 
-          var width = scalingFactor * size.width;
-          var height = scalingFactor * size.height;
+          var width = Math.round(scalingFactor * metadata.width);
+          var height = Math.round(scalingFactor * metadata.height);
 
           // Infer the scaling factor to avoid stretching the image unnaturally.
           // Transform the image buffer in memory.
-          this.resize(width, height)
-            .toBuffer(extension, function(err, buffer) {
+          img.resize(width, height, { fit: "contain", withoutEnlargement: true })
+            .toBuffer(function(err, buffer) {
+              console.log("Resizing.");
               if (err) return transformCallback(err);
 
               // Stream the transformed image to a different S3 bucket.
