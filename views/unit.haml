@@ -88,7 +88,7 @@
       - selected_version.screenshot_versions.each_with_index do |sv, i|
         .screenshot
           - fullImgSrc = sv["Image URL"]
-          - largeImgSrc = sv["Image URL"].gsub("\/screenshots\/", "\/screenshots-large\/")
+          - largeImgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
           %h4
             Scene:
             = screenshot_scene_names[i]
