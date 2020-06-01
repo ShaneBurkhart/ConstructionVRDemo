@@ -16,6 +16,8 @@ Aws.config.update({
 })
 
 def rerun_prefix(prefix)
+  after_date = Date.parse('19-5-2020').to_time
+
   s3 = Aws::S3::Client.new
   lambda_client  = Aws::Lambda::Client.new
 
@@ -30,7 +32,7 @@ def rerun_prefix(prefix)
       prefix: prefix,
       continuation_token: marker
     }).to_h
-    photos = s3_resp[:contents].collect { |k| k[:key] }
+    photos = s3_resp[:contents].select{ |k| k[:last_modified] >= after_date }.collect { |k| k[:key] }
 
     photos.each_with_index do |key, index|
       lambda_resp = lambda_client.invoke({
