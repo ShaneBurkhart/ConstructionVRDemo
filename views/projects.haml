@@ -1,4 +1,5 @@
 .container
   %h1 All Projects
   - projects.each do |project|
-    %a{ href: "/project/#{project.id}" }= project["Name"]
+    %p
+      %a{ href: "/admin/login/#{project.fields["Admin Access Token"]}" }= project["Name"]

@@ -54,6 +54,13 @@ def find_project_by_admin_access_token(admin_access_token)
   return records.first
 end
 
+if ENV["NODE_ENV"] == "development"
+  get '/' do
+    projects = Finishes::Project.all
+    haml :projects, locals: { projects: projects }
+  end
+end
+
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
