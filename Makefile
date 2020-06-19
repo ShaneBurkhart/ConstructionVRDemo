@@ -30,7 +30,7 @@ pg_dump:
 	#docker exec <pg_container_id> pg_dump -Fc -v -f /app/full.dump -U postgres mydb
 
 pg_restore:
-	#docker exec <pg_container_id> pg_restore -a -d mydb -Fc /app/full.dump
+	#docker exec <pg_container_id> pg_restore -a -U postgres -d mydb -Fc /app/full.dump
 
 
 db_models:
