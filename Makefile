@@ -26,6 +26,13 @@ rebuild_db:
 	sleep 90
 	$(MAKE) db
 
+pg_dump:
+	#docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm pg pg_dump -Fc -v -f /app/full.dump -U postgres mydb
+	#docker exec 3b7c pg_dump -Fc -v -f /app/full.dump -U postgres mydb
+
+pg_restore:
+	#docker exec 3b7c pg_restore -a -d dbname -Fc /app/full.dump
+
 
 db_models:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web irb -r ./models/db_models.rb

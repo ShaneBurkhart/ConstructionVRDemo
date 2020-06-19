@@ -36,6 +36,7 @@ pg:
         - POSTGRES_DB=mydb
     volumes:
         - ./data/pg:/var/lib/postgresql/data
+        - .:/app
 
 testing_worker:
     image: shaneburkhart/construction-vr-demo
