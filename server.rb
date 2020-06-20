@@ -30,7 +30,7 @@ $stdout.sync = true
 set :bind, '0.0.0.0'
 set :sockets, []
 
-use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0'
+use Rack::Session::Redis, :redis_server => 'redis://redis:6379/0', :expires_in => 60 * 60 * 24 * 7
 
 Slack.configure do |config|
   config.token = ENV['SLACK_KONTENT_KEEPER_SIGNING_SECRET']
