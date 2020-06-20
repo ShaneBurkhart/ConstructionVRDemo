@@ -26,6 +26,10 @@ wipe:
 	sleep 30
 	$(MAKE) db
 
+pg:
+	echo "Enter 'postgres'..."
+	docker-compose -f docker-compose.dev.yml  -p ${NAME} run --rm pg psql -h pg -d mydb -U postgres --password
+
 pg_dump:
 	#docker exec <pg_container_id> pg_dump -Fc -v -f /app/full.dump -U postgres mydb
 
