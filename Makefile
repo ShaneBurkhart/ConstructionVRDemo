@@ -19,11 +19,11 @@ c_node:
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
-rebuild_db:
+wipe:
 	$(MAKE) clean
 	rm -rf data/pg
-	$(MAKE) run
-	sleep 90
+	$(MAKE) db || echo "\n\nDatabase needs a minute to start...\nWaiting 30 seconds for Postgres to start...\n\n"
+	sleep 30
 	$(MAKE) db
 
 pg_dump:
@@ -31,7 +31,6 @@ pg_dump:
 
 pg_restore:
 	#docker exec <pg_container_id> pg_restore -a --disable-triggers -U postgres -d mydb -Fc /app/full.dump
-
 
 db_models:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web irb -r ./models/db_models.rb
