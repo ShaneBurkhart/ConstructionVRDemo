@@ -124,6 +124,18 @@ const ActionCreator = {
     });
   },
 
+  presignedImgURL: (url, callback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api/url_upload/presign",
+      data: {
+        img_url: url
+      },
+      dataType: "json",
+      success: callback
+    });
+  },
+
   uploadFile: (file, presignedURL, callback) => {
     $.ajax({
       type: "PUT",

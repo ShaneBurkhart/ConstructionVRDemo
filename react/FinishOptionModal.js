@@ -1,7 +1,10 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { connect } from 'react-redux'
-import { Label, Popup, Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
+import regeneratorRuntime from "regenerator-runtime";
+import axios from 'axios';
+import { Label, Popup, Input, Grid, Form, Icon,
+   Button, Header, Image, Modal, Loader, Dimmer } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
 import StyledDropzone from "./StyledDropzone"
@@ -22,13 +25,15 @@ class FinishOptionModal extends React.Component {
       optionId: this.isNew ? newId : option["id"],
       optionFields: option || {},
       linkUpload: "",
+      isSaving: false,
+      isPaste: true,
+      isLoading: false
     };
   }
 
   onClickLinkUpload = () => {
     const { linkUpload } = this.state;
-    const imgMatch = linkUpload.match(/^(https?:\/\/)?([a-zA-Z0-9_\-]+\.)?[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\/([a-zA-Z0-9_\-\/]+)?\.(jpg|jpeg|png|gif)(\?.*)$/g);
-
+    const imgMatch = linkUpload.match(/^(https?:\/\/.*\.(?:jpg|jpeg|png|gif))$/g);
     if (imgMatch) {
       const newFields = _.clone(this.state.optionFields);
       const newImages = Array.from(newFields.Images || []);
@@ -58,9 +63,39 @@ class FinishOptionModal extends React.Component {
           newFields.Images = newImages;
 
           this.setState({ optionFields: newFields });
+          if(this.state.isPaste) {
+            this.setState({isPaste: false, isSaving: false, isLoading: false})
+          }
         });
       });
     });
+  }
+
+  handleUpload = async () => {
+    const { linkUpload } = this.state;
+    const imgMatch = linkUpload.match(/^(https?:\/\/.*\.(?:jpg|jpeg|png|gif)(|\?.*))$/g);
+    if (imgMatch) {
+
+      let file = await axios({
+        method: 'get',
+        url: linkUpload,
+        responseType: 'blob'
+      }).then(response => {return response.data})
+
+      ActionCreators.presignedImgURL(linkUpload, (data) => {
+        ActionCreators.uploadFile(file, data.presignedURL, () => {
+          const newFields = _.clone(this.state.optionFields);
+          const newImages = Array.from(newFields.Images || []);
+
+          newImages.push({ url: data.awsURL });
+          newFields.Images = newImages;
+
+          this.setState({ optionFields: newFields, linkUpload: "", isLoading: false, isSaving: false });
+        });
+      });
+    } else {
+      this.setState({ isSaving: false, isLoading: false })
+    }
   }
 
   removeImage = (imgId) => {
@@ -80,6 +115,21 @@ class FinishOptionModal extends React.Component {
       const { optionFields } = this.state;
       optionFields[attr] = value;
       this.setState({ optionFields });
+    }
+  }
+
+  onPasteFor = (data) => {
+    if(!this.state.isLoading) {
+      this.setState({ isSaving: true, isPaste: true, isLoading: true })
+      let file = data.clipboardData.items[1] && data.clipboardData.items[1].getAsFile()
+      if(file) {
+        this.onDrop([file])
+      } else {
+        data.clipboardData.items[0].getAsString((text) => {
+          this.setState({ linkUpload: text })
+          this.handleUpload()
+        })
+      }
     }
   }
 
@@ -111,11 +161,20 @@ class FinishOptionModal extends React.Component {
           <div style={{ textAlign: "right" }}>
             <Icon name="close" onClick={this.onClose} />
           </div>
-          <Form>
+          <Form onPaste={(e) => {
+            e.persist()
+            this.onPasteFor(e)
+            }}>
             <div className="field">
               <label>Images</label>
               <Grid>
                 <Grid.Row>
+                  { this.state.isLoading && 
+                    <Grid.Column width={8}>
+                      <Dimmer active inverted>
+                        <Loader />
+                      </Dimmer> 
+                    </Grid.Column>}
                   {images.map((image) => (
                     <Grid.Column width={8} key={image["id"] || image["url"]}>
                       <Image src={image["url"]} />
@@ -249,6 +308,7 @@ class FinishOptionModal extends React.Component {
                 labelPosition='right'
                 content='Save'
                 onClick={_ => this.onSave(false)}
+                disabled={this.state.isSaving}
               />
             }
         </Modal.Actions>

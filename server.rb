@@ -107,6 +107,29 @@ post '/api/temp_upload/presign' do
 
   key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
   signer = Aws::S3::Presigner.new
+  puts params["mime"]
+  url = signer.presigned_url(:put_object, {
+    bucket: ENV["BUCKET"],
+    key: key,
+    content_type: params["mime"],
+    acl: "public-read"
+  })
+
+  content_type "application/json"
+  {
+    presignedURL: url,
+    awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+  }.to_json
+end
+
+post '/api/url_upload/presign' do
+  is_admin_mode = !!session[:is_admin]
+  return "Not found" if !is_admin_mode
+  
+  key = File.basename(URI.parse(params[:img_url]).path)
+
+
+  signer = Aws::S3::Presigner.new
   url = signer.presigned_url(:put_object, {
     bucket: ENV["BUCKET"],
     key: key,
