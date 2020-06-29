@@ -33,6 +33,7 @@ testing_worker:
         - .:/app
     env_file:
         - user.env
+    restart: always
     command: "ruby workers/skp_model_tester.rb"
 
 notification_worker:
@@ -41,6 +42,7 @@ notification_worker:
         - .:/app
     env_file:
         - user.env
+    restart: always
     command: "ruby workers/skp_rendering_notification.rb"
 
 redis:
