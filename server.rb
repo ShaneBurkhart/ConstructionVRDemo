@@ -553,6 +553,7 @@ get '/project/:access_token/unit/:id' do
     unit_versions: unit.versions,
     feedbacks: feedbacks,
     unit_pano_data: version.pano_data,
+    unit_image_data: version.image_data,
     access_token: access_token,
     is_tour: is_tour,
     is_debug_mode: is_debug_mode,
@@ -561,7 +562,7 @@ get '/project/:access_token/unit/:id' do
   }
 end
 
-get '/project/:access_token/unit/:id/set_description' do
+post '/project/:access_token/unit/:id/set_description' do
   access_token = params[:access_token]
   is_admin = !!session[:is_admin]
   unit_id = params[:id]
@@ -689,6 +690,7 @@ post '/project/:access_token/screenshot/feedback' do
   return "Not found" if unit_version["Pano Versions"].nil? or unit_version["Pano Versions"].length < 1
 
   feedback = Feedback.new(
+    "Unit Version" => [unit_version.id],
     "Pano Version" => [unit_version["Pano Versions"].first],
     "Notes" => notes,
     "Is Fix" => true,

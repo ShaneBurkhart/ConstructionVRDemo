@@ -1,10 +1,22 @@
-.site-header
+%link(type="text/css" rel="stylesheet" href="/site-header.css?v=200312")
+
+.site-header(class="#{page == 'finishes' ? 'drawer' : ''}")
   .xlarge-container
+    .menu-container
+      .ui.small.compact.menu.hide-print
+        %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
+        - if (project.units || []).length > 0
+          %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
+
     %h1= project["Name"]
 
-    .ui.tabular.menu.hide-print
-      %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
-      - if (project.units || []).length > 0
-        %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
+.site-header.spacer
+  .xlarge-container
+    .menu-container
+      .ui.small.compact.menu.hide-print
+        %a.item{ href: "/project/#{access_token}/finishes", class: page == "finishes" ? "active" : "" } Finish Selections
+        - if (project.units || []).length > 0
+          %a.item{ href: "/project/#{access_token}", class: page == "renderings" ? "active" : "" } Renderings
 
-.site-header-spacer
+    %h1= project["Name"]
+

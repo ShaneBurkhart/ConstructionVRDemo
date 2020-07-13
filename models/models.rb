@@ -248,7 +248,8 @@ class UnitVersion < Airrecord::Table
   end
 
   def feedbacks
-    self.pano_versions.map { |pv| pv.feedbacks }.flatten.sort_by{ |f| f["Created At"] }.reverse
+    feedbacks = Feedback.all(filter: "{Unit Version ID} = '#{self.id}'")
+    return feedbacks.sort_by{ |f| f["Created At"] }.reverse
   end
 
   def pano_data
@@ -260,6 +261,14 @@ class UnitVersion < Airrecord::Table
       fields = pano_version.fields
       # Match the pano ID for backwards compatibility
       next fields
+    end
+  end
+
+  def image_data
+    image_versions = self.screenshot_versions
+
+    return image_versions.map do |image_version|
+      next image_version.fields
     end
   end
 

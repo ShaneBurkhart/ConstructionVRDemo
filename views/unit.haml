@@ -7,20 +7,7 @@
   .admin-section
     .large-container
       %p
-        %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
-
-      %p
-        - if unit["Hidden?"]
-          %span.bold Only Admins can see this unit.
-          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=0" }
-            Make Visible to Everyone
-        - else
-          %span.bold Everyone can see this unit.
-          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=1" }
-            Hide Unit
-
-      %p
-        Versions:
+        Version:
         %select#unit-version.ui.dropdown
           - unit_versions.each do |uv|
             - label = Time.parse(uv["Created At"]).strftime('%b %e, %Y')
@@ -40,76 +27,56 @@
         - if selected_version.id != unit["Current Version"][0]
           %a.button{ href: "/project/#{access_token}/unit/#{unit.id}/set_current_version?uv_id=#{selected_version.id}" } Make Current Version
 
+      %p.breadcrumb
+        %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
+
+      %p.breadcrumb
+        - if unit["Hidden?"]
+          %span.bold Only Admins can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=0" }
+            Make Visible to Everyone
+        - else
+          %span.bold Everyone can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=1" }
+            Hide Unit
+
 
 .large-container
-  %p
+  %p.breadcrumb
     %a{ href: "/project/#{access_token}" } Back to all Units
 
   %hr
 
-  .row
-    .third
-      %h1= unit["Name"]
+  #rendering-viewer
+  :javascript
+    var _accessToken = "#{access_token}";
+    var _unitVersionId = "#{@version_id}";
 
-      - if is_admin_mode
-        %p
-          %a.edit-description{ href: "#", data: { description: unit["Details"] || "" } } Edit Description
+    var _isDebugMode = #{is_debug_mode};
+    var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";
 
-      %ul
-        - (unit["Details"] || "").split(/[\n|]/).each do |detail|
-          %li= detail
-    .two-third
-      #unit-floor-plan
-        .floor-plan-wrapper
-          %img{ src: unit["Floor Plan Image URL"] }
-          - unit_pano_data.each do |pano|
-            - if pano["Floor Plan Label X"]
-              .label{ data: { id: pano["Pano ID"][0] }, style: "left: #{pano['Floor Plan Label X']}%; top: #{pano['Floor Plan Label Y']}%;"}
-                %span= pano["Pano Name"].first
-        %p * hover floor plan to show labels
-      - if is_admin_mode and is_tour
-        %p
-          %a.button.set-floor-plan-hotspot{ href: "#" } Set Floor Plan Hotspot
-          %a.button.red.remove-floor-plan-hotspot{ href: "#" } Remove Floor Plan Hotspot
-        #floor-plan-hotspot-pano-previews.pano-previews
-          - unit_pano_data.each do |pano|
-            - next if pano["Pano Name"].first.include? "Entry"
-            .pano-preview{ data: { id: pano["Pano ID"][0] }}
-              .name= pano["Pano Name"].first
+    var DATA = {
+      admin_mode: #{is_admin_mode},
+      unit_version_id: "#{@version_id}",
+      unit: #{unit.fields.to_json},
+      pano_data: #{unit_pano_data.to_json},
+      image_data: #{unit_image_data.to_json},
+      feedbacks: #{feedbacks.map{ |f| f.fields }.to_json},
 
-  .ui.tabular.menu
-    %a.item{ href: "?version=#{selected_version.id}", class: !is_tour ? "active" : "" } Rendered Images
-    %a.item{ href: "?show_tour=1&version=#{selected_version.id}", class: is_tour ? "active" : "" } Virtual Tour
+      //var _unitVersionId = "#{@version_id}";
+      //var _accessToken = "#{access_token}";
+      //var _isDebugMode = #{is_debug_mode};
+      //var AWS_IDENTITY_POOL_ID = "#{aws_identity_pool_id}";
+    };
+  %script(src="/dist/rendering_viewer.js?v=062120-01")
 
   - if !is_tour
-    #screenshots
-      %h2 Interior Renderings
-      - screenshot_scene_names = selected_version.get_screenshot_scene_names
-      - selected_version.screenshot_versions.each_with_index do |sv, i|
-        .screenshot
-          - fullImgSrc = sv["Image URL"]
-          - largeImgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
-          %h4
-            Scene:
-            = screenshot_scene_names[i]
-          %a{ href: fullImgSrc, target: "_blank" }
-            %img{ src: largeImgSrc }
-          - if is_admin_mode and is_latest_version
-            %a.show-give-feedback{ href: "#" } + Give Feedback
-            .feedback-input{ style: "display: none;", data: { unit_version_id: sv["Unit Version"][0], image_url: fullImgSrc } }
-              %textarea{ name: "notes", placeholder: "Enter your feedback here..." }
-              %br
-              %button.screenshot-feedback-submit Submit Feedback
-
   - else
     #virtual-tour
-      %h2 Virtual Tour
-      %p
-        %a.button.fullscreen-toggle{ href: "#" } Fullscreen Mode
-        - if is_admin_mode
-          %a.button.set-initial-yaw{ href: "#" } Set Initial Yaw
-        - elsif is_debug_mode
-          %a.button.log-coord{ href: "#" } Log Coords
+      #pano-previews.pano-previews
+        - unit_pano_data.each do |pano|
+          .pano-preview{ data: { id: pano["Pano ID"][0] }}
+            .name= pano["Pano Name"][0]
 
       #pano-window
         - if is_debug_mode
@@ -125,15 +92,6 @@
               .button-wrapper
                 %button.feedback-add-file#fullscreen-feedback-add-file Add File
                 %button#fullscreen-feedback-submit Submit Feedback
-
-      - if is_admin_mode
-        %p
-          %a.button.set-link-hotspot{ href: "#" } Set Link Hotspot
-          %a.button.red.remove-link-hotspot{ href: "#" } Remove Link Hotspot
-      #pano-previews.pano-previews
-        - unit_pano_data.each do |pano|
-          .pano-preview{ data: { id: pano["Pano ID"][0] }}
-            .name= pano["Pano Name"][0]
 
       - if is_admin_mode and is_latest_version
         %textarea#feedback-input{ name: "notes", placeholder: "Enter your feedback here..." }
@@ -195,9 +153,9 @@
         var $this = $(this);
         e.preventDefault();
 
-        var newDesc = prompt("What should the description for the unit say? The '|' character separates bullet points.", $this.data("description").replace(/\n/, "|"));
+        var newDesc = prompt("What should the description for the unit say?", ($this.data("description") || "").replace(/\n/, "|"));
 
-        window.location.href = window.location.href + "/set_description?description=" + newDesc;
+        window.location.href = window.location.pathname + "/set_description?description=" + newDesc;
       });
     });
 

@@ -1,0 +1,150 @@
+.break {
+    float: none;
+    clear: both;
+}
+
+.screenshot h4 {
+    margin-top: 10px;
+}
+
+.screenshot-thumbnail {
+    position: relative;
+    width: 180px;
+    height: 100px;
+    display: inline-block;
+    border: 1px solid #aaaaaa;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.screenshot-thumbnail img {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 100%;
+    max-width: 100%;
+    padding: 2px;
+}
+
+#pano-window {
+    width: 100%;
+    padding-bottom: 50%;
+    min-height: 300px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+#pano-window .link-hotspot {
+    color: white;
+    background-color: #333333;
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 14px;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
+
+    opacity: 1;
+    animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 1000ms;
+}
+
+.pano-previews {
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.pano-previews .pano-preview {
+    position: relative;
+    float: left;
+    width: 100px;
+    height: 70px;
+    border: 1px solid #bbbbbb;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+    background-color: #333333;
+    text-align: center;
+}
+
+.pano-previews .pano-preview:hover {
+    border: 1px solid #000000;
+    background-color: #555555;
+}
+
+.pano-previews .pano-preview.selected {
+    border: 1px solid #000000;
+    background-color: #f0f0f0;
+}
+
+.pano-previews .pano-preview.selected .name {
+    color: #222222;
+    font-weight: bold;
+}
+
+.pano-previews .pano-preview.select-pano {
+    background-color: #800080;
+}
+
+.pano-previews .pano-preview.select-pano:hover,
+.pano-previews .pano-preview.selected-pano {
+    background-color: #b300b2;
+}
+
+.pano-previews .pano-preview .name {
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 12px;
+    line-height: 1.2;
+    color: white;
+    -ms-transform: translate(-50%, -50%); /* IE 9 */
+    -webkit-transform: translate(-50%, -50%); /* Safari */
+    transform: translate(-50%, -50%);
+}
+
+.give-feedback {
+    margin-bottom: 20px;
+}
+
+.feedback {
+    padding: 10px 0;
+    border-top: 1px solid #888888;
+}
+
+.feedback .pano_name {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+.feedback .created_at {
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 0;
+}
+
+.feedback .feedback-image {
+    float: right;
+    padding-left: 20px;
+    padding-right: 0;
+}
+
