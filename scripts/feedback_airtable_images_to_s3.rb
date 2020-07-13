@@ -14,19 +14,13 @@ Aws.config.update({
 })
 s3 = Aws::S3::Resource.new(region: REGION)
 
-FLOOR_PLAN_IMAGES_KEY_PREFIX = "floor-plans"
-PANO_IMAGES_KEY_PREFIX = "panos"
+FEEDBACK_IMAGES_KEY_PREFIX = "feedback_perspectives"
 
 # To Convert
-# Unit - Floor Plan Image -> Floor Plan Image URL
-# UnitVersion - Floor Plan Image -> Floor Plan Image URL
-# Pano - Image -> Image URL
-# PanoVersion - Image -> Image URL
+# Screenshot => Screenshot URL
 
-[Unit, UnitVersion, Pano, PanoVersion].each do |unit_class|
-  puts unit_class.name
-  image_key = "Image" if unit_class.name.include? "Pano"
-  image_key = "Floor Plan Image" if unit_class.name.include? "Unit"
+[Feedback].each do |unit_class|
+  image_key = "Screenshot"
 
   (unit_class.all || []).each do |u|
     next if u[image_key].nil? or !u[image_key].length
@@ -34,7 +28,7 @@ PANO_IMAGES_KEY_PREFIX = "panos"
     f_name = "#{u.id}.png"
     IO.copy_stream(open(u[image_key][0]["url"]), f_name)
 
-    key = "#{FLOOR_PLAN_IMAGES_KEY_PREFIX}/#{SecureRandom.uuid}.png"
+    key = "#{FEEDBACK_IMAGES_KEY_PREFIX}/#{SecureRandom.uuid}.png"
     obj = s3.bucket(BUCKET).object(key)
     obj.upload_file(f_name, { acl: 'public-read' })
 

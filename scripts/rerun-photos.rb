@@ -32,7 +32,7 @@ def rerun_prefix(prefix)
       prefix: prefix,
       continuation_token: marker
     }).to_h
-    photos = s3_resp[:contents].select{ |k| k[:last_modified] >= after_date }.collect { |k| k[:key] }
+    photos = (s3_resp[:contents] || []).select{ |k| k[:last_modified] >= after_date }.collect { |k| k[:key] }
 
     photos.each_with_index do |key, index|
       lambda_resp = lambda_client.invoke({
