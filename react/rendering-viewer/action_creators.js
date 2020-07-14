@@ -17,6 +17,10 @@ const ActionCreator = {
   updateUnit: (unit) => {
     return { type: Actions.UPDATE_UNIT, unit };
   },
+
+  addFeedback: (feedback) => {
+    return { type: Actions.ADD_FEEDBACK, feedback };
+  },
 };
 
 export default ActionCreator;

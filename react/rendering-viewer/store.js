@@ -24,6 +24,8 @@ const todos = (state = {}, action) => {
       return load(state, action);
     case Actions.UPDATE_UNIT:
       return { ...state, unit: { ...state.unit, ...action.unit }};
+    case Actions.ADD_FEEDBACK:
+      return { ...state, feedbacks: [ action.feedback, ...state.feedbacks ]};
     case Actions.UPDATE_MODAL:
       return { ...state, modals: { ...state.modals, ...action.modals }};
     default:

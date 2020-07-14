@@ -3,9 +3,26 @@
 
 = haml :_project_header, locals: { page: "renderings", project: project, access_token: access_token }
 
+.large-container
+  %p.breadcrumb
+    %a{ href: "/project/#{access_token}" } Back to all Units
+
 - if is_admin_mode
   .admin-section
     .large-container
+      %p.breadcrumb
+        %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
+
+      %p.breadcrumb
+        - if unit["Hidden?"]
+          %span.bold Only Admins can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=0" }
+            Make Visible to Everyone
+        - else
+          %span.bold Everyone can see this unit.
+          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=1" }
+            Hide Unit
+
       %p
         Version:
         %select#unit-version.ui.dropdown
@@ -27,26 +44,7 @@
         - if selected_version.id != unit["Current Version"][0]
           %a.button{ href: "/project/#{access_token}/unit/#{unit.id}/set_current_version?uv_id=#{selected_version.id}" } Make Current Version
 
-      %p.breadcrumb
-        %a{ href: "/project/#{access_token}/unit/#{unit.id}/feedback_feed" } Go to Feedback Feed
-
-      %p.breadcrumb
-        - if unit["Hidden?"]
-          %span.bold Only Admins can see this unit.
-          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=0" }
-            Make Visible to Everyone
-        - else
-          %span.bold Everyone can see this unit.
-          %a{ href: "/project/#{access_token}/unit/#{unit.id}/set_visibility?hidden=1" }
-            Hide Unit
-
-
 .large-container
-  %p.breadcrumb
-    %a{ href: "/project/#{access_token}" } Back to all Units
-
-  %hr
-
   #rendering-viewer
   :javascript
     var _accessToken = "#{access_token}";

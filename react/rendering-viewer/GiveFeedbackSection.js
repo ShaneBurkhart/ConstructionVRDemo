@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 import { v4 as uuidv4 } from 'uuid';
 
+import ActionCreators from './action_creators';
+
 AWS.config.update({
   region: "us-west-2",
   credentials: new AWS.CognitoIdentityCredentials({
@@ -48,7 +50,7 @@ const uploadImageToS3 = (viewer, callback) => {
 }
 
 const GiveFeedbackSection = (props) => {
-  const { imageURL, viewer } = props;
+  const { imageURL, viewer, onSubmitFeedback } = props;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
@@ -72,12 +74,17 @@ const GiveFeedbackSection = (props) => {
           return
         }
 
+        props.dispatch(ActionCreators.addFeedback(res.responseJSON));
+
+        setOpen(false)
         setValue("")
       },
     });
   };
 
   const onSubmit = (e) => {
+    setLoading(true);
+
     if (viewer) {
       uploadImageToS3(viewer, (s3URL) => {
         onUploadImage(s3URL);
@@ -99,6 +106,7 @@ const GiveFeedbackSection = (props) => {
           }
           <a onClick={_=>setOpen(false)}>Close Feedback</a>
           <textarea
+            ref={e=>{if (e) e.focus()}}
             value={value}
             placeholder="Enter your feedback here..."
             onChange={e=>setValue(e.target.value)}
@@ -110,4 +118,7 @@ const GiveFeedbackSection = (props) => {
   )
 }
 
-export default GiveFeedbackSection;
+export default connect((reduxState, props) => {
+  return { };
+}, null)(GiveFeedbackSection);
+

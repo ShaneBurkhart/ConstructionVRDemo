@@ -47,6 +47,8 @@ const EditDescriptionModal = (props) => {
             placeholder='1000 sqft 1 bedroom, 1 bath apartment'
             value={value}
             onChange={e=>setValue(e.target.value)}
+            ref={e=>{if (e) e.focus()}}
+            style={{ fontSize: 16 }}
           />
         </Form>
       </Modal.Content>

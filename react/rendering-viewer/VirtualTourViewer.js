@@ -106,9 +106,11 @@ const VirtualTourViewer = (props) => {
         setViewer={setViewer}
       />
 
-      <GiveFeedbackSection
-        viewer={viewer}
-      />
+      {admin_mode &&
+        <GiveFeedbackSection
+          viewer={viewer}
+        />
+      }
     </div>
   );
 };

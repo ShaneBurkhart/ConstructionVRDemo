@@ -33,5 +33,6 @@ module.exports = {
 
   LOAD: "LOAD",
   UPDATE_UNIT: "UPDATE_UNIT",
+  ADD_FEEDBACK: "ADD_FEEDBACK",
 }
 

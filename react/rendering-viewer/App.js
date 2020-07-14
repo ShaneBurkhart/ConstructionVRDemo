@@ -71,7 +71,7 @@ const App = (props) => {
       {selectedView == "tour" && <VirtualTourViewer />}
       {selectedView == "images" && <RenderedImagesViewer />}
 
-      <RecentFeedback />
+      {admin_mode && <RecentFeedback />}
 
       <div className="modals">
         {modals.edit_description && <EditDescriptionModal />}

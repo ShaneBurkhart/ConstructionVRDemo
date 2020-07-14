@@ -133,7 +133,7 @@ p.no-margin { margin-bottom: 0; }
 
 p.breadcrumb {
     font-size: 14px;
-    margin-bottom: 0;
+    margin-bottom: 5px !important;
 }
 
 a { text-decoration: none; }
@@ -299,6 +299,13 @@ button.red, .button.red {
     text-align: center;
     padding: 4px 0px;
     color: white;
+}
+
+@media only screen and (max-width: 450px) {
+    .unit-preview {
+        display: block;
+        width: auto;
+    }
 }
 
 .debug-center-window {

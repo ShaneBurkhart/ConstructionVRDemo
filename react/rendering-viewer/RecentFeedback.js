@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import moment from "moment"
 import { Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
+import "./RecentFeedback.css"
+
 const Feedback = (props) => {
   const screenshot = (props["Screenshot"] || [])[0];
 
@@ -10,14 +12,12 @@ const Feedback = (props) => {
     <div className="feedback">
       {screenshot &&
         <a href={screenshot["url"]} className="feedback-image" target="_blank">
-          <img src={screenshot["url"]} style={{ width: 300 }} />
+          <img src={screenshot["url"]} />
         </a>
       }
       <div>
-        <p>
-          <strong className="pano_name">{props["Pano Name"] || "Rendered Image"}</strong>
-          <span className="created_at"> {moment(props["Created At"]).fromNow()}</span>
-        </p>
+        <p className="pano_name">{props["Pano Name"] || "Rendered Image"}</p>
+        <p className="created_at">{moment(props["Created At"]).fromNow()}</p>
         <div className="show-notes">
           <div className="notes">{props["Notes"]}</div>
         </div>
@@ -32,6 +32,7 @@ const RecentFeedback = (props) => {
 
   return (
     <div id="feedbacks">
+      <h2>Comments</h2>
       {(feedbacks || []).map((f, i) => {
         return <Feedback key={f["Record ID"]} {...(f || {})} />
       })}
