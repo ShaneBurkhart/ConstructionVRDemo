@@ -84,14 +84,13 @@
   - if !is_tour
     #screenshots
       %h2 Interior Renderings
-      - screenshot_scene_names = selected_version.get_screenshot_scene_names
       - selected_version.screenshot_versions.each_with_index do |sv, i|
         .screenshot
           - fullImgSrc = sv["Image URL"]
           - largeImgSrc = sv["Image URL"]#.gsub("\/screenshots\/", "\/screenshots-large\/")
           %h4
             Scene:
-            = screenshot_scene_names[i]
+            = i
           %a{ href: fullImgSrc, target: "_blank" }
             %img{ src: largeImgSrc }
           - if is_admin_mode and is_latest_version
