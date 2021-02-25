@@ -16,6 +16,17 @@ c:
 c_node:
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"
 
+build_js:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm run-script build
+
+npm_install:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
+
+clean_npm_install:
+	rm -rf node_modules
+	rm -rf package-lock.json
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
+
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
