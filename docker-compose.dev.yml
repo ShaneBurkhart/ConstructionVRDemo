@@ -27,7 +27,7 @@ react_build:
     command: "npm run watch"
 
 pg:
-    image: postgres
+    image: postgres:10
     ports:
         - "5432:5432"
     environment:
