@@ -334,7 +334,7 @@ get '/admin/login/:admin_token' do
   session[:is_admin] = true
 
   # Log admin in on the websocket server too
-  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{URI::encode(redirect_to)}"
+  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{CGI.escape(redirect_to)}"
 end
 
 post '/admin/linked_hotspot/set' do
