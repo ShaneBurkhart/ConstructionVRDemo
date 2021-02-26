@@ -9,6 +9,8 @@ import FocusEditableInput from './FocusEditableInput';
 
 import "./FinishOptionModal.css"
 
+const acceptedImgFiles = ['image/gif', 'image/png', 'image/jpeg', 'image/bmp', 'image/tiff'];
+
 class FinishOptionModal extends React.Component {
   constructor(props) {
     super(props);
@@ -23,6 +25,14 @@ class FinishOptionModal extends React.Component {
       optionFields: option || {},
       linkUpload: "",
     };
+  }
+
+  componentDidMount() {
+    document.addEventListener('paste', this.handlePaste)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('paste', this.handlePaste)
   }
 
   onClickLinkUpload = () => {
@@ -98,6 +108,25 @@ class FinishOptionModal extends React.Component {
 
   onClose = () => {
     this.props.dispatch(ActionCreators.updateModal({ optionId: null }));
+  }
+
+  isValidImgFormat = (fileType) => acceptedImgFiles.includes(fileType);
+
+  addImageFromClipboard = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      if (this.isValidImgFormat(items[i].type)) {
+        const blobLikeFile = items[i].getAsFile();
+        if (blobLikeFile) {
+          this.onDrop([blobLikeFile])
+        }
+      }
+    }
+  }
+
+  handlePaste = (e) => {
+    if (e.clipboardData && e.clipboardData.items.length > 0) {
+      this.addImageFromClipboard(e.clipboardData.items)
+    }
   }
 
   render() {
