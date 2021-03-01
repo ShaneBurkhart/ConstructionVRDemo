@@ -57,7 +57,7 @@ end
 if ENV["NODE_ENV"] == "development"
   get '/' do
     projects = Finishes::Project.all
-    haml :projects, locals: { projects: projects }
+    haml :projects, locals: { projects: projects.map { |p| p.fields }.to_json } 
   end
 end
 
