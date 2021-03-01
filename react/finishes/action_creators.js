@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import Actions from '../common/actions'
+import Actions from '../../common/actions'
 import _  from 'underscore'
 
 var socket = require('socket.io-client')({

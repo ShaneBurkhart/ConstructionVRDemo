@@ -2,7 +2,11 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./react/index.js",
+  entry: {
+    finishes_app: "./react/finishes/index.js",
+    admin_dashboard_app: "./react/admin_dashboard/index.js"
+  },
+  // entry: "./react/index.js",
   mode: "development",
   //watch: true,
   //watchOptions: {
@@ -36,6 +40,6 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "public/dist"),
     publicPath: "/public/dist",
-    filename: "finishes_app.js"
+    filename: "[name].js"
   }
 };
