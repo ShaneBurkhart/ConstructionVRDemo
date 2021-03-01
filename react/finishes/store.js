@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk';
 import ActionCreators from './action_creators';
-import Actions from '../common/actions'
+import Actions from '../../common/actions';
 
 const _initialState = {
   isAdmin: false,
