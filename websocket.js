@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require("express");
+var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
@@ -25,10 +26,23 @@ let sessionMiddleware = session({
   resave: false,
 });
 
+app.set('view engine', 'pug')
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(sessionMiddleware);
 io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
+
+require("./controllers/auth.js")(app);
+require("./controllers/users.js")(app);
+require("./controllers/dashboard.js")(app);
+
+// APIs
+require("./controllers/api/users.js")(app);
+
 
 app.get("/api2/finishes/options/search", function (req, res) {
   const adminMode = !!req.session["is_admin"];

@@ -22,7 +22,20 @@ module.exports = {
         options: { presets: ["@babel/env"] }
       },
       {
+        test: /\.module\.css$/,
+        use: ["style-loader", {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 1,
+            modules: {
+              localIdentName: '[local]-[name]--[hash:base64:5]',
+            },
+          }
+        }]
+      },
+      {
         test: /\.css$/,
+        exclude: /\.module\.css/,
         use: ["style-loader", "css-loader"]
       },
       {
