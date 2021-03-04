@@ -104,7 +104,7 @@ const UsersPanel = (props) => {
                     <td>{user.humanizedRole}</td>
                     <td className="center aligned">{user.activated ? "Active" : "Pending"}</td>
                     <td>
-                      <Link to={`/admin/users/${user.id}`}>Edit</Link>
+                      <Link to={`/app/admin/users/${user.id}`}>Edit</Link>
                     </td>
                   </tr>
                   )

@@ -9,7 +9,7 @@ block content
                         p.ui.red.header= err
         .ui.middle.aligned.center.aligned.grid
             .column
-                form.ui.form(action="/api2/invite-user-link" method="post")
+                form.ui.form(action="/app/invite-user-link" method="post")
                     .ui.segment
                         input(type="hidden" name="email_signup_token" value=user.emailSignupToken)
 

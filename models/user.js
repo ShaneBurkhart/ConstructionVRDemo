@@ -105,11 +105,11 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.prototype.getResetPasswordLink = function () {
-    return SITE_URL + "/api2/reset-password-link/" + this.resetPasswordToken;
+    return SITE_URL + "/app/reset-password-link/" + this.resetPasswordToken;
   }
 
   User.prototype.getSignUpLink = function () {
-    return SITE_URL + "/api2/invite-user-link/" + this.emailSignupToken;
+    return SITE_URL + "/app/invite-user-link/" + this.emailSignupToken;
   }
 
   User.prototype.canEditProject = async function(project) {
@@ -129,13 +129,13 @@ module.exports = (sequelize, DataTypes) => {
 
     await this.save();
 
-    const message = `You have requested a password reset at ConstructionVR Finish Portal. 
+    const message = `You have requested a password reset at FinishVision Finish Portal. 
     Please click the link to reset your password: ${this.getResetPasswordLink()}`
 
     // Send email with link to signup
     sendgrid.sendEmail({
       to: this.email,
-      subject: `ConstructionVR invitation`,
+      subject: `FinishVision invitation`,
       text: message,
       html: message,
     });
@@ -149,13 +149,13 @@ module.exports = (sequelize, DataTypes) => {
     
     await this.save();
 
-    const message = `You have been invited to join the ConstructionVR Finish Portal. 
+    const message = `You have been invited to join the FinishVision Finish Portal. 
     Please use this link to accept your invitation: ${this.getSignUpLink()}`
 
     // Send email with link to signup
     sendgrid.sendEmail({
         to: this.email,
-        subject: `ConstructionVR invitation`,
+        subject: `FinishVision invitation`,
         text: message,
         html: message,
       });

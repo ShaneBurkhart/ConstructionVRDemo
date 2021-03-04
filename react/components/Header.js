@@ -3,8 +3,9 @@ import { Dropdown } from 'semantic-ui-react';
 
 import styles from "./Header.module.css";
 
-const Header = (props) => {
-  // const IS_ANONYMOUS = !IS_SUPER_ADMIN && !IS_REPORTS_ADMIN && !IS_DEALER && !IS_SUPER_DEALER;
+const Header = () => {
+  const IS_ANONYMOUS = !IS_SUPER_ADMIN && !IS_ADMIN && !IS_BASIC;
+  
   const allNavLinkInfo = [
     {
       name: 'Dashboard',
@@ -16,31 +17,31 @@ const Header = (props) => {
       name: 'Users',
       href: '/app/admin/users-panel',
       navPosition: 'left',
-      permission: true,
+      permission: IS_SUPER_ADMIN || IS_ADMIN,
     },
-    {
-      name: 'Admin',
-      href: '/app/admin',
-      navPosition: 'right',
-      permission: true,
-    },
+    // {
+    //   name: 'Admin',
+    //   href: '/app/admin',
+    //   navPosition: 'right',
+    //   permission: true,
+    // },
     {
       name: window.hasOwnProperty("USERNAME") ? USERNAME : 'Account',
       href: '/app/account',
       navPosition: 'right',
-      permission: true,
+      permission: !IS_ANONYMOUS,
     },
     {
       name: <><i className="sign out icon" /> Logout</>,
       href: '/app/logout',
       navPosition: 'right',
-      permission: true,
+      permission: !IS_ANONYMOUS,
     },
     {
       name: 'Sign In',
       href: '/',
       navPosition: 'right',
-      permission: true,
+      permission: IS_ANONYMOUS,
     },
   ];
 

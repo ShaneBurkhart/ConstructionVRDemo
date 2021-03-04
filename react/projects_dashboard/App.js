@@ -17,6 +17,8 @@ const NoRoute = () => {
 
 const App = () => {
   const dispatch = useDispatch();
+
+  const isAdmin = window.hasOwnProperty('IS_SUPER_ADMIN') && IS_SUPER_ADMIN;
   
   useEffect(() => {
     ActionCreators.updateDispatch(dispatch);
@@ -30,8 +32,12 @@ const App = () => {
         <Router>
           <Switch>
             <Route exact path="/app/dashboard" component={Dashboard} />
-            <Route path="/app/admin/users-panel" component={UsersPanel} />
-            <Route path="/app/admin/users/:id" component={EditUser} />
+            {isAdmin && (
+              <>
+              <Route path="/app/admin/users-panel" component={UsersPanel} />
+              <Route path="/app/admin/users/:id" component={EditUser} />
+              </>
+            )}
             <Route component={NoRoute} />
           </Switch>
         </Router>
