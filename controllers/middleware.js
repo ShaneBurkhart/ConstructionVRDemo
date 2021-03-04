@@ -37,6 +37,7 @@ const Middleware = {
   },
 
   authUser: function authUser(req, res, next) {
+    console.log(`m.authUser - ${req.user}`)
     if (!req.user) {
       req.session['redirect_to'] = req.originalUrl;
       return res.redirect(r.SIGN_IN_URL)
@@ -45,15 +46,17 @@ const Middleware = {
   },
 
   goToDashboardIfSignedIn: function goToDashboardIfSignedIn(req, res, next) {
-    if (req.user) return res.redirect("/dashboard");
+    console.log(`m.goToDashIFSI ${req.user}`)
+    if (req.user) return res.redirect("/app/dashboard");
     next();
   }
 };
 
 Middleware["authAdmin"] = (req, res, next) => {
+  console.log(`m.authAdmin - ${req.user} - ${req.user.role}`)
   if (!req.user) return res.redirect(r.SIGN_IN_URL);
   if (req.user.role !== "admin") {
-    return res.redirect("/dashboard");
+    return res.redirect("/app/dashboard");
   }
   next();
 };
@@ -64,7 +67,7 @@ Middleware["authAdmin"] = (req, res, next) => {
 
   Middleware[camelCase] = (req, res, next) => {
     if (!req.user) return res.redirect(r.SIGN_IN_URL);
-    if (req.user.role !== role) return res.redirect("/dashboard");
+    if (req.user.role !== role) return res.redirect("/app/dashboard");
     next();
   };
 });

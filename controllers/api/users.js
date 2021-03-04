@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
 
@@ -7,8 +7,10 @@ module.exports = (app) => {
   app.get("/api2/admin/users", async (req, res) => {
     const users = await models.User.findAll();
     const roles = models.User.rawAttributes.role.values;
+    console.log('redux load')
 
-    res.json({ users, roles });
+    const projects = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
+    res.json({ users, roles, projects });
   });
 
   // app.post("/api2/admin/invite-user",  m.authSuperAdmin, async (req, res) => {

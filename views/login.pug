@@ -9,7 +9,7 @@ block content
                         p.ui.red.header= err
         .ui.middle.aligned.center.aligned.grid
             .column
-                form.ui.large.form(action="/login" method="post")
+                form.ui.large.form(action="/app/login" method="post")
                     .ui.segment
                         .ui.column.centered.grid
                             p.large.ui.grey.header Login
@@ -23,4 +23,4 @@ block content
                                 input(type="password" name="password" placeholder="Password")
                         button.ui.fluid.large.teal.submit.button Login
                 .column
-                    a(href="/reset-password") Forgot your password?
+                    a(href="/app/reset-password") Forgot your password?

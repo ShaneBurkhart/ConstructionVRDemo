@@ -3,6 +3,7 @@ import thunk from 'redux-thunk';
 
 const _initialState = {
   users: [],
+  projects: [],
   usersMeta: null,
   apiError: null,
 };

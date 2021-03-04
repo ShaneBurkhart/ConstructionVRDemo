@@ -4,21 +4,18 @@ const models = require("../models/index.js");
 const { Sequelize } = require('sequelize');
 
 module.exports = (app) => {
-  app.get("/logout", (req, res) => {
-    console.log('..logout..')
+  app.get("/app/logout", (req, res) => {
     req.session["user_id"] = null;
     res.redirect(r.SIGN_IN_URL)
   });
 
-  app.get("/", m.goToDashboardIfSignedIn, (req, res) => {
-    console.log('............log in??')
+  app.get("/app", m.goToDashboardIfSignedIn, (req, res) => {
     res.render("login");
   });
 
-  app.post("/login", m.goToDashboardIfSignedIn, (req, res) => {
+  app.post("/app/login", m.goToDashboardIfSignedIn, (req, res) => {
     // Check user credentials
     const { email, password } = req.body;
-
     if (!email) return res.redirect(r.DASHBOARD);
 
     models.User.scope("withPassword").findOne({
@@ -43,11 +40,11 @@ module.exports = (app) => {
     });
   });
 
-  app.get("/reset-password", m.goToDashboardIfSignedIn, (req, res) => {
+  app.get("/app/reset-password", m.goToDashboardIfSignedIn, (req, res) => {
     res.render("reset_password");
   });
 
-  app.post("/reset-password", m.goToDashboardIfSignedIn, (req, res) => {
+  app.post("/app/reset-password", m.goToDashboardIfSignedIn, (req, res) => {
     const email = req.body.email;
     if (!email) return res.redirect(r.DASHBOARD);
 
@@ -62,11 +59,11 @@ module.exports = (app) => {
     });
   });
 
-  app.get("/reset-password-thank-you", m.goToDashboardIfSignedIn, (req, res) => {
+  app.get("/app/reset-password-thank-you", m.goToDashboardIfSignedIn, (req, res) => {
     res.render("reset_password_thank_you");
   });
 
-  app.get("/reset-password-link/:token", m.goToDashboardIfSignedIn, (req, res) => {
+  app.get("/app/reset-password-link/:token", m.goToDashboardIfSignedIn, (req, res) => {
     const token = req.params.token;
 
     models.User.scope("withTokens").findOne({ where: { resetPasswordToken: token } }).then(user => {
@@ -78,7 +75,7 @@ module.exports = (app) => {
     });
   })
 
-  app.post("/reset-password-link", m.goToDashboardIfSignedIn, (req, res) => {
+  app.post("/app/reset-password-link", m.goToDashboardIfSignedIn, (req, res) => {
     const resetPasswordToken = req.body.reset_password_token;
     const password = req.body.password;
 
@@ -99,7 +96,7 @@ module.exports = (app) => {
     });
   })
 
-  app.get("/api2/invite-user-link/:token", m.goToDashboardIfSignedIn, (req, res) => {
+  app.get("/app/invite-user-link/:token", m.goToDashboardIfSignedIn, (req, res) => {
     const token = req.params.token;
 
     models.User.scope("withTokens").findOne({ where: { emailSignupToken: token } }).then(user => {

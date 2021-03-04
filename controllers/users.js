@@ -4,11 +4,11 @@ const models = require("../models/index.js");
 
 
 module.exports = (app) => {
-  app.get("/admin", m.authSuperAdmin, (req, res) => {
+  app.get("/app/admin", m.authSuperAdmin, (req, res) => {
     res.render("admin");
   });
 
-  app.post("/admin", m.authSuperAdmin, (req, res) => {
+  app.post("/app/admin", m.authSuperAdmin, (req, res) => {
     const adminPassword = req.body.admin_password;
     const password = req.body.password;
 
@@ -38,11 +38,11 @@ module.exports = (app) => {
     })
   });
 
-  app.get("/account", m.authUser, (req, res) => {
+  app.get("/app/account", m.authUser, (req, res) => {
     res.render("account");
   });
 
-  app.post("/account", m.authUser, (req, res) => {
+  app.post("/app/account", m.authUser, (req, res) => {
     const oldPassword = req.body.old_password;
     const newPassword = req.body.new_password;
     let emailList = req.body.notification_emails || [];
@@ -77,19 +77,15 @@ module.exports = (app) => {
     });
   });
 
-  app.get("/account/user", m.authUser, async (req, res) => {
+  app.get("/app/account/user", m.authUser, async (req, res) => {
     const userId = req.session["user_id"]
     const user = await models.User.findOne({ where: { id: userId } });
     const { notificationEmails, email } = user;
     res.json({ notificationEmails, email });
   });
 
-  app.get("/api2/hi", (req, res) => {
-    console.log('hiiiii')
-  })
 
-  app.get("/api2/invite-user-link/:token", (req, res) => {
-    console.log('ok -- invitssssssse user222s')
+  app.get("/app/invite-user-link/:token", (req, res) => {
     const token = req.params.token;
 
     models.User.scope("withTokens").findOne({ where: { emailSignupToken: token } }).then(user => {
@@ -105,7 +101,7 @@ module.exports = (app) => {
     });
   });
 
-  app.post("/api2/invite-user-link", m.goToDashboardIfSignedIn, (req, res) => {
+  app.post("/app/invite-user-link", m.goToDashboardIfSignedIn, (req, res) => {
     const emailSignupToken = req.body.email_signup_token;
     const password = req.body.password;
 

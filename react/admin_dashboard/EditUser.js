@@ -27,8 +27,8 @@ const EditUser = ({ match }) => {
     }
   }, [user])
 
-  // if (redirect) return <Redirect to="/admin/users-dashboard" />;
-  // if (!user) return "";
+  if (redirect) return <Redirect to="/app/admin/users-panel" />;
+  if (!user) return "";
 
   const handleBack = () => { setRedirect(true) }
 

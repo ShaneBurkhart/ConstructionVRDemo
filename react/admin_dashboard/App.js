@@ -29,9 +29,9 @@ const App = () => {
       <main className="large-container">
         <Router>
           <Switch>
-            <Route exact path="/" component={Dashboard} />
-            <Route path="/users-panel" component={UsersPanel} />
-            <Route path="/admin/users/:id" component={EditUser} />
+            <Route exact path="/app/dashboard" component={Dashboard} />
+            <Route path="/app/admin/users-panel" component={UsersPanel} />
+            <Route path="/app/admin/users/:id" component={EditUser} />
             <Route component={NoRoute} />
           </Switch>
         </Router>

@@ -1,8 +1,10 @@
 import React from 'react';
-import { Dropdown, Label, Form, Input, Button, Table, Grid, Header } from "semantic-ui-react";
+import { useSelector } from 'react-redux';
+
+import { Table, Header } from "semantic-ui-react";
 
 const Dashboard = () => {
-  const allProjects = PROJECTS;
+  const allProjects = useSelector(state => state.projects || []);
 
   return (
     <div className="ui grid centered">
@@ -20,9 +22,9 @@ const Dashboard = () => {
 
           <Table.Body>
             {allProjects.map(project => (
-              <tr className="project-row" key={project['Record ID']}>
+              <tr className="project-row" key={project.accessToken}>
                 <td>
-                  <a href={`/admin/login/${project["Admin Access Token"]}`}>{project['Name']}</a>
+                  <a href={`/admin/login/${project.adminAccessToken}`}>{project.name}</a>
                 </td>
                 <td>
                   <a>Copy</a>

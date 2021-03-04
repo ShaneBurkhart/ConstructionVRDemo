@@ -8,31 +8,31 @@ const Header = (props) => {
   const allNavLinkInfo = [
     {
       name: 'Dashboard',
-      href: '/',
+      href: '/app/dashboard',
       navPosition: 'left',
       permission: true,
     },
     {
       name: 'Users',
-      href: '/users-panel',
+      href: '/app/admin/users-panel',
       navPosition: 'left',
       permission: true,
     },
     {
       name: 'Admin',
-      href: '/admin',
+      href: '/app/admin',
       navPosition: 'right',
       permission: true,
     },
     {
       name: window.hasOwnProperty("USERNAME") ? USERNAME : 'Account',
-      href: '/account',
+      href: '/app/account',
       navPosition: 'right',
       permission: true,
     },
     {
       name: <><i className="sign out icon" /> Logout</>,
-      href: '/logout',
+      href: '/app/logout',
       navPosition: 'right',
       permission: true,
     },

@@ -9,4 +9,4 @@ import './index.css';
 
 import App from './App';
 
-ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('admin-dashboard-app'));
+ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('projects-dashboard-app'));

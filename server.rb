@@ -54,23 +54,20 @@ def find_project_by_admin_access_token(admin_access_token)
   return records.first
 end
 
-if ENV["NODE_ENV"] == "development"
-  ['/', '/dashboard', '/users-panel'].each do |path|
-    get path do
-      projects = Finishes::Project.all
-      haml :projects, locals: { projects: projects.map { |p| p.fields }.to_json } 
-    end
-  end
+# if ENV["NODE_ENV"] == "development"
+#   ['/app', '/app/dashboard', '/app/users-panel', '/app/admin/users/:user_id', '/app/logout'].each do |path|
+#     get path do
+#       projects = Finishes::Project.all
+#       haml :projects, locals: { projects: projects.map { |p| p.fields }.to_json } 
+#     end
+#   end
+# end
+
+get '/' do
+  # get projects via sync job on websocket
+  redirect "http://#{request.env["HTTP_HOST"]}/app"
 end
 
-# post '/admin/new_project' do
-#   is_admin_mode = !!session[:is_admin]
-#   return "Not found" if !is_admin_mode
-
-#   new_project = Finishes::Project.create(
-    
-#   )
-# end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
