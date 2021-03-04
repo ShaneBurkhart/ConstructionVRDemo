@@ -58,6 +58,10 @@ body {
     z-index: 99999;
 }
 
+#no-site-header {
+    padding-top: 40px;
+}
+
 .site-header .xlarge-container {
     padding: 0;
     padding-bottom: 5px;
@@ -80,6 +84,14 @@ body {
     max-width: 700px;
     padding: 10px;
     position: relative;
+}
+#no-site-header .ui.grid {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+#no-site-header .ui.grid .column {
+    padding: 5px 5px !important;
 }
 
 .small-container {
