@@ -54,17 +54,8 @@ def find_project_by_admin_access_token(admin_access_token)
   return records.first
 end
 
-# if ENV["NODE_ENV"] == "development"
-#   ['/app', '/app/dashboard', '/app/users-panel', '/app/admin/users/:user_id', '/app/logout'].each do |path|
-#     get path do
-#       projects = Finishes::Project.all
-#       haml :projects, locals: { projects: projects.map { |p| p.fields }.to_json } 
-#     end
-#   end
-# end
 
 get '/' do
-  # get projects via sync job on websocket
   redirect "http://#{request.env["HTTP_HOST"]}/app"
 end
 

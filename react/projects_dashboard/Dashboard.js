@@ -1,18 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import ActionCreators from './action_creators';
 
-import { Table, Header } from "semantic-ui-react";
+import { Grid, Table, Header, Button, Label } from "semantic-ui-react";
 
 const Dashboard = () => {
   const allProjects = useSelector(state => state.projects || []);
-  const isAdmin = window.hasOwnProperty('IS_SUPER_ADMIN') && IS_SUPER_ADMIN;
+  const isAdmin = IS_SUPER_ADMIN;
+
+  const [message, setMessage] = useState({ show: false })
+
+  useEffect(() => {
+    if (message.show) {
+      setTimeout(() => setMessage({ show: false }), 2000)
+    }
+  }, [message])
+
+  const onSuccess = (result) => setMessage({ show: true, message: result.message, color: 'green' });
+  const onError = (result) => setMessage({ show: true, message: result.message, color: 'red' });
+
+  const handleCreateNew = () => {
+    const name = prompt("Give your project a name");
+    ActionCreators.addNewProject(name, onSuccess, onError); 
+  }
+
+  const handleCopy = (id) => {
+    const name = prompt("Enter a new name for copied project");
+    ActionCreators.copyProject({ name, id }, onSuccess, onError)
+  }
 
   return (
     <div className="ui grid centered">
       <div className="column">
-        <div className="ui row" style={{ marginBottom: 10 }}>
-          <Header as='h2'>All Projects</Header>
-        </div>
+        <Grid>
+          <Grid.Column width={8}>
+              <Header as='h2'>All Projects</Header>
+          </Grid.Column>
+          <Grid.Column width={4}>
+              {message.show && <Label basic color={message.color}>{message.message}</Label>}
+          </Grid.Column>
+          <Grid.Column width={4}>
+              {isAdmin && <Button onClick={handleCreateNew}>Create New Project</Button>}
+          </Grid.Column>
+        </Grid>
         <Table className="celled">
           <Table.Header>
             <Table.Row>
@@ -24,20 +54,14 @@ const Dashboard = () => {
           <Table.Body>
             {allProjects.map(project => (
                 <tr className="project-row" key={project.accessToken}>
-                  {isAdmin ? (
-                    <>
-                      <td>
-                        <a href={`/admin/login/${project.adminAccessToken}`}>{project.name}</a>
-                      </td>
-                      <td>
-                        <a>Copy</a>
-                      </td>
-                    </>
-                  ) : (
-                    <td>
+                  <td>
+                    {isAdmin ? (
+                      <a href={`/admin/login/${project.adminAccessToken}`}>{project.name}</a>
+                    ) : (
                       <a href={`/project/${project.accessToken}/finishes`}>{project.name}</a>
-                    </td>
-                  )}
+                    )}
+                  </td>
+                  {isAdmin &&  <td> <a onClick={() => handleCopy(project.id)}>Copy</a> </td>}
                 </tr>
             ))}
           </Table.Body>

@@ -37,7 +37,6 @@ const Middleware = {
   },
 
   authUser: function authUser(req, res, next) {
-    console.log(`m.authUser - ${req.user}`)
     if (!req.user) {
       req.session['redirect_to'] = req.originalUrl;
       return res.redirect(r.SIGN_IN_URL)
@@ -52,14 +51,15 @@ const Middleware = {
   }
 };
 
-Middleware["authAdmin"] = (req, res, next) => {
-  console.log(`m.authAdmin - ${req.user} - ${req.user.role}`)
-  if (!req.user) return res.redirect(r.SIGN_IN_URL);
-  if (req.user.role !== "admin") {
-    return res.redirect("/app/dashboard");
-  }
-  next();
-};
+// Middleware["authAdmin"] = (req, res, next) => {
+//   console.log('hi')
+//   console.log(`m.authAdmin - ${req.user.role.toJSON()}`)
+//   if (!req.user) return res.redirect(r.SIGN_IN_URL);
+//   if (req.user.role !== "super admin" && req.user.role !== "admin") {
+//     return res.redirect("/app/dashboard");
+//   }
+//   next();
+// };
 
 
 (models.User.rawAttributes.role.values || []).forEach(role => {

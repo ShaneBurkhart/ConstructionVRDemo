@@ -13,6 +13,9 @@ const todos = (state = {}, action) => {
     case "LOAD":
       return { ...state, ...action.data };
 
+    case "NEW_PROJECT":
+      return {  ...state, projects: [ ...state.projects, action.data ] };
+
     case "INVITE_USER":
       return { ...state, users: [...state.users, action.data] };
 

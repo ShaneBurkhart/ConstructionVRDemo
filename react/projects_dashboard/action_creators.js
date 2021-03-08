@@ -16,6 +16,46 @@ const ActionCreator = {
     })
   },
 
+  addNewProject: (name, callback, errorCallback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api2/create-new-project",
+      dataType: "json",
+      data: { name },
+      success: (data) => {
+         _dispatch({ type: "NEW_PROJECT", data});
+        callback({ status: 200, message: `New project "${data.name}" added` })
+      },
+      error: (error) => {
+        _dispatch({ type: "API_ERROR", error });
+        errorCallback({
+          status: error.status,
+          message: `Error ${error.status} - Could not add new project`
+        })
+      },
+    })
+  },
+
+  copyProject: ({ id, name }, callback, errorCallback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api2/copy-project",
+      dataType: "json",
+      data: { id, name },
+      success: (data) => {
+        _dispatch({ type: "NEW_PROJECT", data});
+        callback({ status: 200, message: `New project "${data.name}" added` })
+      },
+      error: (error) => {
+        _dispatch({ type: "API_ERROR", error });
+        errorCallback({
+          status: error.status,
+          message: `Error ${error.status} - Could not add new project`
+        })
+      },
+    })
+  },
+
   inviteUser: (user, callback, errorCallback) => {
     $.ajax({
       type: "POST",
