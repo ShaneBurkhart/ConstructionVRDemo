@@ -4,29 +4,36 @@ import ActionCreators from './action_creators';
 
 import { Grid, Table, Header, Button, Label } from "semantic-ui-react";
 
+import CreateProjectModal from './CreateProjectModal';
+import CopyProjectModal from './CopyProjectModal';
+
 const Dashboard = () => {
   const allProjects = useSelector(state => state.projects || []);
   const isAdmin = IS_SUPER_ADMIN;
 
-  const [message, setMessage] = useState({ show: false })
+  const [message, setMessage] = useState({ show: false });
+  const [projectToCopy, setProjectToCopy] = useState({});
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+  const [showCopyProjectModal, setShowCopyProjectModal] = useState(false);
+
+  const toggleShowCreateProjectModal = () => setShowCreateProjectModal(!showCreateProjectModal);
+  const toggleShowCopyProjectModal = () => setShowCopyProjectModal(!showCopyProjectModal);
 
   useEffect(() => {
     if (message.show) {
       setTimeout(() => setMessage({ show: false }), 2000)
     }
-  }, [message])
+  }, [message]);
 
   const onSuccess = (result) => setMessage({ show: true, message: result.message, color: 'green' });
   const onError = (result) => setMessage({ show: true, message: result.message, color: 'red' });
 
-  const handleCreateNew = () => {
-    const name = prompt("Give your project a name");
-    ActionCreators.addNewProject(name, onSuccess, onError); 
-  }
-
-  const handleCopy = (id) => {
-    const name = prompt("Enter a new name for copied project");
-    ActionCreators.copyProject({ name, id }, onSuccess, onError)
+  const handleCreateNew = (name) => ActionCreators.addNewProject(name, onSuccess, onError); 
+  const handleCopy = (newName) => ActionCreators.copyProject({ name: newName, id: projectToCopy.id }, onSuccess, onError)
+  
+  const openCopyModal = (id, name)=> {
+    setProjectToCopy({id, name});
+    toggleShowCopyProjectModal();
   }
 
   return (
@@ -40,7 +47,7 @@ const Dashboard = () => {
               {message.show && <Label basic color={message.color}>{message.message}</Label>}
           </Grid.Column>
           <Grid.Column width={4}>
-              {isAdmin && <Button onClick={handleCreateNew}>Create New Project</Button>}
+              {isAdmin && <Button onClick={toggleShowCreateProjectModal}>Create New Project</Button>}
           </Grid.Column>
         </Grid>
         <Table className="celled">
@@ -61,12 +68,21 @@ const Dashboard = () => {
                       <a href={`/project/${project.accessToken}/finishes`}>{project.name}</a>
                     )}
                   </td>
-                  {isAdmin &&  <td> <a onClick={() => handleCopy(project.id)}>Copy</a> </td>}
+                  {isAdmin &&  <td> <a className="project-copy-link" onClick={() => openCopyModal(project.id, project.name)}>Copy</a> </td>}
                 </tr>
             ))}
           </Table.Body>
         </Table>
       </div>
+      {showCreateProjectModal && <CreateProjectModal onSubmit={handleCreateNew} onClose={toggleShowCreateProjectModal} />}
+      {showCopyProjectModal && (
+        <CopyProjectModal
+          onSubmit={handleCopy}
+          projectToCopy={projectToCopy}
+          setProjectToCopy={setProjectToCopy}
+          onClose={toggleShowCopyProjectModal}
+        />
+      )}
     </div>
   );
 }
