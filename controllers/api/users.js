@@ -6,9 +6,10 @@ module.exports = (app) => {
   app.get("/api2/admin/users", m.authSuperAdmin, async (req, res) => {
     const users = await models.User.findAll();
     const roles = models.User.rawAttributes.role.values;
-    console.log('redux load')
 
-    const projects = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
+    const projectsAllInfo = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
+    // here we are obscuring token names from adminAccessToken to href
+    const projects = projectsAllInfo.map(({ id, name, adminAccessToken, accessToken }) => ({ id, name, href: adminAccessToken, accessToken }))
     res.json({ users, roles, projects });
   });
 

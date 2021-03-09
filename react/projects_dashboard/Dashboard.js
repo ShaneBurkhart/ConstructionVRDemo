@@ -63,7 +63,7 @@ const Dashboard = () => {
                 <tr className="project-row" key={project.accessToken}>
                   <td>
                     {isAdmin ? (
-                      <a href={`/admin/login/${project.adminAccessToken}`}>{project.name}</a>
+                      <a href={`/admin/login/${project.href}`}>{project.name}</a>
                     ) : (
                       <a href={`/project/${project.accessToken}/finishes`}>{project.name}</a>
                     )}
