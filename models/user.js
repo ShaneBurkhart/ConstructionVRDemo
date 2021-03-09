@@ -25,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     activated: DataTypes.BOOLEAN,
     role: {
       type:   DataTypes.ENUM,
-      values: ["super admin", "admin", "basic"],
+      // values: ["super admin", "admin", "basic"],
+      values: ["super admin"],
       defaultValue: "basic",
     },
     humanizedRole: {

@@ -3,8 +3,7 @@ const m = require("../middleware.js");
 const models = require("../../models/index.js");
 
 module.exports = (app) => {
-  // app.get("/api2/admin/users", m.authSuperAdmin, async (req, res) => {
-  app.get("/api2/admin/users", async (req, res) => {
+  app.get("/api2/admin/users", m.authSuperAdmin, async (req, res) => {
     const users = await models.User.findAll();
     const roles = models.User.rawAttributes.role.values;
     console.log('redux load')
@@ -13,8 +12,7 @@ module.exports = (app) => {
     res.json({ users, roles, projects });
   });
 
-  // app.post("/api2/admin/invite-user",  m.authSuperAdmin, async (req, res) => {
-  app.post("/api2/admin/invite-user", async (req, res) => {
+  app.post("/api2/admin/invite-user",  m.authSuperAdmin, async (req, res) => {
     console.log('doing invite stuff')
     if (!models.User.validateEmail(req.body.email)) {
       return res.status(422).json({ msg: "Wrong email" })

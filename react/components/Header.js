@@ -4,7 +4,8 @@ import { Dropdown } from 'semantic-ui-react';
 import styles from "./Header.module.css";
 
 const Header = () => {
-  const IS_ANONYMOUS = !IS_SUPER_ADMIN && !IS_ADMIN && !IS_BASIC;
+  // const IS_ANONYMOUS = !IS_SUPER_ADMIN && !IS_ADMIN && !IS_BASIC;
+  const IS_ANONYMOUS = !IS_SUPER_ADMIN;
   
   const allNavLinkInfo = [
     {
@@ -17,7 +18,7 @@ const Header = () => {
       name: 'Users',
       href: '/app/admin/users-panel',
       navPosition: 'left',
-      permission: IS_SUPER_ADMIN || IS_ADMIN,
+      permission: IS_SUPER_ADMIN,
     },
     // {
     //   name: 'Admin',
