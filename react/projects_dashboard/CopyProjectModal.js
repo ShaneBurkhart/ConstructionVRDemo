@@ -20,7 +20,7 @@ const CopyProjectModal = ({ onSubmit, onClose, projectToCopy, setProjectToCopy }
       onClose={onClose}
       size="tiny"
     >
-      <Modal.Header style={{ backgroundColor: '#4dffff' }}>Copy Project "{projectToCopy.name}"</Modal.Header>
+      <Modal.Header style={{ backgroundColor: '#e2e2e2' }}>Copy Project "{projectToCopy.name}"</Modal.Header>
       <Modal.Content>
         <Modal.Description>
           <Header>Give your project a new name</Header>

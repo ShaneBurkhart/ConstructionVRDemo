@@ -19,7 +19,7 @@ const CreateProjectModal = ({ onSubmit, onClose }) => {
       onClose={onClose}
       size="tiny"
     >
-      <Modal.Header style={{ backgroundColor: '#4dffff' }}>Create a New Project</Modal.Header>
+      <Modal.Header style={{ backgroundColor: '#e2e2e2' }}>Create a New Project</Modal.Header>
       <Modal.Content>
         <Modal.Description>
           <Header>Give your project a name</Header>
