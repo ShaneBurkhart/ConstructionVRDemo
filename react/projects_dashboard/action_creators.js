@@ -56,6 +56,42 @@ const ActionCreator = {
     })
   },
 
+  toggleArchiveProject: (id, callback, errorCallback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api2/toggle-archive-project",
+      dataType: "json",
+      data: { id },
+      success: (data) => {
+        _dispatch({ type: "UPDATE_PROJECT", data});
+        const message =  `Project '${data.name}' ${data.archived ? 'archived' : 're-activated'}`
+        callback({ status: 200, message })
+      },
+      error: (error) => {
+        _dispatch({ type: "API_ERROR", error });
+        errorCallback({
+          status: error.status,
+          message: `Error ${error.status} - Could not change project status`
+        });
+      },
+    })
+  },
+
+  updateSeenAt: (id) => {
+    $.ajax({
+      type: "POST",
+      url: "/api2/update-project-seen-at",
+      dataType: "json",
+      data: { id },
+      success: (data) => {
+        _dispatch({ type: "UPDATE_PROJECT", data});
+      },
+      error: (error) => {
+        _dispatch({ type: "API_ERROR", error });
+      },
+    })
+  },
+
   inviteUser: (user, callback, errorCallback) => {
     $.ajax({
       type: "POST",

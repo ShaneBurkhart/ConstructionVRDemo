@@ -5,7 +5,10 @@ module.exports = (sequelize, DataTypes) => {
     accessToken: DataTypes.STRING,
     adminAccessToken: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
-    last_seen_at: DataTypes.DATE,
+    last_seen_at: {
+      type: DataTypes.DATE,
+      defaultValue: Date.now(),
+    },
   }, {});
   Project.associate = function(models) {
     // associations can be defined here

@@ -19,6 +19,9 @@ const todos = (state = {}, action) => {
     case "INVITE_USER":
       return { ...state, users: [...state.users, action.data] };
 
+    case "UPDATE_PROJECT":
+      return { ...state, projects: [ ...state.projects.filter(p => p.id !== action.data.id), action.data]}
+
     case "UPDATE_USER":
       return {
         ...state,

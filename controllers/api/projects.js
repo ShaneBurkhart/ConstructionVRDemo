@@ -18,7 +18,7 @@ module.exports = (app) => {
       adminAccessToken: uuid()
     });
 
-    const { id, name, accessToken, adminAccessToken } = newProject;
+    const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = newProject;
     if (!id) return res.status(422).send("Could not add new project");
     
     // add a few basic categories for 'new project' template
@@ -42,8 +42,19 @@ module.exports = (app) => {
         console.error(error);
         return res.status(error.statusCode).send("Could not add new project");
       }
-      return res.status(200).send({ id, name, accessToken, adminAccessToken });
+      return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived });
     });
+  });
+
+  app.post("/api2/update-project-seen-at", m.authUser, async (req, res) => {
+    if (!req.body.id) return res.status(422).send("Cannot update date without project id");
+    
+    const project = await models.Project.findOne({ where: { id: req.body.id }});
+    await project.update({
+      last_seen_at: new Date(),
+    });
+    const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = project;
+    return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived })
   });
 
   app.post("/api2/copy-project", m.authSuperAdmin, async (req, res) => {
@@ -59,7 +70,7 @@ module.exports = (app) => {
       adminAccessToken: uuid()
     });
 
-    const { id: newProjectId, name, accessToken, adminAccessToken } = newProject;
+    const { id: newProjectId, name, accessToken, adminAccessToken, last_seen_at, archived } = newProject;
     if (!newProjectId) return res.status(422).send("Could not create new project");
 
     const categoriesToCopy = await models.Category.findAll({ where: { "ProjectId": req.body.id } });
@@ -140,8 +151,18 @@ module.exports = (app) => {
         return res.status(error.statusCode).send("Could not add new project");
       }
 
-      return res.status(200).send({ newProjectId, name, accessToken, adminAccessToken });
+      return res.status(200).send({ id: newProjectId, name, accessToken, href: adminAccessToken, last_seen_at, archived });
     });
+  });
 
-  })
+  app.post('/api2/toggle-archive-project', m.authSuperAdmin, async (req, res) => {
+    if (!req.body.id) return res.status(422).send("A project is required")
+
+    const projectToArchive = await models.Project.findOne({ where: { id: req.body.id }});
+    projectToArchive.update({
+      archived: !projectToArchive.archived,
+    });
+    await projectToArchive.save();
+    res.json(projectToArchive);
+  });
 }
