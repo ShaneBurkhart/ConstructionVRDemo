@@ -9,7 +9,7 @@ module.exports = (app) => {
 
     const projectsAllInfo = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
     // here we are obscuring token names from adminAccessToken to href
-    const projects = projectsAllInfo.map(({ id, name, adminAccessToken, accessToken }) => ({ id, name, href: adminAccessToken, accessToken }))
+    const projects = projectsAllInfo.map(({ id, name, adminAccessToken, accessToken, archived, last_seen_at }) => ({ id, name, href: adminAccessToken, accessToken, archived, last_seen_at }))
     res.json({ users, roles, projects });
   });
 
