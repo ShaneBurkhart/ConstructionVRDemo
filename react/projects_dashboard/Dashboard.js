@@ -91,13 +91,13 @@ const Dashboard = () => {
                   <td>
                       <a href={link} onClick={() => updateSeenAt(id)}>{name}</a>
                   </td>
-                  {isAdmin && !archived  (
+                  {isAdmin && !archived &&  (
                     <td> 
                       <a className="project-controls-link" onClick={() => openCopyModal(id, name)}>Copy</a>
                       <a className="project-controls-link" onClick={() => openConfirmModal(id, name, 'archive')}>Archive</a>
                     </td>
                   )}
-                  {isAdmin && archived  (
+                  {isAdmin && !!archived && (
                     <td> 
                       <a className="project-controls-link" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
                     </td>
