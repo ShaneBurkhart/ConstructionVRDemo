@@ -4,7 +4,7 @@ const webpack = require("webpack");
 module.exports = {
   entry: {
     finishes_app: "./react/finishes/index.js",
-    admin_dashboard_app: "./react/admin_dashboard/index.js"
+    renderer_uploader_app: "./react/renderer_uploader/index.js"
   },
   // entry: "./react/index.js",
   mode: "development",

@@ -61,6 +61,11 @@ if ENV["NODE_ENV"] == "development"
   end
 end
 
+renderer_app_url_uuid = "83f75fdc-975b-4a12-a183-360a20038ac1"
+get "/#{renderer_app_url_uuid}" do
+  haml :renderer_uploader
+end
+
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
