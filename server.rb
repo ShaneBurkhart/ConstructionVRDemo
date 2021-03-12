@@ -66,14 +66,19 @@ get "/#{renderer_app_url_uuid}" do
   haml :renderer_uploader
 end
 
-renderer_app_get_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
-get "/#{renderer_app_get_projects}" do
+renderer_app_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
+get "/#{renderer_app_projects}" do
   @projects = Finishes::Project.all
   @units = Unit.all
   content_type "application/json"
   project_list = @projects.map { |p| p.fields }
   unit_list = @units.map { |u| u.fields }
   {projects: project_list, units: unit_list}.to_json
+end
+
+post "/#{renderer_app_projects}" do
+  @project = Finishes::Project.find(params['projectId'])
+  
 end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
@@ -133,6 +138,24 @@ post '/api/temp_upload/presign' do
   {
     presignedURL: url,
     awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+  }.to_json
+end
+
+renderer_uploader_presign = "99a0101f-2c32-4d60-9471-983372a81840"
+post "/api/presign/#{renderer_uploader_presign}" do
+  key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
+  signer = Aws::S3::Presigner.new
+  url = signer.presigned_url(:put_object, {
+    bucket: ENV["BUCKET"],
+    key: key,
+    content_type: params["mime"],
+    acl: "public-read"
+  })
+
+  content_type "application/json"
+  {
+    presignedURL: url,
+    awsURL: "https://#{ENV["BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
   }.to_json
 end
 

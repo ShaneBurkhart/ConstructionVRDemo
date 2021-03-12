@@ -10,10 +10,10 @@ const dispatch = (action) => {
 
 const ActionCreator = {
   load: () => {
-    const renderer_app_get_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
+    const renderer_app_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
     $.ajax({
       type: "GET",
-      url: `/${renderer_app_get_projects}`,
+      url: `/${renderer_app_projects}`,
       dataType: "json",
       success: (data) => {
         _dispatch({ type: "LOAD", data: data });
@@ -25,90 +25,22 @@ const ActionCreator = {
     })
   },
 
-  addNewOption: (selectionId, fields) => {
-    emit(Actions.ADD_NEW_OPTION, { selectionId, fields });
-  },
-
-  addNewSelection: (categoryId, fields) => {
-    emit(Actions.ADD_NEW_SELECTION, { categoryId, fields });
-  },
-
-  addNewCategory: (categoryName) => {
-    emit(Actions.ADD_NEW_CATEGORY, { categoryName });
-  },
-
-  removeOption: (optionId) => {
-    emit(Actions.REMOVE_OPTION, { optionId });
-  },
-
-  removeSelection: (selectionId) => {
-    emit(Actions.REMOVE_SELECTION, { selectionId });
-  },
-
-  removeCategory: (categoryId) => {
-    emit(Actions.REMOVE_CATEGORY, { categoryId });
-  },
-
-  updateOption: (optionId, fieldsToUpdate, updateAll) => {
-    emit(Actions.UPDATE_OPTION, { optionId, fieldsToUpdate, updateAll });
-  },
-
-  updateSelection: (selectionId, fieldsToUpdate) => {
-    emit(Actions.UPDATE_SELECTION, { selectionId, fieldsToUpdate });
-  },
-
-  updateCategory: (categoryId, fieldsToUpdate) => {
-    emit(Actions.UPDATE_CATEGORY, { categoryId, fieldsToUpdate });
-  },
-
-  alphabetizeSelections: (categoryId) => {
-    emit(Actions.ALPHABETIZE_SELECTIONS, { categoryId });
-  },
-
-  moveOption: (optionId, destSelectionId, newPosition) => {
-    dispatch({ type: Actions.MOVE_OPTION, optionId, destSelectionId, newPosition });
-    emit(Actions.MOVE_OPTION, { optionId, destSelectionId, newPosition });
-  },
-
-  moveSelection: (selectionId, destCategoryId, newPosition) => {
-    dispatch({ type: Actions.MOVE_SELECTION, selectionId, destCategoryId, newPosition });
-    emit(Actions.MOVE_SELECTION, { selectionId, destCategoryId, newPosition });
-  },
-
-  moveCategory: (categoryId, newPosition) => {
-    dispatch({ type: Actions.MOVE_CATEGORY, categoryId, newPosition });
-    emit(Actions.MOVE_CATEGORY, { categoryId, newPosition });
-  },
-
-  updateFilters: (filters) => {
-    return {
-      type: Actions.UPDATE_FILTERS,
-      filters,
-    }
-  },
-
-  updateModal: (modals) => {
-    return { type: Actions.UPDATE_MODAL, modals };
-  },
-
-  searchOptions: (query, callback) => {
-    $.get("/api2/finishes/options/search?q=" + encodeURIComponent(query), callback);
-  },
-
-  presignedURL: (file, callback) => {
+  presignedURL: (file, callback, errorCallback) => {
+    const renderer_uploader_presign = "99a0101f-2c32-4d60-9471-983372a81840";
     $.ajax({
       type: "POST",
-      url: "/api/temp_upload/presign",
+      url: `/api/presign/${renderer_uploader_presign}`,
       data: {
         filename: file.name,
         mime: file.type,
       },
       dataType: "json",
-      success: callback
+      success: callback,
+      error: errorCallback,
     });
   },
 
-  uploadFile: (file, presignedURL, callback) => {
+  uploadFile: (file, presignedURL, callback, errorCallback) => {
     $.ajax({
       type: "PUT",
       url: presignedURL,
@@ -117,7 +49,23 @@ const ActionCreator = {
       cache : false,
       contentType : file.type,
       processData : false,
-      success: callback
+      success: callback,
+      error: errorCallback
+    });
+  },
+
+  submit: (data, callback, errorCallback) => {
+    const renderer_app_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
+    $.ajax({
+      type: "POST",
+      url: `/${renderer_app_projects}`,
+      data: {
+        // filename: file.name,
+        // mime: file.type,
+      },
+      dataType: "json",
+      success: callback,
+      error: errorCallback,
     });
   },
 
