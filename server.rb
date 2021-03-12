@@ -66,6 +66,16 @@ get "/#{renderer_app_url_uuid}" do
   haml :renderer_uploader
 end
 
+renderer_app_get_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
+get "/#{renderer_app_get_projects}" do
+  @projects = Finishes::Project.all
+  @units = Unit.all
+  content_type "application/json"
+  project_list = @projects.map { |p| p.fields }
+  unit_list = @units.map { |u| u.fields }
+  {projects: project_list, units: unit_list}.to_json
+end
+
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {

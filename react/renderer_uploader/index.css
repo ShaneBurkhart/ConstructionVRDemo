@@ -1,0 +1,28 @@
+#renderer-uploader-app {
+  padding: 4% 2%;
+}
+
+#renderer-uploader__main .image-placeholder {
+  background-color: #fafafa;
+  padding: 5px 5px;
+  border: 2px dashed #ccc;
+  border-radius: 3px;
+  min-height: 35px;
+  margin-bottom: 5px;
+  text-align: center;
+  color: #cccccc;
+  cursor: pointer;
+}
+
+#renderer-uploader__main .image-placeholder:hover {
+  color: #40A819;
+  border-color: #40A819;
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: space-between;
+}
+.dropdown-container > div {
+  width: 48%;
+}

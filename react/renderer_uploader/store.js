@@ -10,13 +10,14 @@ const _initialState = {
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      return { ...state, ...action.data };
+      const { projects, units } = action.data;
+      return { ...state, projects, units };
 
-    case "NEW_PROJECT":
-      return {  ...state, projects: [ ...state.projects, action.data ] };
+    // case "NEW_PROJECT":
+    //   return {  ...state, projects: [ ...state.projects, action.data ] };
 
-    case "UPDATE_PROJECT":
-      return { ...state, projects: [ ...state.projects.filter(p => p.id !== action.data.id), action.data]}
+    // case "UPDATE_PROJECT":
+    //   return { ...state, projects: [ ...state.projects.filter(p => p.id !== action.data.id), action.data]}
 
     case 'API_ERROR':
       return { ...state, apiError: {
