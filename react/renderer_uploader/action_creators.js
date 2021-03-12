@@ -59,10 +59,7 @@ const ActionCreator = {
     $.ajax({
       type: "POST",
       url: `/${renderer_app_projects}`,
-      data: {
-        // filename: file.name,
-        // mime: file.type,
-      },
+      data,
       dataType: "json",
       success: callback,
       error: errorCallback,

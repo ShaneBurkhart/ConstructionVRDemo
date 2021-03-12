@@ -15,36 +15,60 @@ const App = () => {
 
   const [selectedProject, setSelectedProject] = useState({});
   const [selectedUnit, setSelectedUnit] = useState({});
-  const [floorPlanImgUrl, setFloorPlanImgUrl] = useState(null);
-  const [skpUrl, setSkpUrl] = useState(null);
+  const [floorPlanImgUrl, setFloorPlanImgUrl] = useState('');
+  const [skpUrl, setSkpUrl] = useState('');
   const [screenshotUrls, setScreenshotUrls] = useState([]);
   const [unitsList, setUnitsList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ show: false })
   
   useEffect(() => {
-    // load pulls Units and Projects from server --> what's source of truth for unit/project connection?
-    // should I filter out Projects that don't have units associated?
     ActionCreators.updateDispatch(dispatch);
     ActionCreators.load();
   }, []);
 
-  const handleSubmit = () => {
-    // TO Do - update error system to toast message system
-    if (_.isEmpty(selectedProject)) return console.log('project selection required');
-    if (_.isEmpty(selectedUnit)) return console.log('unit selection required');
-    // TO Do - get all validation requirement specs
+  useEffect(() => {
+    if (message.show) {
+      setTimeout(() => {
+        setMessage({ show: false })
+      }, 3000);
+    }
+  }, [message])
 
-    /* 
-      WHAT HAPPENS ON SUBMIT --> 
-      - send project/unit combo & all images to server (or just skp & floor plan?)
-      - controller will add a unit version to the project/unit combo
-      - connect skp & floorplan to unit version
-      - "For each screenshot version, we will add a screenshot version to the unit." is a screenshot version just one of our screenshotUrls??
-      - What do we send back to user? success message? link?
-      -- open new tab to unit version target = _blank; clear form
-    */
-   ActionCreators.submit();
+  const resetForm = () => {
+    setSelectedProject({});
+    setSelectedUnit({});
+    setFloorPlanImgUrl('');
+    setSkpUrl('');
+    setScreenshotUrls([]);
+    setUnitsList([]);
+  }
+
+  const handleSubmit = () => {
+    if (_.isEmpty(selectedProject)) setMessage({ show: true, message: 'project selection is required'});
+    if (_.isEmpty(selectedUnit)) return console.log({ show: true, message: 'unit selection is required'});
+    setLoading(true);
+
+    const data = {
+      unitId: selectedUnit["Record ID"],
+      floorPlanImgUrl,
+      screenshotUrls,
+      skpUrl,
+    }
+    ActionCreators.submit(
+      data,
+      (newUnitVersionId) => {
+        console.log({newUnitVersionId})
+        setMessage({ show: true, color: "green", message: "success" });
+        openUnitVersionUrl(newUnitVersionId)
+        resetForm();
+        setLoading(false);
+      },
+      () => {
+        setMessage({ show: true, message: "uh oh something went wrong" });
+        setLoading(false);
+      }
+    );
   }
 
 
@@ -164,8 +188,10 @@ const App = () => {
   
   return (
     <main className="large-container" id="renderer-uploader__main">
-      <Header as="h2">Upload Renderings</Header>
+      <div style={{ display: 'flex', minHeight: 45 }}>
+        <Header as="h2" style={{ marginRight: "2%" }}>Upload Renderings</Header>
         {message.show && <Label basic color={message.color || "red"}>{message.message}</Label>}
+      </div>
         <div className="dropdown-container">
           <div>
             <label>Select a Project</label>
@@ -202,7 +228,7 @@ const App = () => {
           <Grid.Column>
             <label>Add Scene Images - </label>
             (<a onClick={() => setScreenshotUrls([])}>clear</a>)
-            {!screenshotUrls.length && <StyledDropzone onDrop={onDropScreenshots} />}
+            <StyledDropzone onDrop={onDropScreenshots} />
             {!!screenshotUrls.length && (
               <div className="images-container">
                 {(screenshotUrls || []).map(imgUrl => (
@@ -239,14 +265,21 @@ const App = () => {
           </Grid.Column>
         </Grid.Row>
       </Grid>
-      <Button
-        color='blue'
-        disabled={_.isEmpty(selectedUnit)}
-        style={{ marginTop: '2%', float: 'right' }}
-        onClick={handleSubmit}
-      >
-        Submit
-      </Button>
+      <div className="button-section" style={{ marginTop: "2%", display: "flex", justifyContent: "space-between" }}>
+        <Button
+          color="black"
+          onClick={resetForm}
+        >
+          Reset Form
+        </Button>
+        <Button
+          color='blue'
+          disabled={_.isEmpty(selectedUnit)}
+          onClick={handleSubmit}
+        >
+          Submit
+        </Button>
+      </div>
       {loading && <Dimmer active inverted page><Loader /></Dimmer>}
     </main>
   );

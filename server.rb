@@ -77,8 +77,21 @@ get "/#{renderer_app_projects}" do
 end
 
 post "/#{renderer_app_projects}" do
-  @project = Finishes::Project.find(params['projectId'])
-  
+  screenshot_urls = params["screenshotUrls"]
+
+  new_unit_version = UnitVersion.create({
+    "Unit": [params["unitId"]],
+    "Floor Plan Image URL": params["floorPlanImgUrl"],
+    "SKP File URL": params["skpUrl"]
+  })
+
+  screenshot_urls.each do |s|
+    ScreenshotVersion.create({
+      "Image URL": s,
+      "Unit Version": [new_unit_version.id]
+    })
+  end
+  return new_unit_version.id.to_json
 end
 
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do

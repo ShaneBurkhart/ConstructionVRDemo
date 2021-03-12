@@ -18,6 +18,10 @@
   color: #40A819;
   border-color: #40A819;
 }
+#renderer-uploader__main label {
+  font-weight: bold;
+  margin-bottom: 2%;
+}
 
 .dropdown-container {
   display: flex;
