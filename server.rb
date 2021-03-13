@@ -91,6 +91,7 @@ post "/#{renderer_app_projects}" do
       "Unit Version": [new_unit_version.id]
     })
   end
+  session[:is_admin] = true
   return new_unit_version.id.to_json
 end
 

@@ -44,6 +44,19 @@ const App = () => {
     setUnitsList([]);
   }
 
+  const openUnitVersionUrl = newUnitVersionId => {
+    if (!newUnitVersionId) return setMessage({ show: true, message: "Hmmm we could not retrieve the redirect url for this new version" })
+    const unitVersionUrl = `/project/${selectedProject["Access Token"]}/unit/${selectedUnit["Record ID"]}?version=${newUnitVersionId}`;
+    
+    // open new browser tab with unitVersionUrl
+    var a = document.createElement("a");    
+    a.href = unitVersionUrl;   
+    a.target = "_blank"; 
+    var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0,true, false, false, false, 0, null);
+    a.dispatchEvent(evt);
+  }
+
   const handleSubmit = () => {
     if (_.isEmpty(selectedProject)) setMessage({ show: true, message: 'project selection is required'});
     if (_.isEmpty(selectedUnit)) return console.log({ show: true, message: 'unit selection is required'});
@@ -58,7 +71,6 @@ const App = () => {
     ActionCreators.submit(
       data,
       (newUnitVersionId) => {
-        console.log({newUnitVersionId})
         setMessage({ show: true, color: "green", message: "success" });
         openUnitVersionUrl(newUnitVersionId)
         resetForm();
