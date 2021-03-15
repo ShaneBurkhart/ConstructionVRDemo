@@ -20,7 +20,7 @@ const rejectStyle = {
 
 function StyledDropzone(props) {
   const { onDrop, acceptSKP=false } = props;
-  const acceptedMimeTypes = acceptSKP ? '*' : 'image/*';
+  const acceptedMimeTypes = acceptSKP ? 'application/*' : 'image/*';
   const {
     getRootProps,
     getInputProps,
