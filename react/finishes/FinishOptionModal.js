@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { Label, Popup, Input, Grid, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react'
 
 import ActionCreators from './action_creators';
-import StyledDropzone from "./StyledDropzone"
+import StyledDropzone from "../components/StyledDropzone";
 import FocusEditableInput from './FocusEditableInput';
 
 import "./FinishOptionModal.css"

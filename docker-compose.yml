@@ -17,7 +17,7 @@ websocket:
     command: "node websocket.js"
 
 pg:
-    image: postgres
+    image: postgres:10
     environment:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres

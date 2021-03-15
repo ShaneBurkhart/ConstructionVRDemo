@@ -61,6 +61,40 @@ if ENV["NODE_ENV"] == "development"
   end
 end
 
+renderer_app_url_uuid = "83f75fdc-975b-4a12-a183-360a20038ac1"
+get "/#{renderer_app_url_uuid}" do
+  haml :renderer_uploader
+end
+
+renderer_app_projects = "24621eed-e87b-4422-b67f-a4ba513b47f2"
+get "/#{renderer_app_projects}" do
+  @projects = Finishes::Project.all
+  @units = Unit.all
+  content_type "application/json"
+  project_list = @projects.map { |p| p.fields }
+  unit_list = @units.map { |u| u.fields }
+  {projects: project_list, units: unit_list}.to_json
+end
+
+post "/#{renderer_app_projects}" do
+  screenshot_urls = params["screenshotUrls"]
+
+  new_unit_version = UnitVersion.create({
+    "Unit": [params["unitId"]],
+    "Floor Plan Image URL": params["floorPlanImgUrl"],
+    "SKP File URL": params["skpUrl"]
+  })
+
+  screenshot_urls.each do |s|
+    ScreenshotVersion.create({
+      "Image URL": s,
+      "Unit Version": [new_unit_version.id]
+    })
+  end
+  session[:is_admin] = true
+  return new_unit_version.id.to_json
+end
+
 get '/93e8e03a-9c36-48bc-af15-54db7715ac15/component/search' do
   s = params[:s] || ""
   haml :component_search, locals: {
@@ -118,6 +152,24 @@ post '/api/temp_upload/presign' do
   {
     presignedURL: url,
     awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+  }.to_json
+end
+
+renderer_uploader_presign = "99a0101f-2c32-4d60-9471-983372a81840"
+post "/api/presign/#{renderer_uploader_presign}" do
+  key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
+  signer = Aws::S3::Presigner.new
+  url = signer.presigned_url(:put_object, {
+    bucket: ENV["BUCKET"],
+    key: key,
+    content_type: params["mime"],
+    acl: "public-read"
+  })
+
+  content_type "application/json"
+  {
+    presignedURL: url,
+    awsURL: "https://#{ENV["BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
   }.to_json
 end
 
@@ -334,7 +386,7 @@ get '/admin/login/:admin_token' do
   session[:is_admin] = true
 
   # Log admin in on the websocket server too
-  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{URI::encode(redirect_to)}"
+  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{CGI.escape(redirect_to)}"
 end
 
 post '/admin/linked_hotspot/set' do
