@@ -267,7 +267,7 @@ const App = () => {
           <Grid.Column>
             <label>Add a SKP - </label>
             (<a onClick={() => setSkpUrl('')}>clear</a>)
-            {!skpUrl && <StyledDropzone onDrop={onDropSKP} />}
+            {!skpUrl && <StyledDropzone onDrop={onDropSKP} acceptSKP={true} />}
             {skpUrl && (
               <div className="skp-url">
                   <label>SKP File Url:</label>
