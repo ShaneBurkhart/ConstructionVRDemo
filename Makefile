@@ -19,6 +19,9 @@ c_node:
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
+build_js:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npm run-script build
+
 wipe:
 	$(MAKE) clean
 	rm -rf data/pg
