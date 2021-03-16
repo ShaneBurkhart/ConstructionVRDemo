@@ -1,12 +1,7 @@
 import $ from 'jquery';
-import Actions from '../../common/actions';
 import _ from 'underscore';
 
 var _dispatch = null;
-
-const dispatch = (action) => {
-  if (_dispatch) _dispatch(action);
-}
 
 const ActionCreator = {
   load: () => {
@@ -42,6 +37,31 @@ const ActionCreator = {
 
   uploadFile: (file, presignedURL, callback, errorCallback) => {
     $.ajax({
+      type: "PUT",
+      url: presignedURL,
+      data: file,
+      dataType: "text",
+      cache : false,
+      contentType : file.type,
+      processData : false,
+      success: callback,
+      error: errorCallback
+    });
+  },
+
+  uploadLargeFile: (file, presignedURL, callback, errorCallback) => {
+    console.log({file})
+    $.ajax({
+      xhr: function() {
+        var xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener("progress", function(evt) {
+          if (evt.lengthComputable) {
+              var percentComplete = (evt.loaded / evt.total) * 100;
+              _dispatch({ type: "UPLOAD_PROGRESS", data: percentComplete });
+          }
+        }, false);
+        return xhr;
+      },
       type: "PUT",
       url: presignedURL,
       data: file,
