@@ -137,7 +137,10 @@ const App = () => {
       )
     }
       
-    const onError = () => setMessage({ show: true, message: "Could not initiate upload" });
+    const onError = () => {
+      setSkpUploading(false);
+      setMessage({ show: true, message: "Could not initiate upload" })
+    };
     ActionCreators.presignedURL(file, onSuccess, onError);
   }
 

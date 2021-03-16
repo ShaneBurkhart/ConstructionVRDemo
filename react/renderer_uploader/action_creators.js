@@ -50,7 +50,6 @@ const ActionCreator = {
   },
 
   uploadLargeFile: (file, presignedURL, callback, errorCallback) => {
-    console.log({file})
     $.ajax({
       xhr: function() {
         var xhr = new window.XMLHttpRequest();
