@@ -539,6 +539,24 @@ get '/project/:access_token/finishes' do
     is_admin_mode: is_admin_mode,
   }
 end
+get '/project/:access_token/finishes/v1' do
+  # TO DO - how to verify admin mode in legacy app
+  # is_admin_mode = !!session[:is_admin]
+  is_admin_mode = true
+  access_token = params[:access_token]
+  project = find_project_by_access_token(access_token)
+  return "Not found" if project.nil?
+
+  haml :project_finishes_v1, locals: {
+    markdown: MARKDOWN,
+    project: project,
+    access_token: access_token,
+    page_title: project["Name"] + " - Finishes",
+    no_style: true,
+    fixed_width_viewport: true,
+    is_admin_mode: is_admin_mode,
+  }
+end
 
 get '/project/:access_token/procurement_forms' do
   is_admin_mode = !!session[:is_admin]
