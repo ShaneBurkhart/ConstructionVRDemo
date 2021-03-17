@@ -4,7 +4,8 @@ const webpack = require("webpack");
 module.exports = {
   entry: {
     finishes_app: "./react/finishes/index.js",
-    renderer_uploader_app: "./react/renderer_uploader/index.js"
+    renderer_uploader_app: "./react/renderer_uploader/index.js",
+    finishes_app_revision: "./react/finishes_revision/index.js"
   },
   // entry: "./react/index.js",
   mode: "development",

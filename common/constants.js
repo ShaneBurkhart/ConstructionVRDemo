@@ -184,6 +184,8 @@ export const finishCategories = {
   },
  }
 
- const attrArr = Array.from(finishAttributeMap)
+ const attrArr = Array.from(finishAttributeMap);
+
+ export const allCategoriesArr = Object.keys(finishCategories).map(c => finishCategories[c].name);
 
  export const getAttrList = category => category.attr.map(a => attrArr[a]);
