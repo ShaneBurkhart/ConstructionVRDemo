@@ -14,13 +14,16 @@ module.exports = (app) => {
   
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
-    const adminMode = !!req.session["is_admin"];
+    const adminMode = !!req.session["is_admin"]; // TO DO - use express auth not ruby
     const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+    if (!project) return res.status(404).send("Project not found");
+    
     let finishes = []
+    
     try {
-      const finishes = await project.getFinishes();
-    } catch (error) {
-      console.log(error)
+      finishes = await project.getFinishes();
+    } catch(error) {
+      console.log(error);
     }
     res.json({adminMode, finishes});
   });
@@ -32,9 +35,14 @@ module.exports = (app) => {
     const adminMode = !!req.session["is_admin"];
     // should this be admin only?
     console.log(JSON.stringify(project))
-    const finishList = await models.Finish.findAll({ where: { projectId: project.id, category: category }});
+    let finishList = [];
+    try {
+      finishList = await models.Finish.findAll({ where: { projectId: project.id, category: category }});
+    } catch(error) {
+      console.log(error)
+    }
     const newFinish = await models.Finish.create({
-      projectId: project.id,
+      ProjectId: project.id,
       category,
       orderNumber: finishList.length,
       attributes,

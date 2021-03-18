@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Finish = sequelize.define('Finish', {
-    projectId: DataTypes.INTEGER,
+    ProjectId: DataTypes.BIGINT,
     category: DataTypes.STRING,
     orderNumber: DataTypes.INTEGER,
     attributes: DataTypes.JSON
