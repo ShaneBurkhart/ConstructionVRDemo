@@ -7,7 +7,7 @@ const ActionCreator = {
   load: () => {
     $.ajax({
       type: "GET",
-      url: `/api2/project/${PROJECT_ACCESS_TOKEN}/finishes`,
+      url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}`,
       dataType: "json",
       success: (data) => {
         console.log({data})
@@ -18,6 +18,21 @@ const ActionCreator = {
         _dispatch({ type: "API_ERROR", data: data });
       }
     })
+  },
+
+  submit: (newFinish) => {
+    $.ajax({
+      type: "POST",
+      url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}`,
+      data: newFinish,
+      dataType: "json",
+      success: () => {
+        console.log({data})
+        // _dispatch({ type: "NEW_FINISH", data })
+        callback({ status: 200, message: `New Finish added` })
+      },
+      // error: errorCallback
+    });
   },
 
   presignedURL: (file, callback) => {
@@ -44,21 +59,6 @@ const ActionCreator = {
       contentType : file.type,
       processData : false,
       success: callback,
-      // error: errorCallback
-    });
-  },
-
-  submit: (newFinish) => {
-    $.ajax({
-      type: "POST",
-      url: `/api2/project/${PROJECT_ACCESS_TOKEN}/finishes`,
-      data: newFinish,
-      dataType: "json",
-      success: () => {
-        console.log({data})
-        // _dispatch({ type: "NEW_FINISH", data })
-        callback({ status: 200, message: `New Finish added` })
-      },
       // error: errorCallback
     });
   },

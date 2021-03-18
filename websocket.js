@@ -46,6 +46,7 @@ require("./controllers/dashboard.js")(app);
 // APIs
 require("./controllers/api/users.js")(app);
 require("./controllers/api/projects.js")(app);
+require("./controllers/api/finishes.js")(app);
 
 
 app.get("/api2/finishes/options/search", function (req, res) {

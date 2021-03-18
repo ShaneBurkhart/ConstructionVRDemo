@@ -4,6 +4,7 @@ import thunk from 'redux-thunk';
 
 const _initialState = {
   adminMode: false,
+  finishes: [],
   filters: {
     locations: null,
   },
@@ -14,8 +15,8 @@ const _initialState = {
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      const { admin_mode } = action.data;
-      return { ...state, adminMode: admin_mode };
+      const { adminMode, finishes } = action.data;
+      return { ...state, adminMode, finishes };
 
       // case 'FULL_UPDATE':
       //   const filters = state.filters;
