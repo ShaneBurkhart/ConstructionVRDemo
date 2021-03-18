@@ -20,6 +20,34 @@ const ActionCreator = {
     })
   },
 
+  presignedURL: (file, callback) => {
+    $.ajax({
+      type: "POST",
+      url: "/api/temp_upload/presign",
+      data: {
+        filename: file.name,
+        mime: file.type,
+      },
+      dataType: "json",
+      success: callback,
+      // error: errorCallback,
+    });
+  },
+
+  uploadFile: (file, presignedURL, callback) => {
+    $.ajax({
+      type: "PUT",
+      url: presignedURL,
+      data: file,
+      dataType: "text",
+      cache : false,
+      contentType : file.type,
+      processData : false,
+      success: callback,
+      // error: errorCallback
+    });
+  },
+
   updateDispatch: (dispatch) => {
     _dispatch = dispatch;
   }

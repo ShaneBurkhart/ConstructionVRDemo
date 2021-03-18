@@ -1,186 +1,188 @@
 
 const finishAttributeMap = {
-  0:{name: "Manufacturer", validate: () => {}},
-  1:{name: "Product Number", validate: () => {}},
-  2:{name: "Color", validate: () => {}},
-  3:{name: "Style", validate: () => {}},
-  4:{name: "Dimensions", validate: () => {}},
-  5:{name: "Repeat", validate: () => {}},
-  6:{name: "Grout Tag", validate: () => {}},
-  7:{name: "Grout Joint Thickness", validate: () => {}},
-  8:{name: "Installation Method", validate: () => {}},
-  9:{name: "Carpet Pad", validate: () => {}},
-  10:{name: "Finish", validate: () => {}},
-  11:{name: "Type", validate: () => {}},
-  12:{name: "Thickness", validate: () => {}},
-  13:{name: "Edge Profile", validate: () => {}},
-  14:{name: "Wood Species", validate: () => {}},
-  15:{name: "Product URL", validate: () => {}},
-  16:{name: "Price", validate: () => {}},
-  17:{name: "Details", validate: () => {}},
-  length: 18,
+  0:{name: "Manufacturer", order: 10, validate: () => {}},
+  1:{name: "Product Number", order: 10, validate: () => {}},
+  2:{name: "Color", order: 10, validate: () => {}},
+  3:{name: "Style", order: 10, validate: () => {}},
+  4:{name: "Dimensions", order: 10, validate: () => {}},
+  5:{name: "Repeat", order: 10, validate: () => {}},
+  6:{name: "Grout Tag", order: 10, validate: () => {}},
+  7:{name: "Grout Joint Thickness", order: 10, validate: () => {}},
+  8:{name: "Installation Method", order: 10, validate: () => {}},
+  9:{name: "Carpet Pad", order: 10, validate: () => {}},
+  10:{name: "Finish", order: 10, validate: () => {}},
+  11:{name: "Type", order: 10, validate: () => {}},
+  12:{name: "Thickness", order: 10, validate: () => {}},
+  13:{name: "Edge Profile", order: 10, validate: () => {}},
+  14:{name: "Wood Species", order: 10, validate: () => {}},
+  15:{name: "Product URL", order: 3, validate: () => {}},
+  16:{name: "Price", order: 2, validate: () => {}},
+  17:{name: "Details", order: 18, validate: () => {}},
+  18:{name: "Images", order: 0, validate: () => {}},
+  19:{name: "Name", order: 1, validate: () => {}},
+  length: 20,
 }
 
 export const finishCategories = {
-  paint: {
+  "Paint": {
     name: "Paint",
     tag: "PT",
-    attr: [0,1,2,15,16,17,] 
+    attr: [0,1,2,15,16,17,18,19] 
   },
-  wallCovering: {
+  "Wall Covering": {
     name: "Wall Covering",
     tag: "WC",
-    attr: [0,1,2,3,4,5,15,16,17,] 
+    attr: [0,1,2,3,4,5,15,16,17,18,19] 
   },
-  tile: {
+  "Tile": {
     name: "Tile",
     tag: "T",
-    attr: [0,1,2,3,4,6,7,15,16,17,] 
+    attr: [0,1,2,3,4,6,7,15,16,17,18,19] 
   },
-  grout: {
+  "Grout": {
     name: "Grout",
     tag: "G",
-    attr: [0,1,2,3,15,16,17,] 
+    attr: [0,1,2,3,15,16,17,18,19] 
   },
-  carpet: {
+  "Carpet": {
     name: "Carpet",
     tag: "CPT",
-    attr: [0,1,2,3,4,8,9,15,16,17,] 
+    attr: [0,1,2,3,4,8,9,15,16,17,18,19] 
   },
-  luxuryVinylTile: {
+  "Luxury Vinyl Tile": {
     name: "Luxury Vinyl Tile",
     tag: "LVT",
-    attr: [0,1,2,3,4,] 
+    attr: [0,1,2,3,4,15,16,17,18,19] 
   },
-  sealedConcrete: {
+  "Sealed Concrete": {
     name: "Sealed Concrete",
     tag: "SC",
-    attr: [0,1,2,10,15,16,17,] 
+    attr: [0,1,2,10,15,16,17,18,19] 
   },
-  laminate: {
+  "Laminate": {
     name: "Laminate",
     tag: "L",
-    attr: [0,1,2,3,10,15,16,17,] 
+    attr: [0,1,2,3,10,15,16,17,18,19] 
   },
-  stoneCountertops: {
+  "Stone Countertops": {
     name: "Stone Countertops",
     tag: "ST",
-    attr: [0,2,10,11,12,13,15,16,17,] 
+    attr: [0,2,10,11,12,13,15,16,17,18,19] 
   },
-  woodStain: {
+  "Wood Stain": {
     name: "Wood Stain",
     tag: "WS",
-    attr: [2,10,14,15,16,17,] 
+    attr: [2,10,14,15,16,17,18,19] 
   },
-  woodProducts: {
+  "Wood Products": {
     name: "Wood Products",
     tag: "WP",
-    attr: [0,1,2,3,4,11,14,15,16,17,] 
+    attr: [0,1,2,3,4,11,14,15,16,17,18,19] 
   },
-  metalProducts: {
+  "Metal Products": {
     name: "Metal Products",
     tag: "MP",
-    attr: [0,1,2,3,10,15,16,17,] 
+    attr: [0,1,2,3,10,15,16,17,18,19] 
   },
-  wallBase: {
+  "Wall Base": {
     name: "Wall Base",
     tag: "B",
-    attr: [0,1,3,4,11,15,16,17,] 
+    attr: [0,1,3,4,11,15,16,17,18,19] 
   },
-  trim: {
+  "Trim": {
     name: "Trim",
     tag: "TR",
-    attr: [0,1,3,4,11,15,16,17,] 
+    attr: [0,1,3,4,11,15,16,17,18,19] 
   },
-  transitionStrips: {
+  "Transition Strips": {
     name: "Transition Strips",
     tag: "TS",
-    attr: [0,1,2,3,4,10,11,15,16,17,] 
+    attr: [0,1,2,3,4,10,11,15,16,17,18,19] 
   },
-  doors: {
+  "Doors": {
     name: "Doors",
     tag: "D",
-    attr: [0,1,3,4,11,15,16,17,] 
+    attr: [0,1,3,4,11,15,16,17,18,19] 
   },
-  doorHardware: {
+  "Door Hardware": {
     name: "Door Hardware",
     tag: "DH",
-    attr: [0,2,3,15,16,17,] 
+    attr: [0,2,3,15,16,17,18,19] 
   },
-  cabinets: {
+  "Cabinets": {
     name: "Cabinets",
     tag: "CB",
-    attr: [0,2,3,15,16,17,] 
+    attr: [0,2,3,15,16,17,18,19] 
   },
-  cabinetHardware: {
+  "Cabinet Hardware": {
     name: "Cabinet Hardware",
     tag: "CH",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  mailboxes: {
+  "Mailboxes": {
     name: "Mailboxes",
     tag: "MB",
-    attr: [0,1,2,3,4,] 
+    attr: [0,1,2,3,4,17,18,19] 
   },
-  electrical: {
+  "Electrical": {
     name: "Electrical",
     tag: "E",
-    attr: [0,1,2,3,15,16,17,] 
+    attr: [0,1,2,3,15,16,17,18,19] 
   },
-  lightingFixtures: {
+  "Lighting Fixtures": {
     name: "Lighting Fixtures",
     tag: "LT",
-    attr: [0,1,2,3,4,15,16,17,] 
+    attr: [0,1,2,3,4,15,16,17,18,19] 
   },
-  electronics: {
+  "Electronics": {
     name: "Electronics",
     tag: "EL",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  plumbing: {
+  "Plumbing": {
     name: "Plumbing",
     tag: "PL",
-    attr: [0,1,2,3,4,10,11,15,16,17,] 
+    attr: [0,1,2,3,4,10,11,15,16,17,18,19] 
   },
-  restroomAccessories: {
+  "Restroom Accessories": {
     name: "Restroom Accessories",
     tag: "RA",
-    attr: [0,1,2,3,4,10,11,15,16,17,] 
+    attr: [0,1,2,3,4,10,11,15,16,17,18,19] 
   },
-  appliances: {
+  "Appliances": {
     name: "Appliances",
     tag: "AP",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  fabric: {
+  "Fabric": {
     name: "Fabric",
     tag: "FA",
-    attr: [0,1,2,3,4,5,11,15,16,17,] 
+    attr: [0,1,2,3,4,5,11,15,16,17,18,19] 
   },
-  furniture: {
+  "Furniture": {
     name: "Furniture",
     tag: "F",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  wallDecor: {
+  "Wall Decor": {
     name: "Wall Decor",
     tag: "WD",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  miscDecor: {
+  "Misc Decor": {
     name: "Misc Decor",
     tag: "MD",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  windowTreatments: {
+  "Window Treatments": {
     name: "Window Treatments",
     tag: "WT",
-    attr: [0,1,2,3,4,11,15,16,17,] 
+    attr: [0,1,2,3,4,11,15,16,17,18,19] 
   },
-  misc: {
+  "Miscellaneous": {
     name: "Miscellaneous",
     tag: "M",
-    attr: [0,1,2,3,4,15,16,17,] 
+    attr: [0,1,2,3,4,15,16,17,18,19] 
   },
  }
 
@@ -188,4 +190,4 @@ export const finishCategories = {
 
  export const allCategoriesArr = Object.keys(finishCategories).map(c => finishCategories[c].name);
 
- export const getAttrList = category => category.attr.map(a => attrArr[a]);
+ export const getAttrList = category => category.attr.map(a => attrArr[a]).sort((a,b) => a.order - b.order);

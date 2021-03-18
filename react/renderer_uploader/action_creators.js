@@ -49,7 +49,7 @@ const ActionCreator = {
       cache : false,
       contentType : file.type,
       processData : false,
-      success: callback,
+      success: (data) => callback(data),
       error: errorCallback
     });
   },
