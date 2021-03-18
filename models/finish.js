@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     attributes: DataTypes.JSON
   }, {});
   Finish.associate = function(models) {
-    // associations can be defined here
+    Finish.belongsTo(models.Project);
   };
   return Finish;
 };

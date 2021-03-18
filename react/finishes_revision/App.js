@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ActionCreators from './action_creators';
 
-import { allCategoriesArr } from '../../common/constants';
-
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import { DragDropContext } from 'react-beautiful-dnd';
 

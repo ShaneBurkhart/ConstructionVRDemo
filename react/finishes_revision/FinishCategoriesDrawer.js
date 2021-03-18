@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Label, Segment, Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react';
-import { allCategoriesArr } from '../../common/constants';
+import { allCategoryNames } from '../../common/constants';
 
 import { Droppable } from 'react-beautiful-dnd';
 
@@ -58,7 +58,7 @@ const FinishCategoriesDrawer = () => {
             <label>Click to Jump to Category</label>
             <Segment vertical>
               <CategoriesDnD
-                categoryList={allCategoriesArr}
+                categoryList={allCategoryNames}
               />
             </Segment>
           </Segment>

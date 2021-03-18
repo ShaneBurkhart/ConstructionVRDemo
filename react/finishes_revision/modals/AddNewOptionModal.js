@@ -4,7 +4,7 @@ import { Label, Popup, Input, Grid, Dropdown, Form, Icon, Button, Header, Image,
 
 import { finishCategories, getAttrList } from '../../../common/constants';
 
-import { PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
+import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
 import './AddNewOptionModal.css';
@@ -20,6 +20,14 @@ const AddNewOptionModal = ({ onClose }) => {
     setSelectedCategory(categoryName);
     const category = finishCategories[categoryName];
     setAttributes(getAttrList(category));
+  }
+
+  const handleSubmit = () => {
+    const newFinish = {
+      category: selectedCategory,
+      attributes: attributeValues,
+    }
+    ActionCreators.submit(newFinish);
   }
 
   const resetForm = () => {
@@ -71,7 +79,7 @@ const AddNewOptionModal = ({ onClose }) => {
       </Modal.Header>
       <Modal.Content>
         <Form>
-          {selectedCategory && (
+          {/* {selectedCategory && (
             <span>
               <label style={{ fontWeight: 'bold' }}>Category:</label>
               <Label style={{ marginLeft: 20 }} color="teal">
@@ -82,18 +90,14 @@ const AddNewOptionModal = ({ onClose }) => {
                 />
               </Label>
             </span>
-          )}
-          {!selectedCategory && <div style={{ minHeight: 50, width: "100%" }}>
-            <label style={{display: "block"}}>Select a category</label>
-            <Dropdown
-              button 
-              basic
-              fluid
-              text={selectedCategory || 'Select One'}
-              options={Object.keys(finishCategories).map(c => ({ key: c, text: c, value: c }))}
-              onChange={(e, {value}) => handleSelectCategory(value)}
+          )} */}
+          {/* {!selectedCategory && ( */}
+            <CategoryDropdown
+              options={Object.keys(finishCategories)}
+              selectedCategory={selectedCategory}
+              handleSelectCategory={handleSelectCategory}
             />
-          </div>}
+          {/* )} */}
           {!_.isEmpty(attributes) && attributes.map(({name}) => getAttributeInput(name))}
         </Form>
       </Modal.Content>
@@ -102,7 +106,7 @@ const AddNewOptionModal = ({ onClose }) => {
           Cancel
         </Button>
         <Button
-          onClick={() => alert('saving')}
+          onClick={handleSubmit}
           color="green"
           disabled={!selectedCategory || _.isEmpty(attributeValues)}
         >

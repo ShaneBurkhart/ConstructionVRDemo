@@ -48,6 +48,21 @@ const ActionCreator = {
     });
   },
 
+  submit: (newFinish) => {
+    $.ajax({
+      type: "POST",
+      url: `/api2/project/${PROJECT_ACCESS_TOKEN}/finishes`,
+      data: newFinish,
+      dataType: "json",
+      success: () => {
+        console.log({data})
+        // _dispatch({ type: "NEW_FINISH", data })
+        callback({ status: 200, message: `New Finish added` })
+      },
+      // error: errorCallback
+    });
+  },
+
   updateDispatch: (dispatch) => {
     _dispatch = dispatch;
   }

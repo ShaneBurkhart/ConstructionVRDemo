@@ -529,6 +529,8 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
+  # create bool if project is old or not
+
   haml :project_finishes, locals: {
     markdown: MARKDOWN,
     project: project,
