@@ -20,18 +20,20 @@ const ActionCreator = {
     })
   },
 
-  submit: (newFinish) => {
+  submit: (newFinish, onSuccess, onError) => {
     $.ajax({
       type: "POST",
       url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}`,
       data: newFinish,
       dataType: "json",
-      success: () => {
-        console.log({data})
-        // _dispatch({ type: "NEW_FINISH", data })
-        callback({ status: 200, message: `New Finish added` })
+      success: (data) => {
+        _dispatch({ type: "NEW_FINISH", data })
+        onSuccess({ status: 200, message: `New Finish added` })
       },
-      // error: errorCallback
+      error: (error) => {
+        console.error(error);
+        onError();
+      }
     });
   },
 

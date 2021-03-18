@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import _ from 'underscore';
-import { Label, Popup, Input, Grid, Dropdown, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react';
+import { Label, Popup, Input, Grid, Dimmer, Loader, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react';
 
 import { finishCategories, getAttrList } from '../../../common/constants';
 
@@ -14,6 +14,7 @@ const AddNewOptionModal = ({ onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [attributes, setAttributes] = useState([]);
   const [attributeValues, setAttributeValues] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleSelectCategory = categoryName => {
     setAttributes([]);
@@ -23,11 +24,20 @@ const AddNewOptionModal = ({ onClose }) => {
   }
 
   const handleSubmit = () => {
+    setLoading(true);
     const newFinish = {
       category: selectedCategory,
       attributes: attributeValues,
     }
-    ActionCreators.submit(newFinish);
+    const onSuccess = () => {
+      setLoading(false);
+      onClose();
+    };
+    const onError = () => {
+      setLoading(false);
+      alert('something went wrong');
+    }
+    ActionCreators.submit(newFinish, onSuccess, onError);
   }
 
   const resetForm = () => {
@@ -44,11 +54,13 @@ const AddNewOptionModal = ({ onClose }) => {
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
     const onDrop = (acceptedFiles) => {
       if (arrVal.length < 2) {
-        (acceptedFiles || []).forEach(file => {
+        (acceptedFiles || []).forEach((file) => {
+          setLoading(true)
           ActionCreators.presignedURL(file, (data) => {
             ActionCreators.uploadFile(file, data.presignedURL, () => {
               arrVal.push(data.awsURL);
               setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }));
+              setLoading(false);
             });
           });
         });
@@ -79,25 +91,11 @@ const AddNewOptionModal = ({ onClose }) => {
       </Modal.Header>
       <Modal.Content>
         <Form>
-          {/* {selectedCategory && (
-            <span>
-              <label style={{ fontWeight: 'bold' }}>Category:</label>
-              <Label style={{ marginLeft: 20 }} color="teal">
-                {selectedCategory}
-                <Popup
-                  content="Clearing the Category will reset the form"
-                  trigger={ <Icon name='delete' onClick={resetForm} /> }
-                />
-              </Label>
-            </span>
-          )} */}
-          {/* {!selectedCategory && ( */}
-            <CategoryDropdown
-              options={Object.keys(finishCategories)}
-              selectedCategory={selectedCategory}
-              handleSelectCategory={handleSelectCategory}
-            />
-          {/* )} */}
+          <CategoryDropdown
+            options={Object.keys(finishCategories)}
+            selectedCategory={selectedCategory}
+            handleSelectCategory={handleSelectCategory}
+          />
           {!_.isEmpty(attributes) && attributes.map(({name}) => getAttributeInput(name))}
         </Form>
       </Modal.Content>
@@ -108,11 +106,12 @@ const AddNewOptionModal = ({ onClose }) => {
         <Button
           onClick={handleSubmit}
           color="green"
-          disabled={!selectedCategory || _.isEmpty(attributeValues)}
+          disabled={loading || !selectedCategory || _.isEmpty(attributeValues)}
         >
           Save
         </Button>
       </Modal.Actions>
+      {loading && <Dimmer active inverted><Loader /></Dimmer>}
     </Modal>
   );
 }
