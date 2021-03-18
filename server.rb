@@ -151,7 +151,7 @@ post '/api/temp_upload/presign' do
   content_type "application/json"
   {
     presignedURL: url,
-    awsURL: "https://finish-vision-vr.s3-us-west-2.amazonaws.com/#{key}"
+    awsURL: "https://#{ENV["BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
   }.to_json
 end
 
