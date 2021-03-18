@@ -54,11 +54,9 @@ def find_project_by_admin_access_token(admin_access_token)
   return records.first
 end
 
-if ENV["NODE_ENV"] == "development"
-  get '/' do
-    projects = Finishes::Project.all
-    haml :projects, locals: { projects: projects }
-  end
+
+get '/' do
+  redirect "http://#{request.env["HTTP_HOST"]}/app"
 end
 
 renderer_app_url_uuid = "83f75fdc-975b-4a12-a183-360a20038ac1"
@@ -760,20 +758,19 @@ post '/project/:access_token/screenshot/feedback' do
   return "Not found" if unit_version.nil? or !unit_version.unit.belongs_to_project?(project)
   return "Not found" if unit_version["Pano Versions"].nil? or unit_version["Pano Versions"].length < 1
 
-  feedback = Feedback.new(
+  feedback = Feedback.create(
     "Pano Version" => [unit_version["Pano Versions"].first],
     "Notes" => notes,
     "Is Fix" => true,
     "Screenshot" => [{ url: image_url }],
   )
 
-  feedback.create
 
   fields = feedback.fields
   fields["Notes HTML"] = feedback.notes_html
 
   # Send notification to slack
-  send_slack_message_to_rendering_channel(create_feedback_notification_message(feedback))
+  send_slack_message_to_rendering_channel(create_feedback_notification_message(feedback, unit_version))
 
   content_type :json
   return fields.to_json
@@ -801,6 +798,7 @@ post '/project/:access_token/pano/:id/feedback' do
 
   feedback = Feedback.new(
     "Pano Version" => [pano_version.id],
+    "Unit Version Id" => unit_version_id,
     "Notes" => params["notes"],
     "View Parameters" => params["viewParameters"],
     "Is Fix" => is_fix == true ? true : nil

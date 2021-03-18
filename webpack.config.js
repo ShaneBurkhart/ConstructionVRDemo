@@ -5,7 +5,8 @@ module.exports = {
   entry: {
     finishes_app: "./react/finishes/index.js",
     renderer_uploader_app: "./react/renderer_uploader/index.js",
-    finishes_app_revision: "./react/finishes_revision/index.js"
+    finishes_app_revision: "./react/finishes_revision/index.js",
+    projects_dashboard_app: "./react/projects_dashboard/index.js"
   },
   // entry: "./react/index.js",
   mode: "development",
@@ -23,7 +24,20 @@ module.exports = {
         options: { presets: ["@babel/env"] }
       },
       {
+        test: /\.module\.css$/,
+        use: ["style-loader", {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 1,
+            modules: {
+              localIdentName: '[local]-[name]--[hash:base64:5]',
+            },
+          }
+        }]
+      },
+      {
         test: /\.css$/,
+        exclude: /\.module\.css/,
         use: ["style-loader", "css-loader"]
       },
       {

@@ -1,5 +1,14 @@
-.container
-  %h1 All Projects
-  - projects.each do |project|
-    %p
-      %a{ href: "/admin/login/#{project.fields["Admin Access Token"]}" }= project["Name"]
+#admin-dashboard-app
+
+:javascript
+  var PROJECTS = #{projects};
+  console.log(PROJECTS)
+
+%script(src="/dist/admin_dashboard_app.js?v=04282001")
+ 
+
+-# .container
+-#   %h1 All Projects
+-#   - projects.each do |project|
+-#     %p
+-#       %a{ href: "/admin/login/#{project.fields["Admin Access Token"]}" }= project["Name"]

@@ -1,0 +1,28 @@
+extends no_site_header_layout.pug
+
+block content
+    .small-container
+        if err
+            .ui.middle.aligned.center.aligned.grid
+                .column
+                    .ui
+                        p.ui.red.header= err
+        .ui.middle.aligned.center.aligned.grid
+            .column
+                form.ui.form(action="/app/invite-user-link" method="post")
+                    .ui.segment
+                        input(type="hidden" name="email_signup_token" value=user.emailSignupToken)
+
+                        .field
+                            label Username
+                            input(type="text" value=user.username disabled)
+
+                        .field
+                            label Email
+                            input(type="text" value=user.email disabled)
+
+                        .field
+                            label Password
+                            input(type="password" name="password" placeholder="********")
+
+                        button.ui.fluid.large.teal.submit.button(type="submit") Sign Up
