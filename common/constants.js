@@ -154,4 +154,25 @@ export const finishCategories = {
 
  export const allCategoryNames = Object.keys(finishCategories);
 
+ export const getCategoryTag = category => finishCategories[category].tag;
+
  export const getAttrList = category => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute));
+
+ export const getAttrGridRows = (attrList=[]) => {
+  let remainingWidth = 16;
+  const attrRows = [];
+  let row = [];
+
+  for (let i = 0; i < attrList.length; i++){
+    row.push(attrList[i])
+    remainingWidth = remainingWidth - attrList[i].width;
+    if (!attrList[i+1]) {
+      attrRows.push(row);
+    } else if (attrList[i+1].width > remainingWidth) {
+      attrRows.push(row);
+      remainingWidth = 16;
+      row = [];
+    }
+  }
+  return attrRows;
+}

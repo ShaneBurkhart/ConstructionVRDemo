@@ -2,19 +2,22 @@ import React from 'react';
 import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 
 import StyledDropzone from "../../components/StyledDropzone";
+import styles from './AddEditFinishModals.module.css';
 
 export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory}) => (
-  <div style={{ minHeight: 50, width: "100%" }}>
-    <label style={{display: "block"}}>Select a category</label>
+  <>
+    <label className={styles.uiFormFieldLabel}>Select a category</label>
     <Dropdown
       button 
       basic
       fluid
+      scrolling
+      upward={false}
       text={selectedCategory || 'Select One'}
       options={options.map(c => ({ key: c, text: c, value: c }))}
       onChange={(e, {value}) => handleSelectCategory(value)}
     />
-  </div>
+  </>
 );
 
 export const PriceInput = ({ value, onChange }) => (

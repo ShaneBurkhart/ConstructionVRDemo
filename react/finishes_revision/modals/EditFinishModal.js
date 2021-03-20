@@ -3,50 +3,47 @@ import _ from 'underscore';
 import { Label, Popup, Input, Grid, Dimmer, Loader, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react';
 
 import { finishCategories, getAttrList, getAttrGridRows } from '../../../common/constants';
-
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
 import './AddNewOptionModal.css';
 
 
-const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
-  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || '');
+const EditFinishModal = ({ onClose, finishDetails: { category, orderNumber, attributes} }) => {
+  const [selectedCategory, setSelectedCategory] = useState(category);
   const [attrRows, setAttrRows] = useState([]);
-  const [attributeValues, setAttributeValues] = useState({});
+  const [attributeValues, setAttributeValues] = useState(attributes);
   const [loading, setLoading] = useState(false);
 
   const handleSelectCategory = categoryName => {
     setAttrRows([]);
     setSelectedCategory(categoryName);
-    const newCategoryObj = finishCategories[categoryName];
-    const attrList = (getAttrList(newCategoryObj));
-    setAttrRows(getAttrGridRows(attrList));
+    const newCategory = finishCategories[categoryName];
+    setAttrRows(getAttrList(newCategory));
   }
 
   useEffect(() => {
-    if (preselectedCategory) {
-      const categoryObj = finishCategories[preselectedCategory];
-      const attrList = getAttrList(categoryObj);
-      setAttrRows(getAttrGridRows(attrList));
-    }
+    const categoryObj = finishCategories[category];
+    const attrList = getAttrList(categoryObj);
+    setAttrRows(getAttrGridRows(attrList));
   }, []);
 
   const handleSubmit = () => {
-    setLoading(true);
-    const newFinish = {
-      category: selectedCategory,
-      attributes: attributeValues,
-    }
-    const onSuccess = () => {
-      setLoading(false);
-      onClose();
-    };
-    const onError = () => {
-      setLoading(false);
-      alert('something went wrong');
-    }
-    ActionCreators.submit(newFinish, onSuccess, onError);
+    console.log('ok')
+    // setLoading(true);
+    // const newFinish = {
+    //   category: selectedCategory,
+    //   attributes: attributeValues,
+    // }
+    // const onSuccess = () => {
+    //   setLoading(false);
+    //   onClose();
+    // };
+    // const onError = () => {
+    //   setLoading(false);
+    //   alert('something went wrong');
+    // }
+    // ActionCreators.submit(newFinish, onSuccess, onError);
   }
 
   const resetForm = () => {
@@ -86,6 +83,7 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
     return attrInput;
   }
 
+
   return (
     <Modal
       closeIcon
@@ -95,7 +93,7 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
       className="add-new-option-modal"
     >
       <Modal.Header>
-        Add New Finish
+        Edit Finish
       </Modal.Header>
       <Modal.Content>
         <Form>
@@ -138,4 +136,4 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
   );
 }
 
-export default AddNewOptionModal;
+export default EditFinishModal;

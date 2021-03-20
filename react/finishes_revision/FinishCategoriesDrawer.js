@@ -1,40 +1,12 @@
 import React, { useState } from 'react';
-import { Label, Segment, Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react';
-import { allCategoryNames } from '../../common/constants';
+import { Segment, Menu, Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react';
 
-import { Droppable } from 'react-beautiful-dnd';
-
-import FinishCategoryModalCategory from './FinishCategoryModalCategory';
 import AddNewOptionModal from './modals/AddNewOptionModal';
-// import ActionCreators from './action_creators';
 
 import './FinishCategoriesDrawer.css';
 
-const CategoriesDnD = ({ categoryList }) => {
-  const _droppableId = Math.random().toString(36).substring(2, 15);
-  return (
-    <Droppable droppableId={_droppableId} type="CATEGORY">
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.droppableProps}
-        >
-          {categoryList.map((c, i) => (
-            <FinishCategoryModalCategory
-              key={c}
-              index={i}
-              category={c}
-            />
-          ))}
-        {provided.placeholder}
-        </div>
-      )}
-    </Droppable>
-  );
-}
-
-const FinishCategoriesDrawer = () => {
-  const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(true);
+const FinishCategoriesDrawer = ({ activeCategoryMap }) => {
+  const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
   const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
   
   return (
@@ -55,12 +27,18 @@ const FinishCategoriesDrawer = () => {
             </Button>
           </Segment>
           <Segment vertical className="categories-section">
-            <label>Click to Jump to Category</label>
-            <Segment vertical>
-              <CategoriesDnD
-                categoryList={allCategoryNames}
-              />
-            </Segment>
+            <Menu text vertical>
+              <Menu.Item header>Click to Jump to Category</Menu.Item>
+              {(Object.keys(activeCategoryMap) || []).map(category => (
+                <Menu.Item
+                  key={category}
+                  name={category}
+                  content={`${category} (${activeCategoryMap[category]})`}
+                  active={false}
+                  onClick={() => {}}
+                />
+              ))}
+            </Menu>
           </Segment>
       </div>
       {showAddNewOptionModal && (
