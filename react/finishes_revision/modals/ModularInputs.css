@@ -1,4 +1,4 @@
-.add-new-option-modal .image-placeholder {
+.field .image-placeholder {
   background-color: #fafafa;
   padding: 5px 5px;
   border: 2px dashed #ccc;
@@ -10,8 +10,17 @@
   cursor: pointer;
 }
 
-.add-new-option-modal .image-placeholder:hover {
+.field .image-placeholder:hover {
   color: #40A819;
   border-color: #40A819;
 }
 
+
+.uiFormFieldLabel {
+  display: block;
+  margin: 0 0 .28571429rem 0;
+  color: rgba(0,0,0,.87);
+  font-size: .92857143em;
+  font-weight: 700;
+  text-transform: none;
+}

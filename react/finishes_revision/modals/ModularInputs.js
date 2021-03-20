@@ -2,11 +2,11 @@ import React from 'react';
 import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 
 import StyledDropzone from "../../components/StyledDropzone";
-import styles from './AddEditFinishModals.module.css';
+import './ModularInputs.css';
 
 export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory}) => (
   <>
-    <label className={styles.uiFormFieldLabel}>Select a category</label>
+    <label className="uiFormFieldLabel">Select a category</label>
     <Dropdown
       button 
       basic

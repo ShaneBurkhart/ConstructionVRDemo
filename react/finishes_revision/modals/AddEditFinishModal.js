@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'underscore';
-import { Label, Popup, Input, Grid, Dimmer, Loader, Form, Icon, Button, Header, Image, Modal } from 'semantic-ui-react';
+import { Grid, Dimmer, Loader, Form, Button, Modal } from 'semantic-ui-react';
 
 import { finishCategories, getAttrList, getAttrGridRows } from '../../../common/constants';
-
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
-import './AddNewOptionModal.css';
 
-
-const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
-  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || '');
+const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} }) => {
+  const { category='', attributes={}, id=null} = finishDetails;
+  
+  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || category);
   const [attrRows, setAttrRows] = useState([]);
-  const [attributeValues, setAttributeValues] = useState({});
+  const [attributeValues, setAttributeValues] = useState(attributes);
   const [loading, setLoading] = useState(false);
+
+  const isNew = id === null;
 
   const handleSelectCategory = categoryName => {
     setAttrRows([]);
@@ -25,8 +26,8 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
   }
 
   useEffect(() => {
-    if (preselectedCategory) {
-      const categoryObj = finishCategories[preselectedCategory];
+    if (selectedCategory) {
+      const categoryObj = finishCategories[selectedCategory];
       const attrList = getAttrList(categoryObj);
       setAttrRows(getAttrGridRows(attrList));
     }
@@ -46,15 +47,9 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
       setLoading(false);
       alert('something went wrong');
     }
-    ActionCreators.submit(newFinish, onSuccess, onError);
+    if (isNew) return ActionCreators.submit(newFinish, onSuccess, onError);
+    return ActionCreators.update(({id, newFinish}));
   }
-
-  const resetForm = () => {
-    setAttrRows([]);
-    setAttributeValues({});
-    setSelectedCategory('');
-  }
-
 
   const getAttributeInput = (attrName) => {
     const val = attributeValues[attrName] || '';
@@ -92,10 +87,9 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
       closeOnDimmerClick={false}
       open={true}
       onClose={onClose}
-      className="add-new-option-modal"
     >
       <Modal.Header>
-        Add New Finish
+        {isNew ? "Add New Finish" : "Edit Finish"}
       </Modal.Header>
       <Modal.Content>
         <Form>
@@ -111,7 +105,7 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
             </Grid.Row>
             {!_.isEmpty(attrRows) && attrRows.map(row => (
               <Grid.Row key={row.reduce((a,b) => a + b.name, '')} columns={row.length}>
-                {row.map((attr, i) => (
+                {row.map(attr => (
                   <Grid.Column key={attr.name}>
                     {getAttributeInput(attr.name)}
                   </Grid.Column>
@@ -138,4 +132,4 @@ const AddNewOptionModal = ({ onClose, preselectedCategory='' }) => {
   );
 }
 
-export default AddNewOptionModal;
+export default AddEditFinishModal;

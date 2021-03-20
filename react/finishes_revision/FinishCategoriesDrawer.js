@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Segment, Menu, Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react';
 
-import AddNewOptionModal from './modals/AddNewOptionModal';
+import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import './FinishCategoriesDrawer.css';
 
@@ -42,9 +42,7 @@ const FinishCategoriesDrawer = ({ activeCategoryMap }) => {
           </Segment>
       </div>
       {showAddNewOptionModal && (
-        <AddNewOptionModal 
-          onClose={toggleShowAddNewOptionModal}
-        />
+        <AddEditFinishModal onClose={toggleShowAddNewOptionModal} />
       )}
     </>
   );

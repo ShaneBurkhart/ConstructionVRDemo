@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import EditFinishModal from './modals/EditFinishModal';
+import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import styles from './FinishCard.module.css';
 
@@ -28,7 +28,7 @@ const FinishCard = ({ tag, finishDetails }) => {
           ))}
         </div>
       </div>
-      {showEditFinishModal && <EditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
+      {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
     </>
   )
 }
