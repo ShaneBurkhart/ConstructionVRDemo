@@ -1,4 +1,4 @@
-.admin-mode .selection {
+/* .admin-mode .selection {
   cursor: pointer;
 }
 
@@ -18,14 +18,31 @@
 
 .selection .cell-details .label .dropdown:hover {
   cursor: pointer !important;
-}
+} */
 
 .finishCard {
   display: flex;
   justify-content: space-between;
-  height: 200px;
-  padding: 1%;
-  margin: 1%;
+  min-height: 180px;
+  padding: 3px 5px;
+  border: 1px solid #bbb;
+  background-color: #ffffff;
+}
+
+.adminMode .finishCard:hover {
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+/* .detailsSection {
+  diplay: 
+} */
+
+.cellHeading {
+  composes: spaceBetween from '../universalStyles/flexStyles.module.css';
+  line-height: 1.2;
+  font-weight: bold;
+  min-width: 60px;
 }
 
 .imageSection {

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import styles from './FinishCard.module.css';
+import flex from '../universalStyles/flexStyles.module.css';
 
 const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
+  const isAdmin = useSelector(state => state.adminMode);
   const { orderNumber, attributes } = finishDetails;
   const [expanded, setExpanded] = useState(shouldExpand.status);
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
@@ -22,13 +25,15 @@ const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
 
   const imgArr = attributes["Images"] || [];
   return (
-    <>
+    <article className={`${isAdmin ? styles.adminMode : ''}`}>
       <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
-        <div className="details-section">
-          <span className="order-num">
-            {`${tag}-${orderNumber+1}`}
-          </span>
-          <h3>{attributes["Name"]}</h3>
+        <div className={styles.detailsSection}>
+          <div className={flex.spaceBetween}>
+            <span className={styles.cellHeading}>
+              {`${tag}-${orderNumber+1}`}
+            </span>
+            <span className={styles.cellHeading}>{attributes["Name"]}</span>
+          </div>
           <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
           {expanded && (
             <div>Hey I'm expanded</div>
@@ -43,7 +48,7 @@ const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
         </div>
       </div>
       {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
-    </>
+    </article>
   )
 }
 
