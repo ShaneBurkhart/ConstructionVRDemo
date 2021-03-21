@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import styles from './FinishCard.module.css';
 
-const FinishCard = ({ tag, finishDetails }) => {
+const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
   const { orderNumber, attributes } = finishDetails;
+  const [expanded, setExpanded] = useState(shouldExpand.status);
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
+
+  useEffect(() => {
+    setExpanded(shouldExpand.status);
+  }, [shouldExpand.clicked]);
+
+  const toggleExpand = (e) => {
+    e.stopPropagation();
+    setExpanded(!expanded)
+  };
 
   const toggleShowEditFinishModal = () => setShowEditFinishModal(!showEditFinishModal);
 
@@ -19,6 +29,10 @@ const FinishCard = ({ tag, finishDetails }) => {
             {`${tag}-${orderNumber+1}`}
           </span>
           <h3>{attributes["Name"]}</h3>
+          <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+          {expanded && (
+            <div>Hey I'm expanded</div>
+          )}
         </div>
         <div className={styles.imageSection}>
           {imgArr.map((imgUrl) => (
