@@ -33,9 +33,9 @@ const FinishCategoriesDrawer = ({ activeCategoryMap }) => {
                 <Menu.Item
                   key={category}
                   name={category}
+                  href={`#${category}`}
                   content={`${category} (${activeCategoryMap[category]})`}
                   active={false}
-                  onClick={() => {}}
                 />
               ))}
             </Menu>
