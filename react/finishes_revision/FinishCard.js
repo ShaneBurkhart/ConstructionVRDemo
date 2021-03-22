@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
+import { getAttrList, finishCategories } from '../../common/constants';
+
 import AddEditFinishModal from './modals/AddEditFinishModal';
+import AdminControls from '../components/AdminControls';
 
 import styles from './FinishCard.module.css';
 
-const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
+const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
-  const { orderNumber, attributes } = finishDetails;
+  const { id, orderNumber, attributes, category } = finishDetails;
   const [expanded, setExpanded] = useState(shouldExpand.status);
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
 
@@ -24,12 +27,15 @@ const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
 
   const toggleShowEditFinishModal = () => setShowEditFinishModal(!showEditFinishModal);
 
+  const attrList = getAttrList(finishCategories[category]).map(a => a.name);
+
   const imgArr = attributes["Images"] || [];
   return (
     <article className={`${isAdmin ? styles.adminMode : ''}`}>
       <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
         <div className={styles.detailsSection}>
           <div className={styles.detailsHeadingContainer}>
+            {isAdmin && <AdminControls dragHandleProps={{yes: 'ok'}} onClickTrash={() => onDelete(id)} />}
             <span className={styles.cellHeading}>
               {`${tag}${orderNumber+1}`}
             </span>
@@ -40,12 +46,12 @@ const FinishCard = ({ tag, finishDetails, shouldExpand }) => {
             {expanded && (
               <table className={styles.detailsTable}>
                 <tbody>
-                  {(Object.keys(attributes).filter(a => !detailsExclude.includes(a)) || []).map(a => (
+                  {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
                       <tr key={a}>
                         <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
                         {a === "Product URL" ? (
                           <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
-                          <td>{a === "Price" ? "$" : ""}{attributes[a]}</td>
+                          <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
                         )}
                     </tr>
                   ))}

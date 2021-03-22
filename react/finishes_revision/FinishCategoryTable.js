@@ -9,11 +9,13 @@ import FinishCard from './FinishCard';
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import styles from "./FinishCategoryTable.module.css";
+import ActionCreator from './action_creators';
 
 const FinishCategoriesTable = ({ category, finishes }) => {
   const [expanded, setExpanded] = useState(true);
   const [expandAllCards, setExpandAllCards] = useState({ status: false, clicked: 0 }); 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isAdmin = useSelector(state => state.adminMode);
 
@@ -25,6 +27,13 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
   const handleExpandAllCards = () => setExpandAllCards(prev => ({ status: true, clicked: ++prev.clicked }));
+
+  const handleDeleteCard = finishId => {
+    setLoading(true);
+    const onSuccess = () => setLoading(false);
+    const onError = () => setLoading(false);
+    ActionCreator.deleteFinish(finishId, onSuccess, onError);
+  }
   
 
   return (
@@ -52,6 +61,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           tag={tag}
           finishDetails={f}
           shouldExpand={expandAllCards}
+          onDelete={handleDeleteCard}
         />
       ))}
       {showAddNewModal && <AddEditFinishModal preselectedCategory={category} onClose={toggleShowAddNewModal} />}

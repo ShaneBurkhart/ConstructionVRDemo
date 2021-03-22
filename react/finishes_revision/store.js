@@ -7,6 +7,8 @@ const _initialState = {
   modals: {},
 };
 
+let unchangedFinishes;
+
 
 const todos = (state = {}, action) => {
   switch (action.type) {
@@ -15,21 +17,24 @@ const todos = (state = {}, action) => {
       return { ...state, adminMode, finishes };
     
     case "NEW_FINISH":
-      return { ...state, finishes: [...state.finishes, action.data]}
+      return { ...state, finishes: [...state.finishes, action.data]};
     
     case "UPDATE_FINISH":
-      const unchangedFinishes = [...state.finishes.filter(f => f.id !== action.data.id)]
-      return { ...state, finishes: [...unchangedFinishes, action.data]}
-
+      unchangedFinishes = [...state.finishes.filter(f => f.id !== action.data.id)];
+      return { ...state, finishes: [...unchangedFinishes, action.data]};
+    
+    case "DELETE_FINISH":
+      unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
+      return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
 
     case 'API_ERROR':
       return { ...state, apiError: {
         status: action.data ? action.data.status : 404,
         // message: action.data.responseJSON.msg
         message: "API ERROR"
-      }}
+      }};
     default:
-      return state
+      return state;
   }
 }
 

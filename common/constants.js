@@ -1,4 +1,5 @@
 const finishAttributes = [
+  // TO DO : add 'format' func
   {name: "Manufacturer", width: 5, validate: () => {}},
   {name: "Product Number", width: 5, validate: () => {}},
   {name: "Color", width: 5, validate: () => {}},

@@ -55,6 +55,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const getAttributeInput = (attrName) => {
     const val = attributeValues[attrName] || '';
     const arrVal = attributeValues[attrName] || [];
+    // add Formatter function pass value for price/url/etc, w/ default passing thru
     const onChange = (e, {value}) => setAttributeValues(prev => ({ ...prev, [attrName]: value }));
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
     const onDrop = (acceptedFiles) => {
@@ -105,9 +106,9 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
               </Grid.Column>
             </Grid.Row>
             {!_.isEmpty(attrRows) && attrRows.map(row => (
-              <Grid.Row key={row.reduce((a,b) => a + b.name, '')} columns={row.length}>
+              <Grid.Row key={row.reduce((a,b) => a + b.name, '')}>
                 {row.map(attr => (
-                  <Grid.Column key={attr.name}>
+                  <Grid.Column key={attr.name} width={attr.width}>
                     {getAttributeInput(attr.name)}
                   </Grid.Column>
                 ))}

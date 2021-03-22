@@ -3,6 +3,12 @@ const m = require("../middleware.js");
 const models = require("../../models/index.js");
 const { uuid } = require('uuidv4');
 
+const getOrderNumber = (num, list) => {
+  if (num < 0) return 0;
+  if (num > list.length) return list.length;
+  return num;
+}
+
 module.exports = (app) => {
   
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
@@ -49,7 +55,6 @@ module.exports = (app) => {
   app.put("/api2/v2/finishes/:project_access_token/:finish_id", async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
     const finishId = req.params["finish_id"];
-    console.log({finishId});
     if (!finishId) return res.status(400).send("Finish ID required");
     
     const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
@@ -59,13 +64,38 @@ module.exports = (app) => {
     if (!finish) return res.status(404).send("Finish not found");
 
     const { category, attributes } = req.body;
-    console.log({category, attributes});
     try {
       const updatedFinish = await finish.update({
         category,
         attributes,
       });
       return res.json(updatedFinish);
+    } catch(error){
+      console.log(error)
+      return res.status(422).send("Could not update Finish")
+    }
+  });
+  
+  app.delete("/api2/v2/finishes/:project_access_token/:finish_id", async (req, res) => {
+    const projectAccessToken = req.params["project_access_token"];
+    const finishId = req.params["finish_id"];
+    if (!finishId) return res.status(400).send("Finish ID required");
+    
+    const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+    if (!project) return res.status(404).send("Project not found");
+
+    const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
+    if (!finish) return res.status(404).send("Finish not found");
+
+    const category = finish.category
+
+    try {
+      await finish.destroy();
+      const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category }});
+      const promisedNewOrderedList = finishList.map((f, i) => f.update({ orderNumber: i }))
+      const newOrderedFinishes = await Promise.all(promisedNewOrderedList);
+
+      return res.json({category, newOrderedFinishes});
     } catch(error){
       console.log(error)
       return res.status(422).send("Could not update Finish")
@@ -86,11 +116,6 @@ module.exports = (app) => {
     const { orderNumber } = req.body;
     if (!orderNumber || isNaN(Number(orderNumber))) return res.status(400).send("A valid order number is required");
 
-    const getOrderNumber = (num, list) => {
-      if (num < 0) return 0;
-      if (num > list.length) return list.length;
-      return num;
-    }
 
     try {
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});

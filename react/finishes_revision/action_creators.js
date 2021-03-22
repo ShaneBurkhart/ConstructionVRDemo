@@ -10,7 +10,6 @@ const ActionCreator = {
       url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}`,
       dataType: "json",
       success: (data) => {
-        console.log({data})
         _dispatch({ type: "LOAD", data: data });
       },
       error: (data) => {
@@ -46,6 +45,23 @@ const ActionCreator = {
       success: (data) => {
         _dispatch({ type: "UPDATE_FINISH", data })
         onSuccess({ status: 200, message: `Finish ${finish.Name} updated` })
+      },
+      error: (error) => {
+        console.error(error);
+        onError();
+      }
+    });
+  },
+
+  deleteFinish: (finishId, onSuccess, onError) => {
+    $.ajax({
+      type: "DELETE",
+      url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}/${finishId}`,
+      data: finishId,
+      dataType: "json",
+      success: (data) => {
+        _dispatch({ type: "DELETE_FINISH", data })
+        onSuccess({ status: 200, message: `Finish id#${data} deleted` })
       },
       error: (error) => {
         console.error(error);
