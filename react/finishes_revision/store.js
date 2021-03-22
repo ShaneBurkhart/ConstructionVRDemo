@@ -14,8 +14,12 @@ const todos = (state = {}, action) => {
       const { adminMode, finishes } = action.data;
       return { ...state, adminMode, finishes };
     
-      case "NEW_FINISH":
+    case "NEW_FINISH":
       return { ...state, finishes: [...state.finishes, action.data]}
+    
+    case "UPDATE_FINISH":
+      const unchangedFinishes = [...state.finishes.filter(f => f.id !== action.data.id)]
+      return { ...state, finishes: [...unchangedFinishes, action.data]}
 
 
     case 'API_ERROR':

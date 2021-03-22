@@ -35,7 +35,8 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
 
   const handleSubmit = () => {
     setLoading(true);
-    const newFinish = {
+    const finish = {
+      id,
       category: selectedCategory,
       attributes: attributeValues,
     }
@@ -47,8 +48,8 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       setLoading(false);
       alert('something went wrong');
     }
-    if (isNew) return ActionCreators.submit(newFinish, onSuccess, onError);
-    return ActionCreators.update(({id, newFinish}));
+    if (isNew) return ActionCreators.submitNewFinish(finish, onSuccess, onError);
+    return ActionCreators.updateFinish(finish, onSuccess, onError);
   }
 
   const getAttributeInput = (attrName) => {

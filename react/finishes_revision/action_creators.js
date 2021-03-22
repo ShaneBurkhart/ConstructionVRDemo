@@ -20,7 +20,7 @@ const ActionCreator = {
     })
   },
 
-  submit: (newFinish, onSuccess, onError) => {
+  submitNewFinish: (newFinish, onSuccess, onError) => {
     $.ajax({
       type: "POST",
       url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}`,
@@ -29,6 +29,23 @@ const ActionCreator = {
       success: (data) => {
         _dispatch({ type: "NEW_FINISH", data })
         onSuccess({ status: 200, message: `New Finish added` })
+      },
+      error: (error) => {
+        console.error(error);
+        onError();
+      }
+    });
+  },
+
+  updateFinish: (finish, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}/${finish.id}`,
+      data: finish,
+      dataType: "json",
+      success: (data) => {
+        _dispatch({ type: "UPDATE_FINISH", data })
+        onSuccess({ status: 200, message: `Finish ${finish.Name} updated` })
       },
       error: (error) => {
         console.error(error);

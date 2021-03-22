@@ -29,7 +29,7 @@ const FinishCategoriesDrawer = ({ activeCategoryMap }) => {
           <Segment vertical className="categories-section">
             <Menu text vertical>
               <Menu.Item header>Click to Jump to Category</Menu.Item>
-              {(Object.keys(activeCategoryMap) || []).map(category => (
+              {(Object.keys(activeCategoryMap).sort() || []).map(category => (
                 <Menu.Item
                   key={category}
                   name={category}

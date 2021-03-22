@@ -46,7 +46,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           </h2>
         )}
       </header>
-      {expanded && finishes.map(f => (
+      {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map(f => (
         <FinishCard
           key={f.id}
           tag={tag}

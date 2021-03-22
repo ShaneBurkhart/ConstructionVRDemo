@@ -44,7 +44,7 @@ const App = () => {
       <main>
         {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} />}
         <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
-          {(Object.keys(activeCategoryMap) || []).map(category => (
+          {(Object.keys(activeCategoryMap).sort() || []).map(category => (
             <FinishCategoryTable
               key={category}
               category={category}
