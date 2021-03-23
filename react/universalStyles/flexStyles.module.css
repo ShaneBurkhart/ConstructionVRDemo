@@ -27,3 +27,13 @@
   display: flex;
   justify-content: space-evenly;
 }
+
+.flexEnd {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.flexStart {
+  display: flex;
+  justify-content: flex-start;
+}

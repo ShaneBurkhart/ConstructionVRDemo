@@ -5,8 +5,10 @@ import { getAttrList, finishCategories } from '../../common/constants';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
+import FocusEditableInput from '../components/FocusEditableInput';
 
 import styles from './FinishCard.module.css';
+import ActionCreator from './action_creators';
 
 const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
@@ -27,19 +29,32 @@ const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
 
   const toggleShowEditFinishModal = () => setShowEditFinishModal(!showEditFinishModal);
 
+  const handleNameChange = (val) => {
+    const newAttributes = { ...finishDetails.attributes, "Name": val }
+    const onSuccess = () => {};
+    const onError = () => console.error('error');
+    ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError)
+  }
+
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
   const imgArr = attributes["Images"] || [];
   return (
     <article className={`${isAdmin ? styles.adminMode : ''}`}>
       <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
+        {isAdmin && <AdminControls dragHandleProps={{yes: 'ok'}} onClickTrash={() => onDelete(id)} />}
         <div className={styles.detailsSection}>
-          <div className={styles.detailsHeadingContainer}>
-            {isAdmin && <AdminControls dragHandleProps={{yes: 'ok'}} onClickTrash={() => onDelete(id)} />}
+          <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
             <span className={styles.cellHeading}>
               {`${tag}${orderNumber+1}`}
             </span>
-            <span className={styles.cellHeading}>{attributes["Name"]}</span>
+            <div className={styles.cellHeading}>
+              <FocusEditableInput
+                editable={isAdmin}
+                value={attributes["Name"]}
+                onUpdate={handleNameChange}
+              />
+            </div>
           </div>
           <div className={styles.detailsTableContainer}>
             <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>

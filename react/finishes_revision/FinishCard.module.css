@@ -22,7 +22,6 @@
 
 .finishCard {
   display: flex;
-  justify-content: space-between;
   min-height: 180px;
   padding: 1%;
   border: 1px solid #bbb;
@@ -34,6 +33,10 @@
   background-color: #f0f0f0;
 }
 
+.detailsSection {
+  flex-grow: 2;
+}
+
 .cellHeading {
   composes: spaceBetween from '../universalStyles/flexStyles.module.css';
   line-height: 1.2;
@@ -42,11 +45,11 @@
 }
 
 .detailsHeadingContainer {
-  composes: spaceBetween from '../universalStyles/flexStyles.module.css';
+  display: flex;
 }
 
 .detailsTableContainer {
-  margin: 4% 0;
+  margin: 1% 0;
 }
 
 .detailsTable {
@@ -54,15 +57,14 @@
 }
 
 .imageSection {
-  composes: spaceBetween from '../universalStyles/flexStyles.module.css';
+  composes: flexEnd from '../universalStyles/flexStyles.module.css';
   align-items: center;
+  flex-grow: 2;
 }
 
 .imageSectionItem {
+  composes: center from '../universalStyles/flexStyles.module.css';
   padding: 1%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .finishCardImg {
