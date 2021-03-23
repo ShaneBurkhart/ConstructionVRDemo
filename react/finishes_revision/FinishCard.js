@@ -12,7 +12,7 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
+const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
   const [expanded, setExpanded] = useState(shouldExpand.status);
@@ -48,10 +48,17 @@ const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
           className={`${isAdmin ? styles.adminMode : ''}`}
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
         >
-          <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
-            {isAdmin && <AdminControls dragHandleProps={provided.dragHandleProps} onClickTrash={() => onDelete(id)} />}
+          <div 
+            className={`table-row ${styles.finishCard} ${snapshot.isDragging ? styles.draggingState : ''}`} 
+            onClick={toggleShowEditFinishModal}
+          >
+            {isAdmin && (
+              <AdminControls
+                dragHandleProps={provided.dragHandleProps}
+                onClickTrash={() => onDelete(id)}
+              />
+            )}
             <div className={styles.detailsSection}>
               <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
                 <span className={styles.cellHeading}>

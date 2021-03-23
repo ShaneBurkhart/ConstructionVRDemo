@@ -22,10 +22,13 @@
 
 .finishCard {
   display: flex;
-  min-height: 180px;
-  padding: 1%;
+  min-height: 110px;
+  padding: 2px;
   border: 1px solid #bbb;
   background-color: #ffffff;
+}
+.draggingState {
+  width: 350px;
 }
 
 .adminMode .finishCard:hover {
@@ -59,19 +62,23 @@
 
 .imageSection {
   composes: flexEnd from '../universalStyles/flexStyles.module.css';
-  align-items: center;
+  align-items: flex-start;
   flex-grow: 2;
+}
+
+.draggingState .imageSection {
+  display: none;
 }
 
 .imageSectionItem {
   composes: center from '../universalStyles/flexStyles.module.css';
-  padding: 1%;
+  padding: 2px;
 }
 
 .finishCardImg {
-  width: 150px;
-  height: 150px;
-  padding: 1%;
+  width: 120px;
+  max-height: 100px;
+  padding: 2px;
   object-fit: contain;
   align-self: stretch;
 }

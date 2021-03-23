@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { Popup, Button, Icon } from 'semantic-ui-react';
+import { Button, Icon } from 'semantic-ui-react';
 
 import { getCategoryTag } from '../../common/constants';
 
@@ -16,8 +16,6 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   const [expanded, setExpanded] = useState(true);
   const [expandAllCards, setExpandAllCards] = useState({ status: false, clicked: 0 }); 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const isAdmin = useSelector(state => state.adminMode);
 
@@ -30,23 +28,13 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   
   const handleExpandAllCards = () => setExpandAllCards(prev => ({ status: true, clicked: ++prev.clicked }));
 
-  const handleDeleteCard = finishId => {
-    setLoading(true);
-    const onSuccess = () => setLoading(false);
-    const onError = () => setLoading(false);
-    ActionCreator.deleteFinish(finishId, onSuccess, onError);
-  }
-
-  const onDragStart = () => setIsDragging(true);
+  const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
 
   const onDragEnd = ({ source, destination, draggableId }) => {
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    const onSuccess = () => {};
-    const onError = (error) => console.error(error)
-    ActionCreator.updateFinishOrders({ id: draggableId, orderNumber: destination.index }, onSuccess, onError);
-    setIsDragging(false);
+    ActionCreator.updateFinishOrders({ id: draggableId, orderNumber: destination.index });
   }
   
 
@@ -69,7 +57,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           </h2>
         )}
       </header>
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+      <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId={category} type="CARD">
           {(provided, snapshot) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
