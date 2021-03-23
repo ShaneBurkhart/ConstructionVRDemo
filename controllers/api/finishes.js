@@ -87,7 +87,7 @@ module.exports = (app) => {
     const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
     if (!finish) return res.status(404).send("Finish not found");
 
-    const category = finish.category
+    const category = finish.category;
 
     try {
       await finish.destroy();
@@ -116,18 +116,19 @@ module.exports = (app) => {
     const { orderNumber } = req.body;
     if (!orderNumber || isNaN(Number(orderNumber))) return res.status(400).send("A valid order number is required");
 
+    const category = finish.category;
 
     try {
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
-      const newOrderNumber = getOrderNumber(orderNumber, finishList);
-      const filteredFinishList = finishList.filter(f => f.id !== finish.id).sort((a,b) => a.orderNumber - b.orderNumber);
-      const newFinishList = filteredFinishList.splice(newOrderNumber, 0, finish);
+      const newOrderNumber = getOrderNumber(Number(orderNumber), finishList);
+      const nextFinishList = finishList.filter(f => f.id !== finish.id).sort((a,b) => a.orderNumber - b.orderNumber);
+      nextFinishList.splice(newOrderNumber, 0, finish);
 
-      const promisedNewOrderedList = newFinishList.map((f, i) => f.update({ orderNumber: i }))
-      const newOrderedList = await Promise.all(promisedNewOrderedList);
-      if (newOrderedList.includes(null)) return res.status(422).send("Could not complete request");
+      const promisedNewOrderedFinishes = nextFinishList.map((f, i) => f.update({ orderNumber: i }))
+      const newOrderedFinishes = await Promise.all(promisedNewOrderedFinishes);
+      if (newOrderedFinishes.includes(null)) return res.status(422).send("Could not complete request");
 
-      return res.json(newOrderedList);
+      return res.json({category, newOrderedFinishes});
     } catch(error){
       console.log(error)
       return res.status(422).send("Could not complete update")

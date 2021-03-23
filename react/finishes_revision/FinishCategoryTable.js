@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Popup, Button, Icon } from 'semantic-ui-react';
 
 import { getCategoryTag } from '../../common/constants';
@@ -11,16 +11,18 @@ import AddEditFinishModal from './modals/AddEditFinishModal';
 import styles from "./FinishCategoryTable.module.css";
 import ActionCreator from './action_creators';
 
+
 const FinishCategoriesTable = ({ category, finishes }) => {
   const [expanded, setExpanded] = useState(true);
   const [expandAllCards, setExpandAllCards] = useState({ status: false, clicked: 0 }); 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const isAdmin = useSelector(state => state.adminMode);
 
   const count = finishes.length;
-  const tag = getCategoryTag(category);
+  const tag = category ? getCategoryTag(category) : '';
   
   const toggleCollapse = () => setExpanded(!expanded);
 
@@ -33,6 +35,18 @@ const FinishCategoriesTable = ({ category, finishes }) => {
     const onSuccess = () => setLoading(false);
     const onError = () => setLoading(false);
     ActionCreator.deleteFinish(finishId, onSuccess, onError);
+  }
+
+  const onDragStart = () => setIsDragging(true);
+
+  const onDragEnd = ({ source, destination, draggableId }) => {
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    const onSuccess = () => {};
+    const onError = (error) => console.error(error)
+    ActionCreator.updateFinishOrders({ id: draggableId, orderNumber: destination.index }, onSuccess, onError);
+    setIsDragging(false);
   }
   
 
@@ -55,15 +69,24 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           </h2>
         )}
       </header>
-      {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map(f => (
-        <FinishCard
-          key={f.id}
-          tag={tag}
-          finishDetails={f}
-          shouldExpand={expandAllCards}
-          onDelete={handleDeleteCard}
-        />
-      ))}
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+        <Droppable droppableId={category} type="CARD">
+          {(provided, snapshot) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map(f => (
+                <FinishCard
+                  key={f.id}
+                  tag={tag}
+                  finishDetails={f}
+                  shouldExpand={expandAllCards}
+                  onDelete={handleDeleteCard}
+                />
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
       {showAddNewModal && <AddEditFinishModal preselectedCategory={category} onClose={toggleShowAddNewModal} />}
     </div>
   );

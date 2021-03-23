@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Draggable } from 'react-beautiful-dnd';
+
 
 import { getAttrList, finishCategories } from '../../common/constants';
 
@@ -40,51 +42,60 @@ const FinishCard = ({ tag, finishDetails, shouldExpand, onDelete }) => {
 
   const imgArr = attributes["Images"] || [];
   return (
-    <article className={`${isAdmin ? styles.adminMode : ''}`}>
-      <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
-        {isAdmin && <AdminControls dragHandleProps={{yes: 'ok'}} onClickTrash={() => onDelete(id)} />}
-        <div className={styles.detailsSection}>
-          <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
-            <span className={styles.cellHeading}>
-              {`${tag}${orderNumber+1}`}
-            </span>
-            <div className={styles.cellHeading}>
-              <FocusEditableInput
-                editable={isAdmin}
-                value={attributes["Name"]}
-                onUpdate={handleNameChange}
-              />
+    <Draggable draggableId={`${id}`} index={orderNumber}>
+      {(provided, snapshot) => (
+        <article
+          className={`${isAdmin ? styles.adminMode : ''}`}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <div className={`table-row ${styles.finishCard}`} onClick={toggleShowEditFinishModal}>
+            {isAdmin && <AdminControls dragHandleProps={provided.dragHandleProps} onClickTrash={() => onDelete(id)} />}
+            <div className={styles.detailsSection}>
+              <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
+                <span className={styles.cellHeading}>
+                  {`${tag}${orderNumber+1}`}
+                </span>
+                <div className={styles.cellHeading}>
+                  <FocusEditableInput
+                    editable={isAdmin}
+                    value={attributes["Name"]}
+                    onUpdate={handleNameChange}
+                  />
+                </div>
+              </div>
+              <div className={styles.detailsTableContainer}>
+                <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+                {expanded && (
+                  <table className={styles.detailsTable}>
+                    <tbody>
+                      {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
+                          <tr key={a}>
+                            <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
+                            {a === "Product URL" ? (
+                              <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
+                              <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
+                            )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+            <div className={styles.imageSection}>
+              {imgArr.map((imgUrl) => (
+                <a key={imgUrl} className={styles.imageSectionItem} href={imgUrl} target="_blank" onClick={e=>e.stopPropagation()}>
+                  <img className={styles.finishCardImg} src={imgUrl} />
+                </a>
+              ))}
             </div>
           </div>
-          <div className={styles.detailsTableContainer}>
-            <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
-            {expanded && (
-              <table className={styles.detailsTable}>
-                <tbody>
-                  {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
-                      <tr key={a}>
-                        <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
-                        {a === "Product URL" ? (
-                          <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
-                          <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
-                        )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-        <div className={styles.imageSection}>
-          {imgArr.map((imgUrl) => (
-            <a key={imgUrl} className={styles.imageSectionItem} href={imgUrl} target="_blank" onClick={e=>e.stopPropagation()}>
-              <img className={styles.finishCardImg} src={imgUrl} />
-            </a>
-          ))}
-        </div>
-      </div>
-      {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
-    </article>
+          {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
+        </article>
+      )}
+    </Draggable>
   )
 }
 

@@ -53,6 +53,23 @@ const ActionCreator = {
     });
   },
 
+  updateFinishOrders: (finish, onSuccess, onError) => {
+    $.ajax({
+      type: "PATCH",
+      url: `/api2/v2/finishes/${PROJECT_ACCESS_TOKEN}/${finish.id}/order`,
+      data: finish,
+      dataType: "json",
+      success: (data) => {
+        _dispatch({ type: "UPDATE_FINISH_ORDERS", data })
+        onSuccess({ status: 200, message: `Finish #${finish.id} updated` })
+      },
+      error: (error) => {
+        console.error(error);
+        onError();
+      }
+    });
+  },
+
   deleteFinish: (finishId, onSuccess, onError) => {
     $.ajax({
       type: "DELETE",
@@ -60,8 +77,8 @@ const ActionCreator = {
       data: finishId,
       dataType: "json",
       success: (data) => {
-        _dispatch({ type: "DELETE_FINISH", data })
-        onSuccess({ status: 200, message: `Finish id#${data} deleted` })
+        _dispatch({ type: "UPDATE_FINISH_ORDERS", data })
+        onSuccess({ status: 200, message: `Finish id#${finishId} deleted` })
       },
       error: (error) => {
         console.error(error);

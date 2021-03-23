@@ -23,7 +23,7 @@ const todos = (state = {}, action) => {
       unchangedFinishes = [...state.finishes.filter(f => f.id !== action.data.id)];
       return { ...state, finishes: [...unchangedFinishes, action.data]};
     
-    case "DELETE_FINISH":
+    case "UPDATE_FINISH_ORDERS":
       unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
       return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
 
