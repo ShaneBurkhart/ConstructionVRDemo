@@ -39,7 +39,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   
 
   return (
-    <div id={category} className={`${styles.categoryContainer} ${count ? "no-print" : ""}`}>
+    <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
       <header>
         <h2 onClick={toggleCollapse}>
           <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />

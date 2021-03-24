@@ -1,25 +1,3 @@
-/* .admin-mode .selection {
-  cursor: pointer;
-}
-
-.admin-mode .selection:hover {
-  background-color: #f0f0f0;
-}
-
-.selection .options-cell {
-  padding: 5px 5px 0 0;
-  border: none;
-}
-
-.selection .cell-details .label:hover {
-  background-color: #ffffff;
-  cursor: pointer !important;
-}
-
-.selection .cell-details .label .dropdown:hover {
-  cursor: pointer !important;
-} */
-
 .finishCard {
   display: flex;
   min-height: 110px;
@@ -27,6 +5,7 @@
   border: 1px solid #bbb;
   background-color: #ffffff;
 }
+
 .draggingState {
   width: 350px;
 }
@@ -38,6 +17,20 @@
 
 .detailsSection {
   flex-grow: 2;
+}
+
+.hideDetails {
+  display: none;
+}
+
+.showDetails {
+  display: block;
+}
+
+@media print {
+  .hideDetails {
+    display: block;
+  }
 }
 
 .cellHeading {
@@ -57,7 +50,7 @@
 }
 
 .detailsTable {
-  font-size: .9rem;
+  font-size: .85rem;
 }
 
 .imageSection {
@@ -81,4 +74,10 @@
   padding: 2px;
   object-fit: contain;
   align-self: stretch;
+}
+
+@media print {
+  .detailsTable {
+    font-size: 10pt;
+  }
 }

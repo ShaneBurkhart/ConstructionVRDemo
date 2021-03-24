@@ -47,7 +47,6 @@ class FocusEditableInput extends React.Component {
           size="mini"
           value={value}
           onBlur={this.onBlur}
-          onClick={e => e.stopPropagation()}
           onChange={this.onChange}
           onKeyPress={this.onKeyPress}
           className="slim"

@@ -161,6 +161,35 @@ textarea {
   margin-top: 10px;
 }
 
+@media print {
+  h1 {
+    font-size: 28pt;
+  }
+  
+  h2 {
+    font-size: 24pt;
+  }
+  
+  h3 {
+    font-size: 16.5pt;
+  }
+  
+  h4 {
+    font-size: 15pt;
+  }
+  
+  .small { font-size: 11pt; }
+  .large { font-size: 15pt; }
+  
+  p {
+    font-size: 12pt;
+  }
+  
+  ul li {
+    font-size: 12pt;
+  }
+}
+
 #unit-floor-plan {
   text-align: center;
 }

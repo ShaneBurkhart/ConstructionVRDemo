@@ -29,13 +29,13 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
     setExpanded(!expanded)
   };
 
-  const toggleShowEditFinishModal = () => setShowEditFinishModal(!showEditFinishModal);
+  const toggleShowEditFinishModal = () => isAdmin && setShowEditFinishModal(!showEditFinishModal);
 
   const handleNameChange = (val) => {
     const newAttributes = { ...finishDetails.attributes, "Name": val }
     const onSuccess = () => {};
     const onError = () => console.error('error');
-    ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError)
+    ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
   }
 
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
@@ -45,7 +45,7 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
     <Draggable draggableId={`${id}`} index={orderNumber}>
       {(provided, snapshot) => (
         <article
-          className={`${isAdmin ? styles.adminMode : ''}`}
+          className={`show-print ${isAdmin ? styles.adminMode : ''}`}
           ref={provided.innerRef}
           {...provided.draggableProps}
         >
@@ -73,22 +73,20 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
                 </div>
               </div>
               <div className={styles.detailsTableContainer}>
-                <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
-                {expanded && (
-                  <table className={styles.detailsTable}>
-                    <tbody>
-                      {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
-                          <tr key={a}>
-                            <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
-                            {a === "Product URL" ? (
-                              <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
-                              <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
-                            )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                <a className="hide-print" onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+                <table className={`${styles.detailsTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
+                  <tbody>
+                    {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
+                        <tr key={a}>
+                          <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
+                          {a === "Product URL" ? (
+                            <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
+                            <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
+                          )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
             <div className={styles.imageSection}>

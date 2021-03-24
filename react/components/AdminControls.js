@@ -14,6 +14,7 @@ const AdminControls = ({ onClickTrash, dragHandleProps }) => {
       {onClickTrash &&
         <Popup
           on="click"
+          onClose={e => e.stopPropagation()}
           content={
             <div>
               <p className="bold">Are you sure?</p>
