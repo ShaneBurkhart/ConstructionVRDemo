@@ -41,67 +41,82 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
   const imgArr = attributes["Images"] || [];
-  return (
-    <Draggable draggableId={`${id}`} index={orderNumber}>
-      {(provided, snapshot) => (
-        <article
-          className={`show-print ${isAdmin ? styles.adminMode : ''}`}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-        >
-          <div 
-            className={`table-row ${styles.finishCard} ${snapshot.isDragging ? styles.draggingState : ''}`} 
-            onClick={toggleShowEditFinishModal}
+
+  const cardContents = (
+    <>
+      <div className={styles.detailsSection}>
+        <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
+          <span className={styles.cellHeading}>
+            {`${tag}${orderNumber+1}`}
+          </span>
+          <div className={styles.cellHeading}>
+            <FocusEditableInput
+              editable={isAdmin}
+              value={attributes["Name"]}
+              onUpdate={handleNameChange}
+            />
+          </div>
+        </div>
+        <div className={styles.detailsTableContainer}>
+          <a className="hide-print" onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+          <table className={`${styles.detailsTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
+            <tbody>
+              {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
+                  <tr key={a}>
+                    <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
+                    {a === "Product URL" ? (
+                      <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
+                      <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
+                    )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className={styles.imageSection}>
+        {imgArr.map((imgUrl) => (
+          <a key={imgUrl} className={styles.imageSectionItem} href={imgUrl} target="_blank" onClick={e=>e.stopPropagation()}>
+            <img className={styles.finishCardImg} src={imgUrl} />
+          </a>
+        ))}
+      </div>
+    </>
+  );
+
+  if (isAdmin) {
+    return (
+      <Draggable draggableId={`${id}`} index={orderNumber}>
+        {(provided, snapshot) => (
+          <article
+            className={`show-print ${styles.adminMode}`}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
           >
-            {isAdmin && (
+            <div 
+              className={`table-row ${styles.finishCard} ${snapshot.isDragging ? styles.draggingState : ''}`} 
+              onClick={toggleShowEditFinishModal}
+            >
               <AdminControls
                 dragHandleProps={provided.dragHandleProps}
                 onClickTrash={() => onDelete(id)}
               />
-            )}
-            <div className={styles.detailsSection}>
-              <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
-                <span className={styles.cellHeading}>
-                  {`${tag}${orderNumber+1}`}
-                </span>
-                <div className={styles.cellHeading}>
-                  <FocusEditableInput
-                    editable={isAdmin}
-                    value={attributes["Name"]}
-                    onUpdate={handleNameChange}
-                  />
-                </div>
-              </div>
-              <div className={styles.detailsTableContainer}>
-                <a className="hide-print" onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
-                <table className={`${styles.detailsTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
-                  <tbody>
-                    {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
-                        <tr key={a}>
-                          <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
-                          {a === "Product URL" ? (
-                            <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
-                            <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
-                          )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {cardContents}
             </div>
-            <div className={styles.imageSection}>
-              {imgArr.map((imgUrl) => (
-                <a key={imgUrl} className={styles.imageSectionItem} href={imgUrl} target="_blank" onClick={e=>e.stopPropagation()}>
-                  <img className={styles.finishCardImg} src={imgUrl} />
-                </a>
-              ))}
-            </div>
-          </div>
-          {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
-        </article>
-      )}
-    </Draggable>
-  )
+            {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
+          </article>
+        )}
+      </Draggable>
+    );
+  }
+
+  return (
+    <article className={"show-print"}>
+      <div className={`table-row ${styles.finishCard}`}>
+        {cardContents}
+      </div>
+    </article>
+  );
 }
 
 export default FinishCard;
