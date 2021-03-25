@@ -153,6 +153,11 @@ export const finishCategories = {
   },
  }
 
+ const attrMap = {};
+ finishAttributes.forEach(a => attrMap[a.name] = a.width);
+ 
+ export const getAttrWidth = (attrName) => attrMap[attrName];
+
  export const allCategoryNames = Object.keys(finishCategories);
 
  export const getCategoryTag = category => finishCategories[category].tag;

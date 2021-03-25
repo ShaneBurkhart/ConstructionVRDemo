@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 
-
-import { getAttrList, finishCategories } from '../../common/constants';
+import { getAttrList, finishCategories, getAttrWidth } from '../../common/constants';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -18,6 +17,8 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
   const [expanded, setExpanded] = useState(shouldExpand.status);
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
 
+  const _isEditing = useRef(false);
+
   const detailsExclude = ["Images","Name"];
 
   useEffect(() => {
@@ -29,10 +30,13 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
     setExpanded(!expanded)
   };
 
-  const toggleShowEditFinishModal = () => isAdmin && setShowEditFinishModal(!showEditFinishModal);
+  const toggleShowEditFinishModal = () => {
+    if (_isEditing.current) return false;
+    if (isAdmin) setShowEditFinishModal(!showEditFinishModal)
+  };
 
-  const handleNameChange = (val) => {
-    const newAttributes = { ...finishDetails.attributes, "Name": val }
+  const handleAttrChange = (val, attr) => {
+    const newAttributes = { ...finishDetails.attributes, [attr]: val }
     const onSuccess = () => {};
     const onError = () => console.error('error');
     ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
@@ -49,29 +53,55 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
           <span className={styles.cellHeading}>
             {`${tag}${orderNumber+1}`}
           </span>
-          <div className={styles.cellHeading}>
+          <div className={`${styles.cellHeading} ${styles.cardName}`}>
             <FocusEditableInput
               editable={isAdmin}
               value={attributes["Name"]}
-              onUpdate={handleNameChange}
+              onUpdate={(val) => {
+                handleAttrChange(val, "Name");
+                setTimeout(() => {_isEditing.current = false}, 100);
+              }}
             />
           </div>
         </div>
         <div className={styles.detailsTableContainer}>
-          <a className="hide-print" onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
-          <table className={`${styles.detailsTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
-            <tbody>
-              {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
-                  <tr key={a}>
-                    <td style={{ fontWeight: 'bold', paddingRight: 20 }}>{a}:</td>
-                    {a === "Product URL" ? (
-                      <td><a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a></td>) : (
-                      <td>{(a === "Price" && attributes[a]) ? "$" : ""}{attributes[a]}</td>
-                    )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className={`${styles.detailsToggleLink} hide-print`}>
+            <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+          </div>
+          <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
+            {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
+              <div key={a} style={{ width: getAttrWidth(a) < 16 ? "50%" : "100%", display: 'flex' }}>
+                <div style={{ fontWeight: 'bold', paddingRight: 20, width: "50%" }}>{a}:</div>
+                {a === "Product URL" ? (
+                  <div>
+                    <FocusEditableInput
+                      editable={isAdmin}
+                      value={attributes[a]}
+                      isURL={true}
+                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a>}
+                      onUpdate={(val) => {
+                        handleAttrChange(val, a);
+                        setTimeout(() => {_isEditing.current = false}, 100);
+                      }}
+                      onOpen={() => _isEditing.current = true}
+                    />
+                  </div>
+                  ) : (
+                  <div>
+                    <FocusEditableInput
+                      editable={isAdmin}
+                      value={`${(a === "Price" && attributes[a]) ? "$" : ""}${attributes[a] || ''}`}
+                      onUpdate={(val) => {
+                        handleAttrChange(val, a);
+                        setTimeout(() => {_isEditing.current = false}, 100);
+                      }}
+                      onOpen={() => _isEditing.current = true }
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div className={styles.imageSection}>

@@ -8,6 +8,11 @@ class FocusEditableInput extends React.Component {
     this.state = { hovering: false, focused: false, value: props.value || "" };
   }
 
+  static defaultProps = {
+    link: '',
+    isURL: false,
+  }
+
   onMouseEnter = () => {
     this.setState({ hovering: true });
   }
@@ -18,6 +23,7 @@ class FocusEditableInput extends React.Component {
 
   onClick = (e) => {
     e.stopPropagation();
+    if (this.props.onOpen) this.props.onOpen();
     this.setState({ focused: true, hovering: false });
   }
 
@@ -29,7 +35,7 @@ class FocusEditableInput extends React.Component {
   }
 
   onKeyPress = (e) => {
-    if (event.key === "Enter") this.onBlur();
+    if (e.key === "Enter") this.onBlur();
   }
 
   onChange = (e) => {
@@ -60,8 +66,14 @@ class FocusEditableInput extends React.Component {
           onMouseLeave={this.onMouseLeave}
           style={{ display: "inline-block", minWidth: 60 }}
         >
-          {value} &nbsp;
-          {editable && hovering && <Icon name="pencil alternate" style={{ fontSize: 16 }} />}
+          {this.props.isURL ? this.props.link : value} &nbsp;
+          {editable && hovering && (
+            <Icon
+              onClick={this.onClick}
+              name="pencil alternate"
+              style={{ fontSize: 16 }}
+            />
+          )}
         </span>
       );
     }
