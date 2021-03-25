@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import _ from 'underscore';
 import { Grid, Dimmer, Loader, Form, Button, Modal } from 'semantic-ui-react';
 
+import useEvent from '../../hooks/useEvent';
 import { finishCategories, getAttrList, getAttrGridRows } from '../../../common/constants';
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
 
 const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} }) => {
-  const { category='', attributes={}, id=null} = finishDetails;
+  const { category='', attributes={}, id=null } = finishDetails;
   
   const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || category);
   const [attrRows, setAttrRows] = useState([]);
@@ -16,6 +17,41 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [loading, setLoading] = useState(false);
 
   const isNew = id === null;
+
+  const onDrop = (acceptedFiles) => {
+    const imgArr = attributeValues["Images"] || [];
+    if (imgArr.length < 2) {
+      (acceptedFiles || []).forEach((file) => {
+        setLoading(true);
+        ActionCreators.presignedURL(file, (data) => {
+          ActionCreators.uploadFile(file, data.presignedURL, () => {
+            imgArr.push(data.awsURL);
+            setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
+            setLoading(false);
+          });
+        });
+      });
+    }
+  }
+  
+  const addImageFromClipboard = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const blobLikeFile = items[i].getAsFile();
+        if (blobLikeFile) {
+          onDrop([blobLikeFile])
+        }
+      }
+    }
+  }
+
+  const handlePaste = (e) => {
+    if (e.clipboardData && e.clipboardData.items.length > 0) {
+      addImageFromClipboard(e.clipboardData.items)
+    }
+  }
+  
+  useEvent('paste', handlePaste);
 
   const handleSelectCategory = categoryName => {
     setAttrRows([]);
@@ -58,20 +94,6 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     // add Formatter function pass value for price/url/etc, w/ default passing thru
     const onChange = (e, {value}) => setAttributeValues(prev => ({ ...prev, [attrName]: value }));
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
-    const onDrop = (acceptedFiles) => {
-      if (arrVal.length < 2) {
-        (acceptedFiles || []).forEach((file) => {
-          setLoading(true)
-          ActionCreators.presignedURL(file, (data) => {
-            ActionCreators.uploadFile(file, data.presignedURL, () => {
-              arrVal.push(data.awsURL);
-              setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }));
-              setLoading(false);
-            });
-          });
-        });
-      }
-    };
 
     const attrInputMap = {
       "Price":  <PriceInput key={attrName} value={val} onChange={onChange} />,
