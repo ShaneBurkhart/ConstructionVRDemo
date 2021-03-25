@@ -5,12 +5,18 @@ class FocusEditableInput extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { hovering: false, focused: false, value: props.value || "" };
+    this.state = { hovering: false, focused: false, val: props.value || "" };
   }
 
   static defaultProps = {
     link: '',
     isURL: false,
+  }
+
+  componentDidUpdate(prevProps){
+    if (prevProps.value !== this.props.value){
+      this.setState({ val: this.props.value })
+    }
   }
 
   onMouseEnter = () => {
@@ -29,9 +35,9 @@ class FocusEditableInput extends React.Component {
 
   onBlur = () => {
     const { onUpdate } = this.props;
-    const { value } = this.state;
+    const { val } = this.state;
     this.setState({ focused: false, hovering: false });
-    if (onUpdate) onUpdate(value);
+    if (onUpdate) onUpdate(val);
   }
 
   onKeyPress = (e) => {
@@ -39,19 +45,19 @@ class FocusEditableInput extends React.Component {
   }
 
   onChange = (e) => {
-    this.setState({ value: e.target.value });
+    this.setState({ val: e.target.value });
   }
 
   render() {
     const { editable } = this.props;
-    const { focused, hovering, value } = this.state;
+    const { focused, hovering, val } = this.state;
 
     if (editable && focused) {
       return (
         <Input
           autoFocus
           size="mini"
-          value={value}
+          value={val}
           onBlur={this.onBlur}
           onChange={this.onChange}
           onKeyPress={this.onKeyPress}
@@ -66,7 +72,7 @@ class FocusEditableInput extends React.Component {
           onMouseLeave={this.onMouseLeave}
           style={{ display: "inline-block", minWidth: 60 }}
         >
-          {this.props.isURL ? this.props.link : value} &nbsp;
+          {this.props.isURL ? this.props.link : val} &nbsp;
           {editable && hovering && (
             <Icon
               onClick={this.onClick}
