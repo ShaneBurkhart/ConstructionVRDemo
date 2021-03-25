@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ActionCreators from './action_creators';
 
+import FloatingProjectButton from '../components/FloatingProjectButton';
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import FinishCategoryTable from './FinishCategoryTable';
 
@@ -38,6 +39,7 @@ const App = () => {
           />
         ))}
       </section>
+      <FloatingProjectButton name={PROJECT_NAME} />
     </main>
   );
 }
