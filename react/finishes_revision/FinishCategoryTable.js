@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button, Icon } from 'semantic-ui-react';
@@ -13,9 +13,22 @@ import ActionCreator from './action_creators';
 
 
 const FinishCategoriesTable = ({ category, finishes }) => {
+  // const finishesMap = {};
+  // (finishes || []).forEach(f => finishesMap[f.id] = false);
+
   const [expanded, setExpanded] = useState(true);
-  const [expandAllCards, setExpandAllCards] = useState({ status: false, clicked: 0 }); 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
+  // const [expandedChildren, setExpandedChildren] = useState(finishesMap);
+  const [expandedChildren, setExpandedChildren] = useState({});
+
+  useEffect(() => {
+    const finishesMap = {...expandedChildren};
+    (finishes || []).forEach(f => {
+      if (!finishesMap.hasOwnProperty(f.id))
+        finishesMap[f.id] = false
+    });
+    setExpandedChildren(finishesMap);
+  }, [finishes])
 
   const isAdmin = useSelector(state => state.adminMode);
 
@@ -26,7 +39,14 @@ const FinishCategoriesTable = ({ category, finishes }) => {
 
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
-  const handleExpandAllCards = () => setExpandAllCards(prev => ({ status: true, clicked: ++prev.clicked }));
+  const handleExpandAllCards = () => {
+    const children = Object.keys(expandedChildren);
+    const closeAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: false })));
+    const openAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: true })));
+    const allOpen = children.every(child => expandedChildren[child]);
+    if (!allOpen) return openAll();
+    return closeAll();
+  };
 
   const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
 
@@ -36,7 +56,6 @@ const FinishCategoriesTable = ({ category, finishes }) => {
 
     ActionCreator.updateFinishOrders({ id: draggableId, orderNumber: destination.index });
   }
-  
 
   return (
     <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
@@ -66,7 +85,8 @@ const FinishCategoriesTable = ({ category, finishes }) => {
                   key={f.id}
                   tag={tag}
                   finishDetails={f}
-                  shouldExpand={expandAllCards}
+                  expanded={expandedChildren[f.id]}
+                  toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
                   onDelete={handleDeleteCard}
                 />
               ))}

@@ -11,23 +11,18 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
+const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
-  const [expanded, setExpanded] = useState(shouldExpand.status);
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
 
   const _isEditing = useRef(false);
 
   const detailsExclude = ["Images","Name"];
 
-  useEffect(() => {
-    setExpanded(shouldExpand.status);
-  }, [shouldExpand.clicked]);
-
-  const toggleExpand = (e) => {
+  const handleToggleExpand = (e) => {
     e.stopPropagation();
-    setExpanded(!expanded)
+    toggleExpand();
   };
 
   const toggleShowEditFinishModal = () => {
@@ -61,17 +56,18 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
                 handleAttrChange(val, "Name");
                 setTimeout(() => {_isEditing.current = false}, 100);
               }}
+              onOpen={() => _isEditing.current = true}
             />
           </div>
         </div>
         <div className={styles.detailsTableContainer}>
           <div className={`${styles.detailsToggleLink} hide-print`}>
-            <a onClick={toggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+            <a onClick={handleToggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
           </div>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
             {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
               <div key={a} style={{ width: getAttrWidth(a) < 16 ? "50%" : "100%", display: 'flex' }}>
-                <div style={{ fontWeight: 'bold', paddingRight: 20, width: "50%" }}>{a}:</div>
+                <div style={{ fontWeight: 'bold', paddingRight: 20, width: 135 }}>{a}:</div>
                 {a === "Product URL" ? (
                   <div>
                     <FocusEditableInput
@@ -88,9 +84,10 @@ const FinishCard = ({ tag, finishDetails, shouldExpand={}, onDelete }) => {
                   </div>
                   ) : (
                   <div>
+                    {a === "Price" &&  "$"}
                     <FocusEditableInput
                       editable={isAdmin}
-                      value={`${(a === "Price" && attributes[a]) ? "$" : ""}${attributes[a] || ''}`}
+                      value={attributes[a] || ''}
                       onUpdate={(val) => {
                         handleAttrChange(val, a);
                         setTimeout(() => {_isEditing.current = false}, 100);
