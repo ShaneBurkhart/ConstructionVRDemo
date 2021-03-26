@@ -1,28 +1,130 @@
+const { formatUrl, formatPrice } = require('./formatters');
+const { validateUrl, validatePrice } = require('./validators');
+
 const finishAttributes = [
-  // TO DO : add 'format' func
-  {name: "Manufacturer", width: 5, validate: () => {}},
-  {name: "Product Number", width: 5, validate: () => {}},
-  {name: "Color", width: 5, validate: () => {}},
-  {name: "Style", width: 5, validate: () => {}},
-  {name: "Dimensions", width: 5, validate: () => {}},
-  {name: "Repeat", width: 5, validate: () => {}},
-  {name: "Grout Tag", width: 5, validate: () => {}},
-  {name: "Grout Joint Thickness", width: 5, validate: () => {}},
-  {name: "Installation Method", width: 5, validate: () => {}},
-  {name: "Carpet Pad", width: 5, validate: () => {}},
-  {name: "Finish", width: 5, validate: () => {}},
-  {name: "Type", width: 5, validate: () => {}},
-  {name: "Thickness", width: 5, validate: () => {}},
-  {name: "Edge Profile", width: 5, validate: () => {}},
-  {name: "Wood Species", width: 5, validate: () => {}},
-  {name: "Product URL", width: 8, validate: () => {}},
-  {name: "Price", width: 5, validate: () => {}},
-  {name: "Details", width: 16, validate: () => {}},
-  {name: "Images", width: 16, validate: () => {}},
-  {name: "Name", width: 8, validate: () => {}},
+  {
+    name: "Manufacturer",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Product Number",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Color",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Style",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Dimensions",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Repeat",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Grout Tag",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Grout Joint Thickness",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Installation Method",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Carpet Pad",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Finish",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Type",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Thickness",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Edge Profile",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Wood Species",
+    width: 5,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Product URL",
+    width: 8,
+    validate: (val) => validateUrl(val), 
+    format: formatUrl
+  },
+  {
+    name: "Price",
+    width: 5,
+    validate: validatePrice,
+    format: formatPrice
+  },
+  {
+    name: "Details",
+    width: 16,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Images",
+    width: 16,
+    validate: () => true,
+    format: (val) => val,
+  },
+  {
+    name: "Name",
+    width: 8,
+    validate: () => true,
+    format: (val) => val,
+  },
 ];
 
-export const finishCategories = {
+const finishCategories = {
   "Paint": {
     tag: "PT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Price","Details","Images",], 
@@ -153,18 +255,23 @@ export const finishCategories = {
   },
  }
 
+ exports.finishCategories = finishCategories;
+
  const attrMap = {};
- finishAttributes.forEach(a => attrMap[a.name] = a.width);
+ finishAttributes.forEach(a => attrMap[a.name] = { ...a });
+
+ exports.attrMap = attrMap;
  
- export const getAttrWidth = (attrName) => attrMap[attrName];
+ exports.getAttrWidth = (attrName) => attrMap[attrName].width;
 
- export const allCategoryNames = Object.keys(finishCategories);
+ const allCategoryNames = Object.keys(finishCategories)
+ exports.allCategoryNames = allCategoryNames;
 
- export const getCategoryTag = category => finishCategories[category].tag;
+ exports.getCategoryTag = category => finishCategories[category].tag;
 
- export const getAttrList = category => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute));
+ exports.getAttrList = category => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute));
 
- export const getAttrGridRows = (attrList=[]) => {
+ exports.getAttrGridRows = (attrList=[]) => {
   let remainingWidth = 16;
   const attrRows = [];
   let row = [];

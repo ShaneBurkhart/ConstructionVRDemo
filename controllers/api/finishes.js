@@ -1,6 +1,7 @@
 const { Sequelize, Op } = require('sequelize');
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
+const { attrMap } = require("../../common/constants.js");
 const { uuid } = require('uuidv4');
 
 const getOrderNumber = (num, list) => {
@@ -36,7 +37,9 @@ module.exports = (app) => {
 
     const { category, attributes } = req.body;
     // const adminMode = !!req.session["is_admin"]; // should this be admin only?
-    
+    const formattedAttributes = {};
+    (Object.keys(attributes) || []).forEach(a => formattedAttributes[a] = attrMap[a].format(attributes[a]));
+    console.log({formattedAttributes})
     try {
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
       const newFinish = await models.Finish.create({
