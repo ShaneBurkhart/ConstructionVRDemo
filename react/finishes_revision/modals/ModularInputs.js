@@ -4,7 +4,18 @@ import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 import StyledDropzone from "../../components/StyledDropzone";
 import './ModularInputs.css';
 
-export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory}) => (
+const ErrorLabel = (label="") => (
+  <Label
+    basic
+    color="red"
+    size="mini"
+    style={{ position: 'absolute', top: 0, left: `${String(label).length + 5}ch`}}
+  >
+    Invalid Format
+  </Label>
+)
+
+export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => (
   <>
     <label className="uiFormFieldLabel">Select a category</label>
     <Dropdown
@@ -20,28 +31,33 @@ export const CategoryDropdown = ({ selectedCategory, options, handleSelectCatego
   </>
 );
 
-export const PriceInput = ({ value, onChange }) => (
-  <Form.Field>
+export const PriceInput = ({ value, onChange, error, onBlur }) => (
+  <Form.Field style={{ position: 'relative' }}>
     <label>Unit Price</label>
     <Input
       fluid
+      error={error}
       labelPosition="left"
       placeholder='10.21'
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
     >
       <Label basic>$</Label>
       <input />
     </Input>
+    {error && <ErrorLabel label={"Unit Price"} />}
   </Form.Field>
 );
 
-export const DetailsInput = ({ value, onChange}) => (
+export const DetailsInput = ({ value, onChange, onBlur, error }) => (
   <Form.TextArea
     label='Details'
     placeholder='Add notes about this option...'
+    error={error}
     value={value}
     onChange={onChange}
+    onBlur={onBlur}
   />
 );
 
@@ -83,11 +99,16 @@ export const ImagesInput = ({ images, onDrop, onDelete }) => (
   </div>
 );
 
-export const GeneralInput = ({ value, onChange, label }) => (
-  <Form.Input
-    fluid
-    label={label}
-    value={value}
-    onChange={onChange}
-  />
+export const GeneralInput = ({ value, onChange, onBlur, error, label }) => (
+  <span style={{ position: 'relative' }}>
+    <Form.Input
+      fluid
+      label={label}
+      error={error}
+      value={value}
+      onBlur={onBlur}
+      onChange={onChange}
+    />
+    {error && <ErrorLabel label={label} />}
+  </span>
 );

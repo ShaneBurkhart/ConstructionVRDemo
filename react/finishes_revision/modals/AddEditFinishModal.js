@@ -3,7 +3,7 @@ import _ from 'underscore';
 import { Grid, Dimmer, Loader, Form, Button, Modal } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
-import { finishCategories, getAttrList, getAttrGridRows } from '../../../common/constants';
+import { finishCategories, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
@@ -14,6 +14,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || category);
   const [attrRows, setAttrRows] = useState([]);
   const [attributeValues, setAttributeValues] = useState(attributes);
+  const [attributeValueErrors, setAttributeValueErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const isNew = id === null;
@@ -70,6 +71,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   }, []);
 
   const handleSubmit = () => {
+    // TO DO prevent submit if some fields invalid?
     setLoading(true);
     const finish = {
       id,
@@ -92,14 +94,26 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     const val = attributeValues[attrName] || '';
     const arrVal = attributeValues[attrName] || [];
     // add Formatter function pass value for price/url/etc, w/ default passing thru
-    const onChange = (e, {value}) => setAttributeValues(prev => ({ ...prev, [attrName]: value }));
+    const onChange = (e, {value}) => {
+      if (attributeValueErrors[attrName] && attrMap[attrName].validate(attributeValues[attrName])){
+        setAttributeValueErrors(prev => ({ ...prev, [attrName]: false }));
+      } 
+      setAttributeValues(prev => ({ ...prev, [attrName]: value }))
+    };
+    const onBlur = () => {
+      if (!attrMap[attrName].validate(attributeValues[attrName])) {
+        setAttributeValueErrors(prev => ({ ...prev, [attrName]: true }))
+      } else {
+        setAttributeValueErrors(prev => ({ ...prev, [attrName]: false }))
+      };
+    }
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
 
     const attrInputMap = {
-      "Price":  <PriceInput key={attrName} value={val} onChange={onChange} />,
-      "Details":  <DetailsInput key={attrName} value={val} onChange={onChange} />,
-      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} />,
-      default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} />
+      "Price":  <PriceInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      "Details":  <DetailsInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />
     }
     const attrInput = attrInputMap[attrName] ? attrInputMap[attrName] : attrInputMap.default;
     return attrInput;
@@ -146,7 +160,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
         <Button
           onClick={handleSubmit}
           color="green"
-          disabled={loading || !selectedCategory || _.isEmpty(attributeValues)}
+          disabled={loading || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
         >
           Save
         </Button>

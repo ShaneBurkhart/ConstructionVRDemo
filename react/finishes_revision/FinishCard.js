@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 
-import { getAttrList, finishCategories, getAttrWidth } from '../../common/constants';
+import { getAttrList, finishCategories, getAttrWidth } from '../../common/constants.js';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -74,7 +74,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
                       editable={isAdmin}
                       value={attributes[a]}
                       isURL={true}
-                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a>}
+                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`/${attributes[a]}`}>{attributes[a]}</a>}
                       onUpdate={(val) => {
                         handleAttrChange(val, a);
                         setTimeout(() => {_isEditing.current = false}, 100);
@@ -84,7 +84,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
                   </div>
                   ) : (
                   <div>
-                    {a === "Price" &&  "$"}
+                    {(a === "Price" && attributes[a]) ?  "$" : ""}
                     <FocusEditableInput
                       editable={isAdmin}
                       value={attributes[a] || ''}

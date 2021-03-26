@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button, Icon } from 'semantic-ui-react';
 
-import { getCategoryTag } from '../../common/constants';
+import { getCategoryTag } from '../../common/constants.js';
 
 import FinishCard from './FinishCard';
 import AddEditFinishModal from './modals/AddEditFinishModal';
@@ -13,22 +13,9 @@ import ActionCreator from './action_creators';
 
 
 const FinishCategoriesTable = ({ category, finishes }) => {
-  // const finishesMap = {};
-  // (finishes || []).forEach(f => finishesMap[f.id] = false);
-
   const [expanded, setExpanded] = useState(true);
   const [showAddNewModal, setShowAddNewModal] = useState(false);
-  // const [expandedChildren, setExpandedChildren] = useState(finishesMap);
   const [expandedChildren, setExpandedChildren] = useState({});
-
-  useEffect(() => {
-    const finishesMap = {...expandedChildren};
-    (finishes || []).forEach(f => {
-      if (!finishesMap.hasOwnProperty(f.id))
-        finishesMap[f.id] = false
-    });
-    setExpandedChildren(finishesMap);
-  }, [finishes])
 
   const isAdmin = useSelector(state => state.adminMode);
 
@@ -40,7 +27,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
   const handleExpandAllCards = () => {
-    const children = Object.keys(expandedChildren);
+    const children = (finishes || []).map(f => f.id);
     const closeAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: false })));
     const openAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: true })));
     const allOpen = children.every(child => expandedChildren[child]);
