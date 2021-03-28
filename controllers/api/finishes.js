@@ -36,21 +36,24 @@ module.exports = (app) => {
     if (!project) return res.status(404).send("Project not found");
 
     const { category, attributes } = req.body;
-    // const adminMode = !!req.session["is_admin"]; // should this be admin only?
-    const formattedAttributes = {};
-    (Object.keys(attributes) || []).forEach(a => formattedAttributes[a] = attrMap[a].format(attributes[a]));
-    console.log({formattedAttributes})
     try {
+      const formattedAttributes = {};
+      (Object.keys(attributes) || []).forEach(a => {
+        if (attrMap[a]) {
+          formattedAttributes[a] = attrMap[a].format(attributes[a])
+        }
+      });
+      
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
       const newFinish = await models.Finish.create({
         ProjectId: project.id,
         category,
         orderNumber: finishList.length,
-        attributes,
+        attributes: formattedAttributes,
       });
       return res.json(newFinish);
     } catch(error){
-      console.log(error)
+      console.error(error)
       return res.status(422).send("Could not create new Finish")
     }
   });
@@ -67,14 +70,23 @@ module.exports = (app) => {
     if (!finish) return res.status(404).send("Finish not found");
 
     const { category, attributes } = req.body;
+    
     try {
+      const formattedAttributes = {};
+      (Object.keys(attributes) || []).forEach(a => {
+        if (attrMap[a]) {
+          formattedAttributes[a] = attrMap[a].format(attributes[a])
+        }
+      });
+      console.log({formattedAttributes})
+      
       const updatedFinish = await finish.update({
         category,
-        attributes,
+        attributes: formattedAttributes,
       });
       return res.json(updatedFinish);
     } catch(error){
-      console.log(error)
+      console.error(error)
       return res.status(422).send("Could not update Finish")
     }
   });
@@ -100,7 +112,7 @@ module.exports = (app) => {
 
       return res.json({category, newOrderedFinishes});
     } catch(error){
-      console.log(error)
+      console.error(error)
       return res.status(422).send("Could not update Finish")
     }
   });
@@ -133,7 +145,7 @@ module.exports = (app) => {
 
       return res.json({category, newOrderedFinishes});
     } catch(error){
-      console.log(error)
+      console.error(error)
       return res.status(422).send("Could not complete update")
     }
   });

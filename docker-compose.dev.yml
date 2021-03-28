@@ -19,7 +19,7 @@ websocket:
     env_file:
         - user.env
     # command: "rerun --pattern common/* --pattern controllers/* --pattern websocket.js --background node websocket.js"
-    command: "npx nodemon -w websocket.js -w common/* -w controllers/* -w models/* -w util/*"
+    command: "npx nodemon -w websocket.js -w common/* -w controllers/* -w models/* -w util/* -w constants/*"
 
 react_build:
     image: shaneburkhart/construction-vr-demo

@@ -1,5 +1,5 @@
 const { formatUrl, formatPrice, noFormat } = require('./formatters');
-const { validateUrl, validatePrice, noOp } = require('./validators');
+const { validatePrice, noOp } = require('./validators');
 
 const finishAttributes = [
   {
@@ -95,14 +95,14 @@ const finishAttributes = [
   {
     name: "Product URL",
     width: 8,
-    validate: (val) => validateUrl(val), 
-    format: formatUrl
+    validate: noOp, 
+    format: formatUrl,
   },
   {
     name: "Price",
     width: 5,
     validate: validatePrice,
-    format: formatPrice
+    format: formatPrice,
   },
   {
     name: "Details",

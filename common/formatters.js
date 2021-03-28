@@ -7,7 +7,8 @@ module.exports = {
       style: 'currency',
       currency: 'USD'
     }).resolvedOptions();
-    return (num).toLocaleString('en-US', { ...currencyOptions, style: 'decimal' });
+    if (isNaN(num)) return '';
+    return Number(num).toLocaleString('en-US', { ...currencyOptions, style: 'decimal' });
   },
 
   noFormat: (val) => val,

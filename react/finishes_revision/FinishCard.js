@@ -74,7 +74,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
                       editable={isAdmin}
                       value={attributes[a]}
                       isURL={true}
-                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`/${attributes[a]}`}>{attributes[a]}</a>}
+                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a>}
                       onUpdate={(val) => {
                         handleAttrChange(val, a);
                         setTimeout(() => {_isEditing.current = false}, 100);
