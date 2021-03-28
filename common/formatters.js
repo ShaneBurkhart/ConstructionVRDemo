@@ -1,8 +1,15 @@
-exports.formatUrl = (url) => {
-  if (!/^https?:\/\//i.test(url)) {
-    url = 'http://' + url;
-  }
-  return url;
-}
+module.exports = {
   
-exports.formatPrice = (num) => new Intl.NumberFormat().format(num);
+  formatUrl: (url) => url.replace(/(^\w+:|^)\/\//, ''),
+  
+  formatPrice: (num) => {
+    const currencyOptions = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).resolvedOptions();
+    return (num).toLocaleString('en-US', { ...currencyOptions, style: 'decimal' });
+  },
+
+  noFormat: (val) => val,
+
+}

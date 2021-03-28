@@ -1,96 +1,96 @@
-const { formatUrl, formatPrice } = require('./formatters');
-const { validateUrl, validatePrice } = require('./validators');
+const { formatUrl, formatPrice, noFormat } = require('./formatters');
+const { validateUrl, validatePrice, noOp } = require('./validators');
 
 const finishAttributes = [
   {
     name: "Manufacturer",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Product Number",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Color",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Style",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Dimensions",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Repeat",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Grout Tag",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Grout Joint Thickness",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Installation Method",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Carpet Pad",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Finish",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Type",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Thickness",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Edge Profile",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Wood Species",
     width: 5,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Product URL",
@@ -107,20 +107,20 @@ const finishAttributes = [
   {
     name: "Details",
     width: 16,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Images",
     width: 16,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
   {
     name: "Name",
     width: 8,
-    validate: () => true,
-    format: (val) => val,
+    validate: noOp,
+    format: noFormat,
   },
 ];
 
@@ -255,37 +255,68 @@ const finishCategories = {
   },
  }
 
- exports.finishCategories = finishCategories;
-
  const attrMap = {};
  finishAttributes.forEach(a => attrMap[a.name] = { ...a });
+ const allCategoryNames = Object.keys(finishCategories);
 
- exports.attrMap = attrMap;
+
+ module.exports = {
+    finishCategories,
+    attrMap,
+    allCategoryNames,
+    getAttrWidth: (attrName) => attrMap[attrName].width,
+    getCategoryTag: (category) => finishCategories[category].tag,
+    getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
+    getAttrGridRows: (attrList=[]) => {
+      let remainingWidth = 16;
+      const attrRows = [];
+      let row = [];
+    
+      for (let i = 0; i < attrList.length; i++){
+        row.push(attrList[i])
+        remainingWidth = remainingWidth - attrList[i].width;
+        if (!attrList[i+1]) {
+          attrRows.push(row);
+        } else if (attrList[i+1].width > remainingWidth) {
+          attrRows.push(row);
+          remainingWidth = 16;
+          row = [];
+        }
+      }
+      return attrRows;
+    },
+ }
+
+//  exports.finishCategories = finishCategories;
+
+
+
+//  exports.attrMap = attrMap;
  
- exports.getAttrWidth = (attrName) => attrMap[attrName].width;
+//  exports.getAttrWidth = (attrName) => attrMap[attrName].width;
 
- const allCategoryNames = Object.keys(finishCategories)
- exports.allCategoryNames = allCategoryNames;
+//  const allCategoryNames = Object.keys(finishCategories)
+//  exports.allCategoryNames = allCategoryNames;
 
- exports.getCategoryTag = category => finishCategories[category].tag;
+//  exports.getCategoryTag = category => finishCategories[category].tag;
 
- exports.getAttrList = category => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute));
+//  exports.getAttrList = category => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute));
 
- exports.getAttrGridRows = (attrList=[]) => {
-  let remainingWidth = 16;
-  const attrRows = [];
-  let row = [];
+//  exports.getAttrGridRows = (attrList=[]) => {
+//   let remainingWidth = 16;
+//   const attrRows = [];
+//   let row = [];
 
-  for (let i = 0; i < attrList.length; i++){
-    row.push(attrList[i])
-    remainingWidth = remainingWidth - attrList[i].width;
-    if (!attrList[i+1]) {
-      attrRows.push(row);
-    } else if (attrList[i+1].width > remainingWidth) {
-      attrRows.push(row);
-      remainingWidth = 16;
-      row = [];
-    }
-  }
-  return attrRows;
-}
+//   for (let i = 0; i < attrList.length; i++){
+//     row.push(attrList[i])
+//     remainingWidth = remainingWidth - attrList[i].width;
+//     if (!attrList[i+1]) {
+//       attrRows.push(row);
+//     } else if (attrList[i+1].width > remainingWidth) {
+//       attrRows.push(row);
+//       remainingWidth = 16;
+//       row = [];
+//     }
+//   }
+//   return attrRows;
+// }
