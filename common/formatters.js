@@ -1,13 +1,13 @@
 module.exports = {
   
-  formatUrl: (url) => url.replace(/(^\w+:|^)\/\//, ''),
+  preFormatUrl: (url) => url.replace(/(^\w+:|^)\/\//, ''),
   
   formatPrice: (num) => {
+    if (isNaN(num)) return '';
     const currencyOptions = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).resolvedOptions();
-    if (isNaN(num)) return '';
     return Number(num).toLocaleString('en-US', { ...currencyOptions, style: 'decimal' });
   },
 

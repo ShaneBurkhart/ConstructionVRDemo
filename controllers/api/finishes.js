@@ -78,8 +78,6 @@ module.exports = (app) => {
           formattedAttributes[a] = attrMap[a].format(attributes[a])
         }
       });
-      console.log({formattedAttributes})
-      
       const updatedFinish = await finish.update({
         category,
         attributes: formattedAttributes,

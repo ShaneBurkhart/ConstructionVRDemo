@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
+import { Label } from 'semantic-ui-react';
 
-import { getAttrList, finishCategories, getAttrWidth } from '../../common/constants.js';
+import { attrMap, getAttrList, finishCategories, getAttrWidth } from '../../common/constants.js';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -14,7 +15,9 @@ import ActionCreator from './action_creators';
 const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
+  
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
+  const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
 
   const _isEditing = useRef(false);
 
@@ -39,6 +42,10 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
 
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
+  const isValid = (val, attr) => attrMap[attr].validate(val);
+
+  const isFieldLocked = (attr) => formFieldError.error && formFieldError.field !== attr;
+  
   const imgArr = attributes["Images"] || [];
 
   const cardContents = (
@@ -58,6 +65,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
               }}
               onOpen={() => _isEditing.current = true}
             />
+            {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
           </div>
         </div>
         <div className={styles.detailsTableContainer}>
@@ -65,39 +73,33 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
             <a onClick={handleToggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
           </div>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
-            {(attrList.filter(a => !detailsExclude.includes(a)) || []).map(a => (
-              <div key={a} style={{ width: getAttrWidth(a) < 16 ? "50%" : "100%", display: 'flex' }}>
-                <div style={{ fontWeight: 'bold', paddingRight: 20, width: 135 }}>{a}:</div>
-                {a === "Product URL" ? (
-                  <div>
-                    <FocusEditableInput
-                      editable={isAdmin}
-                      value={attributes[a]}
-                      isURL={true}
-                      link={<a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[a]}`}>{attributes[a]}</a>}
-                      onUpdate={(val) => {
-                        handleAttrChange(val, a);
-                        setTimeout(() => {_isEditing.current = false}, 100);
-                      }}
-                      onOpen={() => _isEditing.current = true}
-                    />
-                  </div>
-                  ) : (
-                  <div>
-                    {(a === "Price" && attributes[a]) ?  "$" : ""}
-                    <FocusEditableInput
-                      editable={isAdmin}
-                      value={attributes[a] || ''}
-                      onUpdate={(val) => {
-                        handleAttrChange(val, a);
-                        setTimeout(() => {_isEditing.current = false}, 100);
-                      }}
-                      onOpen={() => _isEditing.current = true }
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map(attr => (
+                <div key={attr} style={{ width: getAttrWidth(attr) < 16 ? "50%" : "100%", display: 'flex' }}>
+                  <div style={{ fontWeight: 'bold', paddingRight: 20, width: 135 }}>{attr}:</div>
+                  <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
+                  <FocusEditableInput
+                    editable={isAdmin && !isFieldLocked(attr)}
+                    value={attributes[attr]}
+                    isURL={attr === "Product URL"}
+                    isPrice={attr === "Price"}
+                    onValidate={(val) => isValid(val,attr)}
+                    link={
+                      attr === "Product URL"
+                        ? <a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[attr]}`}>{attributes[attr]}</a> 
+                        : ''
+                    }
+                    onUpdate={(val) => {
+                      handleAttrChange(val, attr);
+                      setTimeout(() => {_isEditing.current = false}, 100);
+                    }}
+                    onOpen={() => _isEditing.current = true}
+                    error={formFieldError.field === attr}
+                    onError={() => setFormFieldError({ error: true, field: attr })}
+                    clearError={() => setFormFieldError({ error: false, field: '' })}
+                  />
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>

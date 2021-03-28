@@ -1,6 +1,8 @@
 import React from 'react';
 import { Input, Icon } from 'semantic-ui-react';
 
+import { formatPrice } from '../../common/formatters';
+
 class FocusEditableInput extends React.Component {
   constructor(props) {
     super(props);
@@ -11,6 +13,10 @@ class FocusEditableInput extends React.Component {
   static defaultProps = {
     link: '',
     isURL: false,
+    isPrice: false,
+    onValidate: () => true,
+    onError: () => {},
+    clearError: () => {},
   }
 
   componentDidUpdate(prevProps){
@@ -34,10 +40,15 @@ class FocusEditableInput extends React.Component {
   }
 
   onBlur = () => {
-    const { onUpdate } = this.props;
+    const { onUpdate, onValidate, onError, clearError } = this.props;
     const { val } = this.state;
-    this.setState({ focused: false, hovering: false });
-    if (onUpdate) onUpdate(val);
+    if (onValidate && onValidate(val)) {
+      clearError();
+      this.setState({ focused: false, hovering: false });
+      if (onUpdate) onUpdate(val);
+    } else {
+      onError && onError();
+    }
   }
 
   onKeyPress = (e) => {
@@ -45,11 +56,20 @@ class FocusEditableInput extends React.Component {
   }
 
   onChange = (e) => {
+    const { onValidate, clearError } = this.props;
+    if (onValidate && onValidate(e.target.value)) clearError();
     this.setState({ val: e.target.value });
   }
 
+  getDisplayVal = value => {
+    const { isURL, link, isPrice } = this.props
+    if (value && isURL) return link;
+    if (value && isPrice) return formatPrice(value);
+    return value;
+  }
+
   render() {
-    const { editable } = this.props;
+    const { editable, error, isPrice } = this.props;
     const { focused, hovering, val } = this.state;
 
     if (editable && focused) {
@@ -57,7 +77,10 @@ class FocusEditableInput extends React.Component {
         <Input
           autoFocus
           size="mini"
+          type={isPrice ? "number" : "text"}
+          step="0.01"
           value={val}
+          error={error}
           onBlur={this.onBlur}
           onChange={this.onChange}
           onKeyPress={this.onKeyPress}
@@ -72,7 +95,7 @@ class FocusEditableInput extends React.Component {
           onMouseLeave={this.onMouseLeave}
           style={{ display: "inline-block", minWidth: 60 }}
         >
-          {this.props.isURL ? this.props.link : val} &nbsp;
+          {this.getDisplayVal(val)} &nbsp;
           {editable && hovering && (
             <Icon
               onClick={this.onClick}

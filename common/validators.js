@@ -1,9 +1,6 @@
 module.exports = {
 
-  validatePrice: (price) => {
-    var pattern = /^[1-9]\d*(((,\d{3}){1})?(\.\d{0,2})?)$/;
-    return !!pattern.test(price);
-  },
+  validatePrice: (price) => !price.length || !isNaN(price),
 
   validatePresence: (str) => str.trim().length(),
 

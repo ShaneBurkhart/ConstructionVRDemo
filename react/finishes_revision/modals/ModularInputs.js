@@ -39,6 +39,8 @@ export const PriceInput = ({ value, onChange, error, onBlur }) => (
       error={error}
       labelPosition="left"
       placeholder='10.21'
+      type="number"
+      step="0.01"
       value={value}
       onChange={onChange}
       onBlur={onBlur}
