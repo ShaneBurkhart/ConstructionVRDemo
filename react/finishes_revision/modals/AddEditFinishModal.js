@@ -101,13 +101,14 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const getAttributeInput = (attrName) => {
     const val = attributeValues[attrName] || '';
     const arrVal = attributeValues[attrName] || [];
-    // add Formatter function pass value for price/url/etc, w/ default passing thru
+    
     const onChange = (e, {value}) => {
       if (attributeValueErrors[attrName] && attrMap[attrName].validate(attributeValues[attrName])){
         setAttributeValueErrors(prev => ({ ...prev, [attrName]: false }));
       } 
       setAttributeValues(prev => ({ ...prev, [attrName]: value }))
     };
+    
     const onBlur = () => {
       if (!attrMap[attrName].validate(attributeValues[attrName])) {
         setAttributeValueErrors(prev => ({ ...prev, [attrName]: true }))
@@ -115,12 +116,21 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
         setAttributeValueErrors(prev => ({ ...prev, [attrName]: false }))
       };
     }
+    
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
+    const onImgLinkUpload = (imgUrl) => {
+      const re = new RegExp(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|tiff|bmp|jpeg|jp2|svg|webp)/g);
+      const isImgUrl = re.test(imgUrl);
+      if (isImgUrl && arrVal.length < 2) {
+        arrVal.push(imgUrl);
+        setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }))
+      } 
+    }
 
     const attrInputMap = {
       "Price":  <PriceInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
       "Details":  <DetailsInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
-      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onImgLinkUpload={onImgLinkUpload} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
       default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />
     }
     const attrInput = attrInputMap[attrName] ? attrInputMap[attrName] : attrInputMap.default;

@@ -37,8 +37,9 @@ class FinishOptionModal extends React.Component {
 
   onClickLinkUpload = () => {
     const { linkUpload } = this.state;
-    const imgMatch = linkUpload.match(/^(https?:\/\/)?([a-zA-Z0-9_\-]+\.)?[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\/([a-zA-Z0-9_\-\/]+)?\.(jpg|jpeg|png|gif)(\?.*)$/g);
-
+    const re = new RegExp(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|tiff|bmp|jpeg|jp2|svg|webp)/g)
+    const imgMatch = re.test(linkUpload);
+    
     if (imgMatch) {
       const newFields = _.clone(this.state.optionFields);
       const newImages = Array.from(newFields.Images || []);
