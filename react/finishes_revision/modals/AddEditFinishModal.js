@@ -19,18 +19,29 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
 
   const isNew = id === null;
 
+  const uploadFileToS3 = (file, data, imgArr) => {
+    ActionCreators.uploadFile(
+      file,
+      data.presignedURL,
+      () => {
+        imgArr.push(data.awsURL);
+        setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
+        setLoading(false);
+      },
+      () => setLoading(false),
+    );
+  }
+
   const onDrop = (acceptedFiles) => {
     const imgArr = attributeValues["Images"] || [];
     if (imgArr.length < 2) {
       (acceptedFiles || []).forEach((file) => {
         setLoading(true);
-        ActionCreators.presignedURL(file, (data) => {
-          ActionCreators.uploadFile(file, data.presignedURL, () => {
-            imgArr.push(data.awsURL);
-            setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
-            setLoading(false);
-          });
-        });
+        ActionCreators.presignedURL(
+          file,
+          (data) => uploadFileToS3(file, data, imgArr),
+          () => setLoading(false),
+        );
       });
     }
   }
@@ -71,7 +82,6 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   }, []);
 
   const handleSubmit = () => {
-    // TO DO prevent submit if some fields invalid?
     setLoading(true);
     const finish = {
       id,
@@ -84,7 +94,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     };
     const onError = () => {
       setLoading(false);
-      alert('something went wrong');
+      onClose();
     }
     if (isNew) return ActionCreators.submitNewFinish(finish, onSuccess, onError);
     return ActionCreators.updateFinish(finish, onSuccess, onError);

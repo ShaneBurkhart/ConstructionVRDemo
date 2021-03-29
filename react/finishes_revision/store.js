@@ -3,6 +3,7 @@ import thunk from 'redux-thunk';
 
 const _initialState = {
   adminMode: false,
+  apiError: {},
   finishes: [],
   modals: {},
 };
@@ -30,9 +31,12 @@ const todos = (state = {}, action) => {
     case 'API_ERROR':
       return { ...state, apiError: {
         status: action.data ? action.data.status : 404,
-        // message: action.data.responseJSON.msg
-        message: "API ERROR"
+        message: action.data ? action.data.responseText : "Could not complete request",
       }};
+
+    case 'CLEAR_API_ERROR':
+      return { ...state, apiError: {}};
+
     default:
       return state;
   }

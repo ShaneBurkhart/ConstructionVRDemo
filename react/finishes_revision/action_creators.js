@@ -1,7 +1,10 @@
 import $ from 'jquery';
-import _ from 'underscore';
 
 var _dispatch = null;
+
+const clearError = () => setTimeout(() => {
+  _dispatch({ type: "CLEAR_API_ERROR" })
+}, 3100);
 
 const ActionCreator = {
   load: () => {
@@ -12,9 +15,9 @@ const ActionCreator = {
       success: (data) => {
         _dispatch({ type: "LOAD", data: data });
       },
-      error: (data) => {
-        console.error("could not fetch project data");
-        _dispatch({ type: "API_ERROR", data: data });
+      error: (error) => {
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
       }
     })
   },
@@ -30,8 +33,9 @@ const ActionCreator = {
         onSuccess({ status: 200, message: `New Finish added` })
       },
       error: (error) => {
-        console.error(error);
         onError();
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
       }
     });
   },
@@ -47,8 +51,9 @@ const ActionCreator = {
         onSuccess({ status: 200, message: `Finish ${finish.Name} updated` })
       },
       error: (error) => {
-        console.error(error);
         onError();
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
       }
     });
   },
@@ -63,7 +68,8 @@ const ActionCreator = {
         _dispatch({ type: "UPDATE_FINISH_ORDERS", data })
       },
       error: (error) => {
-        console.error(error);
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
       }
     });
   },
@@ -78,7 +84,8 @@ const ActionCreator = {
         _dispatch({ type: "UPDATE_FINISH_ORDERS", data })
       },
       error: (error) => {
-        console.error(error);
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
       }
     });
   },
@@ -93,7 +100,10 @@ const ActionCreator = {
       },
       dataType: "json",
       success: callback,
-      // error: errorCallback,
+      error: (error) => {
+        _dispatch({ type: "API_ERROR" });
+        clearError();
+      },
     });
   },
 
@@ -107,7 +117,10 @@ const ActionCreator = {
       contentType : file.type,
       processData : false,
       success: callback,
-      // error: errorCallback
+      error: (error) => {
+        _dispatch({ type: "API_ERROR" });
+        clearError();
+      }
     });
   },
 

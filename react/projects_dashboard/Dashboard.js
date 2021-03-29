@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import ActionCreators from './action_creators';
 
-import { Grid, Table, Header, Button, Message } from "semantic-ui-react";
+import { Grid, Table, Header, Button } from "semantic-ui-react";
 
+import ToastMessage from '../components/ToastMessage';
 import CreateProjectModal from './CreateProjectModal';
 import CopyProjectModal from './CopyProjectModal';
 import ConfirmModal from './ConfirmModal';
@@ -149,20 +150,7 @@ const Dashboard = () => {
           />
         )}
       </div>
-      {message.show && (
-        <Message 
-          size="big"
-          style={{ 
-            position: 'fixed',
-            bottom: 5,
-            right: 5,
-            backgroundColor: message.positive ? '#12c712c7' : '#ff2d2dc7',
-            color: 'white' 
-          }}
-        >
-          {message.message}
-        </Message>
-      )}
+      {message.show && <ToastMessage message={message.message} positive={message.positive} />}
     </section>
   );
 }

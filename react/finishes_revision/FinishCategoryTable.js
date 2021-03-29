@@ -13,11 +13,12 @@ import ActionCreator from './action_creators';
 
 
 const FinishCategoriesTable = ({ category, finishes }) => {
+  const isAdmin = useSelector(state => state.adminMode);
+  
   const [expanded, setExpanded] = useState(true);
   const [showAddNewModal, setShowAddNewModal] = useState(false);
   const [expandedChildren, setExpandedChildren] = useState({});
 
-  const isAdmin = useSelector(state => state.adminMode);
 
   const count = finishes.length;
   const tag = category ? getCategoryTag(category) : '';
@@ -27,6 +28,7 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
   const handleExpandAllCards = () => {
+    if (!expanded) setExpanded(true); 
     const children = (finishes || []).map(f => f.id);
     const closeAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: false })));
     const openAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: true })));
