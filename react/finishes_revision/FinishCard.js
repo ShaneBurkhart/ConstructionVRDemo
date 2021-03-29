@@ -118,6 +118,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
       <Draggable draggableId={`${id}`} index={orderNumber}>
         {(provided, snapshot) => (
           <article
+            id={`finishCard-${id}`}
             className={`show-print ${styles.adminMode}`}
             ref={provided.innerRef}
             {...provided.draggableProps}
@@ -140,7 +141,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
   }
 
   return (
-    <article className={"show-print"}>
+    <article id={`finishCard-${id}`} className={"show-print"}>
       <div className={`table-row ${styles.finishCard}`}>
         {cardContents}
       </div>

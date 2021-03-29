@@ -579,3 +579,22 @@ p.filters {
       display: block;
   }
 }
+
+.fade-out-bg {
+  animation: fade 3.5s;
+}
+
+@keyframes fade {
+  0% {
+    background-color: white;
+  }
+  35% {
+    background-color: #f3da4b;
+  }
+  50% {
+    background-color: #f5de4c;
+  }
+  100% {
+    background-color: white;
+  }
+}

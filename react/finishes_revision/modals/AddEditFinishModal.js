@@ -50,9 +50,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.startsWith("image/")) {
         const blobLikeFile = items[i].getAsFile();
-        if (blobLikeFile) {
-          onDrop([blobLikeFile])
-        }
+        if (blobLikeFile) onDrop([blobLikeFile])
       }
     }
   }

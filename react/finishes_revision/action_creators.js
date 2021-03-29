@@ -29,8 +29,16 @@ const ActionCreator = {
       data: newFinish,
       dataType: "json",
       success: (data) => {
-        _dispatch({ type: "NEW_FINISH", data })
-        onSuccess({ status: 200, message: `New Finish added` })
+        _dispatch({ type: "NEW_FINISH", data });
+        onSuccess();
+        
+        const el = document.getElementById(`finishCard-${data.id}`);
+        el.classList.add('fade-out-bg');
+        el.scrollIntoView({behavior: 'smooth', block: 'center'});
+        setTimeout(() => {
+          el.classList.remove('fade-out-bg');
+        }, 5000);
+      
       },
       error: (error) => {
         onError();
