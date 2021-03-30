@@ -7,13 +7,19 @@ class FocusEditableInput extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { hovering: false, focused: false, val: props.value || "" };
+    this.state = {
+      hovering: false,
+      focused: false,
+      val: props.value || "",
+    };
   }
 
   static defaultProps = {
     link: '',
     isURL: false,
     isPrice: false,
+    // truncated prop --> add class for truncate
+    // OR: no-wrap/one-line property
     onValidate: () => true,
     onError: () => {},
     clearError: () => {},
@@ -39,6 +45,14 @@ class FocusEditableInput extends React.Component {
     this.setState({ focused: true, hovering: false });
   }
 
+  onCancel = () => this.setState({ val: this.props.value, focused: false });
+
+  onClickCancel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this.onCancel();
+  }
+
   onBlur = () => {
     const { onUpdate, onValidate, onError, clearError } = this.props;
     const { val } = this.state;
@@ -52,6 +66,7 @@ class FocusEditableInput extends React.Component {
   }
 
   onKeyPress = (e) => {
+    if (e.key === 'Escape') this.onCancel();
     if (e.key === "Enter") this.onBlur();
   }
 
@@ -74,18 +89,38 @@ class FocusEditableInput extends React.Component {
 
     if (editable && focused) {
       return (
-        <Input
-          autoFocus
-          size="mini"
-          type={isPrice ? "number" : "text"}
-          step="0.01"
-          value={val}
-          error={error}
-          onBlur={this.onBlur}
-          onChange={this.onChange}
-          onKeyPress={this.onKeyPress}
-          className="slim"
-        />
+        <>
+          <Input
+            autoFocus
+            size="mini"
+            type={isPrice ? "number" : "text"}
+            step="0.01"
+            value={val}
+            error={error}
+            onBlur={this.onBlur}
+            onChange={this.onChange}
+            onKeyUp={this.onKeyPress}
+            className="slim"
+          />
+          <Icon
+            inverted
+            color="grey"
+            circular
+            onMouseDown={this.onClickCancel}
+            title="Cancel Edit"
+            name="close"
+            style={{ fontSize: 8, margin: 3 }}
+          />
+          <Icon
+            inverted
+            circular
+            color="green"
+            onMouseDown={this.onBlur}
+            title="Save Edit"
+            name="check"
+            style={{ fontSize: 8, margin: 3 }}
+          />
+        </>
       );
     } else {
       return (
@@ -98,9 +133,11 @@ class FocusEditableInput extends React.Component {
           {this.getDisplayVal(val)} &nbsp;
           {editable && hovering && (
             <Icon
+              title="Edit this field"
               onClick={this.onClick}
+              style={{ padding: ".5%"}}
               name="pencil alternate"
-              style={{ fontSize: 16 }}
+              style={{ fontSize: 14 }}
             />
           )}
         </span>
@@ -108,5 +145,7 @@ class FocusEditableInput extends React.Component {
     }
   }
 }
+// Add X icon for escape/cancel
+// Edit pencil 
 
 export default FocusEditableInput;
