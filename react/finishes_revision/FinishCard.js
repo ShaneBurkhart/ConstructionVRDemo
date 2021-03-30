@@ -64,6 +64,7 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
                 setTimeout(() => {_isEditing.current = false}, 100);
               }}
               onOpen={() => _isEditing.current = true}
+              onCancel={() => _isEditing.current = false}
             />
             {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
           </div>
@@ -75,24 +76,21 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
             {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map(attr => (
                 <div key={attr} style={{ width: getAttrWidth(attr) < 16 ? "50%" : "100%", display: 'flex' }}>
-                  <div style={{ fontWeight: 'bold', paddingRight: 20, width: 135 }}>{attr}:</div>
+                  <div className={styles.detailsFlexTableLabel}>{attr}:</div>
                   <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
                   <FocusEditableInput
                     editable={isAdmin && !isFieldLocked(attr)}
                     value={attributes[attr]}
                     isURL={attr === "Product URL"}
                     isPrice={attr === "Price"}
+                    oneLine={attr !== "Details"}
                     onValidate={(val) => isValid(val,attr)}
-                    link={
-                      attr === "Product URL"
-                        ? <a target="_blank" onClick={e => e.stopPropagation()} href={`//${attributes[attr]}`}>{attributes[attr]}</a> 
-                        : ''
-                    }
                     onUpdate={(val) => {
                       handleAttrChange(val, attr);
                       setTimeout(() => {_isEditing.current = false}, 100);
                     }}
                     onOpen={() => _isEditing.current = true}
+                    onCancel={() => _isEditing.current = false}
                     error={formFieldError.field === attr}
                     onError={() => setFormFieldError({ error: true, field: attr })}
                     clearError={() => setFormFieldError({ error: false, field: '' })}

@@ -40,7 +40,7 @@ module.exports = (app) => {
       const formattedAttributes = {};
       (Object.keys(attributes) || []).forEach(a => {
         if (attrMap[a]) {
-          formattedAttributes[a] = attrMap[a].format(attributes[a])
+          formattedAttributes[a] = attrMap[a].format(attributes[a]);
         }
       });
       
@@ -53,8 +53,8 @@ module.exports = (app) => {
       });
       return res.json(newFinish);
     } catch(error){
-      console.error(error)
-      return res.status(422).send("Could not create new Finish")
+      console.error(error);
+      return res.status(422).send("Could not create new Finish");
     }
   });
   
@@ -84,8 +84,8 @@ module.exports = (app) => {
       });
       return res.json(updatedFinish);
     } catch(error){
-      console.error(error)
-      return res.status(422).send("Could not update Finish")
+      console.error(error);
+      return res.status(422).send("Could not update Finish");
     }
   });
   
@@ -105,13 +105,13 @@ module.exports = (app) => {
     try {
       await finish.destroy();
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category }});
-      const promisedNewOrderedList = finishList.map((f, i) => f.update({ orderNumber: i }))
+      const promisedNewOrderedList = finishList.sort((a,b) => a.orderNumber - b.orderNumber).map((f, i) => f.update({ orderNumber: i }));
       const newOrderedFinishes = await Promise.all(promisedNewOrderedList);
 
       return res.json({category, newOrderedFinishes});
     } catch(error){
-      console.error(error)
-      return res.status(422).send("Could not update Finish")
+      console.error(error);
+      return res.status(422).send("Could not update Finish");
     }
   });
   
@@ -137,14 +137,14 @@ module.exports = (app) => {
       const nextFinishList = finishList.filter(f => f.id !== finish.id).sort((a,b) => a.orderNumber - b.orderNumber);
       nextFinishList.splice(newOrderNumber, 0, finish);
 
-      const promisedNewOrderedFinishes = nextFinishList.map((f, i) => f.update({ orderNumber: i }))
+      const promisedNewOrderedFinishes = nextFinishList.map((f, i) => f.update({ orderNumber: i }));
       const newOrderedFinishes = await Promise.all(promisedNewOrderedFinishes);
       if (newOrderedFinishes.includes(null)) return res.status(422).send("Could not complete request");
 
       return res.json({category, newOrderedFinishes});
     } catch(error){
-      console.error(error)
-      return res.status(422).send("Could not complete update")
+      console.error(error);
+      return res.status(422).send("Could not complete update");
     }
   });
 

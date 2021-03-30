@@ -2,6 +2,7 @@ import React from 'react';
 import { Input, Icon } from 'semantic-ui-react';
 
 import { formatPrice } from '../../common/formatters';
+import styles from './FocusEditableInput.module.css'
 
 class FocusEditableInput extends React.Component {
   constructor(props) {
@@ -15,18 +16,17 @@ class FocusEditableInput extends React.Component {
   }
 
   static defaultProps = {
-    link: '',
     isURL: false,
     isPrice: false,
-    // truncated prop --> add class for truncate
-    // OR: no-wrap/one-line property
+    oneLine: false,
     onValidate: () => true,
+    onCancel: () => {},
     onError: () => {},
     clearError: () => {},
   }
 
   componentDidUpdate(prevProps){
-    if (prevProps.value !== this.props.value){
+    if (prevProps.value !== this.props.value) {
       this.setState({ val: this.props.value })
     }
   }
@@ -44,8 +44,11 @@ class FocusEditableInput extends React.Component {
     if (this.props.onOpen) this.props.onOpen();
     this.setState({ focused: true, hovering: false });
   }
-
-  onCancel = () => this.setState({ val: this.props.value, focused: false });
+ 
+  onCancel = () => {
+    this.setState({ val: this.props.value, focused: false, hovering: false });
+    this.props.onCancel();
+  };
 
   onClickCancel = (e) => {
     e.preventDefault();
@@ -76,15 +79,21 @@ class FocusEditableInput extends React.Component {
     this.setState({ val: e.target.value });
   }
 
+  getAnchor = href => (
+    <a target="_blank" href={`//${href}`} onClick={e => e.stopPropagation()}>
+      {href}
+    </a>
+  );
+
   getDisplayVal = value => {
-    const { isURL, link, isPrice } = this.props
-    if (value && isURL) return link;
+    const { isURL, isPrice } = this.props;
+    if (value && isURL) return this.getAnchor(value);
     if (value && isPrice) return formatPrice(value);
     return value;
   }
 
   render() {
-    const { editable, error, isPrice } = this.props;
+    const { editable, error, isPrice, oneLine } = this.props;
     const { focused, hovering, val } = this.state;
 
     if (editable && focused) {
@@ -124,28 +133,29 @@ class FocusEditableInput extends React.Component {
       );
     } else {
       return (
-        <span
+        <div
           onClick={this.onClick}
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
-          style={{ display: "inline-block", minWidth: 60 }}
+          style={{ minWidth: 60 }}
         >
-          {this.getDisplayVal(val)} &nbsp;
-          {editable && hovering && (
-            <Icon
-              title="Edit this field"
-              onClick={this.onClick}
-              style={{ padding: ".5%"}}
-              name="pencil alternate"
-              style={{ fontSize: 14 }}
-            />
-          )}
-        </span>
+          <div style={{ display: 'flex' }}>
+            <div className={`${oneLine ? styles.oneline : ''} ${styles.displayField}`}>
+              {this.getDisplayVal(val)}
+            </div>
+            {editable && hovering ? (
+              <Icon
+                title="Edit this field"
+                onClick={this.onClick}
+                name="pencil alternate"
+                style={{ fontSize: 14, minWidth: 14 }}
+              />
+            ) : <div style={{ minWidth: 14, margin: 1 }} />}
+          </div>
+        </div>
       );
     }
   }
 }
-// Add X icon for escape/cancel
-// Edit pencil 
 
 export default FocusEditableInput;

@@ -16,7 +16,7 @@
 }
 
 .detailsSection {
-  flex-grow: 2;
+  width: 70%;
 }
 
 .cellHeading {
@@ -44,7 +44,6 @@
 
 .detailsTableContainer {
   margin-left: 60px;
-  padding-right: 20%;
 }
 
 .draggingState .detailsTableContainer {
@@ -56,11 +55,17 @@
   flex-wrap: wrap;
   font-size: .82rem;
 }
+.detailsFlexTableLabel {
+  font-weight: bold;
+  padding-right: 20px;
+  width: 125px;
+  min-width: 125px;
+}
 
 .imageSection {
   composes: flexEnd from '../universalStyles/flexStyles.module.css';
-  align-items: flex-start;
-  flex-grow: 2;
+  align-items: center;
+  width: 25%;
 }
 
 .draggingState .imageSection {
@@ -79,6 +84,9 @@
 }
 
 @media print {
+  article {
+    padding: 2px;
+  }
   .detailsTable {
     font-size: 10pt;
   }
