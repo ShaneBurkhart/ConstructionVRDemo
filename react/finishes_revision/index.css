@@ -581,7 +581,7 @@ p.filters {
 }
 
 .fade-out-bg {
-  animation: fade 3.5s;
+  animation: fade 3.1s;
 }
 
 @keyframes fade {
@@ -589,10 +589,10 @@ p.filters {
     background-color: white;
   }
   35% {
-    background-color: #f3da4b;
+    background-color: #f9faae;
   }
   50% {
-    background-color: #f5de4c;
+    background-color: #f9faae;
   }
   100% {
     background-color: white;

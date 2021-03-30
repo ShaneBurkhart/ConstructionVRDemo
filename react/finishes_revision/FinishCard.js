@@ -118,12 +118,12 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
       <Draggable draggableId={`${id}`} index={orderNumber}>
         {(provided, snapshot) => (
           <article
-            id={`finishCard-${id}`}
-            className={`show-print ${styles.adminMode}`}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
+          className={`show-print ${styles.adminMode}`}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
           >
             <div 
+              id={`finishCard-${id}`}
               className={`table-row ${styles.finishCard} ${snapshot.isDragging ? styles.draggingState : ''}`} 
               onClick={toggleShowEditFinishModal}
             >
@@ -141,8 +141,8 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
   }
 
   return (
-    <article id={`finishCard-${id}`} className={"show-print"}>
-      <div className={`table-row ${styles.finishCard}`}>
+    <article className={"show-print"}>
+      <div id={`finishCard-${id}`} className={`table-row ${styles.finishCard}`}>
         {cardContents}
       </div>
     </article>

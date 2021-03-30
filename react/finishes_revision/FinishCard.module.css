@@ -1,12 +1,9 @@
-article {
-  background-color: #ffffff;
-}
-
 .finishCard {
   display: flex;
   min-height: 110px;
   padding: 2px;
   border: 1px solid #bbb;
+  background-color: white;
 }
 
 .draggingState {
