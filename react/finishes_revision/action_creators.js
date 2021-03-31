@@ -37,7 +37,7 @@ const ActionCreator = {
         el.scrollIntoView({behavior: 'smooth', block: 'center'});
         setTimeout(() => {
           el.classList.remove('fade-out-bg');
-        }, 5000);
+        }, 3200);
       
       },
       error: (error) => {
@@ -130,6 +130,16 @@ const ActionCreator = {
         clearError();
       }
     });
+  },
+
+  downloadUri: (url) => {
+    console.log({url})
+    $.ajax({
+      type: "POST",
+      url: `/api2/v2/download_uri`,
+      data: {url},
+      success: () => console.log("success")
+    })
   },
 
   updateDispatch: (dispatch) => {

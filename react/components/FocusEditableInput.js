@@ -113,20 +113,20 @@ class FocusEditableInput extends React.Component {
           />
           <Icon
             inverted
-            color="grey"
-            circular
-            onMouseDown={this.onClickCancel}
-            title="Cancel Edit"
-            name="close"
-            style={{ fontSize: 8, margin: 3 }}
-          />
-          <Icon
-            inverted
             circular
             color="green"
             onMouseDown={this.onBlur}
             title="Save Edit"
             name="check"
+            style={{ fontSize: 8, margin: 3 }}
+          />
+          <Icon
+            inverted
+            color="grey"
+            circular
+            onMouseDown={this.onClickCancel}
+            title="Cancel Edit"
+            name="close"
             style={{ fontSize: 8, margin: 3 }}
           />
         </>
