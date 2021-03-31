@@ -118,13 +118,16 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     }
     
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
+    
     const onImgLinkUpload = (imgUrl) => {
-      const re = new RegExp(/(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png|tiff|bmp|jpeg|jp2|svg|webp)/g);
-      const isImgUrl = re.test(imgUrl);
-      if (isImgUrl && arrVal.length < 2) {
-        arrVal.push(imgUrl);
-        setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }))
-      } 
+      ActionCreators.uploadFromUrl(
+        imgUrl,
+        (awsURL) => {
+          arrVal.push(awsURL);
+          setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }));
+        },
+        (error) => {}
+      );
     }
 
     const attrInputMap = {

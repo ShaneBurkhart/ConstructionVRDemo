@@ -1,14 +1,18 @@
 const { Sequelize, Op } = require('sequelize');
+const got = require('got');
+const FileType = require('file-type');
+const AWS = require('aws-sdk')
+const request = require('request');
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
 const { attrMap } = require("../../common/constants.js");
 const { uuid } = require('uuidv4');
 
-const getOrderNumber = (num, list) => {
-  if (num < 0) return 0;
-  if (num > list.length) return list.length;
-  return num;
-}
+AWS.config.update({
+  region: process.env["REGION"],
+  credentials: new AWS.Credentials(process.env["ACCESS_KEY_ID"], process.env["SECRET_ACCESS_KEY"])
+});
+const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
 
 module.exports = (app) => {
   
@@ -131,6 +135,12 @@ module.exports = (app) => {
 
     const category = finish.category;
 
+    const getOrderNumber = (num, list) => {
+      if (num < 0) return 0;
+      if (num > list.length) return list.length;
+      return num;
+    }
+
     try {
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
       const newOrderNumber = getOrderNumber(Number(orderNumber), finishList);
@@ -145,6 +155,43 @@ module.exports = (app) => {
     } catch(error){
       console.error(error);
       return res.status(422).send("Could not complete update");
+    }
+  });
+
+  app.post("/api2/v2/upload/from_url", async (req, res) => {
+    const { url } = req.body;
+    if (!url) return res.status(400).send("a web resource is required");
+    try {
+      const stream = got.stream(url);
+      const filetype = await FileType.fromStream(stream);
+      if (!filetype) return res.status(422).send("this URL cannot be processed as an image");
+      const { ext, mime } = filetype;
+      if (!mime.startsWith('image/')) return res.status(422).send("cannot convert this web resource into image");
+  
+      const filename = `tmp/${uuid()}.${ext}`;
+  
+      request({ url, encoding: null }, (err, r, body) => {
+        if (err) return res.status(422).json({ error: err })
+        const bucket = process.env.BUCKET;
+        const imageURL = `https://${bucket}.s3-us-west-2.amazonaws.com/${filename}`;
+
+        s3.putObject({
+          Bucket: bucket,
+          Key: filename,
+          ACL: "public-read",
+          ContentType: r.headers['content-type'],
+          ContentLength: r.headers['content-length'],
+          Body: body,
+        }, (error, data) => {
+          if (error) console.error(error);
+          if (error) return res.status(422).send("Could not upload this image");
+          return res.json({ imageURL });
+        });
+
+      });
+    } catch (error){
+      console.error(error)
+      res.status(422).send("Could not complete this request")
     }
   });
 

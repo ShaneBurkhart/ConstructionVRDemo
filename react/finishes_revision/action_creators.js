@@ -132,13 +132,17 @@ const ActionCreator = {
     });
   },
 
-  downloadUri: (url) => {
-    console.log({url})
+  uploadFromUrl: (url, onSuccess, onError) => {
     $.ajax({
       type: "POST",
-      url: `/api2/v2/download_uri`,
+      url: `/api2/v2/upload/from_url`,
       data: {url},
-      success: () => console.log("success")
+      success: ({ imageURL }) => onSuccess(imageURL),
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+        clearError();
+      }
     })
   },
 
