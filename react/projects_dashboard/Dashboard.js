@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import ActionCreators from './action_creators';
 
@@ -24,12 +24,6 @@ const Dashboard = () => {
   const toggleShowCreateProjectModal = () => setShowCreateProjectModal(!showCreateProjectModal);
   const toggleShowCopyProjectModal = () => setShowCopyProjectModal(!showCopyProjectModal);
   const toggleShowConfirmModal = () => setShowConfirmModal(!showConfirmModal);
-
-  useEffect(() => {
-    if (message.show) {
-      setTimeout(() => setMessage({ show: false }), 3000)
-    }
-  }, [message]);
 
   const onSuccess = (result) => setMessage({ show: true, message: result.message, positive: true });
   const onError = (result) => setMessage({ show: true, message: result.message, positive: false });
@@ -150,7 +144,7 @@ const Dashboard = () => {
           />
         )}
       </div>
-      {message.show && <ToastMessage message={message.message} positive={message.positive} />}
+      <ToastMessage message={message.message} positive={message.positive} />
     </section>
   );
 }

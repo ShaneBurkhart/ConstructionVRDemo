@@ -44,7 +44,7 @@ const App = () => {
         ))}
       </section>
       <FloatingProjectButton name={PROJECT_NAME} />
-      {!_.isEmpty(apiError) && <ToastMessage positive={false} message={apiError.message} bottom={75} right={35} />}
+      <ToastMessage positive={false} message={apiError.message} />
     </main>
   );
 }

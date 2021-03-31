@@ -2,9 +2,6 @@ import $ from 'jquery';
 
 var _dispatch = null;
 
-const clearError = () => setTimeout(() => {
-  _dispatch({ type: "CLEAR_API_ERROR" })
-}, 3100);
 
 const ActionCreator = {
   load: () => {
@@ -17,7 +14,6 @@ const ActionCreator = {
       },
       error: (error) => {
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
       }
     })
   },
@@ -43,7 +39,7 @@ const ActionCreator = {
       error: (error) => {
         onError();
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
+        
       }
     });
   },
@@ -61,7 +57,6 @@ const ActionCreator = {
       error: (error) => {
         onError();
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
       }
     });
   },
@@ -77,7 +72,6 @@ const ActionCreator = {
       },
       error: (error) => {
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
       }
     });
   },
@@ -93,7 +87,6 @@ const ActionCreator = {
       },
       error: (error) => {
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
       }
     });
   },
@@ -110,7 +103,6 @@ const ActionCreator = {
       success: callback,
       error: (error) => {
         _dispatch({ type: "API_ERROR" });
-        clearError();
       },
     });
   },
@@ -127,7 +119,6 @@ const ActionCreator = {
       success: callback,
       error: (error) => {
         _dispatch({ type: "API_ERROR" });
-        clearError();
       }
     });
   },
@@ -141,7 +132,6 @@ const ActionCreator = {
       error: (error) => {
         onError();
         _dispatch({ type: "API_ERROR", data: error });
-        clearError();
       }
     })
   },

@@ -1,17 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Message } from 'semantic-ui-react';
 
-const ToastMessage = ({ positive=true, message="", bottom=5, right=5 }) => {
+const ToastMessage = ({ positive=true, message="", bottom=15, left=15, timeout=3000 }) => {
+  const [show, setShow] = useState(true);
+  
+  useEffect(() => {
+    setShow(true);
+
+    const _id = setTimeout(() => {
+      setShow(false);
+    }, timeout);
+    
+    return () => {
+      clearTimeout(_id);
+    }
+  }, [positive, timeout, message]);
+
+  if (!show || !message) return "";
+
   return (
     <Message 
       size="big"
+      success={positive}
+      negative={!positive}
       style={{ 
         position: 'fixed',
         bottom,
-        right,
+        left,
         zIndex: 999999,
-        backgroundColor: positive ? '#12c712c7' : '#ff3b3bf2',
-        color: 'white' 
       }}
     >
       {message}
