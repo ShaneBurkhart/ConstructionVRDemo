@@ -29,6 +29,17 @@ textarea.slim {
   padding: 2px 1px;
 }
 
+textarea.slim:focus {
+  border: 1px solid #85b7d9;
+  outline: 0;
+  border-radius: 8px;
+  font-size: .85rem;
+}
+
+.ui.input.slim input {
+  max-height: 20px;
+}
+
 .pointer {
   cursor: pointer;
 }

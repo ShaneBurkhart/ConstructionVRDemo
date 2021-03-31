@@ -1,8 +1,8 @@
 import React from 'react';
-import { Input, Icon } from 'semantic-ui-react';
+import { Input, TextArea, Icon } from 'semantic-ui-react';
 
 import { formatPrice } from '../../common/formatters';
-import styles from './FocusEditableInput.module.css'
+import styles from './FocusEditableInput.module.css';
 
 class FocusEditableInput extends React.Component {
   constructor(props) {
@@ -16,8 +16,7 @@ class FocusEditableInput extends React.Component {
   }
 
   static defaultProps = {
-    isURL: false,
-    isPrice: false,
+    type: "",
     oneLine: false,
     onValidate: () => true,
     onCancel: () => {},
@@ -27,7 +26,7 @@ class FocusEditableInput extends React.Component {
 
   componentDidUpdate(prevProps){
     if (prevProps.value !== this.props.value) {
-      this.setState({ val: this.props.value })
+      this.setState({ val: this.props.value });
     }
   }
 
@@ -85,32 +84,79 @@ class FocusEditableInput extends React.Component {
     </a>
   );
 
+  formatTextArea = value => (
+    <div>
+      {value.split("\n").map((line, i) => (
+        <span key={i}>{line} <br /></span>
+       ))}
+    </div>
+  );
+  
+
+  textAreaInput = () => (
+    <TextArea
+      autoFocus
+      rows={1}
+      value={this.state.val}
+      onBlur={this.onBlur}
+      onChange={this.onChange}
+      onKeyUp={this.onKeyPress}
+      style={{marginTop: 1, width: '72%'}}
+      className="slim"
+    />
+  );
+
+  priceInput = () => (
+    <Input
+      autoFocus
+      size="mini"
+      type={"number"}
+      step="0.01"
+      value={this.state.val}
+      error={this.props.error}
+      onBlur={this.onBlur}
+      onChange={this.onChange}
+      onKeyUp={this.onKeyPress}
+      className="slim"
+    />
+  )
+
+  defaultInput = () => (
+    <Input
+      autoFocus
+      size="mini"
+      value={this.state.val}
+      error={this.props.error}
+      onBlur={this.onBlur}
+      onChange={this.onChange}
+      onKeyUp={this.onKeyPress}
+      className="slim"
+    />
+  );
+
   getDisplayVal = value => {
-    const { isURL, isPrice } = this.props;
-    if (value && isURL) return this.getAnchor(value);
-    if (value && isPrice) return formatPrice(value);
+    const { type } = this.props;
+    if (value && type === 'url') return this.getAnchor(value);
+    if (value && type === 'price') return formatPrice(value);
+    if (value && type === 'textArea') return this.formatTextArea(value)
     return value;
   }
 
+  getInputField = () => {
+    const { type } = this.props;
+    if (type === 'textArea') return this.textAreaInput();
+    if (type === 'price') return this.priceInput();
+    return this.defaultInput();
+  }
+
   render() {
-    const { editable, error, isPrice, oneLine } = this.props;
+    const { editable, oneLine } = this.props;
     const { focused, hovering, val } = this.state;
 
     if (editable && focused) {
       return (
         <>
-          <Input
-            autoFocus
-            size="mini"
-            type={isPrice ? "number" : "text"}
-            step="0.01"
-            value={val}
-            error={error}
-            onBlur={this.onBlur}
-            onChange={this.onChange}
-            onKeyUp={this.onKeyPress}
-            className="slim"
-          />
+          {this.getInputField()}
           <Icon
             inverted
             circular
@@ -122,8 +168,8 @@ class FocusEditableInput extends React.Component {
           />
           <Icon
             inverted
-            color="grey"
             circular
+            color="grey"
             onMouseDown={this.onClickCancel}
             title="Cancel Edit"
             name="close"

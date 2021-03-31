@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
 
-import { attrMap, getAttrList, finishCategories, getAttrWidth } from '../../common/constants.js';
+import { attrMap, getAttrList, finishCategories } from '../../common/constants.js';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -45,6 +45,13 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
   const isValid = (val, attr) => attrMap[attr].validate(val);
 
   const isFieldLocked = (attr) => formFieldError.error && formFieldError.field !== attr;
+
+  const getFormType = (attr) => {
+    if (attr === "Price") return "price";
+    if (attr === "Product URL") return "url";
+    if (attr === "Details") return "textArea";
+    return "";
+  }
   
   const imgArr = attributes["Images"] || [];
 
@@ -75,14 +82,13 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
           </div>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
             {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map(attr => (
-                <div key={attr} style={{ width: getAttrWidth(attr) < 16 ? "50%" : "100%", display: 'flex' }}>
+                <div key={attr} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
                   <div className={styles.detailsFlexTableLabel}>{attr}:</div>
                   <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
                   <FocusEditableInput
                     editable={isAdmin && !isFieldLocked(attr)}
                     value={attributes[attr]}
-                    isURL={attr === "Product URL"}
-                    isPrice={attr === "Price"}
+                    type={getFormType(attr)}
                     oneLine={attr !== "Details"}
                     onValidate={(val) => isValid(val,attr)}
                     onUpdate={(val) => {
