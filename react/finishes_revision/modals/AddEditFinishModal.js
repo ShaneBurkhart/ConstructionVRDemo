@@ -120,13 +120,15 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
     
     const onImgLinkUpload = (imgUrl) => {
+      setLoading(true)
       ActionCreators.uploadFromUrl(
         imgUrl,
         (awsURL) => {
           arrVal.push(awsURL);
           setAttributeValues(prev => ({ ...prev, [attrName]: arrVal }));
+          setLoading(false)
         },
-        (error) => {}
+        (error) => { setLoading(false) }
       );
     }
 
