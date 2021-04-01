@@ -16,7 +16,7 @@
 }
 
 .detailsSection {
-  width: 70%;
+  width: 75%;
 }
 
 .cellHeading {
@@ -66,6 +66,7 @@
   composes: flexEnd from '../universalStyles/flexStyles.module.css';
   align-items: center;
   width: 25%;
+  justify-self: flex-end;
 }
 
 .draggingState .imageSection {
@@ -83,15 +84,6 @@
   align-self: stretch;
 }
 
-@media print {
-  article {
-    padding: 2px;
-  }
-  .detailsTable {
-    font-size: 10pt;
-  }
-}
-
 .hideDetails {
   display: none;
 }
@@ -101,6 +93,12 @@
 }
 
 @media print {
+  .finishCard {
+    padding: 3px;
+  }
+  .detailsTable {
+    font-size: 10pt;
+  }
   .hideDetails {
     display: flex;
   }

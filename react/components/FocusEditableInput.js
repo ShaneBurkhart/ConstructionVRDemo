@@ -93,18 +93,21 @@ class FocusEditableInput extends React.Component {
   );
   
 
-  textAreaInput = () => (
-    <TextArea
-      autoFocus
-      rows={1}
-      value={this.state.val}
-      onBlur={this.onBlur}
-      onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
-      style={{marginTop: 1, width: '72%'}}
-      className="slim"
-    />
-  );
+  textAreaInput = () => {
+    const maxHeight = (this.state.val.split("\n").length || 1) * 25;
+    return (
+      <TextArea
+        autoFocus
+        rows={1}
+        value={this.state.val}
+        onBlur={this.onBlur}
+        onChange={this.onChange}
+        onKeyUp={this.onKeyPress}
+        style={{ marginTop: 1, width: '72%', maxHeight }}
+        className="slim"
+      />
+    )
+  };
 
   priceInput = () => (
     <Input
