@@ -18,8 +18,10 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
   
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
   const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
+  const [focusedChild, setFocusedChild] = useState(null);
 
   const _isEditing = useRef(false);
+  const _itemsRef = useRef([]);
 
   const detailsExclude = ["Images","Name"];
 
@@ -55,6 +57,55 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
   
   const imgArr = attributes["Images"] || [];
 
+  const AttributeField = ({attr, childNum}) => {
+    
+    const handleClick = e => {
+      console.log('click')
+      e.stopPropagation();
+      if (_itemsRef.current[childNum]) _itemsRef.current[childNum].click();
+    }
+
+    const goToNextInput = () => {
+      // e.stopPropagation();
+      console.log('tabbed')
+      console.log(_itemsRef.current[childNum + 1])
+      if (_itemsRef.current[childNum + 1]) _itemsRef.current[childNum + 1].click();
+    }
+
+    return (
+      <div style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
+        <div onClick={handleClick} className={styles.detailsFlexTableLabel}>{attr}:</div>
+        <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
+        <FocusEditableInput
+          key={attr}
+          // ref={el => _itemsRef.current[childNum] = el}
+          inputRef={el => {
+            console.log({el})
+            _itemsRef.current[childNum] = el
+          }}
+          // forwardedRef={inputRef}
+          editable={isAdmin && !isFieldLocked(attr)}
+          value={attributes[attr]}
+          type={getFormType(attr)}
+          oneLine={attr !== "Details"}
+          onValidate={(val) => isValid(val,attr)}
+          onUpdate={(val) => {
+            handleAttrChange(val, attr);
+            setTimeout(() => {_isEditing.current = false}, 100);
+          }}
+          isFocusedByLabel={focusedChild === childNum}
+          focusedChild={focusedChild}
+          goToNextInput={() => goToNextInput()}
+          onOpen={() => _isEditing.current = true}
+          onCancel={() => _isEditing.current = false}
+          error={formFieldError.field === attr}
+          onError={() => setFormFieldError({ error: true, field: attr })}
+          clearError={() => setFormFieldError({ error: false, field: '' })}
+        />
+      </div>
+    );
+  }
+
   const cardContents = (
     <>
       <div className={styles.detailsSection}>
@@ -81,28 +132,9 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
             <a onClick={handleToggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
           </div>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
-            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map(attr => (
-                <div key={attr} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
-                  <div className={styles.detailsFlexTableLabel}>{attr}:</div>
-                  <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
-                  <FocusEditableInput
-                    editable={isAdmin && !isFieldLocked(attr)}
-                    value={attributes[attr]}
-                    type={getFormType(attr)}
-                    oneLine={attr !== "Details"}
-                    onValidate={(val) => isValid(val,attr)}
-                    onUpdate={(val) => {
-                      handleAttrChange(val, attr);
-                      setTimeout(() => {_isEditing.current = false}, 100);
-                    }}
-                    onOpen={() => _isEditing.current = true}
-                    onCancel={() => _isEditing.current = false}
-                    error={formFieldError.field === attr}
-                    onError={() => setFormFieldError({ error: true, field: attr })}
-                    clearError={() => setFormFieldError({ error: false, field: '' })}
-                  />
-                </div>
-              )
+            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map((attr, i) => {
+              return <AttributeField key={attr} attr={attr} childNum={i} />
+            }
             )}
           </div>
         </div>

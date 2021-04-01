@@ -13,21 +13,37 @@ class FocusEditableInput extends React.Component {
       focused: false,
       val: props.value || "",
     };
+    this.textInput = React.createRef();
   }
 
   static defaultProps = {
     type: "",
     oneLine: false,
+    // forwardedRef: {},
+    isFocusedByLabel: false,
     onValidate: () => true,
     onCancel: () => {},
     onError: () => {},
     clearError: () => {},
   }
 
+  // componentDidMount(){
+  //   if (this.props.isFocusedByLabel) this.setState({ focused: true })
+  // }
+
   componentDidUpdate(prevProps){
+    const { value, isFocusedByLabel } = this.props;
     if (prevProps.value !== this.props.value) {
       this.setState({ val: this.props.value });
     }
+    if (prevProps.isFocusedByLabel !== this.props.isFocusedByLabel ) alert('boomtown')
+    
+  }
+
+  focusTextInput = () => {
+    // Explicitly focus the text input using the raw DOM API
+    // Note: we're accessing "current" to get the DOM node
+    this.textInput.current.focus();
   }
 
   onMouseEnter = () => {
@@ -56,7 +72,8 @@ class FocusEditableInput extends React.Component {
   }
 
   onBlur = () => {
-    const { onUpdate, onValidate, onError, clearError } = this.props;
+    // console.log('onblur')
+    const { onUpdate, onValidate, onError, clearError, onClear } = this.props;
     const { val } = this.state;
     if (onValidate && onValidate(val)) {
       clearError();
@@ -67,7 +84,17 @@ class FocusEditableInput extends React.Component {
     }
   }
 
-  onKeyPress = (e) => {
+  goToNextInput = () => {
+    this.props.goToNextInput();
+  }
+
+  onKeyDown = (e) => {
+    console.log('keydown', e.key)
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.goToNextInput()
+    };
     if (e.key === 'Escape') this.onCancel();
     if (e.key === "Enter") this.onBlur();
   }
@@ -102,7 +129,7 @@ class FocusEditableInput extends React.Component {
         value={this.state.val}
         onBlur={this.onBlur}
         onChange={this.onChange}
-        onKeyUp={this.onKeyPress}
+        onKeyDown={this.onKeyDown}
         style={{ marginTop: 1, width: '72%', maxHeight }}
         className="slim"
       />
@@ -112,6 +139,7 @@ class FocusEditableInput extends React.Component {
   priceInput = () => (
     <Input
       autoFocus
+      ref={this.textInput}
       size="mini"
       type={"number"}
       step="0.01"
@@ -119,7 +147,7 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyDown={this.onKeyDown}
       className="slim"
     />
   )
@@ -127,12 +155,13 @@ class FocusEditableInput extends React.Component {
   defaultInput = () => (
     <Input
       autoFocus
+      // ref={this.props.inputRef}
       size="mini"
       value={this.state.val}
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyDown={this.onKeyDown}
       className="slim"
     />
   );
@@ -153,11 +182,15 @@ class FocusEditableInput extends React.Component {
   }
 
   render() {
-    const { editable, oneLine } = this.props;
+    const { editable, oneLine, isFocusedByLabel, focusedChild } = this.props;
     const { focused, hovering, val } = this.state;
 
-    if (editable && focused) {
-      return (
+    let displayField = "";
+
+    // console.log(this.props.inputRef)
+
+    if (editable && (focused)) {
+      displayField = (
         <>
           {this.getInputField()}
           <Icon
@@ -181,9 +214,8 @@ class FocusEditableInput extends React.Component {
         </>
       );
     } else {
-      return (
+      displayField = (
         <div
-          onClick={this.onClick}
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
           style={{ minWidth: 60 }}
@@ -202,8 +234,19 @@ class FocusEditableInput extends React.Component {
             ) : <div style={{ minWidth: 14, margin: 1 }} />}
           </div>
         </div>
+
       );
     }
+    return (
+      <div
+        key="wrapper"
+        ref={this.props.inputRef}
+        onClick={this.onClick}
+        style={{ minWidth: 60 }}
+      >
+        {displayField}
+      </div>
+    )
   }
 }
 
