@@ -18,7 +18,7 @@ module.exports = (app) => {
       adminAccessToken: uuid()
     });
 
-    const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = newProject;
+    const { id, name, accessToken, adminAccessToken, last_seen_at, archived, v1 } = newProject;
     if (!id) return res.status(422).send("Could not add new project");
     
     // add a few basic categories for 'new project' template
@@ -42,7 +42,7 @@ module.exports = (app) => {
         console.error(error);
         return res.status(error.statusCode).send("Could not add new project");
       }
-      return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived });
+      return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived, v1 });
     });
   });
 
@@ -53,8 +53,8 @@ module.exports = (app) => {
     await project.update({
       last_seen_at: new Date(),
     });
-    const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = project;
-    return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived })
+    const { id, name, accessToken, adminAccessToken, last_seen_at, archived, v1 } = project;
+    return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived, v1 })
   });
 
   app.post("/api2/copy-project", m.authSuperAdmin, async (req, res) => {
@@ -70,7 +70,7 @@ module.exports = (app) => {
       adminAccessToken: uuid()
     });
 
-    const { id: newProjectId, name, accessToken, adminAccessToken, last_seen_at, archived } = newProject;
+    const { id: newProjectId, name, accessToken, adminAccessToken, last_seen_at, archived, v1 } = newProject;
     if (!newProjectId) return res.status(422).send("Could not create new project");
 
     const categoriesToCopy = await models.Category.findAll({ where: { "ProjectId": req.body.id } });
@@ -151,7 +151,7 @@ module.exports = (app) => {
         return res.status(error.statusCode).send("Could not add new project");
       }
 
-      return res.status(200).send({ id: newProjectId, name, accessToken, href: adminAccessToken, last_seen_at, archived });
+      return res.status(200).send({ id: newProjectId, name, accessToken, href: adminAccessToken, last_seen_at, archived, v1 });
     });
   });
 

@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import ActionCreators from './action_creators';
 
-import { Grid, Table, Header, Button } from "semantic-ui-react";
+import { Grid, Table, Header, Button, Icon } from "semantic-ui-react";
 
 import ToastMessage from '../components/ToastMessage';
 import CreateProjectModal from './CreateProjectModal';
 import CopyProjectModal from './CopyProjectModal';
 import ConfirmModal from './ConfirmModal';
+
+// TO DO - Inside of app, clicking between headers has hardcoded href /finishes, will send to v2 of app when clicked
+// where to control for this? Local? session flag? See "Pine Lawn Dental"
+
+// TO DO - handle state re: last_seen_at, updates quicker than redirect
+
+
 
 const Dashboard = () => {
   const allProjects = useSelector(state => state.projects || []);
@@ -63,6 +70,13 @@ const Dashboard = () => {
     }
   }
 
+  const getHref = (adminAccessToken, generalAccessToken, isV1) => {
+    if (isAdmin && isV1) return `/admin/login/${adminAccessToken}`;
+    if (isAdmin && !isV1) return `/admin/login/v2/${adminAccessToken}`;
+    if (isV1) return `/project/${generalAccessToken}/finishes/v1`;
+    return `/project/${generalAccessToken}/finishes`;
+  }
+
   const ProjectGrid = ({ title, projectList, archived=false }) => {
     return (
       <>
@@ -76,15 +90,16 @@ const Dashboard = () => {
             <Table.Row>
               <Table.HeaderCell width={10}>Project</Table.HeaderCell>
               <Table.HeaderCell>Controls</Table.HeaderCell>
+              <Table.HeaderCell width={1}>V1</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {projectList.map(({ id, accessToken, href, name}) => {
-              const link = isAdmin ? `/admin/login/${href}` : `/project/${accessToken}/finishes`
+            {projectList.map(({ id, accessToken, href, name, v1 }) => {
+              const linkHref = getHref(href, accessToken, v1);
               return (
                 <tr className="project-row" key={accessToken}>
                   <td>
-                      <a href={link} onClick={() => updateSeenAt(id)}>{name}</a>
+                      <a href={linkHref} onClick={() => updateSeenAt(id)}>{name}</a>
                   </td>
                   {isAdmin && !archived &&  (
                     <td> 
@@ -97,6 +112,9 @@ const Dashboard = () => {
                       <a className="project-controls-link" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
                     </td>
                   )}
+                  <td>
+                      {v1 && <Icon name="check" color="grey" />}
+                  </td>
                 </tr>
             )})}
           </Table.Body>

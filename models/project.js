@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
     accessToken: DataTypes.STRING,
     adminAccessToken: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
+    v1: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     last_seen_at: {
       type: DataTypes.DATE,
       defaultValue: Date.now(),
