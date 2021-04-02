@@ -67,8 +67,11 @@ class FocusEditableInput extends React.Component {
     }
   }
 
+  onKeyUp = (e) => {
+    if (e.key === 'Escape') this.onCancel(); // escape btn does not register w/ onkeypress
+  }
+  
   onKeyPress = (e) => {
-    if (e.key === 'Escape') this.onCancel();
     if (e.key === "Enter") this.onBlur();
   }
 
@@ -91,18 +94,24 @@ class FocusEditableInput extends React.Component {
        ))}
     </div>
   );
-  
+
+  onTextAreaKeyDown = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, enter will save the form & close
+    if (e.key === "Enter") {
+      this.onBlur();
+    }
+  }
 
   textAreaInput = () => {
-    const maxHeight = (this.state.val.split("\n").length || 1) * 25;
+    const maxHeight = Math.max(this.state.val.split("\n").length, 3) * 20;
     return (
       <TextArea
         autoFocus
-        rows={1}
         value={this.state.val}
         onBlur={this.onBlur}
         onChange={this.onChange}
-        onKeyUp={this.onKeyPress}
+        onKeyDown={this.onTextAreaKeyDown}
+        onKeyUp={this.onKeyUp}
         style={{ marginTop: 1, width: '72%', maxHeight }}
         className="slim"
       />
@@ -119,7 +128,8 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyUp={this.onKeyUp}
+      onKeyPress={this.onKeyPress}
       className="slim"
     />
   )
@@ -132,7 +142,8 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyUp={this.onKeyUp}
+      onKeyPress={this.onKeyPress}
       className="slim"
     />
   );
@@ -145,7 +156,7 @@ class FocusEditableInput extends React.Component {
     return value;
   }
 
-  getInputField = () => {
+  renderInputField = () => {
     const { type } = this.props;
     if (type === 'textArea') return this.textAreaInput();
     if (type === 'price') return this.priceInput();
@@ -159,7 +170,7 @@ class FocusEditableInput extends React.Component {
     if (editable && focused) {
       return (
         <>
-          {this.getInputField()}
+          {this.renderInputField()}
           <Icon
             inverted
             circular
