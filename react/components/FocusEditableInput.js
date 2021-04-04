@@ -2,6 +2,7 @@ import React from 'react';
 import { Input, TextArea, Icon } from 'semantic-ui-react';
 
 import { formatPrice } from '../../common/formatters';
+import TabContext from '../finishes_revision/contexts/TabContext';
 import styles from './FocusEditableInput.module.css';
 
 class FocusEditableInput extends React.Component {
@@ -10,14 +11,18 @@ class FocusEditableInput extends React.Component {
 
     this.state = {
       hovering: false,
-      focused: false,
       val: props.value || "",
     };
   }
 
+  static contextType = TabContext;
+
   static defaultProps = {
     type: "",
     oneLine: false,
+    error: false,
+    isFirstChild: false,
+    isLastChild: false,
     onValidate: () => true,
     onCancel: () => {},
     onError: () => {},
@@ -40,13 +45,19 @@ class FocusEditableInput extends React.Component {
 
   onClick = (e) => {
     e.stopPropagation();
-    if (this.props.onOpen) this.props.onOpen();
-    this.setState({ focused: true, hovering: false });
+    const { onOpen, focusKeySig } = this.props;
+    const { setFocusedEl } = this.context;
+    if (onOpen) onOpen();
+    setFocusedEl(focusKeySig);
+    this.setState({ hovering: false });
   }
  
   onCancel = () => {
-    this.setState({ val: this.props.value, focused: false, hovering: false });
-    this.props.onCancel();
+    const { value, onCancel } = this.props;
+    const { setFocusedEl } = this.context;
+    this.setState({ val: value, hovering: false });
+    setFocusedEl(null)
+    onCancel();
   };
 
   onClickCancel = (e) => {
@@ -57,14 +68,37 @@ class FocusEditableInput extends React.Component {
 
   onBlur = () => {
     const { onUpdate, onValidate, onError, clearError } = this.props;
+    const { setFocusedEl } = this.context;
     const { val } = this.state;
     if (onValidate && onValidate(val)) {
       clearError();
-      this.setState({ focused: false, hovering: false });
+      setFocusedEl(null);
+      this.setState({ hovering: false });
       if (onUpdate) onUpdate(val);
     } else {
       onError && onError();
     }
+  }
+
+  onKeyDown = (e) => {
+    const { tabToNextEl, tabToPrevEl } = this.context;
+    const { isFirstChild, isLastChild } = this.props;
+    if (e.shiftKey && e.key === 'Tab'){
+      e.preventDefault();
+      return tabToPrevEl(isFirstChild);
+    } 
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      return tabToNextEl(isLastChild);
+    }
+  }
+
+  onTextAreaKeyDown = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, enter will save the form & close
+    if (e.key === "Enter") {
+      this.onBlur();
+    }
+    this.onKeyDown(e);
   }
 
   onKeyUp = (e) => {
@@ -95,13 +129,6 @@ class FocusEditableInput extends React.Component {
     </div>
   );
 
-  onTextAreaKeyDown = (e) => {
-    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, enter will save the form & close
-    if (e.key === "Enter") {
-      this.onBlur();
-    }
-  }
-
   textAreaInput = () => {
     const maxHeight = Math.max(this.state.val.split("\n").length, 3) * 20;
     return (
@@ -128,6 +155,7 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
+      onKeyDown={this.onKeyDown}
       onKeyUp={this.onKeyUp}
       onKeyPress={this.onKeyPress}
       className="slim"
@@ -142,6 +170,7 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
+      onKeyDown={this.onKeyDown}
       onKeyUp={this.onKeyUp}
       onKeyPress={this.onKeyPress}
       className="slim"
@@ -164,10 +193,11 @@ class FocusEditableInput extends React.Component {
   }
 
   render() {
-    const { editable, oneLine } = this.props;
-    const { focused, hovering, val } = this.state;
+    const { editable, oneLine, focusKeySig } = this.props;
+    const { hovering, val } = this.state;
+    const { focusedEl } = this.context;
 
-    if (editable && focused) {
+    if (editable && (focusedEl || []).join("") === (focusKeySig || ['x']).join("")) {
       return (
         <>
           {this.renderInputField()}

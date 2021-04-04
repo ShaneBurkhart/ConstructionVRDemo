@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import TabContext from './contexts/TabContext';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
@@ -12,10 +13,12 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) => {
+const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
-  
+
+  const { setFocusedEl, registerAttrCount } = useContext(TabContext);
+
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
   const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
 
@@ -42,6 +45,10 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
 
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
+  useEffect(() => {
+    registerAttrCount(cardIdx, attrList.filter(attr => !detailsExclude.includes(attr)).length - 1)
+  }, []);
+
   const isValid = (val, attr) => attrMap[attr].validate(val);
 
   const isFieldLocked = (attr) => formFieldError.error && formFieldError.field !== attr;
@@ -51,6 +58,40 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
     if (attr === "Product URL") return "url";
     if (attr === "Details") return "textArea";
     return "";
+  }
+
+  const renderAttributeField = (attr, idx) => {    
+    const focusKeyProps = [ category, cardIdx, idx ];
+    
+    const handleClick = (e) => {
+      e.stopPropagation(); 
+      setFocusedEl(focusKeyProps);
+    };
+
+    return (
+      <div key={attr} onClick={handleClick} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
+        <div className={styles.detailsFlexTableLabel}>{attr}:</div>
+        <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
+        <FocusEditableInput
+          editable={isAdmin && !isFieldLocked(attr)}
+          focusKeySig={focusKeyProps}
+          isLastChild={attr === "Details"}
+          value={attributes[attr]}
+          type={getFormType(attr)}
+          oneLine={attr !== "Details"}
+          onValidate={(val) => isValid(val,attr)}
+          onUpdate={(val) => {
+            handleAttrChange(val, attr);
+            setTimeout(() => {_isEditing.current = false}, 100);
+          }}
+          onOpen={() => _isEditing.current = true}
+          onCancel={() => _isEditing.current = false}
+          error={formFieldError.field === attr}
+          onError={() => setFormFieldError({ error: true, field: attr })}
+          clearError={() => setFormFieldError({ error: false, field: '' })}
+        />
+      </div>
+    )
   }
   
   const imgArr = attributes["Images"] || [];
@@ -64,6 +105,8 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
           </span>
           <div className={`${styles.cellHeading} ${styles.cardName}`}>
             <FocusEditableInput
+              focusKeySig={[ category, cardIdx, -1 ]}
+              isFirstChild={true}
               editable={isAdmin}
               value={attributes["Name"]}
               onUpdate={(val) => {
@@ -81,27 +124,8 @@ const FinishCard = ({ tag, finishDetails, expanded, toggleExpand, onDelete }) =>
             <a onClick={handleToggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
           </div>
           <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
-            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map(attr => (
-                <div key={attr} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
-                  <div className={styles.detailsFlexTableLabel}>{attr}:</div>
-                  <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
-                  <FocusEditableInput
-                    editable={isAdmin && !isFieldLocked(attr)}
-                    value={attributes[attr]}
-                    type={getFormType(attr)}
-                    oneLine={attr !== "Details"}
-                    onValidate={(val) => isValid(val,attr)}
-                    onUpdate={(val) => {
-                      handleAttrChange(val, attr);
-                      setTimeout(() => {_isEditing.current = false}, 100);
-                    }}
-                    onOpen={() => _isEditing.current = true}
-                    onCancel={() => _isEditing.current = false}
-                    error={formFieldError.field === attr}
-                    onError={() => setFormFieldError({ error: true, field: attr })}
-                    clearError={() => setFormFieldError({ error: false, field: '' })}
-                  />
-                </div>
+            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map((attr, i) => (
+                renderAttributeField(attr, i)
               )
             )}
           </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import TabContextController from './TabContextController';
 import { Button, Icon } from 'semantic-ui-react';
 
 import { getCategoryTag } from '../../common/constants.js';
@@ -47,45 +48,48 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   }
 
   return (
-    <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
-      <header>
-        <h2 onClick={toggleCollapse}>
-          <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
-          {category}
-          <span className={`${styles.expandCollapseText} hide-print`}>
-            <a href="#/">
-              {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
-            </a>
-          </span>
-        </h2>
-        {isAdmin && (
-          <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
-            <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
-            <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
+    <TabContextController>
+      <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
+        <header>
+          <h2 onClick={toggleCollapse}>
+            <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
+            {category}
+            <span className={`${styles.expandCollapseText} hide-print`}>
+              <a href="#/">
+                {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
+              </a>
+            </span>
           </h2>
-        )}
-      </header>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId={category} type="CARD">
-          {(provided, snapshot) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map(f => (
-                <FinishCard
-                  key={f.id}
-                  tag={tag}
-                  finishDetails={f}
-                  expanded={expandedChildren[f.id]}
-                  toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
-                  onDelete={handleDeleteCard}
-                />
-              ))}
-              {provided.placeholder}
-            </div>
+          {isAdmin && (
+            <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
+              <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
+              <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
+            </h2>
           )}
-        </Droppable>
-      </DragDropContext>
-      {showAddNewModal && <AddEditFinishModal preselectedCategory={category} onClose={toggleShowAddNewModal} />}
-    </div>
+        </header>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId={category} type="CARD">
+            {(provided, snapshot) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map((f, idx) => (
+                  <FinishCard
+                    key={f.id}
+                    tag={tag}
+                    idx={idx}
+                    finishDetails={f}
+                    expanded={expandedChildren[f.id]}
+                    toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                    onDelete={handleDeleteCard}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+        {showAddNewModal && <AddEditFinishModal preselectedCategory={category} onClose={toggleShowAddNewModal} />}
+      </div>
+    </TabContextController>
   );
 }
 
