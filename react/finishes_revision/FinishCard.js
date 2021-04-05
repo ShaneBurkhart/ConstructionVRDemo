@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import TabContext from './contexts/TabContext';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
@@ -13,7 +13,7 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, idx: cardIdx, finishDetails, isFirstCard, isLastCard, expandedDetails, toggleExpand, onDelete }) => {
+const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expandedDetails, toggleExpand, onDelete, expandPrevSibling }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
 
@@ -45,7 +45,6 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, isFirstCard, isLastCard,
     const onError = () => console.error('error');
     ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
   }
-
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
   const lastInputIdx = attrList.filter(attr => !detailsExclude.includes(attr)).length - 1;
@@ -67,7 +66,8 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, isFirstCard, isLastCard,
     if (!isFirstChild){
       return setFocusedEl([ cat, cardIdx, idx - 1 ]);
     } else if (isFirstChild && !isFirstCard){
-      return setFocusedEl([ cat, cardIdx - 1, lastInputIdx])
+      expandPrevSibling();
+      return setFocusedEl([ cat, cardIdx - 1, lastInputIdx]);
     } else if (isFirstCard){
       return goToPrevCategory(category);
     }

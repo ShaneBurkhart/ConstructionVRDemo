@@ -46,6 +46,8 @@ const FinishCategoriesTable = ({ category, finishes }) => {
     ActionCreator.updateFinishOrders({ id: draggableId, orderNumber: destination.index });
   }
 
+  const sortedFinishes = finishes.sort((a,b) => a.orderNumber - b.orderNumber);
+
   return (
       <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
         <header>
@@ -69,16 +71,22 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           <Droppable droppableId={category} type="CARD">
             {(provided, snapshot) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {expanded && finishes.sort((a,b) => a.orderNumber - b.orderNumber).map((f, idx) => (
+                {expanded && sortedFinishes.map((f, idx) => (
                   <FinishCard
                     key={f.id}
                     tag={tag}
-                    idx={idx}
+                    cardIdx={idx}
                     finishDetails={f}
                     expandedDetails={expandedChildren[f.id]}
                     isFirstCard={idx === 0}
                     isLastCard={idx === finishes.length - 1}
                     toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                    expandPrevSibling={() => {
+                      if (idx !== 0) {
+                        const prevSibling = sortedFinishes[idx - 1];
+                        setExpandedChildren(prev => ({...prev, [prevSibling.id]: true}))
+                      }
+                    }}
                     onDelete={handleDeleteCard}
                   />
                 ))}

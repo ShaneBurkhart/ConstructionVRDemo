@@ -20,17 +20,14 @@ const TabContextController = ({ children, categoryList }) => {
     
     const categoryCardLength = finishes.filter(f => f.category === prevCategory).length;
     
-    setFocusedEl([prevCategory, categoryCardLength - 1, -1]);
+    // setFocusedEl([prevCategory, categoryCardLength - 1, -1]); // just go to first field always
   
-    /* This block will get the last attribute of field of the previous card
       const categoryDetails = finishes.find(f => f.category === prevCategory);
-      const categoryAttributes = categoryDetails.attributes;
       const attributesArr = Object.keys(categoryDetails.attributes).length - 1;
       
       const excludedDetails = ["Name", "Images"];
       const lastAttrField = attributesArr - excludedDetails.length;
       setFocusedEl([prevCategory, categoryCardLength - 1, lastAttrField]);
-    */
   }
 
   const contextValue = {
