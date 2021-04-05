@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import TabContextController from './TabContextController';
 import { Button, Icon } from 'semantic-ui-react';
 
 import { getCategoryTag } from '../../common/constants.js';
@@ -48,7 +47,6 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   }
 
   return (
-    <TabContextController>
       <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
         <header>
           <h2 onClick={toggleCollapse}>
@@ -77,7 +75,9 @@ const FinishCategoriesTable = ({ category, finishes }) => {
                     tag={tag}
                     idx={idx}
                     finishDetails={f}
-                    expanded={expandedChildren[f.id]}
+                    expandedDetails={expandedChildren[f.id]}
+                    isFirstCard={idx === 0}
+                    isLastCard={idx === finishes.length - 1}
                     toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
                     onDelete={handleDeleteCard}
                   />
@@ -89,7 +89,6 @@ const FinishCategoriesTable = ({ category, finishes }) => {
         </DragDropContext>
         {showAddNewModal && <AddEditFinishModal preselectedCategory={category} onClose={toggleShowAddNewModal} />}
       </div>
-    </TabContextController>
   );
 }
 

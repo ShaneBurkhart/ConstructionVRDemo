@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import TabContextController from './TabContextController';
 import _ from 'underscore';
 import ActionCreators from './action_creators';
 
@@ -31,18 +32,22 @@ const App = () => {
     }
   });
 
+  const categoryList = Object.keys(activeCategoryMap);
+
   return (
     <main>
       {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} />}
-      <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
-        {(Object.keys(activeCategoryMap).sort() || []).map(category => (
-          <FinishCategoryTable
-            key={category}
-            category={category}
-            finishes={finishes.filter(f => f.category === category)}
-          />
-        ))}
-      </section>
+      <TabContextController categoryList={categoryList}>
+        <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
+          {(categoryList || []).sort().map((category) => (
+            <FinishCategoryTable
+              key={category}
+              category={category}
+              finishes={finishes.filter(f => f.category === category)}
+            />
+          ))}
+        </section>
+      </TabContextController>
       <FloatingProjectButton name={PROJECT_NAME} />
       <ToastMessage positive={false} message={apiError.message} />
     </main>

@@ -1,38 +1,43 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import TabContext from './contexts/TabContext';
 
-const TabContextController = ({ children }) => {
-  const [attrCountMap, setAttrCountMap] = useState({});
+const TabContextController = ({ children, categoryList }) => {
   const [focusedEl, setFocusedEl] = useState(null);
+  const finishes = useSelector(state => state.finishes);
 
-  const tabToNextEl = (isLastChild) => {
-    if (focusedEl && focusedEl.length) {
-      const [ category, cardIdx, idx ] = focusedEl;
-      const nextIdx = isLastChild ? -1 : idx + 1;
-      const nextCardIdx = isLastChild ? cardIdx + 1 : cardIdx
-      setFocusedEl([ category, nextCardIdx, nextIdx ]);
-    }
+  const goToNextCategory = (currentCategory) => {
+    const currentCatIdx = categoryList.indexOf(currentCategory);
+    const nextCategory = categoryList[currentCatIdx + 1] ? categoryList[currentCatIdx + 1] : null;
+    if (nextCategory) setFocusedEl([nextCategory, 0, -1]);
   }
 
-  const tabToPrevEl = (isFirstChild) => {
-    if (focusedEl && focusedEl.length) {
-      const [ category, cardIdx, idx ] = focusedEl;
-      const prevCard = cardIdx - 1;
-      const prevCardLastChild = attrCountMap[prevCard]
-      const prevIdx = isFirstChild ? prevCardLastChild : idx - 1;
-      const prevCardIdx = isFirstChild ? prevCard : cardIdx;
-      setFocusedEl([ category, prevCardIdx, prevIdx ]);
-    }
-  }
+  const goToPrevCategory = (currentCategory) => {
+    const currentCatIdx = categoryList.indexOf(currentCategory);
+    if (currentCatIdx === 0) return;
+    
+    const prevCategory = categoryList[currentCatIdx - 1];
+    
+    const categoryCardLength = finishes.filter(f => f.category === prevCategory).length;
+    
+    setFocusedEl([prevCategory, categoryCardLength - 1, -1]);
   
-  const registerAttrCount = (cardIdx, attrCount) => setAttrCountMap(prev => ({ ...prev, [cardIdx]: attrCount }))
+    /* This block will get the last attribute of field of the previous card
+      const categoryDetails = finishes.find(f => f.category === prevCategory);
+      const categoryAttributes = categoryDetails.attributes;
+      const attributesArr = Object.keys(categoryDetails.attributes).length - 1;
+      
+      const excludedDetails = ["Name", "Images"];
+      const lastAttrField = attributesArr - excludedDetails.length;
+      setFocusedEl([prevCategory, categoryCardLength - 1, lastAttrField]);
+    */
+  }
 
   const contextValue = {
     focusedEl,
-    registerAttrCount,
     setFocusedEl,
-    tabToNextEl,
-    tabToPrevEl,
+    goToNextCategory,
+    goToPrevCategory,
   };
 
   return (

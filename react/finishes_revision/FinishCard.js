@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import TabContext from './contexts/TabContext';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
@@ -13,11 +13,11 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, onDelete }) => {
+const FinishCard = ({ tag, idx: cardIdx, finishDetails, isFirstCard, isLastCard, expandedDetails, toggleExpand, onDelete }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
 
-  const { setFocusedEl, focusedEl, tabToNextEl, tabToPrevEl, registerAttrCount } = useContext(TabContext);
+  const { setFocusedEl, focusedEl, goToNextCategory, goToPrevCategory } = useContext(TabContext);
 
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
   const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
@@ -32,7 +32,10 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
   };
 
   const toggleShowEditFinishModal = () => {
-    if (_isEditing.current) return false;
+    if (_isEditing.current) {
+      _isEditing.current = false;
+      return false
+    };
     if (isAdmin) setShowEditFinishModal(!showEditFinishModal)
   };
 
@@ -45,9 +48,30 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
 
   const attrList = getAttrList(finishCategories[category]).map(a => a.name);
 
-  useEffect(() => {
-    registerAttrCount(cardIdx, attrList.filter(attr => !detailsExclude.includes(attr)).length - 1)
-  }, []);
+  const lastInputIdx = attrList.filter(attr => !detailsExclude.includes(attr)).length - 1;
+  
+  const tabToNextInput = (isLastChild) =>  {
+    const [ cat, cardIdx, idx ] = focusedEl;
+    if (!isLastChild){
+      if (!expandedDetails) toggleExpand();
+      return setFocusedEl([ cat, cardIdx, idx + 1 ]);
+    } else if (isLastChild && !isLastCard){
+      return setFocusedEl([ cat, cardIdx + 1, -1]);
+    } else if (isLastCard){
+      return goToNextCategory(category);
+    }
+  }
+  
+  const tabToPrevInput = (isFirstChild) => {
+    const [ cat, cardIdx, idx ] = focusedEl;
+    if (!isFirstChild){
+      return setFocusedEl([ cat, cardIdx, idx - 1 ]);
+    } else if (isFirstChild && !isFirstCard){
+      return setFocusedEl([ cat, cardIdx - 1, lastInputIdx])
+    } else if (isFirstCard){
+      return goToPrevCategory(category);
+    }
+  }
 
   const isValid = (val, attr) => attrMap[attr].validate(val);
 
@@ -55,9 +79,9 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
 
   const handleTab = (e, isFirstChild, isLastChild) => {
     if (e.shiftKey){
-      return tabToPrevEl(isFirstChild);
+      return tabToPrevInput(isFirstChild);
     } 
-    return tabToNextEl(isLastChild)
+    return tabToNextInput(isLastChild);
   }
 
   const getFormType = (attr) => {
@@ -75,7 +99,7 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
       handleSetFocusedEl();
     };
 
-    const handleSetFocusedEl = () => setFocusedEl(focusKeySig)
+    const handleSetFocusedEl = () => setFocusedEl(focusKeySig);
 
     return (
       <div key={attr} onClick={handleInputClick} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
@@ -136,9 +160,9 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
         </div>
         <div className={styles.detailsTableContainer}>
           <div className={`${styles.detailsToggleLink} hide-print`}>
-            <a onClick={handleToggleExpand}>{`${expanded ? "Hide" : "Show"}`} Details</a>
+            <a onClick={handleToggleExpand}>{`${expandedDetails ? "Hide" : "Show"}`} Details</a>
           </div>
-          <div className={`${styles.detailsFlexTable} ${expanded ? styles.showDetails : styles.hideDetails}`}>
+          <div className={`${styles.detailsFlexTable} ${expandedDetails ? styles.showDetails : styles.hideDetails}`}>
             {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map((attr, i) => (
                 renderAttributeField(attr, i)
               )
