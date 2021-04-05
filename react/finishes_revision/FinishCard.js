@@ -70,22 +70,23 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
   const renderAttributeField = (attr, idx) => {    
     const focusKeySig = [ category, cardIdx, idx ];
     
-    const handleClick = (e) => {
+    const handleInputClick = (e) => {
       e.stopPropagation();
-      setFocusedEl(focusKeySig);
+      handleSetFocusedEl();
     };
 
+    const handleSetFocusedEl = () => setFocusedEl(focusKeySig)
+
     return (
-      <div key={attr} onClick={handleClick} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
+      <div key={attr} onClick={handleInputClick} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
         <div className={styles.detailsFlexTableLabel}>{attr}:</div>
         <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
         <FocusEditableInput
           editable={isAdmin && !isFieldLocked(attr)}
           isLastChild={attr === "Details"}
-          isExpandedExternally={true}
           expanded={(focusedEl || []).join("") === (focusKeySig || ['x']).join("")}
           clearExpanded={() => setFocusedEl(null)}
-          handleExpanded={handleClick}
+          handleExpanded={handleSetFocusedEl}
           handleTab={handleTab}
           value={attributes[attr]}
           type={getFormType(attr)}
@@ -93,7 +94,7 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
           onValidate={(val) => isValid(val,attr)}
           onUpdate={(val) => {
             handleAttrChange(val, attr);
-            setTimeout(() => {_isEditing.current = false}, 100);
+            if (!focusedEl) setTimeout(() => {_isEditing.current = false}, 100);
           }}
           onOpen={() => _isEditing.current = true}
           onCancel={() => _isEditing.current = false}
@@ -118,13 +119,14 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
             <FocusEditableInput
               isFirstChild={true}
               editable={isAdmin}
-              isExpandedExternally={true}
               expanded={(focusedEl || []).join("") === ([ category, cardIdx, -1 ] || ['x']).join("")}
+              handleExpanded={() => setFocusedEl([ category, cardIdx, -1 ])}
+              clearExpanded={() => setFocusedEl(null)}
               handleTab={handleTab}
               value={attributes["Name"]}
               onUpdate={(val) => {
                 handleAttrChange(val, "Name");
-                setTimeout(() => {_isEditing.current = false}, 100);
+                if (!focusedEl) setTimeout(() => {_isEditing.current = false}, 100);
               }}
               onOpen={() => _isEditing.current = true}
               onCancel={() => _isEditing.current = false}

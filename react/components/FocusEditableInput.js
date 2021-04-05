@@ -10,7 +10,7 @@ class FocusEditableInput extends React.Component {
 
     this.state = {
       hovering: false,
-      focused: false,
+      focused: props.expanded || false,
       val: props.value || "",
     };
   }
@@ -20,7 +20,6 @@ class FocusEditableInput extends React.Component {
     oneLine: false,
     error: false,
     expanded: false,
-    isFocusedExernally: false,
     isFirstChild: false,
     isLastChild: false,
     clearExpanded: () => {},
@@ -48,25 +47,19 @@ class FocusEditableInput extends React.Component {
 
 
   removeFocus = () => {
-    const { isExpandedExternally, clearExpanded } = this.props;
-    if (isExpandedExternally) {
-      clearExpanded()
-    } else {
-      this.setState({ focused: false });
-    };
+    const { expanded, clearExpanded } = this.props;
+    if (expanded) clearExpanded();
+    this.setState({ focused: false });
   }
 
   onClick = (e) => {
     e.stopPropagation();
-    const { onOpen, isExpandedExternally, handleExpanded } = this.props;
+    const { onOpen, handleExpanded } = this.props;
     
     if (onOpen) onOpen();
     
-    if (isExpandedExternally) {
-      handleExpanded(e);
-    } else {
-      this.setState({ focused: true });
-    };
+    handleExpanded();
+    this.setState({ focused: true });
     this.setState({ hovering: false });
   }
  
@@ -97,10 +90,10 @@ class FocusEditableInput extends React.Component {
   }
 
   onKeyDown = (e) => {
-    const { handleTab, isExpandedExternally, isFirstChild, isLastChild } = this.props;
+    const { handleTab, expanded, isFirstChild, isLastChild } = this.props;
     if (e.key === 'Tab') {
       e.preventDefault();
-      if (!isExpandedExternally) return this.onBlur();
+      if (!expanded) return this.onBlur();
       handleTab(e, isFirstChild, isLastChild);
     }
   }
@@ -208,7 +201,7 @@ class FocusEditableInput extends React.Component {
     const { editable, oneLine, expanded } = this.props;
     const { hovering, focused, val } = this.state;
 
-    if (editable && (expanded || focused)) {
+    if (editable && (focused || expanded)) {
       return (
         <>
           {this.renderInputField()}
