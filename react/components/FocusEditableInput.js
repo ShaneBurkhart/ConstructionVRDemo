@@ -2,7 +2,6 @@ import React from 'react';
 import { Input, TextArea, Icon } from 'semantic-ui-react';
 
 import { formatPrice } from '../../common/formatters';
-import TabContext from '../finishes_revision/contexts/TabContext';
 import styles from './FocusEditableInput.module.css';
 
 class FocusEditableInput extends React.Component {
@@ -11,18 +10,22 @@ class FocusEditableInput extends React.Component {
 
     this.state = {
       hovering: false,
+      focused: false,
       val: props.value || "",
     };
   }
-
-  static contextType = TabContext;
 
   static defaultProps = {
     type: "",
     oneLine: false,
     error: false,
+    expanded: false,
+    isFocusedExernally: false,
     isFirstChild: false,
     isLastChild: false,
+    clearExpanded: () => {},
+    handleExpanded: () => {},
+    handleTab: () => {},
     onValidate: () => true,
     onCancel: () => {},
     onError: () => {},
@@ -43,20 +46,34 @@ class FocusEditableInput extends React.Component {
     this.setState({ hovering: false });
   }
 
+
+  removeFocus = () => {
+    const { isExpandedExternally, clearExpanded } = this.props;
+    if (isExpandedExternally) {
+      clearExpanded()
+    } else {
+      this.setState({ focused: false });
+    };
+  }
+
   onClick = (e) => {
     e.stopPropagation();
-    const { onOpen, focusKeySig } = this.props;
-    const { setFocusedEl } = this.context;
+    const { onOpen, isExpandedExternally, handleExpanded } = this.props;
+    
     if (onOpen) onOpen();
-    setFocusedEl(focusKeySig);
+    
+    if (isExpandedExternally) {
+      handleExpanded(e);
+    } else {
+      this.setState({ focused: true });
+    };
     this.setState({ hovering: false });
   }
  
   onCancel = () => {
     const { value, onCancel } = this.props;
-    const { setFocusedEl } = this.context;
     this.setState({ val: value, hovering: false });
-    setFocusedEl(null)
+    this.removeFocus();
     onCancel();
   };
 
@@ -68,11 +85,10 @@ class FocusEditableInput extends React.Component {
 
   onBlur = () => {
     const { onUpdate, onValidate, onError, clearError } = this.props;
-    const { setFocusedEl } = this.context;
     const { val } = this.state;
     if (onValidate && onValidate(val)) {
       clearError();
-      setFocusedEl(null);
+      this.removeFocus();
       this.setState({ hovering: false });
       if (onUpdate) onUpdate(val);
     } else {
@@ -81,20 +97,16 @@ class FocusEditableInput extends React.Component {
   }
 
   onKeyDown = (e) => {
-    const { tabToNextEl, tabToPrevEl } = this.context;
-    const { isFirstChild, isLastChild } = this.props;
-    if (e.shiftKey && e.key === 'Tab'){
-      e.preventDefault();
-      return tabToPrevEl(isFirstChild);
-    } 
+    const { handleTab, isExpandedExternally, isFirstChild, isLastChild } = this.props;
     if (e.key === 'Tab') {
       e.preventDefault();
-      return tabToNextEl(isLastChild);
+      if (!isExpandedExternally) return this.onBlur();
+      handleTab(e, isFirstChild, isLastChild);
     }
   }
 
   onTextAreaKeyDown = (e) => {
-    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, enter will save the form & close
+    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, Enter will save the form & close
     if (e.key === "Enter") {
       this.onBlur();
     }
@@ -193,11 +205,10 @@ class FocusEditableInput extends React.Component {
   }
 
   render() {
-    const { editable, oneLine, focusKeySig } = this.props;
-    const { hovering, val } = this.state;
-    const { focusedEl } = this.context;
+    const { editable, oneLine, expanded } = this.props;
+    const { hovering, focused, val } = this.state;
 
-    if (editable && (focusedEl || []).join("") === (focusKeySig || ['x']).join("")) {
+    if (editable && (expanded || focused)) {
       return (
         <>
           {this.renderInputField()}

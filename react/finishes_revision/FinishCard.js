@@ -17,7 +17,7 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
 
-  const { setFocusedEl, registerAttrCount } = useContext(TabContext);
+  const { setFocusedEl, focusedEl, tabToNextEl, tabToPrevEl, registerAttrCount } = useContext(TabContext);
 
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
   const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
@@ -53,6 +53,13 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
 
   const isFieldLocked = (attr) => formFieldError.error && formFieldError.field !== attr;
 
+  const handleTab = (e, isFirstChild, isLastChild) => {
+    if (e.shiftKey){
+      return tabToPrevEl(isFirstChild);
+    } 
+    return tabToNextEl(isLastChild)
+  }
+
   const getFormType = (attr) => {
     if (attr === "Price") return "price";
     if (attr === "Product URL") return "url";
@@ -61,11 +68,11 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
   }
 
   const renderAttributeField = (attr, idx) => {    
-    const focusKeyProps = [ category, cardIdx, idx ];
+    const focusKeySig = [ category, cardIdx, idx ];
     
     const handleClick = (e) => {
-      e.stopPropagation(); 
-      setFocusedEl(focusKeyProps);
+      e.stopPropagation();
+      setFocusedEl(focusKeySig);
     };
 
     return (
@@ -74,8 +81,12 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
         <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
         <FocusEditableInput
           editable={isAdmin && !isFieldLocked(attr)}
-          focusKeySig={focusKeyProps}
           isLastChild={attr === "Details"}
+          isExpandedExternally={true}
+          expanded={(focusedEl || []).join("") === (focusKeySig || ['x']).join("")}
+          clearExpanded={() => setFocusedEl(null)}
+          handleExpanded={handleClick}
+          handleTab={handleTab}
           value={attributes[attr]}
           type={getFormType(attr)}
           oneLine={attr !== "Details"}
@@ -105,9 +116,11 @@ const FinishCard = ({ tag, idx: cardIdx, finishDetails, expanded, toggleExpand, 
           </span>
           <div className={`${styles.cellHeading} ${styles.cardName}`}>
             <FocusEditableInput
-              focusKeySig={[ category, cardIdx, -1 ]}
               isFirstChild={true}
               editable={isAdmin}
+              isExpandedExternally={true}
+              expanded={(focusedEl || []).join("") === ([ category, cardIdx, -1 ] || ['x']).join("")}
+              handleTab={handleTab}
               value={attributes["Name"]}
               onUpdate={(val) => {
                 handleAttrChange(val, "Name");
