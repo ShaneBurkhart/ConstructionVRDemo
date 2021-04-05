@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
 
-import { attrMap, getAttrList, finishCategories } from '../../common/constants.js';
+import { attrMap, getAttrList, finishCategoriesMap } from '../../common/constants.js';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -45,7 +45,7 @@ const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expa
     const onError = () => console.error('error');
     ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
   }
-  const attrList = getAttrList(finishCategories[category]).map(a => a.name);
+  const attrList = getAttrList(finishCategoriesMap[category]).map(a => a.name);
 
   const lastInputIdx = attrList.filter(attr => !detailsExclude.includes(attr)).length - 1;
   

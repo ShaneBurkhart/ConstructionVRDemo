@@ -3,7 +3,7 @@ import _ from 'underscore';
 import { Grid, Dimmer, Loader, Form, Button, Modal } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
-import { finishCategories, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
+import { finishCategoriesMap, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
@@ -66,14 +66,14 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const handleSelectCategory = categoryName => {
     setAttrRows([]);
     setSelectedCategory(categoryName);
-    const newCategoryObj = finishCategories[categoryName];
+    const newCategoryObj = finishCategoriesMap[categoryName];
     const attrList = (getAttrList(newCategoryObj));
     setAttrRows(getAttrGridRows(attrList));
   }
 
   useEffect(() => {
     if (selectedCategory) {
-      const categoryObj = finishCategories[selectedCategory];
+      const categoryObj = finishCategoriesMap[selectedCategory];
       const attrList = getAttrList(categoryObj);
       setAttrRows(getAttrGridRows(attrList));
     }
@@ -158,7 +158,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
             <Grid.Row style={{ overflow: "visible" }}>
               <Grid.Column width={16}>
                 <CategoryDropdown
-                  options={Object.keys(finishCategories).sort()}
+                  options={Object.keys(finishCategoriesMap).sort()}
                   selectedCategory={selectedCategory}
                   handleSelectCategory={handleSelectCategory}
                 />

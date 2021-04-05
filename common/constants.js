@@ -124,148 +124,154 @@ const finishAttributes = [
   },
 ];
 
-const finishCategories = {
-  "Paint": {
+const finishCategoriesArr = [
+  { name: "Paint",
     tag: "PT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Price","Details","Images",], 
   },
-  "Wall Covering": {
+  { name: "Wall Covering",
     tag: "WC",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Price","Details","Images",], 
   },
-  "Tile": {
+  { name: "Tile",
     tag: "T",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Grout Tag","Grout Joint Thickness","Price","Details","Images",], 
   },
-  "Grout": {
+  { name: "Grout",
     tag: "G",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Price","Details","Images",], 
   },
-  "Carpet": {
+  { name: "Carpet",
     tag: "CPT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Installation Method","Carpet Pad","Price","Details","Images",], 
   },
-  "Luxury Vinyl Tile": {
+  { name: "Luxury Vinyl Tile",
     tag: "LVT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
   },
-  "Sealed Concrete": {
+  { name: "Sealed Concrete",
     tag: "SC",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Finish","Price","Details","Images",], 
   },
-  "Laminate": {
+  { name: "Laminate",
     tag: "L",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Finish","Price","Details","Images",], 
   },
-  "Stone Countertops": {
+  { name: "Stone Countertops",
     tag: "ST",
     attr: ["Name","Product URL","Manufacturer","Color","Finish","Type","Thickness","Edge Profile","Price","Details","Images",], 
   },
-  "Wood Stain": {
+  { name: "Wood Stain",
     tag: "WS",
     attr: ["Name","Product URL","Color","Finish","Wood Species","Price","Details","Images",], 
   },
-  "Wood Products": {
+  { name: "Wood Products",
     tag: "WP",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Wood Species","Price","Details","Images",], 
   },
-  "Metal Products": {
+  { name: "Metal Products",
     tag: "MP",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Finish","Price","Details","Images",], 
   },
-  "Wall Base": {
+  { name: "Wall Base",
     tag: "B",
     attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Trim": {
+  { name: "Trim",
     tag: "TR",
     attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Transition Strips": {
+  { name: "Transition Strips",
     tag: "TS",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
   },
-  "Doors": {
+  { name: "Doors",
     tag: "D",
     attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Door Hardware": {
+  { name: "Door Hardware",
     tag: "DH",
     attr: ["Name","Product URL","Manufacturer","Color","Style","Price","Details","Images",], 
   },
-  "Cabinets": {
+  { name: "Cabinets",
     tag: "CB",
     attr: ["Name","Product URL","Manufacturer","Color","Style","Price","Details","Images",], 
   },
-  "Cabinet Hardware": {
+  { name: "Cabinet Hardware",
     tag: "CH",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Mailboxes": {
+  { name: "Mailboxes",
     tag: "MB",
     attr: ["Name","Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
   },
-  "Electrical": {
+  { name: "Electrical",
     tag: "E",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Price","Details","Images",], 
   },
-  "Lighting Fixtures": {
+  { name: "Lighting Fixtures",
     tag: "LT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
   },
-  "Electronics": {
+  { name: "Electronics",
     tag: "EL",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Plumbing": {
+  { name: "Plumbing",
     tag: "PL",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
   },
-  "Restroom Accessories": {
+  { name: "Restroom Accessories",
     tag: "RA",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
   },
-  "Appliances": {
+  { name: "Appliances",
     tag: "AP",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Fabric": {
+  { name: "Fabric",
     tag: "FA",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Type","Price","Details","Images",], 
   },
-  "Furniture": {
+  { name: "Furniture",
     tag: "F",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Wall Decor": {
+  { name: "Wall Decor",
     tag: "WD",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Misc Decor": {
+  { name: "Misc Decor",
     tag: "MD",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Window Treatments": {
+  { name: "Window Treatments",
     tag: "WT",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
   },
-  "Miscellaneous": {
+  { name: "Miscellaneous",
     tag: "M",
     attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
   },
- }
+];
+
+const finishCategoriesMap = {};
+finishCategoriesArr.forEach((category, i) => finishCategoriesMap[category.name] = {...category, order: i });
+
+
 
  const attrMap = {};
  finishAttributes.forEach(a => attrMap[a.name] = { ...a });
- const allCategoryNames = Object.keys(finishCategories);
+ const allCategoryNames = Object.keys(finishCategoriesMap);
 
 
  module.exports = {
-    finishCategories,
+    finishCategoriesArr,
+    finishCategoriesMap,
     attrMap,
     allCategoryNames,
     getAttrWidth: (attrName) => attrMap[attrName].width,
-    getCategoryTag: (category) => finishCategories[category].tag,
+    getCategoryTag: (category) => finishCategoriesMap[category].tag,
     getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
     getAttrGridRows: (attrList=[]) => {
       let remainingWidth = 16;
