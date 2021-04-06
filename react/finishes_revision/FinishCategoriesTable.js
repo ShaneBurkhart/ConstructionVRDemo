@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import FinishCategoryTable from './FinishCategoryTable';
-import _ from 'underscore';
 import TabContextController from './TabContextController';
 
 function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
@@ -47,27 +46,38 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
 
   
   return (
-    <TabContextController categoryList={categoryList}>
-      <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
+    <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
         <div className="controls" style={{ display: 'flex', justifyContent: 'space-evenly' }}>
           <a onClick={expandAllCategories}>Expand All Categories</a><br />
           <a onClick={collapseAllCategories}>Close All Categories</a><br />
           <a onClick={expandAllDetails}>Expand All Details</a><br />
           <a onClick={collapseAllDetails}>Close All Details</a><br />
         </div>
-        {(categoryList || []).map((category, i) => (
-          <FinishCategoryTable
-            key={category}
-            category={category}
-            finishes={finishes.filter(f => f.category === category)}
-            expandedCategory={!expandedCategories || expandedCategories.includes(i)}
-            expandedChildren={expandedCards[i] || []}
-            handleExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [i]: updatedChildren }))}
-            toggleExpandCategory={() => toggleExpandCategory(i)}
-          />
-        ))}
+        <TabContextController
+          categoryList={categoryList}
+          finishes={finishes}
+          expandCard={(key, newCard) => {
+            if (expandedCards[key] && !expandedCards[key].includes(newCard)) return setExpandedCards(prev => ({ ...prev, [key]: [...prev[key], newCard] }));
+            if (!expandedCards[key]) return setExpandedCards(prev => ({ ...prev, [key]: [newCard] }));
+          }}
+          expandCategory={(idx) => {
+            if (!expandedCategories) return setExpandedCategories([idx]);
+            if (!expandedCategories.includes(idx)) return setExpandedCategories(prev => [...prev, idx]);
+          }}
+        >
+          {(categoryList || []).map((category, i) => (
+            <FinishCategoryTable
+              key={category}
+              category={category}
+              finishes={finishes.filter(f => f.category === category)}
+              expandedCategory={!expandedCategories || expandedCategories.includes(i)}
+              expandedChildren={expandedCards[i] || []}
+              handleExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [i]: updatedChildren }))}
+              toggleExpandCategory={() => toggleExpandCategory(i)}
+            />
+          ))}
+      </TabContextController>
       </section>
-  </TabContextController>
   )
 }
 

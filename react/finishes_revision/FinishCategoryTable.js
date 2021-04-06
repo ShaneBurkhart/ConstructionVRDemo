@@ -82,8 +82,8 @@ const FinishCategoriesTable = ({ category, finishes, expandedCategory, toggleExp
                     }}
                     expandPrevSibling={() => {
                       if (idx !== 0) {
-                        const prevSibling = sortedFinishes[idx - 1];
-                        handleExpandedChildren({...expandedChildren, [prevSibling.id]: true})
+                        const prevIdx = idx - 1;
+                        if (!expandedChildren.includes(prevIdx)) handleExpandedChildren([...expandedChildren, prevIdx])
                       }
                     }}
                     onDelete={handleDeleteCard}

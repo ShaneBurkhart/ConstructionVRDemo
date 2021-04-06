@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import TabContext from './contexts/TabContext';
 
-const TabContextController = ({ children, categoryList }) => {
+const TabContextController = ({ children, categoryList, finishes, expandCategory, expandCard }) => {
   const [focusedEl, setFocusedEl] = useState(null);
-  const finishes = useSelector(state => state.finishes);
 
   const goToNextCategory = (currentCategory) => {
     const currentCatIdx = categoryList.indexOf(currentCategory);
-    const nextCategory = categoryList[currentCatIdx + 1] ? categoryList[currentCatIdx + 1] : null;
-    if (nextCategory) setFocusedEl([nextCategory, 0, -1]);
+    const nextCategory = categoryList[currentCatIdx + 1];
+    if (nextCategory) {
+      expandCategory(currentCatIdx + 1);
+      expandCard(currentCatIdx + 1, 0);
+      setFocusedEl([nextCategory, 0, -1]);
+    };
   }
 
   const goToPrevCategory = (currentCategory) => {
@@ -20,14 +22,14 @@ const TabContextController = ({ children, categoryList }) => {
     
     const categoryCardLength = finishes.filter(f => f.category === prevCategory).length;
     
-    // setFocusedEl([prevCategory, categoryCardLength - 1, -1]); // just go to first field always
-  
-      const categoryDetails = finishes.find(f => f.category === prevCategory);
-      const attributesArr = Object.keys(categoryDetails.attributes).length - 1;
-      
-      const excludedDetails = ["Name", "Images"];
-      const lastAttrField = attributesArr - excludedDetails.length;
-      setFocusedEl([prevCategory, categoryCardLength - 1, lastAttrField]);
+    const categoryDetails = finishes.find(f => f.category === prevCategory);
+    const attributesArr = Object.keys(categoryDetails.attributes).length - 1;
+    
+    const excludedDetails = ["Name", "Images"];
+    const lastAttrField = attributesArr - excludedDetails.length;
+    expandCategory(currentCatIdx - 1);
+    expandCard(currentCatIdx - 1, categoryCardLength - 1);
+    setFocusedEl([prevCategory, categoryCardLength - 1, lastAttrField]);
   }
 
   const contextValue = {
