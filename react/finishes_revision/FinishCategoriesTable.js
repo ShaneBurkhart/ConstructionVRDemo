@@ -1,69 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FinishCategoryTable from './FinishCategoryTable';
 import _ from 'underscore';
-import TabContext from './contexts/TabContext';
 import TabContextController from './TabContextController';
 
-function FinishCategoriesTable({ initExpansionTree, finishes, categoryList, adminMode }) {
+function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
 
-  const [expansionTree, setExpansionTree] = useState(null);
+  const [expandedCategories, setExpandedCategories] = useState(null);
+  const [expandedCards, setExpandedCards] = useState({});
 
-  useEffect(() => {
-    setExpansionTree(initExpansionTree);
-  }, [initExpansionTree]);
-
-  
-  const toggleExpandCategory = (category) => {
-    setExpansionTree(prev => (
-      {
-        ...prev,
-        [category]: { ...prev[category], expanded: !prev[category].expanded } 
-      }
-    ));
+  const toggleExpandCategory = (idx) => {
+    if (!expandedCategories) {
+      const nextArr = [];
+      categoryList.forEach((c,i) => { if (i !== idx) nextArr.push(i) });
+      return setExpandedCategories(nextArr)
+    };
+    if (expandedCategories.includes(idx)) return setExpandedCategories([...expandedCategories].filter(i => i !== idx));
+    return setExpandedCategories(prev => ([...prev, idx]));
   }
 
-  const collapseAllCategories = () =>
-    categoryList.forEach(category => setExpansionTree(prev => ({ ...prev, [category]: { ...prev[category], expanded: false } })));
-  
-  const expandAllCategories = () =>
-    categoryList.forEach(category => setExpansionTree(prev => ({ ...prev, [category]: { ...prev[category], expanded: true } })));
-  
+  const expandAllCategories = () => {
+    const nextArr = [];
+    categoryList.forEach((c, i) => nextArr.push(i));
+    setExpandedCategories(nextArr)
+  }
+
+  const collapseAllCategories = () => setExpandedCategories([]);
+
   const expandAllDetails = () => {
-    const setAllTrue = (obj) => {
-      const nextObj = {...obj};
-      const arr = Object.keys(obj);
-      arr.forEach(i => nextObj[i] = true);
-      return nextObj;
-    };
-    categoryList.forEach(category => setExpansionTree(prev => ({ ...prev, [category]: { ...prev[category], expanded: true, expandedChildren: setAllTrue(prev[category].expandedChildren) } })))
+    expandAllCategories();
+    const nextObj = {};
+    categoryList.forEach((c, i) => {
+      nextObj[i] = [];
+      const finishList = finishes.filter(f => f.category === c);
+      finishList.forEach((f,j) => nextObj[i].push(j));
+    })
+    setExpandedCards(nextObj);
   };
-  
+
   const collapseAllDetails = () => {
-    const setAllFalse = (obj) => {
-      const nextObj = {...obj};
-      const arr = Object.keys(obj);
-      arr.forEach(i => nextObj[i] = false);
-      return nextObj;
-    };
-    categoryList.forEach(category => setExpansionTree(prev => ({ ...prev, [category]: { ...prev[category], expandedChildren: setAllFalse(prev[category].expandedChildren) } })))
-  };
+    const nextObj = {};
+    categoryList.forEach((c, i) => {
+      nextObj[i] = [];
+    })
+    setExpandedCards(nextObj);
+  }
+
   
   return (
     <TabContextController categoryList={categoryList}>
       <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
-        <a onClick={expandAllCategories}>Expand All Categories</a><br />
-        <a onClick={collapseAllCategories}>Close All Categories</a><br />
-        <a onClick={expandAllDetails}>Expand All Details</a><br />
-        <a onClick={collapseAllDetails}>Close All Details</a><br />
-        {(categoryList || []).map((category) => (
+        <div className="controls" style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+          <a onClick={expandAllCategories}>Expand All Categories</a><br />
+          <a onClick={collapseAllCategories}>Close All Categories</a><br />
+          <a onClick={expandAllDetails}>Expand All Details</a><br />
+          <a onClick={collapseAllDetails}>Close All Details</a><br />
+        </div>
+        {(categoryList || []).map((category, i) => (
           <FinishCategoryTable
             key={category}
             category={category}
             finishes={finishes.filter(f => f.category === category)}
-            expandedCategory={expansionTree[category] ? expansionTree[category].expanded : true}
-            expandedChildren={expansionTree[category] ? expansionTree[category].expandedChildren : {}}
-            handleExpandedChildren={(nextExpandedChildren) => setExpansionTree(prev => ({...prev, [category]: {...prev[category], expandedChildren: nextExpandedChildren }}))}
-            toggleExpandCategory={() => toggleExpandCategory(category)}
+            expandedCategory={!expandedCategories || expandedCategories.includes(i)}
+            expandedChildren={expandedCards[i] || []}
+            handleExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [i]: updatedChildren }))}
+            toggleExpandCategory={() => toggleExpandCategory(i)}
           />
         ))}
       </section>

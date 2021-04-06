@@ -12,29 +12,25 @@ import styles from "./FinishCategoryTable.module.css";
 import ActionCreator from './action_creators';
 
 
-const FinishCategoriesTable = ({ category, finishes }) => {
+const FinishCategoriesTable = ({ category, finishes, expandedCategory, toggleExpandCategory, expandedChildren, handleExpandedChildren }) => {
   const isAdmin = useSelector(state => state.adminMode);
-  
-  const [expanded, setExpanded] = useState(true);
   const [showAddNewModal, setShowAddNewModal] = useState(false);
-  const [expandedChildren, setExpandedChildren] = useState({});
-
 
   const count = finishes.length;
   const tag = category ? getCategoryTag(category) : '';
   
-  const toggleCollapse = () => setExpanded(!expanded);
-
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
   const handleExpandAllCards = () => {
-    if (!expanded) setExpanded(true); 
-    const children = (finishes || []).map(f => f.id);
-    const closeAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: false })));
-    const openAll = () => children.forEach(child => setExpandedChildren(prev => ({ ...prev, [child]: true })));
-    const allOpen = children.every(child => expandedChildren[child]);
-    if (!allOpen) return openAll();
-    return closeAll();
+    if (!expandedCategory) toggleExpandCategory();
+    let nextChildren = [];
+    const allChildren = (finishes || []).map((c,i) => i);
+    const closeAll = () => [];
+    const openAll = () => allChildren;
+    const allOpen = allChildren.every(child => (expandedChildren || []).includes(child));
+    if (!allOpen) nextChildren = openAll();
+    if (allOpen) nextChildren = closeAll();
+    handleExpandedChildren(nextChildren);
   };
 
   const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
@@ -51,12 +47,12 @@ const FinishCategoriesTable = ({ category, finishes }) => {
   return (
       <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
         <header>
-          <h2 onClick={toggleCollapse}>
-            <Icon className="hide-print" name={expanded ? "angle down" : "angle up"} />
+          <h2 onClick={toggleExpandCategory}>
+            <Icon className="hide-print" name={expandedCategory ? "angle down" : "angle up"} />
             {category}
             <span className={`${styles.expandCollapseText} hide-print`}>
               <a href="#/">
-                {expanded ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
+                {expandedCategory ? `Collapse (${count} selections)` : `Expand (${count} selections)` }
               </a>
             </span>
           </h2>
@@ -71,20 +67,23 @@ const FinishCategoriesTable = ({ category, finishes }) => {
           <Droppable droppableId={category} type="CARD">
             {(provided, snapshot) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {expanded && sortedFinishes.map((f, idx) => (
+                {expandedCategory && sortedFinishes.map((f, idx) => (
                   <FinishCard
                     key={f.id}
                     tag={tag}
                     cardIdx={idx}
                     finishDetails={f}
-                    expandedDetails={expandedChildren[f.id]}
+                    expandedDetails={expandedChildren.includes(idx)}
                     isFirstCard={idx === 0}
                     isLastCard={idx === finishes.length - 1}
-                    toggleExpand={() => setExpandedChildren(prev => ({ ...prev, [f.id]: !prev[f.id] }))}
+                    toggleExpand={() => {
+                      if (expandedChildren.includes(idx)) return handleExpandedChildren([...expandedChildren.filter(c => c !== idx)]);
+                      return handleExpandedChildren([...expandedChildren, idx])
+                    }}
                     expandPrevSibling={() => {
                       if (idx !== 0) {
                         const prevSibling = sortedFinishes[idx - 1];
-                        setExpandedChildren(prev => ({...prev, [prevSibling.id]: true}))
+                        handleExpandedChildren({...expandedChildren, [prevSibling.id]: true})
                       }
                     }}
                     onDelete={handleDeleteCard}

@@ -34,19 +34,10 @@ const App = () => {
 
   const categoryList = finishCategoriesArr.map(({name}) => name).filter(c => Object.keys(activeCategoryMap).includes(c));
 
-  const initExpansionTree = {};
-
-  categoryList.forEach(cat => {
-    const categoryFinishes = finishes.filter(f => f.category === cat);
-    const expandedChildren = {};
-    categoryFinishes.forEach(f => expandedChildren[f.id] = false);
-    initExpansionTree[cat] = { expanded: true, expandedChildren }
-  });
-
   return (
     <main>
       {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} categoryList={categoryList} />}
-      <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} initExpansionTree={initExpansionTree} />
+      <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
       <FloatingProjectButton name={PROJECT_NAME} />
       <ToastMessage positive={false} message={apiError.message} />
     </main>
