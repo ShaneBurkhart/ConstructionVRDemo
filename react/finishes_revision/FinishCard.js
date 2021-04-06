@@ -1,5 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
-import TabContext from './contexts/TabContext';
+import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
@@ -13,11 +12,24 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
-const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expandedDetails, toggleExpand, onDelete, expandPrevSibling }) => {
+const FinishCard = ({
+  tag,
+  cardIdx,
+  finishDetails,
+  isFirstCard,
+  isLastCard,
+  focusedEl,
+  setFocusedEl,
+  tabToNextCategory,
+  tabToPrevCategory,
+  expandedDetails,
+  toggleExpand,
+  onDelete,
+  expandPrevSibling
+}) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
 
-  const { setFocusedEl, focusedEl, goToNextCategory, goToPrevCategory } = useContext(TabContext);
 
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
   const [formFieldError, setFormFieldError] = useState({ error: false, field: '' });
@@ -40,7 +52,7 @@ const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expa
   };
 
   const handleAttrChange = (val, attr) => {
-    const newAttributes = { ...finishDetails.attributes, [attr]: val }
+    const newAttributes = { ...finishDetails.attributes, [attr]: val };
     const onSuccess = () => {};
     const onError = () => console.error('error');
     ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
@@ -57,7 +69,7 @@ const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expa
     } else if (isLastChild && !isLastCard){
       return setFocusedEl([ cat, cardIdx + 1, -1]);
     } else if (isLastCard){
-      return goToNextCategory(category);
+      return tabToNextCategory(category);
     }
   }
   
@@ -69,7 +81,7 @@ const FinishCard = ({ tag, cardIdx, finishDetails, isFirstCard, isLastCard, expa
       expandPrevSibling();
       return setFocusedEl([ cat, cardIdx - 1, lastInputIdx]);
     } else if (isFirstCard){
-      return goToPrevCategory(category);
+      return tabToPrevCategory(category);
     }
   }
 

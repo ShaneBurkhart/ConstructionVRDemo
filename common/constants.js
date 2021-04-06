@@ -258,37 +258,35 @@ const finishCategoriesArr = [
 const finishCategoriesMap = {};
 finishCategoriesArr.forEach((category, i) => finishCategoriesMap[category.name] = {...category, order: i });
 
+const attrMap = {};
+finishAttributes.forEach(a => attrMap[a.name] = { ...a });
+const allCategoryNames = Object.keys(finishCategoriesMap);
 
 
- const attrMap = {};
- finishAttributes.forEach(a => attrMap[a.name] = { ...a });
- const allCategoryNames = Object.keys(finishCategoriesMap);
-
-
- module.exports = {
-    finishCategoriesArr,
-    finishCategoriesMap,
-    attrMap,
-    allCategoryNames,
-    getAttrWidth: (attrName) => attrMap[attrName].width,
-    getCategoryTag: (category) => finishCategoriesMap[category].tag,
-    getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
-    getAttrGridRows: (attrList=[]) => {
-      let remainingWidth = 16;
-      const attrRows = [];
-      let row = [];
-    
-      for (let i = 0; i < attrList.length; i++){
-        row.push(attrList[i])
-        remainingWidth = remainingWidth - attrList[i].width;
-        if (!attrList[i+1]) {
-          attrRows.push(row);
-        } else if (attrList[i+1].width > remainingWidth) {
-          attrRows.push(row);
-          remainingWidth = 16;
-          row = [];
-        }
+module.exports = {
+  finishCategoriesArr,
+  finishCategoriesMap,
+  attrMap,
+  allCategoryNames,
+  getAttrWidth: (attrName) => attrMap[attrName].width,
+  getCategoryTag: (category) => finishCategoriesMap[category].tag,
+  getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
+  getAttrGridRows: (attrList=[]) => {
+    let remainingWidth = 16;
+    const attrRows = [];
+    let row = [];
+  
+    for (let i = 0; i < attrList.length; i++){
+      row.push(attrList[i])
+      remainingWidth = remainingWidth - attrList[i].width;
+      if (!attrList[i+1]) {
+        attrRows.push(row);
+      } else if (attrList[i+1].width > remainingWidth) {
+        attrRows.push(row);
+        remainingWidth = 16;
+        row = [];
       }
-      return attrRows;
-    },
- }
+    }
+    return attrRows;
+  },
+}

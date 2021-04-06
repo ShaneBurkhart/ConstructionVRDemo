@@ -12,7 +12,18 @@ import styles from "./FinishCategoryTable.module.css";
 import ActionCreator from './action_creators';
 
 
-const FinishCategoriesTable = ({ category, finishes, expandedCategory, toggleExpandCategory, expandedChildren, handleExpandedChildren }) => {
+const FinishCategoriesTable = ({
+  category,
+  finishes,
+  expandedCategory,
+  toggleExpandCategory,
+  expandedChildren,
+  focusedEl,
+  setFocusedEl,
+  tabToNextCategory,
+  tabToPrevCategory,
+  updateExpandedChildren
+}) => {
   const isAdmin = useSelector(state => state.adminMode);
   const [showAddNewModal, setShowAddNewModal] = useState(false);
 
@@ -30,7 +41,7 @@ const FinishCategoriesTable = ({ category, finishes, expandedCategory, toggleExp
     const allOpen = allChildren.every(child => (expandedChildren || []).includes(child));
     if (!allOpen) nextChildren = openAll();
     if (allOpen) nextChildren = closeAll();
-    handleExpandedChildren(nextChildren);
+    updateExpandedChildren(nextChildren);
   };
 
   const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
@@ -73,17 +84,21 @@ const FinishCategoriesTable = ({ category, finishes, expandedCategory, toggleExp
                     tag={tag}
                     cardIdx={idx}
                     finishDetails={f}
+                    focusedEl={focusedEl}
+                    setFocusedEl={setFocusedEl}
+                    tabToNextCategory={tabToNextCategory}
+                    tabToPrevCategory={tabToPrevCategory}
                     expandedDetails={expandedChildren.includes(idx)}
                     isFirstCard={idx === 0}
                     isLastCard={idx === finishes.length - 1}
                     toggleExpand={() => {
-                      if (expandedChildren.includes(idx)) return handleExpandedChildren([...expandedChildren.filter(c => c !== idx)]);
-                      return handleExpandedChildren([...expandedChildren, idx])
+                      if (expandedChildren.includes(idx)) return updateExpandedChildren([...expandedChildren.filter(c => c !== idx)]);
+                      return updateExpandedChildren([...expandedChildren, idx])
                     }}
                     expandPrevSibling={() => {
                       if (idx !== 0) {
                         const prevIdx = idx - 1;
-                        if (!expandedChildren.includes(prevIdx)) handleExpandedChildren([...expandedChildren, prevIdx])
+                        if (!expandedChildren.includes(prevIdx)) updateExpandedChildren([...expandedChildren, prevIdx])
                       }
                     }}
                     onDelete={handleDeleteCard}

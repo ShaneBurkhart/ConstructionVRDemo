@@ -4,7 +4,7 @@ import TabContext from './contexts/TabContext';
 const TabContextController = ({ children, categoryList, finishes, expandCategory, expandCard }) => {
   const [focusedEl, setFocusedEl] = useState(null);
 
-  const goToNextCategory = (currentCategory) => {
+  const tabToNextCategory = (currentCategory) => {
     const currentCatIdx = categoryList.indexOf(currentCategory);
     const nextCategory = categoryList[currentCatIdx + 1];
     if (nextCategory) {
@@ -14,7 +14,7 @@ const TabContextController = ({ children, categoryList, finishes, expandCategory
     };
   }
 
-  const goToPrevCategory = (currentCategory) => {
+  const tabToPrevCategory = (currentCategory) => {
     const currentCatIdx = categoryList.indexOf(currentCategory);
     if (currentCatIdx === 0) return;
     
@@ -35,8 +35,8 @@ const TabContextController = ({ children, categoryList, finishes, expandCategory
   const contextValue = {
     focusedEl,
     setFocusedEl,
-    goToNextCategory,
-    goToPrevCategory,
+    tabToNextCategory,
+    tabToPrevCategory,
   };
 
   return (

@@ -3,8 +3,8 @@ import React from 'react';
 const TabContext = React.createContext({
   focusedEl: null,
   setFocusedEl: () => {},
-  goToNextCategory: () => {},
-  goToPrevCategory: () => {},
+  tabToNextCategory: () => {},
+  tabToPrevCategory: () => {},
 });
 
 export default TabContext;
