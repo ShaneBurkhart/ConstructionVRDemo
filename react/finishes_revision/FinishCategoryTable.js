@@ -92,7 +92,7 @@ const FinishCategoriesTable = ({
                       finishDetails={f}
                       focusedEl={focusedEl}
                       setFocusedEl={setFocusedEl}
-                      tabToNextCategory={isLastCard ? () => tabToNextCategory() : tabToNextCategory}
+                      tabToNextCategory={tabToNextCategory}
                       tabToPrevCategory={tabToPrevCategory}
                       expandedDetails={expandedChildren[f.id]}
                       isFirstCard={isFirstCard}
