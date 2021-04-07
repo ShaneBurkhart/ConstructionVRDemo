@@ -22,8 +22,6 @@ const FinishCategoriesTable = ({
   setFocusedEl,
   tabToNextCategory,
   tabToPrevCategory,
-  // nextCategory,
-  // prevCategory,
   updateExpandedChildren
 }) => {
   const adminMode = useSelector(state => state.adminMode);
@@ -90,14 +88,12 @@ const FinishCategoriesTable = ({
                     <FinishCard
                       key={f.id}
                       tag={tag}
-                      cardIdx={i}
                       cardId={f.id}
                       finishDetails={f}
                       focusedEl={focusedEl}
                       setFocusedEl={setFocusedEl}
                       tabToNextCategory={isLastCard ? () => tabToNextCategory() : tabToNextCategory}
                       tabToPrevCategory={tabToPrevCategory}
-                      // nextCategory, prevCategory
                       expandedDetails={expandedChildren[f.id]}
                       isFirstCard={isFirstCard}
                       isLastCard={isLastCard}

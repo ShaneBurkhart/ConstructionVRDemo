@@ -126,8 +126,6 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
               toggleExpandCategory={() => toggleExpandCategory(category)}
               tabToPrevCategory={() => tabToPrevCategory(prevCat, prevCatLastCardId)}
               tabToNextCategory={() => tabToNextCategory(nextCat, nextCatFirstCardId)}
-              prevCategory={i === 0 ? null : sortedCategories[i - 1]}
-              nextCategory={i === sortedCategories.length - 1 ? null : sortedCategories[i + 1]}
             />
           );
         })}
