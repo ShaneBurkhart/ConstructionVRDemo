@@ -14,7 +14,9 @@ import ActionCreator from './action_creators';
 
 const FinishCard = ({
   tag,
-  cardIdx,
+  cardId,
+  nextCardId,
+  prevCardId,
   finishDetails,
   isFirstCard,
   isLastCard,
@@ -25,7 +27,7 @@ const FinishCard = ({
   expandedDetails,
   toggleExpand,
   onDelete,
-  expandPrevSibling
+  expandSiblingCard,
 }) => {
   const isAdmin = useSelector(state => state.adminMode);
   const { id, orderNumber, attributes, category } = finishDetails;
@@ -36,7 +38,7 @@ const FinishCard = ({
 
   const _isEditing = useRef(false);
 
-  const detailsExclude = ["Images","Name"];
+  const excludedDetails = ["Images","Name"];
 
   const handleToggleExpand = (e) => {
     e.stopPropagation();
@@ -59,29 +61,30 @@ const FinishCard = ({
   }
   const attrList = getAttrList(finishCategoriesMap[category]).map(a => a.name);
 
-  const lastInputIdx = attrList.filter(attr => !detailsExclude.includes(attr)).length - 1;
+  const lastInputIdx = attrList.filter(attr => !excludedDetails.includes(attr)).length - 1;
   
   const tabToNextInput = (isLastChild) =>  {
-    const [ cat, cardIdx, idx ] = focusedEl;
+    const [ cat, cardId, idx ] = focusedEl;
     if (!isLastChild){
       if (!expandedDetails) toggleExpand();
-      return setFocusedEl([ cat, cardIdx, idx + 1 ]);
+      return setFocusedEl([ cat, cardId, idx + 1 ]);
     } else if (isLastChild && !isLastCard){
-      return setFocusedEl([ cat, cardIdx + 1, -1]);
+      expandSiblingCard(nextCardId);
+      return setFocusedEl([ cat, nextCardId, -1]);
     } else if (isLastCard){
-      return tabToNextCategory(category);
+      return tabToNextCategory();
     }
   }
   
   const tabToPrevInput = (isFirstChild) => {
-    const [ cat, cardIdx, idx ] = focusedEl;
+    const [ cat, cardId, idx ] = focusedEl;
     if (!isFirstChild){
-      return setFocusedEl([ cat, cardIdx, idx - 1 ]);
+      return setFocusedEl([ cat, cardId, idx - 1 ]);
     } else if (isFirstChild && !isFirstCard){
-      expandPrevSibling();
-      return setFocusedEl([ cat, cardIdx - 1, lastInputIdx]);
+      expandSiblingCard(prevCardId);
+      return setFocusedEl([ cat, prevCardId, lastInputIdx]);
     } else if (isFirstCard){
-      return tabToPrevCategory(category);
+      return tabToPrevCategory();
     }
   }
 
@@ -104,7 +107,7 @@ const FinishCard = ({
   }
 
   const renderAttributeField = (attr, idx) => {    
-    const focusKeySig = [ category, cardIdx, idx ];
+    const focusKeySig = [ category, cardId, idx ];
     
     const handleInputClick = (e) => {
       e.stopPropagation();
@@ -155,8 +158,8 @@ const FinishCard = ({
             <FocusEditableInput
               isFirstChild={true}
               editable={isAdmin}
-              expanded={(focusedEl || []).join("") === ([ category, cardIdx, -1 ] || ['x']).join("")}
-              handleExpanded={() => setFocusedEl([ category, cardIdx, -1 ])}
+              expanded={(focusedEl || []).join("") === ([ category, cardId, -1 ] || ['x']).join("")}
+              handleExpanded={() => setFocusedEl([ category, cardId, -1 ])}
               clearExpanded={() => setFocusedEl(null)}
               handleTab={handleTab}
               value={attributes["Name"]}
@@ -175,7 +178,7 @@ const FinishCard = ({
             <a onClick={handleToggleExpand}>{`${expandedDetails ? "Hide" : "Show"}`} Details</a>
           </div>
           <div className={`${styles.detailsFlexTable} ${expandedDetails ? styles.showDetails : styles.hideDetails}`}>
-            {(attrList.filter(attr => !detailsExclude.includes(attr)) || []).map((attr, i) => (
+            {(attrList.filter(attr => !excludedDetails.includes(attr)) || []).map((attr, i) => (
                 renderAttributeField(attr, i)
               )
             )}

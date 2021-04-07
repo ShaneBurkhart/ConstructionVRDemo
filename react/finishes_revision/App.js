@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import _ from 'underscore';
 import ActionCreators from './action_creators';
 import { finishCategoriesArr } from '../../common/constants';
 

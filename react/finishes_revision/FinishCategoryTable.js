@@ -22,9 +22,12 @@ const FinishCategoriesTable = ({
   setFocusedEl,
   tabToNextCategory,
   tabToPrevCategory,
+  // nextCategory,
+  // prevCategory,
   updateExpandedChildren
 }) => {
-  const isAdmin = useSelector(state => state.adminMode);
+  const adminMode = useSelector(state => state.adminMode);
+
   const [showAddNewModal, setShowAddNewModal] = useState(false);
 
   const count = finishes.length;
@@ -34,14 +37,16 @@ const FinishCategoriesTable = ({
   
   const handleExpandAllCards = () => {
     if (!expandedCategory) toggleExpandCategory();
-    let nextChildren = [];
-    const allChildren = (finishes || []).map((c,i) => i);
-    const closeAll = () => [];
-    const openAll = () => allChildren;
-    const allOpen = allChildren.every(child => (expandedChildren || []).includes(child));
-    if (!allOpen) nextChildren = openAll();
-    if (allOpen) nextChildren = closeAll();
-    updateExpandedChildren(nextChildren);
+    const cards = (finishes || []).map(f => f.id);
+    const allCardsOpen = cards.every(c => expandedChildren[c]);
+    const nextState = {};
+
+    if (allCardsOpen) {
+      cards.forEach(c => nextState[c] = false);
+    } else {
+      cards.forEach(c => nextState[c] = true);
+    }
+    return updateExpandedChildren(nextState)
   };
 
   const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
@@ -67,7 +72,7 @@ const FinishCategoriesTable = ({
               </a>
             </span>
           </h2>
-          {isAdmin && (
+          {adminMode && (
             <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
               <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
               <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
@@ -78,32 +83,39 @@ const FinishCategoriesTable = ({
           <Droppable droppableId={category} type="CARD">
             {(provided, snapshot) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                {expandedCategory && sortedFinishes.map((f, idx) => (
-                  <FinishCard
-                    key={f.id}
-                    tag={tag}
-                    cardIdx={idx}
-                    finishDetails={f}
-                    focusedEl={focusedEl}
-                    setFocusedEl={setFocusedEl}
-                    tabToNextCategory={tabToNextCategory}
-                    tabToPrevCategory={tabToPrevCategory}
-                    expandedDetails={expandedChildren.includes(idx)}
-                    isFirstCard={idx === 0}
-                    isLastCard={idx === finishes.length - 1}
-                    toggleExpand={() => {
-                      if (expandedChildren.includes(idx)) return updateExpandedChildren([...expandedChildren.filter(c => c !== idx)]);
-                      return updateExpandedChildren([...expandedChildren, idx])
-                    }}
-                    expandPrevSibling={() => {
-                      if (idx !== 0) {
-                        const prevIdx = idx - 1;
-                        if (!expandedChildren.includes(prevIdx)) updateExpandedChildren([...expandedChildren, prevIdx])
-                      }
-                    }}
-                    onDelete={handleDeleteCard}
+                {expandedCategory && sortedFinishes.map((f, i) => {
+                  const isFirstCard = i === 0;
+                  const isLastCard = i === finishes.length - 1;
+                  return (
+                    <FinishCard
+                      key={f.id}
+                      tag={tag}
+                      cardIdx={i}
+                      cardId={f.id}
+                      finishDetails={f}
+                      focusedEl={focusedEl}
+                      setFocusedEl={setFocusedEl}
+                      tabToNextCategory={isLastCard ? () => tabToNextCategory() : tabToNextCategory}
+                      tabToPrevCategory={tabToPrevCategory}
+                      // nextCategory, prevCategory
+                      expandedDetails={expandedChildren[f.id]}
+                      isFirstCard={isFirstCard}
+                      isLastCard={isLastCard}
+                      nextCardId={isLastCard ? null : sortedFinishes[i + 1].id}
+                      prevCardId={isFirstCard ? null : sortedFinishes[i - 1].id}
+                      toggleExpand={() => {
+                        if (!expandedChildren.hasOwnProperty(f.id)) {
+                          updateExpandedChildren({ ...expandedChildren, [f.id]: true });
+                        } else {
+                          updateExpandedChildren({ ...expandedChildren, [f.id]: !expandedChildren[f.id]});
+                        }
+                      }}
+                      expandSiblingCard={(siblingId) => {
+                        if (!expandedChildren[siblingId]) updateExpandedChildren({ ...expandedChildren, [siblingId]: true });
+                      }}
+                      onDelete={handleDeleteCard}
                   />
-                ))}
+                )})}
                 {provided.placeholder}
               </div>
             )}

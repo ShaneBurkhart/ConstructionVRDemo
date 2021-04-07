@@ -1,93 +1,90 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import _ from 'underscore';
 import FinishCategoryTable from './FinishCategoryTable';
 import { finishCategoriesMap } from '../../common/constants';
 
 function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
-  const [expandedCategories, setExpandedCategories] = useState(null);
+  const newestFinish = useSelector(state => state.newestFinish);
+
+  const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
   const [focusedEl, setFocusedEl] = useState(null);
 
-  const toggleExpandCategory = (idx) => {
-    if (!expandedCategories) {
-      const nextArr = [];
-      categoryList.forEach((c,i) => { if (i !== idx) nextArr.push(i) });
-      return setExpandedCategories(nextArr);
-    };
-    if (expandedCategories.includes(idx)) return setExpandedCategories([...expandedCategories].filter(i => i !== idx));
-    return setExpandedCategories(prev => ([...prev, idx]));
+  const toggleExpandCategory = (category) => {
+    if (!expandedCategories.hasOwnProperty(category)){
+      return setExpandedCategories(prev => ({ ...prev, [category]: false }));
+    }
+    return setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
   }
 
   const expandAllCategories = () => {
-    const nextArr = [];
-    categoryList.forEach((c, i) => nextArr.push(i));
-    setExpandedCategories(nextArr);
+    const nextState = {};
+    categoryList.forEach(category => nextState[category] = true);
+    setExpandedCategories(nextState);
   }
 
   const collapseAllCategories = () => {
     setFocusedEl(null);
-    setExpandedCategories([]);
+    const nextState = {};
+    categoryList.forEach(category => nextState[category] = false);
+    setExpandedCategories(nextState)
   };
 
   const expandAllDetails = () => {
     expandAllCategories();
-    const nextObj = {};
-    categoryList.forEach((c, i) => {
-      nextObj[i] = [];
-      const finishList = finishes.filter(f => f.category === c);
-      finishList.forEach((f,j) => nextObj[i].push(j));
+    const nextState = {};
+    categoryList.forEach(category => {
+      nextState[category] = {};
+      const finishList = finishes.filter(f => f.category === category);
+      finishList.forEach(f => nextState[category][f.id] = true);
     })
-    setExpandedCards(nextObj);
+    setExpandedCards(nextState);
   };
 
   const collapseAllDetails = () => {
     setFocusedEl(null);
-    const nextObj = {};
-    categoryList.forEach((c, i) => {
-      nextObj[i] = [];
+    const nextState = {};
+    categoryList.forEach(category => {
+      nextState[category] = {};
+      const finishList = finishes.filter(f => f.category === category);
+      finishList.forEach(f => nextState[category][f.id] = false);
     })
-    setExpandedCards(nextObj);
+    setExpandedCards(nextState);
   }
 
-  const expandCard = (key, newCard) => {
-    if (expandedCards[key] && !expandedCards[key].includes(newCard)) return setExpandedCards(prev => ({ ...prev, [key]: [...prev[key], newCard] }));
-    if (!expandedCards[key]) return setExpandedCards(prev => ({ ...prev, [key]: [newCard] }));
-  }
-
-  const expandCategory= (idx) => {
-    if (!expandedCategories) return setExpandedCategories([idx]);
-    if (!expandedCategories.includes(idx)) return setExpandedCategories(prev => [...prev, idx]);
-  }
-
-  useEffect(() => {
-    if (expandedCategories) {
-      const newestFinish = finishes[finishes.length - 1];
-      const categoryIdx = categoryList.indexOf(newestFinish.category);
-      if (newestFinish && !expandedCategories.includes(categoryIdx)) setExpandedCategories(prev => [...prev, categoryIdx]);
-    }
-  }, [finishes]);
-
-  const tabToNextCategory = (currentCategory) => {
-    const currentCatIdx = categoryList.indexOf(currentCategory);
-    const nextCategory = categoryList[currentCatIdx + 1];
-    if (nextCategory) {
-      expandCategory(currentCatIdx + 1);
-      expandCard(currentCatIdx + 1, 0);
-      setFocusedEl([nextCategory, 0, -1]);
+  const expandCategory = (category) => setExpandedCategories(prev => ({ ...prev, [category]: true }));
+  
+  const expandCard = (category, cardId) => {
+    if (!expandedCards[category]) {
+      setExpandedCards(prev => ({ ...prev, [category]: { [cardId]: true }}))
+    } else {
+      if (!expandedCards[category][cardId]) setExpandedCards(prev => (
+        { ...prev, [category]: { ...prev[category], [cardId]: true }}
+      ))
     };
   }
 
-  const tabToPrevCategory = (currentCategory) => {
-    const currentCatIdx = categoryList.indexOf(currentCategory);
-    if (currentCatIdx === 0) return;
-    
-    const prevCategory = categoryList[currentCatIdx - 1];
-    const prevCategoryCardLength = finishes.filter(f => f.category === prevCategory).length;
-    const prevCategoryAttrLength = finishCategoriesMap[prevCategory].attr.length - 1;
+  useEffect(() => {
+    if (!_.isEmpty(newestFinish)) {
+      const category = newestFinish.category;
+      expandCategory(category);
+    }
+  }, [newestFinish]);
+
+  const tabToPrevCategory = (category, cardId) => {
+    if (!expandedCategories[category]) expandCategory(category);
+    expandCard(category, cardId);
     const excludedDetails = ["Name", "Images"];
-    const lastAttrFieldIdx = prevCategoryAttrLength - excludedDetails.length;
-    expandCategory(currentCatIdx - 1);
-    expandCard(currentCatIdx - 1, prevCategoryCardLength - 1);
-    setFocusedEl([prevCategory, prevCategoryCardLength - 1, lastAttrFieldIdx]);
+    const attrListLength = finishCategoriesMap[category].attr.length - 1;
+    const lastFieldIdx = attrListLength - excludedDetails.length;
+    setFocusedEl([category, cardId, lastFieldIdx]);
+  }
+
+  const tabToNextCategory = (category, cardId) => {
+    if (!expandedCategories[category]) expandCategory(category);
+    expandCard(category, cardId);
+    setFocusedEl([category, cardId, -1]);
   }
 
   const controls = [
@@ -97,6 +94,7 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     [collapseAllDetails, "Collapse All Details"],
   ]
 
+  const sortedCategories = categoryList || [];
   
   return (
     <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
@@ -108,21 +106,31 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
             </Fragment>
           ))}
         </div>
-        {(categoryList || []).map((category, i) => (
-          <FinishCategoryTable
-            key={category}
-            category={category}
-            focusedEl={focusedEl}
-            setFocusedEl={setFocusedEl}
-            finishes={finishes.filter(f => f.category === category)}
-            expandedCategory={!expandedCategories || expandedCategories.includes(i)}
-            expandedChildren={expandedCards[i] || []}
-            updateExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [i]: updatedChildren }))}
-            toggleExpandCategory={() => toggleExpandCategory(i)}
-            tabToPrevCategory={() => tabToPrevCategory(category)}
-            tabToNextCategory={() => tabToNextCategory(category)}
-          />
-        ))}
+        {sortedCategories.map((category, i) => {
+          const prevCat = i === 0 ? "" : sortedCategories[i - 1];
+          const nextCat = i === (sortedCategories.length - 1) ? "" : sortedCategories[i + 1];
+          const prevCatList = (finishes || []).filter(f => f.category === prevCat);
+          const prevCatLastCardId = (prevCatList[prevCatList.length - 1] || {}).id;
+          const nextCatList = finishes.filter(f => f.category === nextCat);
+          const nextCatFirstCardId = nextCatList.length && nextCatList[0].id;
+          return (
+            <FinishCategoryTable
+              key={category}
+              category={category}
+              focusedEl={focusedEl}
+              setFocusedEl={setFocusedEl}
+              finishes={finishes.filter(f => f.category === category)}
+              expandedCategory={!expandedCategories.hasOwnProperty(category) || expandedCategories[category]}
+              expandedChildren={expandedCards[category] || {}}
+              updateExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [category]: updatedChildren }))}
+              toggleExpandCategory={() => toggleExpandCategory(category)}
+              tabToPrevCategory={() => tabToPrevCategory(prevCat, prevCatLastCardId)}
+              tabToNextCategory={() => tabToNextCategory(nextCat, nextCatFirstCardId)}
+              prevCategory={i === 0 ? null : sortedCategories[i - 1]}
+              nextCategory={i === sortedCategories.length - 1 ? null : sortedCategories[i + 1]}
+            />
+          );
+        })}
       </section>
   )
 }

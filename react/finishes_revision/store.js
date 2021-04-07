@@ -5,6 +5,7 @@ const _initialState = {
   adminMode: false,
   apiError: {},
   finishes: [],
+  newestFinish: {},
   modals: {},
 };
 
@@ -18,7 +19,7 @@ const todos = (state = {}, action) => {
       return { ...state, adminMode, finishes };
     
     case "NEW_FINISH":
-      return { ...state, finishes: [...state.finishes, action.data]};
+      return { ...state, finishes: [...state.finishes, action.data], newestFinish: action.data };
     
     case "UPDATE_FINISH":
       unchangedFinishes = [...state.finishes.filter(f => f.id !== action.data.id)];
