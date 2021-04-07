@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Segment, Menu, Input, Form, Icon, Button, Select, Header, Image, Modal } from 'semantic-ui-react';
+import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import './FinishCategoriesDrawer.css';
 
-const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
+const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList, adminMode }) => {
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
   const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
   
@@ -13,7 +13,9 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
     <>
       <div className="categories-drawer hide-print">
         <Segment vertical>
+          <a href="/" title="go to project dashboard">
             <img src="/logo.png" />
+          </a>
           </Segment>
           <Segment vertical>
             <Button
