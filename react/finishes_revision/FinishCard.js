@@ -38,7 +38,7 @@ const FinishCard = ({
 
   const _isEditing = useRef(false);
 
-  const excludedDetails = ["Images","Name"];
+  const excludedDetails = ["Images"];
 
   const handleToggleExpand = (e) => {
     e.stopPropagation();
@@ -122,6 +122,7 @@ const FinishCard = ({
         <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
         <FocusEditableInput
           editable={isAdmin && !isFieldLocked(attr)}
+          isFirstChild={idx === 0}
           isLastChild={attr === "Details"}
           expanded={(focusedEl || []).join("") === (focusKeySig || ['x']).join("")}
           clearExpanded={() => setFocusedEl(null)}
@@ -147,6 +148,9 @@ const FinishCard = ({
   
   const imgArr = attributes["Images"] || [];
 
+  const attrArr = attrList.filter(a => attributes[a] && !["Images"].includes(a)).map(a => attributes[a]);
+  const displayName = attrArr.join(",");
+
   const cardContents = (
     <>
       <div className={styles.detailsSection}>
@@ -154,28 +158,16 @@ const FinishCard = ({
           <span className={styles.cellHeading}>
             {`${tag}${orderNumber+1}`}
           </span>
-          <div className={`${styles.cellHeading} ${styles.cardName}`}>
-            <FocusEditableInput
-              isFirstChild={true}
-              editable={isAdmin}
-              expanded={(focusedEl || []).join("") === ([ category, cardId, -1 ] || ['x']).join("")}
-              handleExpanded={() => setFocusedEl([ category, cardId, -1 ])}
-              clearExpanded={() => setFocusedEl(null)}
-              handleTab={handleTab}
-              value={attributes["Name"]}
-              onUpdate={(val) => {
-                handleAttrChange(val, "Name");
-                if (!focusedEl) setTimeout(() => {_isEditing.current = false}, 100);
-              }}
-              onOpen={() => _isEditing.current = true}
-              onCancel={() => _isEditing.current = false}
-            />
-            {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
-          </div>
+          {!expandedDetails && (
+            <div className={`${styles.cellHeading} ${styles.cardName}`}>
+              <span>{displayName}</span>
+            </div>
+          )}
         </div>
         <div className={styles.detailsTableContainer}>
           <div className={`${styles.detailsToggleLink} hide-print`}>
             <a onClick={handleToggleExpand}>{`${expandedDetails ? "Hide" : "Show"}`} Details</a>
+            {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
           </div>
           <div className={`${styles.detailsFlexTable} ${expandedDetails ? styles.showDetails : styles.hideDetails}`}>
             {(attrList.filter(attr => !excludedDetails.includes(attr)) || []).map((attr, i) => (

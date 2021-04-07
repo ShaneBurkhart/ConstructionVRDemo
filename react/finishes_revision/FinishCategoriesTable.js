@@ -75,7 +75,7 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
   const tabToPrevCategory = (category, cardId) => {
     if (!expandedCategories[category]) expandCategory(category);
     expandCard(category, cardId);
-    const excludedDetails = ["Name", "Images"];
+    const excludedDetails = ["Images"];
     const attrListLength = finishCategoriesMap[category].attr.length - 1;
     const lastFieldIdx = attrListLength - excludedDetails.length;
     setFocusedEl([category, cardId, lastFieldIdx]);
