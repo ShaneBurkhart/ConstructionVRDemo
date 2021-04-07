@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 
 import StyledDropzone from "../../components/StyledDropzone";
@@ -15,21 +15,26 @@ const ErrorLabel = (label="") => (
   </Label>
 )
 
-export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => (
-  <>
-    <label className="uiFormFieldLabel">Select a category</label>
-    <Dropdown
-      button 
-      basic
-      fluid
-      scrolling
-      upward={false}
-      text={selectedCategory || 'Select One'}
-      options={options.map(c => ({ key: c, text: c, value: c }))}
-      onChange={(e, {value}) => handleSelectCategory(value)}
-    />
-  </>
-);
+export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => {
+  const _dd = useRef(null)
+  return (
+    <>
+      <label className="uiFormFieldLabel">Select a category</label>
+      <Dropdown
+        ref={dd => _dd.current = dd}
+        button 
+        basic
+        fluid
+        scrolling
+        upward={false}
+        selection
+        search={(options, val) => options.filter(({text}) => text.toLowerCase().startsWith(val.toLowerCase()))}
+        text={selectedCategory || 'Select One'}
+        options={options.map(c => ({ key: c, text: c, value: c }))}
+        onChange={(_e, {value}) =>{ handleSelectCategory(value); console.log({_e, _dd})}}
+      />
+    </>
+)};
 
 export const PriceInput = ({ value, onChange, error, onBlur }) => (
   <Form.Field style={{ position: 'relative' }}>
