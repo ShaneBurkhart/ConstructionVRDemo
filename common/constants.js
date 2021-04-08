@@ -124,165 +124,169 @@ const finishAttributes = [
   },
 ];
 
-const finishCategories = {
-  "Paint": {
+const finishCategoriesArr = [
+  { name: "Paint",
     tag: "PT",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Details","Images",], 
   },
-  "Wall Covering": {
+  { name: "Wall Covering",
     tag: "WC",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Details","Images",], 
   },
-  "Tile": {
+  { name: "Tile",
     tag: "T",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Grout Tag","Grout Joint Thickness","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Grout Tag","Grout Joint Thickness","Details","Images",], 
   },
-  "Grout": {
+  { name: "Grout",
     tag: "G",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Details","Images",], 
   },
-  "Carpet": {
+  { name: "Carpet",
     tag: "CPT",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Installation Method","Carpet Pad","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Installation Method","Carpet Pad","Details","Images",], 
   },
-  "Luxury Vinyl Tile": {
+  { name: "Luxury Vinyl Tile",
     tag: "LVT",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
   },
-  "Sealed Concrete": {
+  { name: "Sealed Concrete",
     tag: "SC",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Finish","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Finish","Details","Images",], 
   },
-  "Laminate": {
+  { name: "Laminate",
     tag: "L",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Finish","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Finish","Details","Images",], 
   },
-  "Stone Countertops": {
+  { name: "Stone Countertops",
     tag: "ST",
-    attr: ["Name","Product URL","Manufacturer","Color","Finish","Type","Thickness","Edge Profile","Price","Details","Images",], 
+    attr: ["Manufacturer","Color","Finish","Type","Thickness","Edge Profile","Details","Images",], 
   },
-  "Wood Stain": {
+  { name: "Wood Stain",
     tag: "WS",
-    attr: ["Name","Product URL","Color","Finish","Wood Species","Price","Details","Images",], 
+    attr: ["Color","Finish","Wood Species","Details","Images",], 
   },
-  "Wood Products": {
+  { name: "Wood Products",
     tag: "WP",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Wood Species","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Wood Species","Details","Images",], 
   },
-  "Metal Products": {
+  { name: "Metal Products",
     tag: "MP",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Finish","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Finish","Details","Images",], 
   },
-  "Wall Base": {
+  { name: "Wall Base",
     tag: "B",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Style","Dimensions","Type","Details","Images",], 
   },
-  "Trim": {
+  { name: "Trim",
     tag: "TR",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Style","Dimensions","Type","Details","Images",], 
   },
-  "Transition Strips": {
+  { name: "Transition Strips",
     tag: "TS",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Details","Images",], 
   },
-  "Doors": {
+  { name: "Doors",
     tag: "D",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Style","Dimensions","Type","Details","Images",], 
   },
-  "Door Hardware": {
+  { name: "Door Hardware",
     tag: "DH",
-    attr: ["Name","Product URL","Manufacturer","Color","Style","Price","Details","Images",], 
+    attr: ["Manufacturer","Color","Style","Details","Images",], 
   },
-  "Cabinets": {
+  { name: "Cabinets",
     tag: "CB",
-    attr: ["Name","Product URL","Manufacturer","Color","Style","Price","Details","Images",], 
+    attr: ["Manufacturer","Color","Style","Details","Images",], 
   },
-  "Cabinet Hardware": {
+  { name: "Cabinet Hardware",
     tag: "CH",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Mailboxes": {
+  { name: "Mailboxes",
     tag: "MB",
-    attr: ["Name","Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
   },
-  "Electrical": {
+  { name: "Electrical",
     tag: "E",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Details","Images",], 
   },
-  "Lighting Fixtures": {
+  { name: "Lighting Fixtures",
     tag: "LT",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
   },
-  "Electronics": {
+  { name: "Electronics",
     tag: "EL",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Plumbing": {
+  { name: "Plumbing",
     tag: "PL",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Details","Images",], 
   },
-  "Restroom Accessories": {
+  { name: "Restroom Accessories",
     tag: "RA",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Finish","Type","Details","Images",], 
   },
-  "Appliances": {
+  { name: "Appliances",
     tag: "AP",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Fabric": {
+  { name: "Fabric",
     tag: "FA",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Repeat","Type","Details","Images",], 
   },
-  "Furniture": {
+  { name: "Furniture",
     tag: "F",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Wall Decor": {
+  { name: "Wall Decor",
     tag: "WD",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Misc Decor": {
+  { name: "Misc Decor",
     tag: "MD",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Window Treatments": {
+  { name: "Window Treatments",
     tag: "WT",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Type","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Type","Details","Images",], 
   },
-  "Miscellaneous": {
+  { name: "Miscellaneous",
     tag: "M",
-    attr: ["Name","Product URL","Manufacturer","Product Number","Color","Style","Dimensions","Price","Details","Images",], 
+    attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details","Images",], 
   },
- }
+];
 
- const attrMap = {};
- finishAttributes.forEach(a => attrMap[a.name] = { ...a });
- const allCategoryNames = Object.keys(finishCategories);
+const finishCategoriesMap = {};
+finishCategoriesArr.forEach((category, i) => finishCategoriesMap[category.name] = {...category, order: i });
+
+const attrMap = {};
+finishAttributes.forEach(a => attrMap[a.name] = { ...a });
+const allCategoryNames = Object.keys(finishCategoriesMap);
 
 
- module.exports = {
-    finishCategories,
-    attrMap,
-    allCategoryNames,
-    getAttrWidth: (attrName) => attrMap[attrName].width,
-    getCategoryTag: (category) => finishCategories[category].tag,
-    getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
-    getAttrGridRows: (attrList=[]) => {
-      let remainingWidth = 16;
-      const attrRows = [];
-      let row = [];
-    
-      for (let i = 0; i < attrList.length; i++){
-        row.push(attrList[i])
-        remainingWidth = remainingWidth - attrList[i].width;
-        if (!attrList[i+1]) {
-          attrRows.push(row);
-        } else if (attrList[i+1].width > remainingWidth) {
-          attrRows.push(row);
-          remainingWidth = 16;
-          row = [];
-        }
+module.exports = {
+  finishCategoriesArr,
+  finishCategoriesMap,
+  attrMap,
+  allCategoryNames,
+  getAttrWidth: (attrName) => attrMap[attrName].width,
+  getCategoryTag: (category) => finishCategoriesMap[category].tag,
+  getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
+  getAttrGridRows: (attrList=[]) => {
+    let remainingWidth = 16;
+    const attrRows = [];
+    let row = [];
+  
+    for (let i = 0; i < attrList.length; i++){
+      row.push(attrList[i])
+      remainingWidth = remainingWidth - attrList[i].width;
+      if (!attrList[i+1]) {
+        attrRows.push(row);
+      } else if (attrList[i+1].width > remainingWidth) {
+        attrRows.push(row);
+        remainingWidth = 16;
+        row = [];
       }
-      return attrRows;
-    },
- }
+    }
+    return attrRows;
+  },
+}

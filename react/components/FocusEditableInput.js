@@ -10,7 +10,7 @@ class FocusEditableInput extends React.Component {
 
     this.state = {
       hovering: false,
-      focused: false,
+      focused: props.expanded || false,
       val: props.value || "",
     };
   }
@@ -18,6 +18,11 @@ class FocusEditableInput extends React.Component {
   static defaultProps = {
     type: "",
     oneLine: false,
+    error: false,
+    expanded: false,
+    clearExpanded: () => {},
+    handleExpanded: () => {},
+    handleTab: () => {},
     onValidate: () => true,
     onCancel: () => {},
     onError: () => {},
@@ -38,15 +43,29 @@ class FocusEditableInput extends React.Component {
     this.setState({ hovering: false });
   }
 
+
+  removeFocus = () => {
+    const { expanded, clearExpanded } = this.props;
+    if (expanded) clearExpanded();
+    this.setState({ focused: false });
+  }
+
   onClick = (e) => {
     e.stopPropagation();
-    if (this.props.onOpen) this.props.onOpen();
-    this.setState({ focused: true, hovering: false });
+    const { onOpen, handleExpanded } = this.props;
+    
+    if (onOpen) onOpen();
+    
+    handleExpanded();
+    this.setState({ focused: true });
+    this.setState({ hovering: false });
   }
  
   onCancel = () => {
-    this.setState({ val: this.props.value, focused: false, hovering: false });
-    this.props.onCancel();
+    const { value, onCancel } = this.props;
+    this.setState({ val: value, hovering: false });
+    this.removeFocus();
+    onCancel();
   };
 
   onClickCancel = (e) => {
@@ -60,15 +79,36 @@ class FocusEditableInput extends React.Component {
     const { val } = this.state;
     if (onValidate && onValidate(val)) {
       clearError();
-      this.setState({ focused: false, hovering: false });
+      this.removeFocus();
+      this.setState({ hovering: false });
       if (onUpdate) onUpdate(val);
     } else {
       onError && onError();
     }
   }
 
+  onKeyDown = (e) => {
+    const { handleTab, expanded } = this.props;
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (!expanded) return this.onBlur();
+      handleTab(e);
+    }
+  }
+
+  onTextAreaKeyDown = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) return //shift+Enter will go to next line, Enter will save the form & close
+    if (e.key === "Enter") {
+      this.onBlur();
+    }
+    this.onKeyDown(e);
+  }
+
+  onKeyUp = (e) => {
+    if (e.key === 'Escape') this.onCancel(); // escape btn does not register w/ onkeypress
+  }
+  
   onKeyPress = (e) => {
-    if (e.key === 'Escape') this.onCancel();
     if (e.key === "Enter") this.onBlur();
   }
 
@@ -91,18 +131,17 @@ class FocusEditableInput extends React.Component {
        ))}
     </div>
   );
-  
 
   textAreaInput = () => {
-    const maxHeight = (this.state.val.split("\n").length || 1) * 25;
+    const maxHeight = Math.max(this.state.val.split("\n").length, 3) * 20;
     return (
       <TextArea
         autoFocus
-        rows={1}
         value={this.state.val}
         onBlur={this.onBlur}
         onChange={this.onChange}
-        onKeyUp={this.onKeyPress}
+        onKeyDown={this.onTextAreaKeyDown}
+        onKeyUp={this.onKeyUp}
         style={{ marginTop: 1, width: '72%', maxHeight }}
         className="slim"
       />
@@ -119,7 +158,9 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyDown={this.onKeyDown}
+      onKeyUp={this.onKeyUp}
+      onKeyPress={this.onKeyPress}
       className="slim"
     />
   )
@@ -132,7 +173,9 @@ class FocusEditableInput extends React.Component {
       error={this.props.error}
       onBlur={this.onBlur}
       onChange={this.onChange}
-      onKeyUp={this.onKeyPress}
+      onKeyDown={this.onKeyDown}
+      onKeyUp={this.onKeyUp}
+      onKeyPress={this.onKeyPress}
       className="slim"
     />
   );
@@ -145,7 +188,7 @@ class FocusEditableInput extends React.Component {
     return value;
   }
 
-  getInputField = () => {
+  renderInputField = () => {
     const { type } = this.props;
     if (type === 'textArea') return this.textAreaInput();
     if (type === 'price') return this.priceInput();
@@ -153,13 +196,13 @@ class FocusEditableInput extends React.Component {
   }
 
   render() {
-    const { editable, oneLine } = this.props;
-    const { focused, hovering, val } = this.state;
+    const { editable, oneLine, expanded } = this.props;
+    const { hovering, focused, val } = this.state;
 
-    if (editable && focused) {
+    if (editable && (focused || expanded)) {
       return (
         <>
-          {this.getInputField()}
+          {this.renderInputField()}
           <Icon
             inverted
             circular

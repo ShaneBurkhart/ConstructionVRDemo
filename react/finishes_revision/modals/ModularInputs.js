@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 
 import StyledDropzone from "../../components/StyledDropzone";
@@ -15,21 +15,28 @@ const ErrorLabel = (label="") => (
   </Label>
 )
 
-export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => (
-  <>
-    <label className="uiFormFieldLabel">Select a category</label>
-    <Dropdown
-      button 
-      basic
-      fluid
-      scrolling
-      upward={false}
-      text={selectedCategory || 'Select One'}
-      options={options.map(c => ({ key: c, text: c, value: c }))}
-      onChange={(e, {value}) => handleSelectCategory(value)}
-    />
-  </>
-);
+export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => {
+  const _dd = useRef(null)
+  return (
+    <>
+      <label className="uiFormFieldLabel">Select a category</label>
+      <Dropdown
+        ref={dd => _dd.current = dd}
+        button 
+        basic
+        fluid
+        scrolling
+        upward={false}
+        selection
+        search={(options, val) => options.filter(({text}) => text.toLowerCase().startsWith(val.toLowerCase()))}
+        text={selectedCategory || 'Select One'}
+        options={options.map(c => ({ key: c, text: c, value: c }))}
+        onChange={(_e, {value}) =>{
+          handleSelectCategory(value)
+        }}
+      />
+    </>
+)};
 
 export const PriceInput = ({ value, onChange, error, onBlur }) => (
   <Form.Field style={{ position: 'relative' }}>
@@ -63,12 +70,19 @@ export const DetailsInput = ({ value, onChange, onBlur, error }) => (
   />
 );
 
-export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onDelete }) => {
+export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onSwitchImgOrder, onDelete }) => {
   const [inputVal, setInputVal] = useState('');
   
   return (
     <div className="field">
-      <label>Images</label>
+        <label style={{marginBottom: 11}}>
+          Images
+          {images.length > 1 && (
+            <span style={{ fontSize: '.8rem', marginLeft: 5 }}>
+              -<a style={{ marginLeft: 5, zIndex: 99, fontWeight: 500 }} href="#/" onClick={() => onSwitchImgOrder()}>Switch Image Order</a>
+            </span>
+          )}
+        </label>
       <Grid>
         <Grid.Row>
           {images.map((image) => (
