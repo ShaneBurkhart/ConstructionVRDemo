@@ -3,16 +3,6 @@ const m = require("../middleware.js");
 const models = require("../../models/index.js");
 
 module.exports = (app) => {
-  app.get("/api2/admin/users", m.authSuperAdmin, async (req, res) => {
-    const users = await models.User.findAll();
-    const roles = models.User.rawAttributes.role.values;
-
-    const projectsAllInfo = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
-    // here we are obscuring token names from adminAccessToken to href
-    const projects = projectsAllInfo.map(({ id, name, adminAccessToken, accessToken, archived, last_seen_at, v1 }) => 
-      ({ id, name, href: adminAccessToken, accessToken, archived, last_seen_at, v1 }));
-    res.json({ users, roles, projects });
-  });
 
   app.post("/api2/admin/invite-user",  m.authSuperAdmin, async (req, res) => {
     if (!models.User.validateEmail(req.body.email)) {

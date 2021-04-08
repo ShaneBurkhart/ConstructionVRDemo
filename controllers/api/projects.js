@@ -9,6 +9,18 @@ Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY });
 const base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
 module.exports = (app) => {
+  
+  app.get("/api2/projects", m.authSuperAdmin, async (req, res) => {
+    const users = await models.User.findAll();
+    const roles = models.User.rawAttributes.role.values;
+
+    const projectsAllInfo = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
+    // here we are obscuring token names from adminAccessToken to href
+    const projects = projectsAllInfo.map(({ id, name, adminAccessToken, accessToken, archived, last_seen_at, v1 }) => 
+      ({ id, name, href: adminAccessToken, accessToken, archived, last_seen_at, v1 }));
+    res.json({ users, roles, projects });
+  });
+
   app.post("/api2/create-new-project", m.authSuperAdmin, async (req, res) => {
     if (!req.body.name) return res.status(422).send("A name is required")
 
@@ -162,13 +174,42 @@ module.exports = (app) => {
     if (!newName) return res.status(422).send("Cannot update name without a new name");
     
     try {
+      // TO DO - How to update in Airtable? Send to server.rb?
+
       const project = await models.Project.findOne({ where: { id: Number(projectId) }});
-      await project.update({
-        name: newName,
-      });
-      // const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = project;
-      // return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived });
-      res.status(200).send({ newName });
+      
+      const getRecordId = new Promise((resolve, reject) => {
+        base('projects').select({
+          maxRecords: 1,
+          filterByFormula: `{Access Token} = "${project.accessToken}"`
+        }).eachPage(function page(records, _fetchNextPage){
+          resolve(records[0].fields["Record ID"]);
+        }, function done(err){
+          if (err) console.error('*', err)
+          if (err) reject("Could not find resource");
+        })
+      })
+      
+      const recordId = await getRecordId;
+
+      base('projects').update([
+        {
+          "id": `${recordId}`,
+          "fields": {
+            "Name": `${newName}`
+          }
+        }
+      ], async function(err, records){
+        if (err) console.error(err);
+        if (err) return res.status(422).send("Could not process request");
+        console.log(records[0].get("Name"));
+        
+        await project.update({ //update pg
+          name: newName,
+        });
+  
+        res.status(200).send({ newName });
+      })
     } catch(error) {
       res.status(422).send("Could not complete request");
     }

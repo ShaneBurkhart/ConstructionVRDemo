@@ -4,7 +4,7 @@ const ActionCreator = {
   load: (page=1) => {
     $.ajax({
       type: "GET",
-      url: `/api2/admin/users`,
+      url: `/api2/projects`,
       dataType: "json",
       success: (data) => {
         _dispatch({ type: "LOAD", data: data });
