@@ -81,7 +81,7 @@
   width: 120px;
   height: 120px;
   border: 1px solid rgb(185, 185, 185);
-  /* background-color: rgba(0, 0, 0, 0.076); */
+  background-color: white;
   object-fit: contain;
   align-self: stretch;
 }
