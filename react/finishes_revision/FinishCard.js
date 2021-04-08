@@ -125,8 +125,6 @@ const FinishCard = ({
         <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
         <FocusEditableInput
           editable={isAdmin && !isFieldLocked(attr)}
-          isFirstChild={!prevAttr}
-          isLastChild={!nextAttr}
           expanded={(focusedEl || []).join("") === (focusKeySig || ['x']).join("")}
           clearExpanded={() => setFocusedEl(null)}
           handleExpanded={handleSetFocusedEl}
@@ -151,21 +149,19 @@ const FinishCard = ({
   
   const imgArr = attributes["Images"] || [];
 
-  const attrArr = attrList.filter(a => attributes[a] && !["Images"].includes(a)).map(a => attributes[a]);
-  const displayName = attrArr.join(",");
+  const attrArr = attrList.filter(a => attributes[a] && !["Images","Details"].includes(a)).map(a => attributes[a]);
+  const displayName = attrArr.join(", ");
 
   const cardContents = (
     <>
       <div className={styles.detailsSection}>
-        <div className={styles.detailsHeadingContainer} onClick={e => e.stopPropagation()}>
+        <div className={styles.detailsHeadingContainer}>
           <span className={styles.cellHeading}>
             {`${tag}${orderNumber+1}`}
           </span>
-          {!expandedDetails && (
-            <div className={`${styles.cellHeading} ${styles.cardName}`}>
-              <span>{displayName}</span>
-            </div>
-          )}
+          <div className={`${styles.cellHeading} ${styles.cardName}`}>
+            <span>{displayName}</span>
+          </div>
         </div>
         <div className={styles.detailsTableContainer}>
           <div className={`${styles.detailsToggleLink} hide-print`}>
