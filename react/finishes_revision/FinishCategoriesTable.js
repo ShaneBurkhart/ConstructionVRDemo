@@ -72,19 +72,33 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     }
   }, [newestFinish]);
 
-  const tabToPrevCategory = (category, cardId) => {
-    if (!expandedCategories[category]) expandCategory(category);
-    expandCard(category, cardId);
-    const excludedDetails = ["Name", "Images"];
-    const attrListLength = finishCategoriesMap[category].attr.length - 1;
-    const lastFieldIdx = attrListLength - excludedDetails.length;
-    setFocusedEl([category, cardId, lastFieldIdx]);
+  const sortedCategories = categoryList || [];
+  const getSortedCategoryCards = category => (finishes || [])
+      .filter(f => f.category === category)
+        .sort((a,b) => a.orderNumber - b.orderNumber);
+
+  const tabToPrevCategory = (prevCat) => {
+    if (!prevCat) return;
+    const lastCard = getSortedCategoryCards(prevCat).pop();
+    if (!lastCard) return;
+
+    if (!expandedCategories[prevCat]) expandCategory(prevCat);
+    expandCard(prevCat, lastCard.id);
+
+    const lastAttr = "Details";
+    setFocusedEl([prevCat, lastCard.id, lastAttr]);
   }
 
-  const tabToNextCategory = (category, cardId) => {
-    if (!expandedCategories[category]) expandCategory(category);
-    expandCard(category, cardId);
-    setFocusedEl([category, cardId, -1]);
+  const tabToNextCategory = (nextCat) => {
+    if (!nextCat) return;
+    const firstCard = getSortedCategoryCards(nextCat)[0];
+    if (!firstCard) return;
+    
+    if (!expandedCategories[nextCat]) expandCategory(nextCat);
+    expandCard(nextCat, firstCard.id);
+
+    const firstAttr = finishCategoriesMap[nextCat].attr[0];
+    setFocusedEl([nextCat, firstCard.id, firstAttr]);
   }
 
   const controls = [
@@ -94,7 +108,6 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     [collapseAllDetails, "Collapse All Details"],
   ]
 
-  const sortedCategories = categoryList || [];
   
   return (
     <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
@@ -109,8 +122,7 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
         {sortedCategories.map((category, i) => {
           const prevCat = i === 0 ? "" : sortedCategories[i - 1];
           const nextCat = i === (sortedCategories.length - 1) ? "" : sortedCategories[i + 1];
-          const prevCatList = (finishes || []).filter(f => f.category === prevCat);
-          const prevCatLastCardId = (prevCatList[prevCatList.length - 1] || {}).id;
+
           const nextCatList = finishes.filter(f => f.category === nextCat);
           const nextCatFirstCardId = nextCatList.length && nextCatList[0].id;
           return (
@@ -124,7 +136,7 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
               expandedChildren={expandedCards[category] || {}}
               updateExpandedChildren={(updatedChildren) => setExpandedCards(prev => ({ ...prev, [category]: updatedChildren }))}
               toggleExpandCategory={() => toggleExpandCategory(category)}
-              tabToPrevCategory={() => tabToPrevCategory(prevCat, prevCatLastCardId)}
+              tabToPrevCategory={() => tabToPrevCategory(prevCat)}
               tabToNextCategory={() => tabToNextCategory(nextCat, nextCatFirstCardId)}
             />
           );

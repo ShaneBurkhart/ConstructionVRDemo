@@ -20,8 +20,6 @@ class FocusEditableInput extends React.Component {
     oneLine: false,
     error: false,
     expanded: false,
-    isFirstChild: false,
-    isLastChild: false,
     clearExpanded: () => {},
     handleExpanded: () => {},
     handleTab: () => {},
@@ -90,11 +88,11 @@ class FocusEditableInput extends React.Component {
   }
 
   onKeyDown = (e) => {
-    const { handleTab, expanded, isFirstChild, isLastChild } = this.props;
+    const { handleTab, expanded } = this.props;
     if (e.key === 'Tab') {
       e.preventDefault();
       if (!expanded) return this.onBlur();
-      handleTab(e, isFirstChild, isLastChild);
+      handleTab(e);
     }
   }
 
