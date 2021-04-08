@@ -14,7 +14,6 @@ module.exports = (app) => {
   });
 
   app.post("/api2/admin/invite-user",  m.authSuperAdmin, async (req, res) => {
-    console.log('doing invite stuff')
     if (!models.User.validateEmail(req.body.email)) {
       return res.status(422).json({ msg: "Wrong email" })
     }
