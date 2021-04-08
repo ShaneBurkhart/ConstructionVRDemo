@@ -31,7 +31,9 @@ export const CategoryDropdown = ({ selectedCategory, options, handleSelectCatego
         search={(options, val) => options.filter(({text}) => text.toLowerCase().startsWith(val.toLowerCase()))}
         text={selectedCategory || 'Select One'}
         options={options.map(c => ({ key: c, text: c, value: c }))}
-        onChange={(_e, {value}) =>{ handleSelectCategory(value); console.log({_e, _dd})}}
+        onChange={(_e, {value}) =>{
+          handleSelectCategory(value)
+        }}
       />
     </>
 )};
