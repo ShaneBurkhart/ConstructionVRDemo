@@ -132,10 +132,15 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       );
     }
 
+    const switchImgOrder = () => {
+      const [ img1, img2 ] = arrVal;
+      if (img1 && img2) setAttributeValues(prev => ({ ...prev, "Images": [ img2, img1 ]}))
+    }
+
     const attrInputMap = {
       "Price":  <PriceInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
       "Details":  <DetailsInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
-      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onImgLinkUpload={onImgLinkUpload} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onImgLinkUpload={onImgLinkUpload} onBlur={onBlur} error={attributeValueErrors[attrName]} onSwitchImgOrder={switchImgOrder} />,
       default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />
     }
     const attrInput = attrInputMap[attrName] ? attrInputMap[attrName] : attrInputMap.default;

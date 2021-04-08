@@ -63,12 +63,19 @@ export const DetailsInput = ({ value, onChange, onBlur, error }) => (
   />
 );
 
-export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onDelete }) => {
+export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onSwitchImgOrder, onDelete }) => {
   const [inputVal, setInputVal] = useState('');
   
   return (
     <div className="field">
-      <label>Images</label>
+        <label style={{marginBottom: 11}}>
+          Images
+          {images.length > 1 && (
+            <span style={{ fontSize: '.8rem', marginLeft: 5 }}>
+              -<a style={{ marginLeft: 5, zIndex: 99, fontWeight: 500 }} href="#/" onClick={() => onSwitchImgOrder()}>Switch Image Order</a>
+            </span>
+          )}
+        </label>
       <Grid>
         <Grid.Row>
           {images.map((image) => (
