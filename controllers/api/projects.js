@@ -94,69 +94,6 @@ module.exports = (app) => {
     const newFinishes = await Promise.all(promisedNewFinishes);
     if (newFinishes.includes(null)) return res.status(422).send("Could not complete request");
 
-    // V1 COPY STUFF --> WILL BE DELETED
-    // const categoriesToCopy = await models.Category.findAll({ where: { "ProjectId": req.body.id } });
-    // const selectionsToCopy = await models.Selection.findAll({ where: { "ProjectId": req.body.id }});
-    // const optionsToCopy = await models.Option.findAll({ where: { "ProjectId": req.body.id }});
-    // const imagesToCopy = await models.OptionImage.findAll({ where: { "ProjectId": req.body.id }});
-    
-    // const promisedNewCategories = categoriesToCopy.map(({ name, order }) => models.Category.create({ name, order, "ProjectId": newProjectId }));
-    // const newCategories = await Promise.all(promisedNewCategories);
-    // if (newCategories.includes(null)) return res.status(422).send("Could not complete request");
-
-    
-    // const copyImage = (image, newOptionId) => {
-    //   const { url } = image;
-    //   const newImage = models.OptionImage.create({
-    //     "ProjectId": newProjectId,
-    //     "OptionId": newOptionId,
-    //     url
-    //   });
-    // }
-    
-    // const copyOption = async (option, newSelectionId) => {
-    //   const {name, unitPrice, type, url, manufacturer, itemNum, style, size, info, order} = option;
-    //   const imagesPerOption = imagesToCopy.filter(i => i["OptionId"] === option.id);
-
-    //   const newOption = await models.Option.create({
-    //     "ProjectId": newProjectId,
-    //     "SelectionId": newSelectionId,
-    //     name,
-    //     unitPrice,
-    //     type,
-    //     url,
-    //     manufacturer,
-    //     itemNum,
-    //     style,
-    //     size,
-    //     info,
-    //     order
-    //   });
-
-    //   imagesPerOption.forEach(i => copyImage(i, newOption.id))
-    // }
-
-    // const copySelection = async (selection, newCategoryId) => {
-    //   const { room, type, location, notes, order } = selection;
-    //   const optionsPerSelection = optionsToCopy.filter(o => o["SelectionId"] === selection.id)
-    //   const newSelection = await models.Selection.create({
-    //     "ProjectId": newProjectId,
-    //     "CategoryId": newCategoryId,
-    //     room,
-    //     type,
-    //     location,
-    //     notes,
-    //     order
-    //   });
-
-    //   optionsPerSelection.forEach(option => copyOption(option, newSelection.id));
-    // }
-
-    // newCategories.forEach((c, i) => {
-    //   const selectionsPerCategory = selectionsToCopy.filter(s => s["CategoryId"] === categoriesToCopy[i].id);
-    //   selectionsPerCategory.forEach(selection => copySelection(selection, c.id))
-    // });
-
 
     // create Airtable record
     base('projects').create([
@@ -177,15 +114,13 @@ module.exports = (app) => {
     });
   });
 
-  app.put("/api2/v2/update-project-name", m.authUser, async (req, res) => {
+  app.put("/api2/v2/update-project-name", m.authSuperAdmin, async (req, res) => {
     const { projectId, newName } = req.body;
     if (!projectId) return res.status(422).send("Cannot update project without project id");
     if (isNaN(Number(projectId))) return res.status(422).send("Invalid project id");
     if (!newName) return res.status(422).send("Cannot update name without a new name");
     
     try {
-      // TO DO - How to update in Airtable? Send to server.rb?
-
       const project = await models.Project.findOne({ where: { id: Number(projectId) }});
       
       const getRecordId = new Promise((resolve, reject) => {
@@ -212,7 +147,6 @@ module.exports = (app) => {
       ], async function(err, records){
         if (err) console.error(err);
         if (err) return res.status(422).send("Could not process request");
-        console.log(records[0].get("Name"));
         
         await project.update({ //update pg
           name: newName,
