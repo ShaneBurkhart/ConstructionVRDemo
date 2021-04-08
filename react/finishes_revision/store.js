@@ -3,6 +3,8 @@ import thunk from 'redux-thunk';
 
 const _initialState = {
   adminMode: false,
+  projectId: null,
+  projectName: "",
   apiError: {},
   finishes: [],
   newestFinish: {},
@@ -15,8 +17,8 @@ let unchangedFinishes;
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      const { adminMode, finishes } = action.data;
-      return { ...state, adminMode, finishes };
+      const { adminMode, finishes, projectId, projectName } = action.data;
+      return { ...state, adminMode, finishes, projectId, projectName };
     
     case "NEW_FINISH":
       return { ...state, finishes: [...state.finishes, action.data], newestFinish: action.data };

@@ -136,6 +136,19 @@ const ActionCreator = {
     })
   },
 
+  changeProjectName: (projectId, newName) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/update-project-name`,
+      data: {projectId, newName},
+      success: (data) => console.log({data}),
+      error: (error) => {
+        // onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
   updateDispatch: (dispatch) => {
     _dispatch = dispatch;
   }

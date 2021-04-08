@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
+import ActionCreators from './action_creators';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import './FinishCategoriesDrawer.css';
 
-const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList, adminMode }) => {
+const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
+  const projectId = useSelector(state => state.projectId)
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
   const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
+
+  const changeProjectName = () => {
+    const newName = prompt("Enter New Name");
+    if (newName && projectId) ActionCreators.changeProjectName(projectId, newName);
+  }
   
   return (
     <>
@@ -27,6 +35,8 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList, adminMode }) 
               Add a New Finish
               <Icon name='plus' />
             </Button>
+            <br />
+            <a onClick={changeProjectName}>Change Project Name</a>
           </Segment>
           <Segment vertical className="categories-section">
             <Menu text vertical>
