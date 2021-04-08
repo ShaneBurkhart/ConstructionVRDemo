@@ -94,7 +94,7 @@ const Dashboard = () => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {projectList.map(({ id, accessToken, href, name, v1 }) => {
+            {projectList.filter(p => !p.v1).map(({ id, accessToken, href, name, v1 }) => {
               const linkHref = getHref(href, accessToken, v1);
               return (
                 <tr className="project-row" key={accessToken}>

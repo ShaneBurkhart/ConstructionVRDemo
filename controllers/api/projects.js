@@ -85,67 +85,77 @@ module.exports = (app) => {
     const { id: newProjectId, name, accessToken, adminAccessToken, last_seen_at, archived, v1 } = newProject;
     if (!newProjectId) return res.status(422).send("Could not create new project");
 
-    const categoriesToCopy = await models.Category.findAll({ where: { "ProjectId": req.body.id } });
-    const selectionsToCopy = await models.Selection.findAll({ where: { "ProjectId": req.body.id }});
-    const optionsToCopy = await models.Option.findAll({ where: { "ProjectId": req.body.id }});
-    const imagesToCopy = await models.OptionImage.findAll({ where: { "ProjectId": req.body.id }});
+    const finishesToCopy = await models.Finish.findAll({ where: { "ProjectId": req.body.id } });
+
+    const promisedNewFinishes = finishesToCopy
+      .map(({ category, orderNumber, attributes }) => 
+        models.Finish.create({ "ProjectId": newProjectId, category, orderNumber, attributes}));
+
+    const newFinishes = await Promise.all(promisedNewFinishes);
+    if (newFinishes.includes(null)) return res.status(422).send("Could not complete request");
+
+    // V1 COPY STUFF --> WILL BE DELETED
+    // const categoriesToCopy = await models.Category.findAll({ where: { "ProjectId": req.body.id } });
+    // const selectionsToCopy = await models.Selection.findAll({ where: { "ProjectId": req.body.id }});
+    // const optionsToCopy = await models.Option.findAll({ where: { "ProjectId": req.body.id }});
+    // const imagesToCopy = await models.OptionImage.findAll({ where: { "ProjectId": req.body.id }});
     
-    const promisedNewCategories = categoriesToCopy.map(({ name, order }) => models.Category.create({ name, order, "ProjectId": newProjectId }));
-    const newCategories = await Promise.all(promisedNewCategories);
-    if (newCategories.includes(null)) return res.status(422).send("Could not complete request");
+    // const promisedNewCategories = categoriesToCopy.map(({ name, order }) => models.Category.create({ name, order, "ProjectId": newProjectId }));
+    // const newCategories = await Promise.all(promisedNewCategories);
+    // if (newCategories.includes(null)) return res.status(422).send("Could not complete request");
 
     
-    const copyImage = (image, newOptionId) => {
-      const { url } = image;
-      const newImage = models.OptionImage.create({
-        "ProjectId": newProjectId,
-        "OptionId": newOptionId,
-        url
-      });
-    }
+    // const copyImage = (image, newOptionId) => {
+    //   const { url } = image;
+    //   const newImage = models.OptionImage.create({
+    //     "ProjectId": newProjectId,
+    //     "OptionId": newOptionId,
+    //     url
+    //   });
+    // }
     
-    const copyOption = async (option, newSelectionId) => {
-      const {name, unitPrice, type, url, manufacturer, itemNum, style, size, info, order} = option;
-      const imagesPerOption = imagesToCopy.filter(i => i["OptionId"] === option.id);
+    // const copyOption = async (option, newSelectionId) => {
+    //   const {name, unitPrice, type, url, manufacturer, itemNum, style, size, info, order} = option;
+    //   const imagesPerOption = imagesToCopy.filter(i => i["OptionId"] === option.id);
 
-      const newOption = await models.Option.create({
-        "ProjectId": newProjectId,
-        "SelectionId": newSelectionId,
-        name,
-        unitPrice,
-        type,
-        url,
-        manufacturer,
-        itemNum,
-        style,
-        size,
-        info,
-        order
-      });
+    //   const newOption = await models.Option.create({
+    //     "ProjectId": newProjectId,
+    //     "SelectionId": newSelectionId,
+    //     name,
+    //     unitPrice,
+    //     type,
+    //     url,
+    //     manufacturer,
+    //     itemNum,
+    //     style,
+    //     size,
+    //     info,
+    //     order
+    //   });
 
-      imagesPerOption.forEach(i => copyImage(i, newOption.id))
-    }
+    //   imagesPerOption.forEach(i => copyImage(i, newOption.id))
+    // }
 
-    const copySelection = async (selection, newCategoryId) => {
-      const { room, type, location, notes, order } = selection;
-      const optionsPerSelection = optionsToCopy.filter(o => o["SelectionId"] === selection.id)
-      const newSelection = await models.Selection.create({
-        "ProjectId": newProjectId,
-        "CategoryId": newCategoryId,
-        room,
-        type,
-        location,
-        notes,
-        order
-      });
+    // const copySelection = async (selection, newCategoryId) => {
+    //   const { room, type, location, notes, order } = selection;
+    //   const optionsPerSelection = optionsToCopy.filter(o => o["SelectionId"] === selection.id)
+    //   const newSelection = await models.Selection.create({
+    //     "ProjectId": newProjectId,
+    //     "CategoryId": newCategoryId,
+    //     room,
+    //     type,
+    //     location,
+    //     notes,
+    //     order
+    //   });
 
-      optionsPerSelection.forEach(option => copyOption(option, newSelection.id));
-    }
+    //   optionsPerSelection.forEach(option => copyOption(option, newSelection.id));
+    // }
 
-    newCategories.forEach((c, i) => {
-      const selectionsPerCategory = selectionsToCopy.filter(s => s["CategoryId"] === categoriesToCopy[i].id);
-      selectionsPerCategory.forEach(selection => copySelection(selection, c.id))
-    });
+    // newCategories.forEach((c, i) => {
+    //   const selectionsPerCategory = selectionsToCopy.filter(s => s["CategoryId"] === categoriesToCopy[i].id);
+    //   selectionsPerCategory.forEach(selection => copySelection(selection, c.id))
+    // });
 
 
     // create Airtable record
