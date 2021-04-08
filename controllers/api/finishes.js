@@ -25,8 +25,10 @@ module.exports = (app) => {
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
+      const projectId = project.id;
+      const projectName = project.name;
   
-      return res.json({ adminMode, finishes });
+      return res.json({ adminMode, finishes, projectId, projectName });
     } catch(error){
       console.log(error);
       res.status(422).send("Could not retrieve project information")

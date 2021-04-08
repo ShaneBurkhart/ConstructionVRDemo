@@ -155,6 +155,25 @@ module.exports = (app) => {
     });
   });
 
+  app.put("/api2/v2/update-project-name", m.authUser, async (req, res) => {
+    const { projectId, newName } = req.body;
+    if (!projectId) return res.status(422).send("Cannot update project without project id");
+    if (isNaN(Number(projectId))) return res.status(422).send("Invalid project id");
+    if (!newName) return res.status(422).send("Cannot update name without a new name");
+    
+    try {
+      const project = await models.Project.findOne({ where: { id: Number(projectId) }});
+      await project.update({
+        name: newName,
+      });
+      // const { id, name, accessToken, adminAccessToken, last_seen_at, archived } = project;
+      // return res.status(200).send({ id, name, accessToken, href: adminAccessToken, last_seen_at, archived });
+      res.status(200).send({ newName });
+    } catch(error) {
+      res.status(422).send("Could not complete request");
+    }
+  });
+
   app.post('/api2/toggle-archive-project', m.authSuperAdmin, async (req, res) => {
     if (!req.body.id) return res.status(422).send("A project is required")
 
