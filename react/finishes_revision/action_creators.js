@@ -141,7 +141,9 @@ const ActionCreator = {
       type: "PUT",
       url: `/api2/v2/update-project-name`,
       data: {projectId, newName},
-      success: (data) => console.log({data}),
+      success: ({ newName }) => {
+        _dispatch({ type: "UPDATE_PROJECT_NAME", data: newName })
+      },
       error: (error) => {
         // onError();
         _dispatch({ type: "API_ERROR", data: error });

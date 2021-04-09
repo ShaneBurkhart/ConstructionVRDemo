@@ -30,6 +30,9 @@ const todos = (state = {}, action) => {
     case "UPDATE_FINISH_ORDERS":
       unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
       return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
+    
+    case "UPDATE_PROJECT_NAME":
+      return { ...state, projectName: action.data};
 
     case 'API_ERROR':
       return { ...state, apiError: {
