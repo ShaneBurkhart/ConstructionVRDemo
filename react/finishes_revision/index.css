@@ -16,7 +16,7 @@ body {
   position: relative;
 }
 
-body.admin-mode {
+.admin-mode {
   padding-left: 300px;
 }
 
