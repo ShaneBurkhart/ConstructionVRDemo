@@ -84,10 +84,10 @@ const ActionCreator = {
       dataType: "json",
       data: { id },
       success: (data) => {
-        _dispatch({ type: "UPDATE_PROJECT", data});
+        // _dispatch({ type: "UPDATE_PROJECT", data});
       },
       error: (error) => {
-        _dispatch({ type: "API_ERROR", error });
+        // _dispatch({ type: "API_ERROR", error });
       },
     })
   },
