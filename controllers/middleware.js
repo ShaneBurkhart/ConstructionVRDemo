@@ -45,15 +45,12 @@ const Middleware = {
   },
 
   goToDashboardIfSignedIn: function goToDashboardIfSignedIn(req, res, next) {
-    console.log(`m.goToDashIFSI ${req.user}`)
     if (req.user) return res.redirect("/app/dashboard");
     next();
   }
 };
 
 // Middleware["authAdmin"] = (req, res, next) => {
-//   console.log('hi')
-//   console.log(`m.authAdmin - ${req.user.role.toJSON()}`)
 //   if (!req.user) return res.redirect(r.SIGN_IN_URL);
 //   if (req.user.role !== "super admin" && req.user.role !== "admin") {
 //     return res.redirect("/app/dashboard");

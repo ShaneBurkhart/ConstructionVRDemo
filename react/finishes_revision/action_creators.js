@@ -151,6 +151,38 @@ const ActionCreator = {
     })
   },
 
+  lockCategory: (category, onSuccess, onError) => {
+    $.ajax({
+      type: "POST",
+      url: `/api2/v2/project/lock_category/${PROJECT_ACCESS_TOKEN}`,
+      data: {category},
+      success: (data) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  unlockCategory: (category, onSuccess, onError) => {
+    $.ajax({
+      type: "DELETE",
+      url: `/api2/v2/project/unlock_category/${PROJECT_ACCESS_TOKEN}`,
+      data: {category},
+      success: (data) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
   updateDispatch: (dispatch) => {
     _dispatch = dispatch;
   }

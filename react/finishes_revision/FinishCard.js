@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
 
@@ -15,6 +14,7 @@ import ActionCreator from './action_creators';
 const FinishCard = ({
   tag,
   cardId,
+  isCardOrderLocked,
   nextCardId,
   prevCardId,
   finishDetails,
@@ -189,14 +189,14 @@ const FinishCard = ({
     </>
   );
 
-  if (isAdmin) {
+  if (isAdmin && !isCardOrderLocked) {
     return (
       <Draggable draggableId={`${id}`} index={orderNumber}>
         {(provided, snapshot) => (
           <article
-          className={`show-print ${styles.adminMode}`}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
+            className={`show-print ${styles.adminMode}`}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
           >
             <div 
               id={`finishCard-${id}`}
@@ -204,7 +204,9 @@ const FinishCard = ({
               onClick={toggleShowEditFinishModal}
             >
               <AdminControls
+                // dragHandleProps={isCardOrderLocked ? null : provided.dragHandleProps}
                 dragHandleProps={provided.dragHandleProps}
+                // onClickTrash={isCardOrderLocked ? null : () => onDelete(id)}
                 onClickTrash={() => onDelete(id)}
               />
               {cardContents}

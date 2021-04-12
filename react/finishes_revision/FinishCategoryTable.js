@@ -25,9 +25,11 @@ const FinishCategoriesTable = ({
   updateExpandedChildren
 }) => {
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
-  // get is Category Locked
+  const lockedCategories = useSelector(state => state.lockedCategories);
+  const isCategoryLocked = lockedCategories.includes(category);
 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
+  const [loadingLockedState, setLoadingLockedState] = useState(false);
 
   const count = finishes.length;
   const tag = category ? getCategoryTag(category) : '';
@@ -47,6 +49,14 @@ const FinishCategoriesTable = ({
     }
     return updateExpandedChildren(nextState)
   };
+
+  const toggleLockCategory = () => {
+    setLoadingLockedState(true);
+    const onSuccess = () => { setLoadingLockedState(false) };
+    const onError = () => { setLoadingLockedState(false) };
+    if (isCategoryLocked) return ActionCreator.unlockCategory(category, onSuccess, onError);
+    return ActionCreator.lockCategory(category, onSuccess, onError);
+  }
 
   const handleDeleteCard = finishId => ActionCreator.deleteFinish(finishId);
 
@@ -73,6 +83,8 @@ const FinishCategoriesTable = ({
           </h2>
           {adminMode && (
             <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
+              {!isCategoryLocked && <Button icon="lock" title="click to lock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
+              {IS_SUPER_ADMIN && isCategoryLocked && <Button icon="unlock alternate" title="click to unlock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
               <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
               <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
             </h2>
@@ -92,6 +104,7 @@ const FinishCategoriesTable = ({
                       cardId={f.id}
                       finishDetails={f}
                       focusedEl={focusedEl}
+                      isCardOrderLocked={isCategoryLocked}
                       setFocusedEl={setFocusedEl}
                       tabToNextCategory={tabToNextCategory}
                       tabToPrevCategory={tabToPrevCategory}
