@@ -10,13 +10,9 @@ import CopyProjectModal from './CopyProjectModal';
 import ConfirmModal from './ConfirmModal';
 
 
-// TO DO - handle state re: last_seen_at, updates quicker than redirect
-
-
-
 const Dashboard = () => {
   const allProjects = useSelector(state => state.projects || []);
-  const isAdmin = IS_SUPER_ADMIN;
+  const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
 
   const [message, setMessage] = useState({ show: false });
   const [projectToCopy, setProjectToCopy] = useState({});

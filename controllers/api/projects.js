@@ -10,7 +10,7 @@ const base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
 module.exports = (app) => {
   
-  app.get("/api2/projects", m.authSuperAdmin, async (req, res) => {
+  app.get("/api2/projects", m.authUser, async (req, res) => {
     try {
       const users = await models.User.findAll();
       const roles = models.User.rawAttributes.role.values;
@@ -23,7 +23,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/api2/create-new-project", m.authSuperAdmin, async (req, res) => {
+  app.post("/api2/create-new-project", m.authUser, async (req, res) => {
     if (!req.body.name) return res.status(422).send("A name is required");
 
     try {
@@ -74,7 +74,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/api2/copy-project", m.authSuperAdmin, async (req, res) => {
+  app.post("/api2/copy-project", m.authUser, async (req, res) => {
     if (!req.body.name) return res.status(422).send("A name is required");
     if (!req.body.id) return res.status(422).send("A project to copy is required");
 
@@ -124,7 +124,7 @@ module.exports = (app) => {
     }
   });
 
-  app.put("/api2/v2/update-project-name", m.authSuperAdmin, async (req, res) => {
+  app.put("/api2/v2/update-project-name", m.authUser, async (req, res) => {
     const { projectId, newName } = req.body;
     if (!projectId) return res.status(422).send("Cannot update project without project id");
     if (isNaN(Number(projectId))) return res.status(422).send("Invalid project id");
@@ -168,7 +168,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post('/api2/toggle-archive-project', m.authSuperAdmin, async (req, res) => {
+  app.post('/api2/toggle-archive-project', m.authUser, async (req, res) => {
     if (!req.body.id) return res.status(422).send("A project is required");
 
     try {

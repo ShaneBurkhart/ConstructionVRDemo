@@ -10,7 +10,7 @@ const ActionCreator = {
         _dispatch({ type: "LOAD", data: data });
       },
       error: (data) => {
-        callback({status: data.status, message: "could not fetch project data"})
+        // callback({status: data.status, message: "could not fetch project data"})
         _dispatch({ type: "API_ERROR", data: data });
       }
     })
