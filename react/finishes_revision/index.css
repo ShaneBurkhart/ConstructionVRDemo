@@ -37,7 +37,7 @@ textarea.slim:focus {
 }
 
 .ui.input.slim input {
-  max-height: 20px;
+  max-height: 2em;
 }
 
 .pointer {
