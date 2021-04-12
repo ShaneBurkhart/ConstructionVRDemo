@@ -26,45 +26,33 @@ module.exports = (app) => {
         }).eachPage(function page(records, _fetchNextPage){
           resolve({
             recordId: records[0].fields["Record ID"],
-            isV1: records[0].fields["Is V1?"]
+            isV1: records[0].fields["Is V1?"],
+            hasRenderings: records[0].fields.hasOwnProperty("Units")
           });
         }, function done(err){
           if (err) reject("Could not find resource");
         })
       });
 
-      const { recordId, isV1 } = await getRecordIdAndVersion;
+      const { recordId, isV1, hasRenderings } = await getRecordIdAndVersion;
       if (!recordId) return res.status(422).send("Could not locate resource");
-
-      const getProjectHasRenderings = new Promise((resolve, reject) => {
-        base('units').select({
-          maxRecords: 1,
-          filterByFormula: `{Project ID} = "${recordId}"`
-        }).eachPage(function page(records, _fetchNextPage){
-          resolve(!!records.length);
-        }, function done(err){
-          if (err) reject("Could not find resources");
-        })
-      });
-
-      const hasRenderings = await getProjectHasRenderings;
 
       const permissions = getPermissions(req.user);
       const isAdmin = permissions.isSuperAdmin || permissions.isEditor;
 
       if (isV1) {
         // LEGACY APP - SEND TO SERVER.RB
-        if (isAdmin) return res.redirect(`/admin/login/${project.adminAccessToken}`);
-        return res.redirect(`/project/${project.accessToken}/finishes`);
+        const finishesPath = `/project/${project.accessToken}/finishes`;
+        if (isAdmin) return res.redirect(`/admin/login/${project.adminAccessToken}?redirect_to=${encodeURIComponent(finishesPath)}`);
+        return res.redirect(finishesPath);
       };
 
       const renderingsLink = isAdmin ? `/admin/login/${project.adminAccessToken}` : `/project/${project.accessToken}`;
       const projectName = project.name;
       
-      res.render("project_finishes", { access_token, projectName, permissions, hasRenderings, renderingsLink }); // add hasRenderings to globals, redirect url (admin login), 
+      res.render("project_finishes", { access_token, projectName, permissions, hasRenderings, renderingsLink });
     } catch (err) {
-      console.log({err});
-      res.status(422).send("Could not complete request")
+      res.status(422).send("Could not complete request");
     }
   });
 }
