@@ -29,7 +29,7 @@ const FinishCard = ({
   onDelete,
   expandSiblingCard,
 }) => {
-  const isAdmin = useSelector(state => state.adminMode);
+  const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
   const { id, orderNumber, attributes, category } = finishDetails;
 
 

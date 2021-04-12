@@ -15,7 +15,6 @@ import "./FinishSelectionTable.css";
 
 const App = () => {
   const dispatch = useDispatch();
-  // const adminMode = useSelector(state => state.adminMode);
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const finishes = useSelector(state => state.finishes);
   const apiError = useSelector(state => state.apiError);

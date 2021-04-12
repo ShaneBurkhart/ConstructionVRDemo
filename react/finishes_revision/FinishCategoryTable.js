@@ -24,7 +24,8 @@ const FinishCategoriesTable = ({
   tabToPrevCategory,
   updateExpandedChildren
 }) => {
-  const adminMode = useSelector(state => state.adminMode);
+  const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
+  // get is Category Locked
 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
 
