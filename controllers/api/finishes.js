@@ -18,17 +18,18 @@ module.exports = (app) => {
   
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
-    const adminMode = !!req.session["is_admin"]; // TO DO - use express auth not ruby
     
     try {
       const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
+      const categoryLocks = await project.getCategoryLocks();
+
       const projectId = project.id;
       const projectName = project.name;
   
-      return res.json({ adminMode, finishes, projectId, projectName });
+      return res.json({ finishes, projectId, projectName, categoryLocks });
     } catch(error){
       console.log(error);
       res.status(422).send("Could not retrieve project information")
