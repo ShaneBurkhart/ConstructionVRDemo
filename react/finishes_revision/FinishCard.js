@@ -189,9 +189,9 @@ const FinishCard = ({
     </>
   );
 
-  if (isAdmin && !isCardOrderLocked) {
+  if (isAdmin) {
     return (
-      <Draggable draggableId={`${id}`} index={orderNumber}>
+      <Draggable draggableId={`${id}`} index={orderNumber} isDragDisabled={isCardOrderLocked}>
         {(provided, snapshot) => (
           <article
             className={`show-print ${styles.adminMode}`}
@@ -204,10 +204,8 @@ const FinishCard = ({
               onClick={toggleShowEditFinishModal}
             >
               <AdminControls
-                // dragHandleProps={isCardOrderLocked ? null : provided.dragHandleProps}
                 dragHandleProps={provided.dragHandleProps}
-                // onClickTrash={isCardOrderLocked ? null : () => onDelete(id)}
-                onClickTrash={() => onDelete(id)}
+                onClickTrash={isCardOrderLocked ? null : () => onDelete(id)}
               />
               {cardContents}
             </div>

@@ -83,8 +83,8 @@ const FinishCategoriesTable = ({
           </h2>
           {adminMode && (
             <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
-              {!isCategoryLocked && <Button icon="lock" title="click to lock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
-              {IS_SUPER_ADMIN && isCategoryLocked && <Button icon="unlock alternate" title="click to unlock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
+              {!isCategoryLocked && <Button icon="unlock alternate" title="click to lock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
+              {IS_SUPER_ADMIN && isCategoryLocked && <Button icon="lock" title="click to unlock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
               <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
               <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
             </h2>
