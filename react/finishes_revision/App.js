@@ -6,6 +6,7 @@ import { finishCategoriesArr } from '../../common/constants';
 import FloatingProjectButton from '../components/FloatingProjectButton';
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import FinishCategoriesTable from './FinishCategoriesTable';
+import SiteHeader from './SiteHeader';
 
 import ToastMessage from '../components/ToastMessage';
 
@@ -14,9 +15,10 @@ import "./FinishSelectionTable.css";
 
 const App = () => {
   const dispatch = useDispatch();
-  const adminMode = useSelector(state => state.adminMode);
+  const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const finishes = useSelector(state => state.finishes);
   const apiError = useSelector(state => state.apiError);
+  const projectName = useSelector(state => state.projectName);
 
   useEffect(() => {
     ActionCreators.updateDispatch(dispatch);
@@ -36,7 +38,10 @@ const App = () => {
   return (
     <main>
       {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} categoryList={categoryList} />}
-      <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
+      <div className={`${adminMode ? "admin-mode" : ""}`}>
+        <SiteHeader projectName={projectName} />
+        <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
+      </div>
       <FloatingProjectButton name={PROJECT_NAME} />
       <ToastMessage positive={false} message={apiError.message} />
     </main>

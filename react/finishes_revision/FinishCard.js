@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
 
@@ -15,6 +14,7 @@ import ActionCreator from './action_creators';
 const FinishCard = ({
   tag,
   cardId,
+  isCardOrderLocked,
   nextCardId,
   prevCardId,
   finishDetails,
@@ -29,7 +29,7 @@ const FinishCard = ({
   onDelete,
   expandSiblingCard,
 }) => {
-  const isAdmin = useSelector(state => state.adminMode);
+  const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
   const { id, orderNumber, attributes, category } = finishDetails;
 
 
@@ -191,12 +191,12 @@ const FinishCard = ({
 
   if (isAdmin) {
     return (
-      <Draggable draggableId={`${id}`} index={orderNumber}>
+      <Draggable draggableId={`${id}`} index={orderNumber} isDragDisabled={isCardOrderLocked}>
         {(provided, snapshot) => (
           <article
-          className={`show-print ${styles.adminMode}`}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
+            className={`show-print ${styles.adminMode}`}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
           >
             <div 
               id={`finishCard-${id}`}
@@ -205,7 +205,7 @@ const FinishCard = ({
             >
               <AdminControls
                 dragHandleProps={provided.dragHandleProps}
-                onClickTrash={() => onDelete(id)}
+                onClickTrash={isCardOrderLocked ? null : () => onDelete(id)}
               />
               {cardContents}
             </div>

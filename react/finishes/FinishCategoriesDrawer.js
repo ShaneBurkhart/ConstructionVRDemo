@@ -73,7 +73,9 @@ class FinishCategoriesDrawer extends React.Component {
     return (
       <div className="categories-drawer hide-print">
         <Segment vertical>
-          <img src="/logo.png" />
+          <a href="/" title="go to projects dashboard">
+            <img src="/logo.png" />
+          </a>
         </Segment>
         <Segment vertical>
           <label>Add A Category</label>

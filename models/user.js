@@ -26,8 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     role: {
       type:   DataTypes.ENUM,
       // values: ["super admin", "admin", "basic"],
-      values: ["super admin"],
-      defaultValue: "basic",
+      values: ["super admin", "editor"],
+      defaultValue: "editor",
     },
     humanizedRole: {
       type: DataTypes.VIRTUAL,

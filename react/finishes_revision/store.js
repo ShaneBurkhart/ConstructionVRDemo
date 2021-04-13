@@ -2,11 +2,11 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 
 const _initialState = {
-  adminMode: false,
   projectId: null,
   projectName: "",
   apiError: {},
   finishes: [],
+  lockedCategories: [],
   newestFinish: {},
   modals: {},
 };
@@ -17,8 +17,8 @@ let unchangedFinishes;
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      const { adminMode, finishes, projectId, projectName } = action.data;
-      return { ...state, adminMode, finishes, projectId, projectName };
+      const { finishes, projectId, projectName, lockedCategories } = action.data;
+      return { ...state, finishes, projectId, projectName, lockedCategories };
     
     case "NEW_FINISH":
       return { ...state, finishes: [...state.finishes, action.data], newestFinish: action.data };
@@ -30,6 +30,12 @@ const todos = (state = {}, action) => {
     case "UPDATE_FINISH_ORDERS":
       unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
       return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
+    
+    case "UPDATE_PROJECT_NAME":
+      return { ...state, projectName: action.data};
+    
+    case "UPDATE_LOCKED_CATEGORIES":
+      return { ...state, lockedCategories: action.data.lockedCategories};
 
     case 'API_ERROR':
       return { ...state, apiError: {

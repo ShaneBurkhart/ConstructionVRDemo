@@ -10,7 +10,7 @@ const ActionCreator = {
         _dispatch({ type: "LOAD", data: data });
       },
       error: (data) => {
-        callback({status: data.status, message: "could not fetch project data"})
+        // callback({status: data.status, message: "could not fetch project data"})
         _dispatch({ type: "API_ERROR", data: data });
       }
     })
@@ -84,10 +84,10 @@ const ActionCreator = {
       dataType: "json",
       data: { id },
       success: (data) => {
-        _dispatch({ type: "UPDATE_PROJECT", data});
+        // _dispatch({ type: "UPDATE_PROJECT", data});
       },
       error: (error) => {
-        _dispatch({ type: "API_ERROR", error });
+        // _dispatch({ type: "API_ERROR", error });
       },
     })
   },

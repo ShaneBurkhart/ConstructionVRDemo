@@ -141,9 +141,43 @@ const ActionCreator = {
       type: "PUT",
       url: `/api2/v2/update-project-name`,
       data: {projectId, newName},
-      success: (data) => console.log({data}),
+      success: ({ newName }) => {
+        _dispatch({ type: "UPDATE_PROJECT_NAME", data: newName })
+      },
       error: (error) => {
         // onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  lockCategory: (category, onSuccess, onError) => {
+    $.ajax({
+      type: "POST",
+      url: `/api2/v2/project/lock_category/${PROJECT_ACCESS_TOKEN}`,
+      data: {category},
+      success: (data) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  unlockCategory: (category, onSuccess, onError) => {
+    $.ajax({
+      type: "DELETE",
+      url: `/api2/v2/project/unlock_category/${PROJECT_ACCESS_TOKEN}`,
+      data: {category},
+      success: (data) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+      },
+      error: (error) => {
+        onError();
         _dispatch({ type: "API_ERROR", data: error });
       }
     })

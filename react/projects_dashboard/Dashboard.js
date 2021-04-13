@@ -9,16 +9,10 @@ import CreateProjectModal from './CreateProjectModal';
 import CopyProjectModal from './CopyProjectModal';
 import ConfirmModal from './ConfirmModal';
 
-// TO DO - Inside of app, clicking between headers has hardcoded href /finishes, will send to v2 of app when clicked
-// where to control for this? Local? session flag? See "Pine Lawn Dental"
-
-// TO DO - handle state re: last_seen_at, updates quicker than redirect
-
-
 
 const Dashboard = () => {
   const allProjects = useSelector(state => state.projects || []);
-  const isAdmin = IS_SUPER_ADMIN;
+  const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
 
   const [message, setMessage] = useState({ show: false });
   const [projectToCopy, setProjectToCopy] = useState({});
@@ -70,13 +64,6 @@ const Dashboard = () => {
     }
   }
 
-  const getHref = (adminAccessToken, generalAccessToken, isV1) => {
-    if (isAdmin && isV1) return `/admin/login/${adminAccessToken}`;
-    if (isAdmin && !isV1) return `/admin/login/v2/${adminAccessToken}`;
-    if (isV1) return `/project/${generalAccessToken}/finishes/v1`;
-    return `/project/${generalAccessToken}/finishes`;
-  }
-
   const ProjectGrid = ({ title, projectList, archived=false }) => {
     return (
       <>
@@ -94,12 +81,10 @@ const Dashboard = () => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {projectList.filter(p => !p.v1).map(({ id, accessToken, href, name, v1 }) => {
-              const linkHref = getHref(href, accessToken, v1);
-              return (
+            {projectList.map(({ id, accessToken, name, v1 }) => (
                 <tr className="project-row" key={accessToken}>
                   <td>
-                      <a href={linkHref} onClick={() => updateSeenAt(id)}>{name}</a>
+                      <a href={`/app/project/${accessToken}/finishes`} onClick={() => updateSeenAt(id)}>{name}</a>
                   </td>
                   {isAdmin && !archived &&  (
                     <td> 
@@ -116,7 +101,7 @@ const Dashboard = () => {
                       {v1 && <Icon name="check" color="grey" />}
                   </td>
                 </tr>
-            )})}
+            ))}
           </Table.Body>
         </Table>
       </>

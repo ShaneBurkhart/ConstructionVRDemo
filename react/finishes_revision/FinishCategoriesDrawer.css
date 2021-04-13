@@ -1,3 +1,12 @@
+.sharelink {
+  margin-top: 4%;
+  padding: 0 1%;
+}
+
+.sharelink:hover {
+  cursor: pointer;
+}
+
 .categories-drawer {
   position: fixed;
   top: 0;

@@ -377,22 +377,6 @@ get '/admin/login/:admin_token' do
   return "Not found" if project.nil?
 
   redirect_to = params[:redirect_to]
-  redirect_to = "/project/#{project["Access Token"]}/v1" if redirect_to.nil? or redirect_to.length == 0
-
-  # Log in user so we don't have to specify debug mode and can update
-  # linked hotspots in the app.
-  session[:is_admin] = true
-
-  # Log admin in on the websocket server too
-  redirect "http://#{request.env["HTTP_HOST"]}/api2/admin/login/#{admin_token}?redirect_to=#{CGI.escape(redirect_to)}"
-end
-
-get '/admin/login/v2/:admin_token' do
-  admin_token = params[:admin_token]
-  project = find_project_by_admin_access_token(admin_token)
-  return "Not found" if project.nil?
-
-  redirect_to = params[:redirect_to]
   redirect_to = "/project/#{project["Access Token"]}" if redirect_to.nil? or redirect_to.length == 0
 
   # Log in user so we don't have to specify debug mode and can update
@@ -543,24 +527,9 @@ get '/project/:access_token/finishes' do
   project = find_project_by_access_token(access_token)
   return "Not found" if project.nil?
 
-  # create bool if project is old or not
+  # V2 PROJECTS ARE SERVED VIA WEBSOCKET.JS
+  return redirect "http://#{request.env["HTTP_HOST"]}/app/project/#{access_token}/finishes" unless project["Is V1?"] 
 
-  haml :project_finishes, locals: {
-    markdown: MARKDOWN,
-    project: project,
-    access_token: access_token,
-    page_title: project["Name"] + " - Finishes",
-    no_style: true,
-    fixed_width_viewport: true,
-    is_admin_mode: is_admin_mode,
-  }
-end
-
-get '/project/:access_token/v1' do
-  is_admin_mode = !!session[:is_admin]
-  access_token = params[:access_token]
-  project = find_project_by_access_token(access_token)
-  return "Not found" if project.nil?
 
   haml :project_finishes_v1, locals: {
     markdown: MARKDOWN,

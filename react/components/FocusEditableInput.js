@@ -240,7 +240,7 @@ class FocusEditableInput extends React.Component {
                 title="Edit this field"
                 onClick={this.onClick}
                 name="pencil alternate"
-                style={{ fontSize: 14, minWidth: 14 }}
+                style={{ fontSize: 14, minWidth: 14, alignSelf: 'center' }}
               />
             ) : <div style={{ minWidth: 14, margin: 1 }} />}
           </div>
