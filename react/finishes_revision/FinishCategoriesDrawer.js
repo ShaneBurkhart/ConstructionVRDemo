@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
-import ActionCreators from './action_creators';
+// import ActionCreators from './action_creators';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
+import ShareLinkModal from './modals/ShareLinkModal';
 
 import './FinishCategoriesDrawer.css';
 
 const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
-  const projectId = useSelector(state => state.projectId)
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
+  const [showShareLinkModal, setShowShareLinkModal] = useState(false);
   const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
-
-  const changeProjectName = () => {
-    const newName = prompt("Enter New Name");
-    if (newName && projectId) ActionCreators.changeProjectName(projectId, newName);
-  }
+  const toggleShowShareLinkModal = () => setShowShareLinkModal(!showShareLinkModal);
   
   return (
     <>
@@ -35,8 +32,9 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
               Add a New Finish
               <Icon name='plus' />
             </Button>
-            <br />
-            <a onClick={changeProjectName}>Change Project Name</a>
+            <div className="sharelink">
+              <a onClick={toggleShowShareLinkModal}>Get Share Link</a>
+            </div>
           </Segment>
           <Segment vertical className="categories-section">
             <Menu text vertical>
@@ -55,6 +53,9 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
       </div>
       {showAddNewOptionModal && (
         <AddEditFinishModal onClose={toggleShowAddNewOptionModal} />
+      )}
+      {showShareLinkModal && (
+        <ShareLinkModal onClose={toggleShowShareLinkModal} />
       )}
     </>
   );
