@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import ActionCreators from './action_creators';
 import { finishCategoriesArr } from '../../common/constants';
 
-import FloatingProjectButton from '../components/FloatingProjectButton';
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
 import FinishCategoriesTable from './FinishCategoriesTable';
 import SiteHeader from './SiteHeader';
@@ -42,7 +41,6 @@ const App = () => {
         <SiteHeader projectName={projectName} />
         <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
       </div>
-      <FloatingProjectButton name={PROJECT_NAME} />
       <ToastMessage positive={false} message={apiError.message} />
     </main>
   );
