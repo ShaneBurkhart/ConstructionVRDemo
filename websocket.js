@@ -48,6 +48,7 @@ require("./controllers/finishes.js")(app);
 require("./controllers/api/users.js")(app);
 require("./controllers/api/projects.js")(app);
 require("./controllers/api/finishes.js")(app);
+require("./controllers/api/uploads.js")(app);
 
 
 app.get("/api2/finishes/options/search", function (req, res) {
