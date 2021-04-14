@@ -94,7 +94,7 @@ const ActionCreator = {
   presignedURL: (file, callback) => {
     $.ajax({
       type: "POST",
-      url: "/api/temp_upload/presign",
+      url: "/api2/v2/uploads/presigned_url",
       data: {
         filename: file.name,
         mime: file.type,
