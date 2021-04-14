@@ -183,6 +183,24 @@ const ActionCreator = {
     })
   },
 
+  searchFinishLibrary: (query, category, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/finishes/search?q=${encodeURIComponent(query)}`,
+      data: {category},
+      success: (data) => {
+        console.log({data})
+        onSuccess();
+        // _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+      },
+      error: (error) => {
+        console.log(error)
+        onError();
+        // _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
   updateDispatch: (dispatch) => {
     _dispatch = dispatch;
   }

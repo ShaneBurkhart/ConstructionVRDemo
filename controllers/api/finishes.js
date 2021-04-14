@@ -1,11 +1,11 @@
-const { Sequelize, Op } = require('sequelize');
+const { Sequelize, Op, QueryTypes } = require('sequelize');
 const got = require('got');
 const FileType = require('file-type');
 const AWS = require('aws-sdk')
 const request = require('request');
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
-const { attrMap } = require("../../common/constants.js");
+const { attrMap, finishCategoriesMap } = require("../../common/constants.js");
 const { uuid } = require('uuidv4');
 
 AWS.config.update({
@@ -14,8 +14,43 @@ AWS.config.update({
 });
 const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
 
+
 module.exports = (app) => {
-  
+  app.put("/api2/v2/finishes/search", m.authUser, async (req, res) => {
+    const searchQuery = req.query["q"] || "";
+    const { category } = req.body;
+    const dbSearchQuery = Sequelize.Validator.escape(`%${searchQuery}%`);
+    const categoryAttributes = finishCategoriesMap[category].attr;
+    let postgresLiteralQuery = '(';
+    categoryAttributes.forEach((attr, i) => {
+      if (i === 0) {
+        postgresLiteralQuery+= `attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+      } else {
+        postgresLiteralQuery+= ` OR attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+      }
+    });
+    postgresLiteralQuery+= ')';
+
+    try {
+      const results = await models.Finish.findAll({
+        attributes: [
+          [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
+        ],
+        where: {
+          category: category,
+          [Op.and]: Sequelize.literal(postgresLiteralQuery)
+        },
+        limit: 100,
+      });
+      // console.log({results})
+      res.json({results})
+    } catch (error){
+      console.error(error)
+      res.status(422).send("Could not complete search request");
+    }
+
+  });
+
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
     
