@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Label } from 'semantic-ui-react';
 
-import { attrMap, getAttrList, finishCategoriesMap } from '../../common/constants.js';
+import { attrMap, finishCategoriesMap } from '../../common/constants.js';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
 import AdminControls from '../components/AdminControls';
@@ -38,8 +38,6 @@ const FinishCard = ({
 
   const _isEditing = useRef(false);
 
-  const excludedDetails = ["Images"];
-
   const handleToggleExpand = (e) => {
     e.stopPropagation();
     toggleExpand();
@@ -59,12 +57,13 @@ const FinishCard = ({
     const onError = () => console.error('error');
     ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
   }
-  const attrList = getAttrList(finishCategoriesMap[category]).map(a => a.name);
-  const filteredAttrList = attrList.filter(attr => !excludedDetails.includes(attr));
 
+  const attrList = finishCategoriesMap[category].attr;
+  const inlineEditAttrList = attrList.filter(attr => !attrMap[attr].excludeFromInlineEdits);
+  const nonInlineEditAttrList = attrList.filter(attr => attrMap[attr].excludeFromInlineEdits && !attrMap[attr].excludeFromLoops);
 
-  const firstAttr = filteredAttrList[0];
-  const lastAttr = filteredAttrList[filteredAttrList.length - 1];
+  const firstAttr = inlineEditAttrList[0];
+  const lastAttr = inlineEditAttrList[inlineEditAttrList.length - 1];
   
   const tabToNextInput = (nextAttr) =>  {
     const isLastChild = !nextAttr;
@@ -120,7 +119,7 @@ const FinishCard = ({
     const handleSetFocusedEl = () => setFocusedEl(focusKeySig);
 
     return (
-      <div key={attr} onClick={handleInputClick} style={{ width: attr === "Details" ? "100%" : "50%", display: 'flex' }}>
+      <div key={attr} onClick={handleInputClick} style={{ width: attrMap[attr].width === 16 ? "100%" : "50%", display: 'flex' }}>
         <div className={styles.detailsFlexTableLabel}>{attr}:</div>
         <span>{ attr === "Price" && attributes[attr] ? "$" : ""}</span>
         <FocusEditableInput
@@ -149,7 +148,7 @@ const FinishCard = ({
   
   const imgArr = attributes["Images"] || [];
 
-  const attrArr = attrList.filter(a => attributes[a] && !["Images","Details"].includes(a)).map(a => attributes[a]);
+  const attrArr = attrList.filter(a => attributes[a] && !attrMap[a].excludeFromCondensed).map(a => attributes[a]);
   const displayName = attrArr.join(", ");
 
   const cardContents = (
@@ -169,12 +168,27 @@ const FinishCard = ({
             {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
           </div>
           <div className={`${styles.detailsFlexTable} ${expandedDetails ? styles.showDetails : styles.hideDetails}`}>
-            {(filteredAttrList || []).map((attr, i) => {
-              const prevAttr = (i === 0) ? "" : filteredAttrList[i - 1];
-              const nextAttr = (i === filteredAttrList.length - 1) ? "" : filteredAttrList[i+1];
+            {(inlineEditAttrList || []).map((attr, i) => {
+              const prevAttr = (i === 0) ? "" : inlineEditAttrList[i - 1];
+              const nextAttr = (i === inlineEditAttrList.length - 1) ? "" : inlineEditAttrList[i+1];
               return (
                 renderAttributeField(attr, prevAttr, nextAttr)
               )}
+            )}
+            {(nonInlineEditAttrList || []).map((attr, i) => {
+              if (attributes[attr]) {
+                return (
+                  <div key={attr} style={{ width: attrMap[attr].width === 16 ? "100%" : "50%", display: 'flex' }}>
+                    <div className={styles.detailsFlexTableLabel}>{attr}:</div>
+                    <div>
+                      {(attrMap[attr].isURL) ? (
+                        <a href={attributes[attr]} target="_blank" onClick={e => e.stopPropagation()}>{attributes[attr]}</a>
+                        ) : (
+                        <span>{attributes[attr]}</span>
+                      )}
+                    </div>
+                  </div>
+                )}}
             )}
           </div>
         </div>

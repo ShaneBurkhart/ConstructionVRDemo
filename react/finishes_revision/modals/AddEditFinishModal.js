@@ -5,7 +5,7 @@ import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup } from 'semanti
 
 import useEvent from '../../hooks/useEvent';
 import { finishCategoriesMap, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
-import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput } from './ModularInputs';
+import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput, DocumentInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
 
@@ -34,34 +34,65 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     setSearchQuery(value);
     const onSuccess = () => {};
     const onError = () => {};
-    ActionCreators.searchFinishLibrary(value, selectedCategory, onSuccess, onError);
+    const debounceSearch = _.debounce((q) => {
+      ActionCreators.searchFinishLibrary(q, selectedCategory, onSuccess, onError);
+    }, 500);
+    debounceSearch(value);
   }
 
-  const uploadFileToS3 = (file, data, imgArr) => {
-    ActionCreators.uploadFile(
-      file,
-      data.presignedURL,
-      () => {
-        imgArr.push(data.awsURL);
-        setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
-        setLoading(false);
-      },
-      () => setLoading(false),
-    );
+  const onDropDocument = (acceptedFiles) => {
+    if (!acceptedFiles.length) return;
+    if (loading) return;
+    if (acceptedFiles.length > 1) acceptedFiles.length = 1;
+    
+    if (!attributeValues["Document"]) {
+      setLoading(true);
+      ActionCreators.presignedURL(
+        acceptedFiles[0],
+        (data) => {
+          ActionCreators.uploadFile(
+            acceptedFiles[0],
+            data.presignedURL,
+            () => {
+              setAttributeValues(prev => ({ ...prev, "Document": data.awsURL }));
+              setLoading(false);
+            },
+            () => setLoading(false),
+          );
+        },
+        () => setLoading(false),
+      );
+    }
   }
 
   const onDrop = (acceptedFiles) => {
+    if (!acceptedFiles.length) return;
+    if (loading) return;
+    if (acceptedFiles.length > 2) acceptedFiles.length = 2;
+    
     const imgArr = attributeValues["Images"] || [];
-    if (imgArr.length < 2) {
-      (acceptedFiles || []).forEach((file) => {
+    
+    (acceptedFiles || []).forEach((file) => {
+      if (imgArr.length < 2) {
         setLoading(true);
         ActionCreators.presignedURL(
           file,
-          (data) => uploadFileToS3(file, data, imgArr),
+          (data) => {
+            ActionCreators.uploadFile(
+              file,
+              data.presignedURL,
+              () => {
+                imgArr.push(data.awsURL);
+                setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
+                if (imgArr.length === 2) setLoading(false);
+              },
+              () => setLoading(false),
+            );
+          },
           () => setLoading(false),
         );
-      });
-    }
+      }
+    });
   }
   
   const addImageFromClipboard = (items) => {
@@ -128,7 +159,8 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     }
     
     const onDeleteImg = (image) => setAttributeValues(prev => ({ ...prev, [attrName]: arrVal.filter(img => img !== image) }));
-    
+    const onDeleteVal = () => setAttributeValues(prev => ({ ...prev, [attrName]: '' }))
+
     const onImgLinkUpload = (imgUrl) => {
       setLoading(true)
       ActionCreators.uploadFromUrl(
@@ -151,15 +183,16 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       "Price":  <PriceInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
       "Details":  <DetailsInput key={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
       "Images": <ImagesInput key={attrName} images={arrVal} onDelete={onDeleteImg} onDrop={onDrop} onImgLinkUpload={onImgLinkUpload} onBlur={onBlur} error={attributeValueErrors[attrName]} onSwitchImgOrder={switchImgOrder} />,
-      default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />
+      "Document": <DocumentInput key={attrName} docURL={val} onDrop={onDropDocument} onChange={onChange} onDelete={onDeleteVal} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
+      default: <GeneralInput key={attrName} label={attrName} value={val} onChange={onChange} onBlur={onBlur} error={attributeValueErrors[attrName]} />,
     }
     const attrInput = attrInputMap[attrName] ? attrInputMap[attrName] : attrInputMap.default;
     return attrInput;
   }
 
-  const filteredCategoryAttributes = finishCategoriesMap[selectedCategory].attr.filter(a => !["Images", "Details"].includes(a));
+  const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromCondensed);
 
-  const getDisplayName = (libraryItem) => filteredCategoryAttributes.filter(a => libraryItem[a]).map(a => libraryItem[a]).join(",");
+  const getDisplayName = (libraryItem) => (filteredCategoryAttributes || []).filter(a => libraryItem[a]).map(a => libraryItem[a]).join(",");
   
 
   return (
@@ -207,41 +240,42 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
             }
             {isLibraryView && 
               <section className={styles.libraryView}>
-                <Button onClick={() => setIsLibraryView(false)}>Cancel</Button>
-
                 <Input placeholder='Search...' onChange={handleSearch} value={searchQuery}>
                   <input autoFocus />
                 </Input>
+                <Button style={{ marginLeft: 10 }} onClick={() => setIsLibraryView(false)}>Cancel</Button>
                 {(finishLibrary || []).map(f => (
-                  <article
-                    className={styles.finishCard}
-                    key={Object.values(f).join("")}
-                    onClick={() => {
-                      setAttributeValues(f);
-                      setIsLibraryView(false);
-                    }}
-                  >
-                    <div className={styles.finishCardLeft}>
-                      <div className={styles.cardName}>
-                        <span>
-                          {getDisplayName(f)}
-                        </span>
-                      </div>
-                      {(filteredCategoryAttributes || []).map(a => (
-                        <div key={a} className={styles.finishCardAttrRow}>
-                          <div className={styles.attrLabel}>{a}:</div>
-                          <div className={styles.attrVal}>{f[a] || ''}</div>
+                  <Grid.Row>
+                    <article
+                      className={styles.finishCard}
+                      key={Object.values(f).join("")}
+                      onClick={() => {
+                        setAttributeValues(f);
+                        setIsLibraryView(false);
+                      }}
+                    >
+                      <div className={styles.finishCardLeft}>
+                        <div className={styles.cardName}>
+                          <span>
+                            {getDisplayName(f)}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                    <div className={styles.finishCardRight}>
-                      {(f["Images"] || []).map(imgUrl => (
-                        <img key={imgUrl} src={imgUrl} className={styles.thumbnail}/>
-                      ))}
-                    </div>
-                  </article>
+                        {/* {(filteredCategoryAttributes || []).map(a => (
+                          <div key={a} className={styles.finishCardAttrRow}>
+                            <div className={styles.attrLabel}>{a}:</div>
+                            <div className={styles.attrVal}>{f[a] || ''}</div>
+                          </div>
+                        ))} */}
+                      </div>
+                      <div className={styles.finishCardRight}>
+                        {(f["Images"] || []).map(imgUrl => (
+                          <img key={imgUrl} src={imgUrl} className={styles.thumbnail}/>
+                        ))}
+                      </div>
+                    </article>
+                  </Grid.Row>
                 ))}
-                {!finishLibrary.length && <span>No results...</span>}
+                {!finishLibrary.length && searchQuery && <div>No results...</div> }
               </section>
             }
             {!isLibraryView && !_.isEmpty(attrRows) && attrRows.map(row => (

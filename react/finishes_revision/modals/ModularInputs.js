@@ -70,6 +70,54 @@ export const DetailsInput = ({ value, onChange, onBlur, error }) => (
   />
 );
 
+export const DocumentInput = ({ docURL, onDrop, onChange, onDelete }) => {
+  const [inputVal, setInputVal] = useState('');
+  
+  return (
+    <div className="field">
+        <label style={{marginBottom: 11}}>
+          Document
+        </label>
+      <Grid>
+        <Grid.Row>
+          {docURL && (
+            <Grid.Column>
+              <a href={docURL}>{docURL}</a>
+              <br />
+              <a onClick={onDelete}>remove</a>
+            </Grid.Column>
+          )}
+          {!docURL &&
+            <Grid.Column width={8}>
+              <label>Drop or select a file.</label>
+              <StyledDropzone onDrop={onDrop} accept={null} />
+              <label>Or upload using a link.</label>
+              <div>
+                <Input
+                  fluid
+                  icon="linkify"
+                  iconPosition="left"
+                  placeholder="https://..."
+                  value={inputVal}
+                  onChange={(e, {value}) => setInputVal(value)}
+                  action={{
+                    icon: "upload",
+                    content: "Add",
+                    onClick: () => {
+                      console.log('ok')
+                      onChange(null, {value: inputVal});
+                      setInputVal('');
+                    },
+                  }}
+                />
+              </div>
+            </Grid.Column>
+          }
+        </Grid.Row>
+      </Grid>
+    </div>
+)};
+
 export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onSwitchImgOrder, onDelete }) => {
   const [inputVal, setInputVal] = useState('');
   

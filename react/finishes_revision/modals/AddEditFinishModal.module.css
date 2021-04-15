@@ -4,9 +4,13 @@
   text-overflow: ellipsis;
 }
 
+.libraryView {
+  width: 100%;
+}
+
 .finishCard {
   composes: finishCard from '../FinishCard.module.css';
-  width: 95%;
+  width: 100%;
   font-size: .8rem;
   margin-top: 5px;
   position: relative;
