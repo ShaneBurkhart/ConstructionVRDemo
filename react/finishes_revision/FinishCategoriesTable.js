@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'underscore';
 import FinishCategoryTable from './FinishCategoryTable';
-import { finishCategoriesMap } from '../../common/constants';
+import { getInlineEditableAttrList } from '../../common/constants';
 
 function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
   const newestFinish = useSelector(state => state.newestFinish);
@@ -85,7 +85,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     if (!expandedCategories[prevCat]) expandCategory(prevCat);
     expandCard(prevCat, lastCard.id);
 
-    const lastAttr = "Details";
+    const editableAttrList = getInlineEditableAttrList(prevCat);
+    const lastAttr = editableAttrList[editableAttrList.length - 1];
     setFocusedEl([prevCat, lastCard.id, lastAttr]);
   }
 
@@ -97,7 +98,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     if (!expandedCategories[nextCat]) expandCategory(nextCat);
     expandCard(nextCat, firstCard.id);
 
-    const firstAttr = finishCategoriesMap[nextCat].attr[0];
+    const editableAttrList = getInlineEditableAttrList(nextCat);
+    const firstAttr = editableAttrList[0];
     setFocusedEl([nextCat, firstCard.id, firstAttr]);
   }
 

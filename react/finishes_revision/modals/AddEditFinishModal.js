@@ -4,7 +4,7 @@ import _ from 'underscore';
 import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
-import { finishCategoriesMap, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
+import { finishCategoriesMap, getAttrGridRows, attrMap } from '../../../common/constants.js';
 import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput, DocumentInput } from './ModularInputs';
 
 import ActionCreators from '../action_creators';
@@ -14,13 +14,13 @@ import styles from './AddEditFinishModal.module.css';
 const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} }) => {
   const { category='', attributes={}, id=null } = finishDetails;
   const finishLibrary = useSelector(state => state.finishLibrary);
-
-  const categoryObj = finishCategoriesMap[preselectedCategory || category];
-  const attrList = categoryObj ? getAttrList(categoryObj) : [];
-  const attrGridRows = getAttrGridRows(attrList) || [];
   
-  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || category);
-  const [attrRows, setAttrRows] = useState(attrGridRows);
+  const initCategory = preselectedCategory || category;
+  const initAttrList = (initCategory) ? finishCategoriesMap[initCategory].attr : [];
+  const initAttrGridRows = getAttrGridRows(initAttrList) || [];
+  
+  const [selectedCategory, setSelectedCategory] = useState(initCategory);
+  const [attrRows, setAttrRows] = useState(initAttrGridRows);
   const [isLibraryView, setIsLibraryView] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [attributeValues, setAttributeValues] = useState(attributes);
@@ -28,7 +28,6 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [loading, setLoading] = useState(false);
 
   const isNew = id === null;
-
 
   const handleSearch = (_e, {value}) => {
     setSearchQuery(value);
@@ -115,8 +114,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const handleSelectCategory = categoryName => {
     setAttrRows([]);
     setSelectedCategory(categoryName);
-    const newCategoryObj = finishCategoriesMap[categoryName];
-    const attrList = (getAttrList(newCategoryObj));
+    const attrList = finishCategoriesMap[categoryName].attr;
     setAttrRows(getAttrGridRows(attrList));
   }
 
@@ -192,8 +190,13 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
 
   const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromCondensed);
 
-  const getDisplayName = (libraryItem) => (filteredCategoryAttributes || []).filter(a => libraryItem[a]).map(a => libraryItem[a]).join(",");
-  
+  const getDisplayName = (libraryObj) => {
+    const attrList = selectedCategory ? finishCategoriesMap[selectedCategory].attr : [];
+    return attrList
+      .filter(a => libraryObj[a] && !attrMap[a].excludeFromName)
+        .map(a => attributes[a])
+          .join(", ");
+  }
 
   return (
     <Modal
@@ -245,10 +248,9 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                 </Input>
                 <Button style={{ marginLeft: 10 }} onClick={() => setIsLibraryView(false)}>Cancel</Button>
                 {(finishLibrary || []).map(f => (
-                  <Grid.Row>
+                  <Grid.Row key={Object.values(f).join("")}>
                     <article
                       className={styles.finishCard}
-                      key={Object.values(f).join("")}
                       onClick={() => {
                         setAttributeValues(f);
                         setIsLibraryView(false);
@@ -260,12 +262,12 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                             {getDisplayName(f)}
                           </span>
                         </div>
-                        {/* {(filteredCategoryAttributes || []).map(a => (
+                        {(filteredCategoryAttributes || []).map(a => (
                           <div key={a} className={styles.finishCardAttrRow}>
                             <div className={styles.attrLabel}>{a}:</div>
                             <div className={styles.attrVal}>{f[a] || ''}</div>
                           </div>
-                        ))} */}
+                        ))}
                       </div>
                       <div className={styles.finishCardRight}>
                         {(f["Images"] || []).map(imgUrl => (
@@ -279,10 +281,10 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
               </section>
             }
             {!isLibraryView && !_.isEmpty(attrRows) && attrRows.map(row => (
-              <Grid.Row key={row.reduce((a,b) => a + b.name, '')}>
+              <Grid.Row key={row.join("")}>
                 {row.map(attr => (
-                  <Grid.Column key={attr.name} width={attr.width}>
-                    {getAttributeInput(attr.name)}
+                  <Grid.Column key={attr} width={attrMap[attr].width}>
+                    {getAttributeInput(attr)}
                   </Grid.Column>
                 ))}
               </Grid.Row>

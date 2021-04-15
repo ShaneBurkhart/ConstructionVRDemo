@@ -12,7 +12,6 @@ import styles from './FinishCard.module.css';
 import ActionCreator from './action_creators';
 
 const FinishCard = ({
-  tag,
   cardId,
   isCardOrderLocked,
   nextCardId,
@@ -31,6 +30,7 @@ const FinishCard = ({
 }) => {
   const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
   const { id, orderNumber, attributes, category } = finishDetails;
+  const tag = finishCategoriesMap[category].tag;
 
 
   const [showEditFinishModal, setShowEditFinishModal] = useState(false);
@@ -52,15 +52,18 @@ const FinishCard = ({
   };
 
   const handleAttrChange = (val, attr) => {
-    const newAttributes = { ...finishDetails.attributes, [attr]: val };
-    const onSuccess = () => {};
-    const onError = () => console.error('error');
-    ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
+    const prevVal = finishDetails.attributes[attr];
+    if (prevVal !== val) {
+      const newAttributes = { ...finishDetails.attributes, [attr]: val };
+      const onSuccess = () => {};
+      const onError = () => console.error('error');
+      ActionCreator.updateFinish({ ...finishDetails, attributes: newAttributes }, onSuccess, onError);
+    }
   }
 
   const attrList = finishCategoriesMap[category].attr;
-  const inlineEditAttrList = attrList.filter(attr => !attrMap[attr].excludeFromInlineEdits);
-  const nonInlineEditAttrList = attrList.filter(attr => attrMap[attr].excludeFromInlineEdits && !attrMap[attr].excludeFromLoops);
+  const inlineEditAttrList = attrList.filter(attr => attrMap[attr].inlineEditable);
+  const cardDetailsList = attrList.filter(attr => !attrMap[attr].excludeFromCardDetails);
 
   const firstAttr = inlineEditAttrList[0];
   const lastAttr = inlineEditAttrList[inlineEditAttrList.length - 1];
@@ -148,8 +151,10 @@ const FinishCard = ({
   
   const imgArr = attributes["Images"] || [];
 
-  const attrArr = attrList.filter(a => attributes[a] && !attrMap[a].excludeFromCondensed).map(a => attributes[a]);
-  const displayName = attrArr.join(", ");
+  const displayName = attrList
+      .filter(a => attributes[a] && !attrMap[a].excludeFromName)
+        .map(a => attributes[a])
+          .join(", ");
 
   const cardContents = (
     <>
@@ -168,27 +173,28 @@ const FinishCard = ({
             {formFieldError.error && <Label className="hide-print" style={{ marginLeft: 20 }} basic color="red" size="mini">Invalid value</Label>}
           </div>
           <div className={`${styles.detailsFlexTable} ${expandedDetails ? styles.showDetails : styles.hideDetails}`}>
-            {(inlineEditAttrList || []).map((attr, i) => {
-              const prevAttr = (i === 0) ? "" : inlineEditAttrList[i - 1];
-              const nextAttr = (i === inlineEditAttrList.length - 1) ? "" : inlineEditAttrList[i+1];
-              return (
-                renderAttributeField(attr, prevAttr, nextAttr)
-              )}
-            )}
-            {(nonInlineEditAttrList || []).map((attr, i) => {
-              if (attributes[attr]) {
-                return (
-                  <div key={attr} style={{ width: attrMap[attr].width === 16 ? "100%" : "50%", display: 'flex' }}>
-                    <div className={styles.detailsFlexTableLabel}>{attr}:</div>
-                    <div>
-                      {(attrMap[attr].isURL) ? (
-                        <a href={attributes[attr]} target="_blank" onClick={e => e.stopPropagation()}>{attributes[attr]}</a>
-                        ) : (
-                        <span>{attributes[attr]}</span>
-                      )}
+            {(cardDetailsList || []).map(attr => {
+              if (!attrMap[attr].hideIfBlank || attributes[attr]) {
+                if (inlineEditAttrList.includes(attr)) {
+                  const idx = inlineEditAttrList.indexOf(attr);
+                  const prevAttr = (idx === 0) ? "" : inlineEditAttrList[idx - 1];
+                  const nextAttr = (idx === inlineEditAttrList.length - 1) ? "" : inlineEditAttrList[idx+1];
+                  return renderAttributeField(attr, prevAttr, nextAttr);
+                } else {
+                  return (
+                    <div key={attr} style={{ width: attrMap[attr].width === 16 ? "100%" : "50%", display: 'flex' }}>
+                      <div className={styles.detailsFlexTableLabel}>{attr}:</div>
+                      <div>
+                        {(attrMap[attr].isURL) ? (
+                          <a href={attributes[attr]} target="_blank" onClick={e => e.stopPropagation()}>{attributes[attr]}</a>
+                          ) : (
+                          <span>{attributes[attr]}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}}
+                  )
+                }
+              }}
             )}
           </div>
         </div>

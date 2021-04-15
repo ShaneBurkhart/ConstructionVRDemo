@@ -3,8 +3,6 @@ import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button, Icon } from 'semantic-ui-react';
 
-import { getCategoryTag } from '../../common/constants.js';
-
 import FinishCard from './FinishCard';
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
@@ -32,7 +30,6 @@ const FinishCategoriesTable = ({
   const [loadingLockedState, setLoadingLockedState] = useState(false);
 
   const count = finishes.length;
-  const tag = category ? getCategoryTag(category) : '';
   
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
@@ -100,7 +97,6 @@ const FinishCategoriesTable = ({
                   return (
                     <FinishCard
                       key={f.id}
-                      tag={tag}
                       cardId={f.id}
                       finishDetails={f}
                       focusedEl={focusedEl}

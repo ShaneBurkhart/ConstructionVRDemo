@@ -7,128 +7,149 @@ const finishAttributes = [
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Product Number",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Color",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Style",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Dimensions",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Repeat",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Grout Tag",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Grout Joint Thickness",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Installation Method",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Carpet Pad",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Finish",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Type",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Thickness",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Edge Profile",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Wood Species",
     width: 5,
     validate: noOp,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Product URL",
     width: 8,
     validate: noOp, 
     format: preFormatUrl,
+    inlineEditable: true,
   },
   {
     name: "Price",
     width: 5,
     validate: validatePrice,
     format: noFormat,
+    inlineEditable: true,
   },
   {
     name: "Details",
     width: 16,
     validate: noOp,
     format: noFormat,
-    excludeFromCondensedList: true,
+    inlineEditable: true,
+    excludeFromName: true,
+    excludeFromLibraryDetails: true,
   },
   {
     name: "Images",
     width: 16,
     validate: noOp,
     format: noFormat,
-    excludeFromLoops: true,
-    excludeFromCondensed: true,
-    excludeFromInlineEdits: true,
+    inlineEditable: false,
+    excludeFromName: true,
+    excludeFromLibraryDetails: true,
+    excludeFromCardDetails: true,
   },
   {
     name: "Document",
     width: 16,
     validate: noOp,
     format: noFormat,
-    // hideIfBlank: true,
     isURL: true,
-    excludeFromCondensed: true,
-    excludeFromInlineEdits: true,
+    hideIfBlank: true,
+    inlineEditable: false,
+    excludeFromName: true,
+    excludeFromLibraryDetails: true,
   }
 ];
 
@@ -268,17 +289,15 @@ finishCategoriesArr.forEach((category, i) => finishCategoriesMap[category.name] 
 
 const attrMap = {};
 finishAttributes.forEach(a => attrMap[a.name] = { ...a });
-const allCategoryNames = Object.keys(finishCategoriesMap);
 
 
 module.exports = {
   finishCategoriesArr,
   finishCategoriesMap,
   attrMap,
-  allCategoryNames,
-  getAttrWidth: (attrName) => attrMap[attrName].width,
-  getCategoryTag: (category) => finishCategoriesMap[category].tag,
-  getAttrList: (category) => category.attr.map(attribute => finishAttributes.find(({name}) => name === attribute)),
+  getInlineEditableAttrList: (category) => {
+    return finishCategoriesMap[category].attr.filter(a => attrMap[a].inlineEditable)
+  },
   getAttrGridRows: (attrList=[]) => {
     let remainingWidth = 16;
     const attrRows = [];
@@ -286,10 +305,10 @@ module.exports = {
   
     for (let i = 0; i < attrList.length; i++){
       row.push(attrList[i])
-      remainingWidth = remainingWidth - attrList[i].width;
+      remainingWidth = remainingWidth - attrMap[attrList[i]].width;
       if (!attrList[i+1]) {
         attrRows.push(row);
-      } else if (attrList[i+1].width > remainingWidth) {
+      } else if (attrMap[attrList[i+1]].width > remainingWidth) {
         attrRows.push(row);
         remainingWidth = 16;
         row = [];
