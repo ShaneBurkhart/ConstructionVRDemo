@@ -189,14 +189,13 @@ const ActionCreator = {
       url: `/api2/v2/finishes/search?q=${encodeURIComponent(query)}`,
       data: {category},
       success: (data) => {
-        console.log({data})
+        const results = data.results || [];
         onSuccess();
-        // _dispatch({ type: "UPDATE_LOCKED_CATEGORIES", data })
+        _dispatch({ type: "UPDATE_FINISH_LIBRARY", data: results.map(r => r.attributes) })
       },
       error: (error) => {
-        console.log(error)
         onError();
-        // _dispatch({ type: "API_ERROR", data: error });
+        _dispatch({ type: "API_ERROR", data: error });
       }
     })
   },

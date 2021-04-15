@@ -6,6 +6,7 @@ const _initialState = {
   projectName: "",
   apiError: {},
   finishes: [],
+  finishLibrary: [],
   lockedCategories: [],
   newestFinish: {},
   modals: {},
@@ -30,6 +31,9 @@ const todos = (state = {}, action) => {
     case "UPDATE_FINISH_ORDERS":
       unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
       return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
+    
+    case "UPDATE_FINISH_LIBRARY":
+      return { ...state, finishLibrary: [...action.data]};
     
     case "UPDATE_PROJECT_NAME":
       return { ...state, projectName: action.data};
