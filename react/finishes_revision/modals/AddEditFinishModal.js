@@ -188,13 +188,13 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     return attrInput;
   }
 
-  const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromCondensed);
+  const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromLibraryDetails);
 
   const getDisplayName = (libraryObj) => {
     const attrList = selectedCategory ? finishCategoriesMap[selectedCategory].attr : [];
     return attrList
       .filter(a => libraryObj[a] && !attrMap[a].excludeFromName)
-        .map(a => attributes[a])
+        .map(a => libraryObj[a])
           .join(", ");
   }
 
