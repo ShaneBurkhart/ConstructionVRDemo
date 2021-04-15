@@ -1,0 +1,52 @@
+.truncateStr {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.finishCard {
+  composes: finishCard from '../FinishCard.module.css';
+  width: 95%;
+  font-size: .8rem;
+  margin-top: 5px;
+  position: relative;
+}
+
+.finishCard:hover {
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.finishCardLeft {
+  width: 75%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cardName {
+  composes: cardName from '../FinishCard.module.css';
+  composes: truncateStr;
+  width: 80%;
+  font-weight: bold;
+  margin-bottom: 1%;
+
+}
+
+.finishCardAttrRow {
+  display: flex;
+  width: 46%;
+}
+
+.attrLabel {
+  composes: detailsFlexTableLabel from '../FinishCard.module.css';
+}
+.attrVal {
+  composes: truncateStr;
+}
+
+.thumbnail {
+  height: 100px;
+  width: 100px;
+  object-fit: contain;
+}
+

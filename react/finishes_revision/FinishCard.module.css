@@ -16,7 +16,7 @@
 }
 
 .detailsSection {
-  width: 75%;
+  width: 72%;
 }
 
 .cellHeading {
@@ -32,6 +32,7 @@
   line-height: 1.4;
   font-weight: 500;
 }
+
 .cardName span {
   width: 100%;
   white-space: nowrap;

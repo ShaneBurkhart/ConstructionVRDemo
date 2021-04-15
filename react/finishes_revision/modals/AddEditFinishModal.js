@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import _ from 'underscore';
-import { Grid, Dimmer, Loader, Form, Button, Modal } from 'semantic-ui-react';
+import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
 import { finishCategoriesMap, getAttrList, getAttrGridRows, attrMap } from '../../../common/constants.js';
@@ -8,16 +9,33 @@ import { CategoryDropdown, PriceInput, DetailsInput, ImagesInput, GeneralInput }
 
 import ActionCreators from '../action_creators';
 
+import styles from './AddEditFinishModal.module.css';
+
 const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} }) => {
   const { category='', attributes={}, id=null } = finishDetails;
+  const finishLibrary = useSelector(state => state.finishLibrary);
+
+  const categoryObj = finishCategoriesMap[preselectedCategory || category];
+  const attrList = categoryObj ? getAttrList(categoryObj) : [];
+  const attrGridRows = getAttrGridRows(attrList) || [];
   
   const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || category);
-  const [attrRows, setAttrRows] = useState([]);
+  const [attrRows, setAttrRows] = useState(attrGridRows);
+  const [isLibraryView, setIsLibraryView] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [attributeValues, setAttributeValues] = useState(attributes);
   const [attributeValueErrors, setAttributeValueErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const isNew = id === null;
+
+
+  const handleSearch = (_e, {value}) => {
+    setSearchQuery(value);
+    const onSuccess = () => {};
+    const onError = () => {};
+    ActionCreators.searchFinishLibrary(value, selectedCategory, onSuccess, onError);
+  }
 
   const uploadFileToS3 = (file, data, imgArr) => {
     ActionCreators.uploadFile(
@@ -70,14 +88,6 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     const attrList = (getAttrList(newCategoryObj));
     setAttrRows(getAttrGridRows(attrList));
   }
-
-  useEffect(() => {
-    if (selectedCategory) {
-      const categoryObj = finishCategoriesMap[selectedCategory];
-      const attrList = getAttrList(categoryObj);
-      setAttrRows(getAttrGridRows(attrList));
-    }
-  }, []);
 
   const handleSubmit = () => {
     setLoading(true);
@@ -147,6 +157,11 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     return attrInput;
   }
 
+  const filteredCategoryAttributes = finishCategoriesMap[selectedCategory].attr.filter(a => !["Images", "Details"].includes(a));
+
+  const getDisplayName = (libraryItem) => filteredCategoryAttributes.filter(a => libraryItem[a]).map(a => libraryItem[a]).join(",");
+  
+
   return (
     <Modal
       closeIcon
@@ -169,7 +184,67 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                 />
               </Grid.Column>
             </Grid.Row>
-            {!_.isEmpty(attrRows) && attrRows.map(row => (
+
+            {!isLibraryView && selectedCategory && 
+              <Grid.Row>
+                <Grid.Column>
+                  {!_.isEmpty(attributeValues) && <Popup
+                      on="click"
+                      onClose={e => e.stopPropagation()}
+                      content={
+                        <div>
+                          <p className="bold">Are you sure? Your current values may be overwritten</p>
+                          <Button color="green" onClick={() => setIsLibraryView(true)}>Continue to Library</Button>
+                        </div>
+                      }
+                      trigger={
+                          <Button color="blue">Fill from library</Button>
+                      }
+                    />}
+                  {_.isEmpty(attributeValues) && <Button color="blue" onClick={() => setIsLibraryView(true)}>Fill from library</Button>}
+                </Grid.Column>
+              </Grid.Row>
+            }
+            {isLibraryView && 
+              <section className={styles.libraryView}>
+                <Button onClick={() => setIsLibraryView(false)}>Cancel</Button>
+
+                <Input placeholder='Search...' onChange={handleSearch} value={searchQuery}>
+                  <input autoFocus />
+                </Input>
+                {(finishLibrary || []).map(f => (
+                  <article
+                    className={styles.finishCard}
+                    key={Object.values(f).join("")}
+                    onClick={() => {
+                      setAttributeValues(f);
+                      setIsLibraryView(false);
+                    }}
+                  >
+                    <div className={styles.finishCardLeft}>
+                      <div className={styles.cardName}>
+                        <span>
+                          {getDisplayName(f)}
+                        </span>
+                      </div>
+                      {(filteredCategoryAttributes || []).map(a => (
+                        <div key={a} className={styles.finishCardAttrRow}>
+                          <div className={styles.attrLabel}>{a}:</div>
+                          <div className={styles.attrVal}>{f[a] || ''}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.finishCardRight}>
+                      {(f["Images"] || []).map(imgUrl => (
+                        <img key={imgUrl} src={imgUrl} className={styles.thumbnail}/>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+                {!finishLibrary.length && <span>No results...</span>}
+              </section>
+            }
+            {!isLibraryView && !_.isEmpty(attrRows) && attrRows.map(row => (
               <Grid.Row key={row.reduce((a,b) => a + b.name, '')}>
                 {row.map(attr => (
                   <Grid.Column key={attr.name} width={attr.width}>
