@@ -74,11 +74,14 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const onDrop = (acceptedFiles) => {
     if (!acceptedFiles.length) return;
     if (loading) return;
-    if (acceptedFiles.length > 2) acceptedFiles.length = 2;
-    
     const imgArr = attributeValues["Images"] || [];
+    const spaceRemaining = 2 - imgArr.length; // max 2 images
+    if (!spaceRemaining > 0) return;
+    if (acceptedFiles.length > spaceRemaining) acceptedFiles.length = spaceRemaining;
     
-    (acceptedFiles || []).forEach((file) => {
+    let toLoad = acceptedFiles.length > spaceRemaining ? spaceRemaining : acceptedFiles.length;
+    
+    (acceptedFiles || []).forEach((file, i) => {
       if (imgArr.length < 2) {
         setLoading(true);
         ActionCreators.presignedURL(
@@ -90,7 +93,8 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
               () => {
                 imgArr.push(data.awsURL);
                 setAttributeValues(prev => ({ ...prev, "Images": imgArr }));
-                if (imgArr.length === 2) setLoading(false);
+                toLoad -= 1;
+                if (!toLoad) setLoading(false);
               },
               () => setLoading(false),
             );
