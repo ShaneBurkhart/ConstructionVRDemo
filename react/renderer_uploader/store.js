@@ -4,6 +4,7 @@ import thunk from 'redux-thunk';
 const _initialState = {
   projects: [],
   units: [],
+  uploadProgress: 0,
   apiError: null,
 };
 
@@ -13,11 +14,8 @@ const todos = (state = {}, action) => {
       const { projects, units } = action.data;
       return { ...state, projects, units };
 
-    // case "NEW_PROJECT":
-    //   return {  ...state, projects: [ ...state.projects, action.data ] };
-
-    // case "UPDATE_PROJECT":
-    //   return { ...state, projects: [ ...state.projects.filter(p => p.id !== action.data.id), action.data]}
+    case "UPLOAD_PROGRESS":
+      return {  ...state, uploadProgress: action.data };
 
     case 'API_ERROR':
       return { ...state, apiError: {
