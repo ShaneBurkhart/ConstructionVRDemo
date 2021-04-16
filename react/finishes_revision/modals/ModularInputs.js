@@ -72,19 +72,28 @@ export const DetailsInput = ({ value, onChange, onBlur, error }) => (
 
 export const DocumentInput = ({ docURL, onDrop, onChange, onDelete }) => {
   const [inputVal, setInputVal] = useState('');
+  const [show, setShow] = useState(!!docURL);
+
+  if (!show) return (
+    <div className="addADocBtn">
+      <a href="#/" onClick={() => setShow(true)}>{docURL ? "Edit " : "Add a "} Document</a>
+    </div>
+  )
   
   return (
     <div className="field">
         <label style={{marginBottom: 11}}>
-          Document
+          <span>Document - </span><a href="#/" onClick={() => setShow(false)}>Hide</a>
         </label>
       <Grid>
         <Grid.Row>
           {docURL && (
             <Grid.Column>
-              <a href={docURL}>{docURL}</a>
-              <br />
-              <a onClick={onDelete}>remove</a>
+              <div className="docAttachment">
+                <span>📎</span>
+                <a href={docURL}>{docURL}</a>
+              </div>
+              <a href="#/" onClick={onDelete}>Remove</a>
             </Grid.Column>
           )}
           {!docURL &&

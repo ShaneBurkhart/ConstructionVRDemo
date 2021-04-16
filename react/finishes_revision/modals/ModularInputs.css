@@ -24,3 +24,15 @@
   font-weight: 700;
   text-transform: none;
 }
+
+.docAttachment {
+  display: flex;
+  background-color: #e6e6e6;
+  padding: 1%;
+  font-size: .8rem;
+}
+
+.docAttachment a {
+  font-size: .8rem;
+  white-space: pre-wrap;
+}
