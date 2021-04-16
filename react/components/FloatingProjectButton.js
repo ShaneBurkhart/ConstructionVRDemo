@@ -21,7 +21,12 @@ const FloatingProjectButton = ({ name, options }) => {
       onMouseLeave={onMouseLeave}
     >
       {showMenu && (
-        <Menu vertical>
+        <Menu vertical style={{ margin: 5 }}>
+          <Menu.Item
+            onClick={_=>window.scrollTo(0,0)}
+            name={"Scroll to top"}
+            content={"Scroll to top"}
+          />
           {options.map(([action, label]) => (
             <Menu.Item
               key={label}
