@@ -19,31 +19,47 @@ module.exports = (app) => {
   app.put("/api2/v2/finishes/search", m.authUser, async (req, res) => {
     const searchQuery = req.query["q"] || "";
     const { category } = req.body;
-    const dbSearchQuery = Sequelize.Validator.escape(`%${searchQuery}%`);
-    const categoryAttributes = finishCategoriesMap[category].attr;
-    let postgresLiteralQuery = '(';
-    categoryAttributes.forEach((attr, i) => {
-      if (i === 0) {
-        postgresLiteralQuery+= `attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
-      } else {
-        postgresLiteralQuery+= ` OR attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
-      }
-    });
-    postgresLiteralQuery+= ')';
 
     try {
-      const results = await models.Finish.findAll({
-        attributes: [
-          [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
-        ],
-        where: {
-          category: category,
-          [Op.and]: Sequelize.literal(postgresLiteralQuery)
-        },
-        limit: 100,
-      });
-      // console.log({results})
-      res.json({results})
+      if (!searchQuery) {
+        const results = await models.Finish.findAll({
+          attributes: [
+            'attributes',
+            [Sequelize.fn("COUNT", Sequelize.col("*")), "cardcount"]
+          ],
+          where: {
+            category: category,
+          },
+          order: Sequelize.literal('cardcount DESC'),
+          group: ['attributes'],
+          limit: 35,
+        });
+        return res.json({results})
+      } else {
+        const dbSearchQuery = Sequelize.Validator.escape(`%${searchQuery}%`);
+        const categoryAttributes = finishCategoriesMap[category].attr;
+        let postgresLiteralQuery = '(';
+        categoryAttributes.forEach((attr, i) => {
+          if (i === 0) {
+            postgresLiteralQuery+= `attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+          } else {
+            postgresLiteralQuery+= ` OR attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+          }
+        });
+        postgresLiteralQuery+= ')';
+
+        const results = await models.Finish.findAll({
+          attributes: [
+            [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
+          ],
+          where: {
+            category: category,
+            [Op.and]: Sequelize.literal(postgresLiteralQuery)
+          },
+          limit: 100,
+        });
+        return res.json({results})
+      }
     } catch (error){
       console.error(error)
       res.status(422).send("Could not complete search request");
