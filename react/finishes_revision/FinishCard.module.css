@@ -17,6 +17,7 @@
 
 .detailsSection {
   width: 72%;
+  flex-grow: 2;
 }
 
 .cellHeading {

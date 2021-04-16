@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Grid, Image, Label, Input, Form, Dropdown } from 'semantic-ui-react';
 
+import { addHTTPToUrlIfMissing } from '../../../common/formatters';
 import StyledDropzone from "../../components/StyledDropzone";
 import './ModularInputs.css';
 
@@ -91,7 +92,7 @@ export const DocumentInput = ({ docURL, onDrop, onChange, onDelete }) => {
             <Grid.Column>
               <div className="docAttachment">
                 <span>📎</span>
-                <a href={docURL}>{docURL}</a>
+                <a href={docURL} target="_blank">{docURL}</a>
               </div>
               <a href="#/" onClick={onDelete}>Remove</a>
             </Grid.Column>
@@ -113,8 +114,7 @@ export const DocumentInput = ({ docURL, onDrop, onChange, onDelete }) => {
                     icon: "upload",
                     content: "Add",
                     onClick: () => {
-                      console.log('ok')
-                      onChange(null, {value: inputVal});
+                      onChange(null, {value: addHTTPToUrlIfMissing(inputVal)});
                       setInputVal('');
                     },
                   }}

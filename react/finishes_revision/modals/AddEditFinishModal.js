@@ -23,6 +23,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [attrRows, setAttrRows] = useState(initAttrGridRows);
   const [isLibraryView, setIsLibraryView] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [libraryLoading, setLibraryLoading] = useState(false);
   const [attributeValues, setAttributeValues] = useState(attributes);
   const [attributeValueErrors, setAttributeValueErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -30,13 +31,19 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const isNew = id === null;
 
   const handleSearch = (_e, {value}) => {
+    setLibraryLoading(true);
     setSearchQuery(value);
-    const onSuccess = () => {};
-    const onError = () => {};
+    const onSuccess = () => { setLibraryLoading(false) };
+    const onError = () => { setLibraryLoading(false) };
     const debounceSearch = _.debounce((q) => {
       ActionCreators.searchFinishLibrary(q, selectedCategory, onSuccess, onError);
     }, 500);
     debounceSearch(value);
+  }
+
+  const handleSetLibraryView = () => {
+    setIsLibraryView(true);
+    handleSearch(null, ({ value: '' }));
   }
 
   const onDropDocument = (acceptedFiles) => {
@@ -205,8 +212,15 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       open={true}
       onClose={onClose}
     >
-      <Modal.Header>
-        {isNew ? "Add New Finish" : "Edit Finish"}
+      <Modal.Header style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span>{isNew ? "Add New Finish" : "Edit Finish"}</span>
+        <Button
+          onClick={handleSubmit}
+          color="green"
+          disabled={loading || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
+        >
+          Save
+        </Button>
       </Modal.Header>
       <Modal.Content>
         <Form>
@@ -230,14 +244,14 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                       content={
                         <div>
                           <p className="bold">Are you sure? Your current values may be overwritten</p>
-                          <Button color="green" onClick={() => setIsLibraryView(true)}>Continue to Library</Button>
+                          <Button color="green" onClick={handleSetLibraryView}>Continue to Library</Button>
                         </div>
                       }
                       trigger={
                           <Button color="blue">Fill from library</Button>
                       }
                     />}
-                  {_.isEmpty(attributeValues) && <Button color="blue" onClick={() => setIsLibraryView(true)}>Fill from library</Button>}
+                  {_.isEmpty(attributeValues) && <Button color="blue" onClick={handleSetLibraryView}>Fill from library</Button>}
                 </Grid.Column>
               </Grid.Row>
             }
@@ -247,37 +261,40 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                   <input autoFocus />
                 </Input>
                 <Button style={{ marginLeft: 10 }} onClick={() => setIsLibraryView(false)}>Cancel</Button>
-                {(finishLibrary || []).map(f => (
-                  <Grid.Row key={Object.values(f).join("")}>
-                    <article
-                      className={styles.finishCard}
-                      onClick={() => {
-                        setAttributeValues(f);
-                        setIsLibraryView(false);
-                      }}
-                    >
-                      <div className={styles.finishCardLeft}>
-                        <div className={styles.cardName}>
-                          <span>
-                            {getDisplayName(f)}
-                          </span>
-                        </div>
-                        {(filteredCategoryAttributes || []).map(a => (
-                          <div key={a} className={styles.finishCardAttrRow}>
-                            <div className={styles.attrLabel}>{a}:</div>
-                            <div className={styles.attrVal}>{f[a] || ''}</div>
+                <div className={styles.searchResults}>
+                  {(finishLibrary || []).map(f => (
+                      <Grid.Row key={Object.values(f).join("")}>
+                        <article
+                          className={styles.finishCard}
+                          onClick={() => {
+                            setAttributeValues(f);
+                            setIsLibraryView(false);
+                          }}
+                        >
+                          <div className={styles.finishCardLeft}>
+                            <div className={styles.cardName}>
+                              <span>
+                                {getDisplayName(f)}
+                              </span>
+                            </div>
+                            {(filteredCategoryAttributes || []).map(a => (
+                              <div key={a} className={styles.finishCardAttrRow}>
+                                <div className={styles.attrLabel}>{a}:</div>
+                                <div className={styles.attrVal}>{f[a] || ''}</div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                      <div className={styles.finishCardRight}>
-                        {(f["Images"] || []).map(imgUrl => (
-                          <img key={imgUrl} src={imgUrl} className={styles.thumbnail}/>
-                        ))}
-                      </div>
-                    </article>
-                  </Grid.Row>
-                ))}
-                {!finishLibrary.length && searchQuery && <div>No results...</div> }
+                          <div className={styles.finishCardRight}>
+                            {(f["Images"] || []).map(imgUrl => (
+                              <img key={imgUrl} src={imgUrl} className={styles.thumbnail}/>
+                            ))}
+                          </div>
+                        </article>
+                      </Grid.Row>
+                  ))}
+                  {!finishLibrary.length && searchQuery && <div>No results...</div> }
+                  {libraryLoading && <Dimmer active inverted><Loader /></Dimmer>}
+                </div>
               </section>
             }
             {!isLibraryView && !_.isEmpty(attrRows) && attrRows.map(row => (

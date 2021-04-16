@@ -1,4 +1,4 @@
-const { preFormatUrl, noFormat } = require('./formatters');
+const { removeHTTPFromUrlIfPresent, noFormat } = require('./formatters');
 const { validatePrice, noOp } = require('./validators');
 
 const finishAttributes = [
@@ -111,7 +111,7 @@ const finishAttributes = [
     name: "Product URL",
     width: 8,
     validate: noOp, 
-    format: preFormatUrl,
+    format: removeHTTPFromUrlIfPresent,
     inlineEditable: true,
   },
   {

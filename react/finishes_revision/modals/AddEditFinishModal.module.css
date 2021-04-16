@@ -6,6 +6,20 @@
 
 .libraryView {
   width: 100%;
+  min-height: 300px;
+}
+
+.searchResults {
+  margin-top: 1%;
+  max-height: 425px;
+  overflow-y: auto;
+  position: relative;
+  padding: 0 5px;
+  border-radius: 2px;
+  border-top: .5px solid #E7E7E7;
+  background: #FAFAFA;
+  background: linear-gradient(to bottom, #FAFAFA, #FFFFFF);
+
 }
 
 .finishCard {
@@ -14,6 +28,7 @@
   font-size: .8rem;
   margin-top: 5px;
   position: relative;
+  border-radius: 1px;
 }
 
 .finishCard:hover {
