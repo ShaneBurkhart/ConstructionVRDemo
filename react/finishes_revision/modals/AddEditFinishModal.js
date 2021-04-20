@@ -12,10 +12,10 @@ import ActionCreators from '../action_creators';
 import styles from './AddEditFinishModal.module.css';
 
 const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} }) => {
-  const { category='', attributes={}, id=null } = finishDetails;
+  const { attributes={}, id=null } = finishDetails;
   const finishLibrary = useSelector(state => state.finishLibrary);
   
-  const initCategory = preselectedCategory || category;
+  const initCategory = preselectedCategory || '';
   const initAttrList = (initCategory) ? finishCategoriesMap[initCategory].attr : [];
   const initAttrGridRows = getAttrGridRows(initAttrList) || [];
   
@@ -123,6 +123,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   useEvent('paste', handlePaste);
 
   const handleSelectCategory = categoryName => {
+    if (!isNew) return;
     setAttrRows([]);
     setSelectedCategory(categoryName);
     const attrList = finishCategoriesMap[categoryName].attr;
@@ -232,6 +233,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
             <Grid.Row style={{ overflow: "visible" }}>
               <Grid.Column width={16}>
                 <CategoryDropdown
+                  disabled={!isNew}
                   options={Object.keys(finishCategoriesMap).sort()}
                   selectedCategory={selectedCategory}
                   handleSelectCategory={handleSelectCategory}

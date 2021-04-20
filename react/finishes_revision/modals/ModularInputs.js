@@ -16,19 +16,21 @@ const ErrorLabel = (label="") => (
   </Label>
 )
 
-export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory }) => {
+export const CategoryDropdown = ({ selectedCategory, options, handleSelectCategory, disabled }) => {
   const _dd = useRef(null)
   return (
     <>
       <label className="uiFormFieldLabel">Select a category</label>
       <Dropdown
         ref={dd => _dd.current = dd}
+        disabled={disabled}
         button 
         basic
         fluid
         scrolling
         upward={false}
         selection
+        value={selectedCategory}
         search={(options, val) => options.filter(({text}) => text.toLowerCase().startsWith(val.toLowerCase()))}
         text={selectedCategory || 'Select One'}
         options={options.map(c => ({ key: c, text: c, value: c }))}

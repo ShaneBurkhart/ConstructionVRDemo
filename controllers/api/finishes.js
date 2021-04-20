@@ -92,17 +92,17 @@ module.exports = (app) => {
   app.post("/api2/v2/finishes/:project_access_token", m.authUser, async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
     
-    const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
-    if (!project) return res.status(404).send("Project not found");
-
-    const { category, attributes } = req.body;
     try {
-      const formattedAttributes = {};
-      (Object.keys(attributes) || []).forEach(a => {
-        if (attrMap[a]) {
-          formattedAttributes[a] = attrMap[a].format(attributes[a]);
-        }
-      });
+      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      if (!project) return res.status(404).send("Project not found");
+
+      const { category, attributes } = req.body;
+        const formattedAttributes = {};
+        (Object.keys(attributes) || []).forEach(a => {
+          if (attrMap[a]) {
+            formattedAttributes[a] = attrMap[a].format(attributes[a]);
+          }
+        });
       
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
       const newFinish = await models.Finish.create({
@@ -123,23 +123,24 @@ module.exports = (app) => {
     const finishId = req.params["finish_id"];
     if (!finishId) return res.status(400).send("Finish ID required");
     
-    const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
-    if (!project) return res.status(404).send("Project not found");
-
-    const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
-    if (!finish) return res.status(404).send("Finish not found");
-
-    const { category, attributes } = req.body;
-    
     try {
+      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      if (!project) return res.status(404).send("Project not found");
+
+      const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
+      if (!finish) return res.status(404).send("Finish not found");
+
+      const { category, attributes } = req.body;
+      if (finish.category !== category) return res.status(422).send("Cannot change categories once set");
+    
       const formattedAttributes = {};
       (Object.keys(attributes) || []).forEach(a => {
         if (attrMap[a]) {
           formattedAttributes[a] = attrMap[a].format(attributes[a])
         }
       });
+      
       const updatedFinish = await finish.update({
-        category,
         attributes: formattedAttributes,
       });
       return res.json(updatedFinish);

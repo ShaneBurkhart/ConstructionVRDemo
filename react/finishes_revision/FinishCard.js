@@ -229,7 +229,7 @@ const FinishCard = ({
               />
               {cardContents}
             </div>
-            {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} onClose={toggleShowEditFinishModal} />}
+            {showEditFinishModal && <AddEditFinishModal finishDetails={finishDetails} preselectedCategory={category} onClose={toggleShowEditFinishModal} />}
           </article>
         )}
       </Draggable>
