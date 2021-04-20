@@ -171,6 +171,7 @@ export const ImagesInput = ({ images, onDrop, onImgLinkUpload, onSwitchImgOrder,
                   }}
                 />
               </div>
+              <label style={{ display: 'block', marginTop: 8 }}>Or hit "ctrl + v" to paste an image from your clipboard.</label>
             </Grid.Column>
           }
         </Grid.Row>

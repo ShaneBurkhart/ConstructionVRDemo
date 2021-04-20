@@ -186,7 +186,7 @@ const FinishCard = ({
                       <div className={styles.detailsFlexTableLabel}>{attr}:</div>
                       <div>
                         {(attrMap[attr].isURL) ? (
-                          <a href={attributes[attr]} target="_blank" onClick={e => e.stopPropagation()}>{attributes[attr]}</a>
+                          <a href={attributes[attr]} target="_blank" onClick={e => e.stopPropagation()}>View</a>
                           ) : (
                           <span>{attributes[attr]}</span>
                         )}

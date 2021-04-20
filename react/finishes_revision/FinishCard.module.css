@@ -88,11 +88,15 @@
 .finishCardImg {
   width: 120px;
   height: 120px;
+  max-height: 120px;
+  max-width: 120px;
   border: 1px solid rgb(185, 185, 185);
   background-color: white;
   object-fit: contain;
   align-self: stretch;
+  padding: 1px;
 }
+
 .finishCardImg:last-child {
   margin-left: 2px;
 }
@@ -108,11 +112,42 @@
 @media print {
   .finishCard {
     padding: 3px;
+    justify-content: space-between;
+  }
+  .detailsSection {
+    flex-grow: 0;
   }
   .detailsTable {
     font-size: 10pt;
   }
   .hideDetails {
     display: flex;
+  }
+}
+
+@media all and (max-width: 850px){
+  .detailsSection {
+    width: 65%;
+  }
+  .imageSection {
+    width: 34%;
+  }
+}
+
+@media screen and (max-width: 1250px){
+  .adminMode .detailsSection {
+    width: 65%;
+  }
+  .adminMode .imageSection {
+    width: 34%;
+  }
+}
+
+@media screen and (max-width: 1090px){
+  .adminMode .finishCardImg {
+    width: 100px;
+    height: 100px;
+    max-height: 100px;
+    max-width: 100px;
   }
 }

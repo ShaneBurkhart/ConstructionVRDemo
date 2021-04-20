@@ -9,7 +9,7 @@ import SiteHeader from './SiteHeader';
 
 import ToastMessage from '../components/ToastMessage';
 
-import "./FinishSelectionTable.css";
+import "./App.css";
 
 
 const App = () => {
