@@ -6,10 +6,10 @@ const _initialState = {
   projectName: "",
   apiError: {},
   finishes: [],
+  newestFinish: {},
   finishLibrary: [],
   lockedCategories: [],
-  newestFinish: {},
-  modals: {},
+  categoriesHiddenFromPrint: {},
 };
 
 let unchangedFinishes;
@@ -40,6 +40,9 @@ const todos = (state = {}, action) => {
     
     case "UPDATE_LOCKED_CATEGORIES":
       return { ...state, lockedCategories: action.data.lockedCategories};
+    
+    case "UPDATE_PRINT_CATEGORIES":
+      return { ...state, categoriesHiddenFromPrint: action.nextHiddenCategories};
 
     case 'API_ERROR':
       return { ...state, apiError: {

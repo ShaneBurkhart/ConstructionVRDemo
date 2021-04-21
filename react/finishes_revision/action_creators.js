@@ -183,6 +183,10 @@ const ActionCreator = {
     })
   },
 
+  updatePrintCategories: (nextHiddenCategories) => {
+    _dispatch({ type: "UPDATE_PRINT_CATEGORIES", nextHiddenCategories })
+  },
+
   searchFinishLibrary: (query, category, onSuccess, onError) => {
     $.ajax({
       type: "PUT",

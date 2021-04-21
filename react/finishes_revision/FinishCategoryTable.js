@@ -24,7 +24,9 @@ const FinishCategoriesTable = ({
 }) => {
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const lockedCategories = useSelector(state => state.lockedCategories);
+  const categoriesHiddenFromPrint = useSelector(state => state.categoriesHiddenFromPrint);
   const isCategoryLocked = lockedCategories.includes(category);
+  const isHiddenFromPrint = categoriesHiddenFromPrint[category];
 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
   const [loadingLockedState, setLoadingLockedState] = useState(false);
@@ -67,7 +69,7 @@ const FinishCategoriesTable = ({
   const sortedFinishes = finishes.sort((a,b) => a.orderNumber - b.orderNumber);
 
   return (
-      <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
+      <div id={category} className={`${styles.categoryContainer} ${(isHiddenFromPrint || !count) ? "hide-print" : "break-after"}`}>
         <header>
           <h2 onClick={toggleExpandCategory}>
             <Icon className="hide-print" name={expandedCategory ? "angle down" : "angle up"} />
