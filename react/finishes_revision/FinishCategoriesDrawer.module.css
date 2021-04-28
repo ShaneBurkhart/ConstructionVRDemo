@@ -1,13 +1,13 @@
-.sharelink {
+.modalLink {
   margin-top: 4%;
   padding: 0 1%;
 }
 
-.sharelink:hover {
+.modalLink:hover {
   cursor: pointer;
 }
 
-.categories-drawer {
+.categoriesDrawer {
   position: fixed;
   top: 0;
   left: 0;
@@ -20,12 +20,12 @@
   flex-direction: column;
 }
 
-.categories-drawer .segment {
+.categoriesDrawer > div {
   padding-left: 10px !important;
   padding-right: 10px !important;
 }
 
-.categories-drawer .categories-section {
+.categoriesSection {
   height: 100%;
   padding-right: 0 !important;
   overflow-y: scroll;

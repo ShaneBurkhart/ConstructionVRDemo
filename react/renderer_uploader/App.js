@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as _ from 'underscore';
-import { Label, Grid, Button, Header, Dimmer, Loader } from 'semantic-ui-react';
+import { Label, Grid, Button, Header, Dimmer, Loader, Progress } from 'semantic-ui-react';
 
 import ActionCreators from './action_creators';
 
@@ -11,6 +11,7 @@ import CustomizedDropdown from "./CustomizedDropdown";
 const App = () => {
   const projects = useSelector(state => state.projects || []);
   const units = useSelector(state => state.units || []);
+  const skpUploadProgress = useSelector(state => state.uploadProgress || 0);
   const dispatch = useDispatch();
 
   const [selectedProject, setSelectedProject] = useState({});
@@ -20,6 +21,7 @@ const App = () => {
   const [screenshotUrls, setScreenshotUrls] = useState([]);
   const [unitsList, setUnitsList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [skpUploading, setSkpUploading] = useState(false);
   const [message, setMessage] = useState({ show: false })
   
   useEffect(() => {
@@ -59,7 +61,7 @@ const App = () => {
 
   const handleSubmit = () => {
     if (_.isEmpty(selectedProject)) setMessage({ show: true, message: 'project selection is required'});
-    if (_.isEmpty(selectedUnit)) return console.log({ show: true, message: 'unit selection is required'});
+    if (_.isEmpty(selectedUnit)) return setMessage({ show: true, message: 'unit selection is required'});
     setLoading(true);
 
     const data = {
@@ -83,8 +85,6 @@ const App = () => {
     );
   }
 
-
-  // TO DO - make onDrops more DRY 
   const onDropFloorPlan = (acceptedFiles) => {
     setMessage({});
     if (!acceptedFiles.length) return setMessage({ show: true, message: "Image not received" });
@@ -99,12 +99,12 @@ const App = () => {
         file,
         presignedURL,
         () => {
-          setFloorPlanImgUrl(awsURL)
+          setFloorPlanImgUrl(awsURL);
           setLoading(false);
         },
         () => {
           setMessage({ show: true, message: "Could not complete upload" });
-          setLoading(false)
+          setLoading(false);
         }
       )
     }
@@ -115,29 +115,32 @@ const App = () => {
 
   const onDropSKP = (acceptedFiles) => {
     setMessage({});
-    if (!acceptedFiles.length) return setMessage({ show: true, message: "Image not received" });
-    if (loading) return;
+    if (!acceptedFiles.length) return setMessage({ show: true, message: "File not received" });
+    if (loading || skpUploading) return;
 
     const file = acceptedFiles[0];
 
-    setLoading(true);
+    setSkpUploading(true);
 
     const onSuccess = ({ presignedURL, awsURL }) => {
-      ActionCreators.uploadFile(
+      ActionCreators.uploadLargeFile(
         file,
         presignedURL,
         () => {
-          setSkpUrl(awsURL)
-          setLoading(false);
+          setSkpUrl(awsURL);
+          setSkpUploading(false);
         },
         () => {
           setMessage({ show: true, message:  "Could not complete upload" });
-          setLoading(false)
+          setSkpUploading(false);
         }
       )
     }
       
-    const onError = () => setMessage({ show: true, message: "Could not initiate upload" });
+    const onError = () => {
+      setSkpUploading(false);
+      setMessage({ show: true, message: "Could not initiate upload" })
+    };
     ActionCreators.presignedURL(file, onSuccess, onError);
   }
 
@@ -168,7 +171,7 @@ const App = () => {
           },
           () => {
             setMessage({ show: true, message: "Could not complete upload" });
-            setLoading(false)
+            setLoading(false);
           }
         ),
         () => setMessage({ show: true, message: "Could not complete upload" })
@@ -267,7 +270,7 @@ const App = () => {
           <Grid.Column>
             <label>Add a SKP - </label>
             (<a onClick={() => setSkpUrl('')}>clear</a>)
-            {!skpUrl && <StyledDropzone onDrop={onDropSKP} acceptSKP={true} />}
+            {!skpUrl && <StyledDropzone onDrop={onDropSKP} accept={'.skp'} />}
             {skpUrl && (
               <div className="skp-url">
                   <label>SKP File Url:</label>
@@ -293,6 +296,19 @@ const App = () => {
         </Button>
       </div>
       {loading && <Dimmer active inverted page><Loader /></Dimmer>}
+      {skpUploading && (
+        <Dimmer active inverted page>
+          <Progress
+            style={{ position: "fixed", width: "80vw", margin: "0 10vw", top: "45vh", left: 0 }}
+            label="uploading..."
+            color="green"
+            size="medium"
+            percent={skpUploadProgress}
+            precision={0}
+            active
+          />
+        </Dimmer>)
+      }
     </main>
   );
 }

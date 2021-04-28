@@ -62,9 +62,10 @@ class FocusEditableInput extends React.Component {
   }
  
   onCancel = () => {
-    const { value, onCancel } = this.props;
+    const { value, onCancel, clearError } = this.props;
     this.setState({ val: value, hovering: false });
     this.removeFocus();
+    if (clearError) clearError();
     onCancel();
   };
 
@@ -83,16 +84,22 @@ class FocusEditableInput extends React.Component {
       this.setState({ hovering: false });
       if (onUpdate) onUpdate(val);
     } else {
-      onError && onError();
+      if (onError) onError();
     }
   }
 
   onKeyDown = (e) => {
-    const { handleTab, expanded } = this.props;
+    const { handleTab, expanded, onValidate, onUpdate, clearError, onError } = this.props;
     if (e.key === 'Tab') {
       e.preventDefault();
       if (!expanded) return this.onBlur();
-      handleTab(e);
+      if (onValidate && onValidate(this.state.val)) {
+        if (clearError) clearError();
+        if (onUpdate) onUpdate(this.state.val);
+        handleTab(e);
+      } else {
+        if (onError) onError();
+      }
     }
   }
 

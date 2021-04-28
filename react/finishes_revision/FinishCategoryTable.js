@@ -3,8 +3,6 @@ import { useSelector } from 'react-redux';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button, Icon } from 'semantic-ui-react';
 
-import { getCategoryTag } from '../../common/constants.js';
-
 import FinishCard from './FinishCard';
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
@@ -26,13 +24,14 @@ const FinishCategoriesTable = ({
 }) => {
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const lockedCategories = useSelector(state => state.lockedCategories);
+  const categoriesHiddenFromPrint = useSelector(state => state.categoriesHiddenFromPrint);
   const isCategoryLocked = lockedCategories.includes(category);
+  const isHiddenFromPrint = categoriesHiddenFromPrint[category];
 
   const [showAddNewModal, setShowAddNewModal] = useState(false);
   const [loadingLockedState, setLoadingLockedState] = useState(false);
 
   const count = finishes.length;
-  const tag = category ? getCategoryTag(category) : '';
   
   const toggleShowAddNewModal = () => setShowAddNewModal(!showAddNewModal);
   
@@ -70,7 +69,7 @@ const FinishCategoriesTable = ({
   const sortedFinishes = finishes.sort((a,b) => a.orderNumber - b.orderNumber);
 
   return (
-      <div id={category} className={`${styles.categoryContainer} ${!count ? "no-print" : "break-after"}`}>
+      <div id={category} className={`${styles.categoryContainer} ${(isHiddenFromPrint || !count) ? "hide-print" : "break-after"}`}>
         <header>
           <h2 onClick={toggleExpandCategory}>
             <Icon className="hide-print" name={expandedCategory ? "angle down" : "angle up"} />
@@ -100,7 +99,6 @@ const FinishCategoriesTable = ({
                   return (
                     <FinishCard
                       key={f.id}
-                      tag={tag}
                       cardId={f.id}
                       finishDetails={f}
                       focusedEl={focusedEl}

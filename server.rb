@@ -80,7 +80,11 @@ post "/#{renderer_app_projects}" do
   new_unit_version = UnitVersion.create({
     "Unit": [params["unitId"]],
     "Floor Plan Image URL": params["floorPlanImgUrl"],
-    "SKP File URL": params["skpUrl"]
+    "SKP File URL": params["skpUrl"],
+    "Floor Plans Started At": DateTime.now(),
+    "Floor Plans Finished At": DateTime.now(),
+    "Screenshots Started At": DateTime.now(),
+    "Screenshots Finished At": DateTime.now(),
   })
 
   screenshot_urls.each do |s|

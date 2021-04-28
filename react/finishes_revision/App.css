@@ -1,0 +1,31 @@
+.table {
+  width: 100%;
+}
+
+img {
+  padding: 1px;
+  max-width: 175px;
+  max-height: 175px;
+  display: inline-block;
+}
+
+.table-row {
+  display: flex;
+  word-wrap: break-word;
+}
+
+@media print {
+  body { font-size: 10pt; }
+  .table { page-break-inside:auto; page-break-after: always;}
+  .table-row { page-break-inside:avoid; page-break-after:auto }
+  .no-print { display: none; }
+  .admin-mode {
+    padding-left: 0;
+  }
+}
+
+@media print and (max-width: 750px){
+  body { font-size: 9pt; }
+}
+
+

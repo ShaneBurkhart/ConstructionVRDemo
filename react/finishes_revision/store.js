@@ -6,9 +6,10 @@ const _initialState = {
   projectName: "",
   apiError: {},
   finishes: [],
-  lockedCategories: [],
   newestFinish: {},
-  modals: {},
+  finishLibrary: [],
+  lockedCategories: [],
+  categoriesHiddenFromPrint: {},
 };
 
 let unchangedFinishes;
@@ -31,11 +32,17 @@ const todos = (state = {}, action) => {
       unchangedFinishes = [...state.finishes.filter(f => f.category !== action.data.category)];
       return { ...state, finishes: [...unchangedFinishes, ...action.data.newOrderedFinishes]};
     
+    case "UPDATE_FINISH_LIBRARY":
+      return { ...state, finishLibrary: [...action.data]};
+    
     case "UPDATE_PROJECT_NAME":
       return { ...state, projectName: action.data};
     
     case "UPDATE_LOCKED_CATEGORIES":
       return { ...state, lockedCategories: action.data.lockedCategories};
+    
+    case "UPDATE_PRINT_CATEGORIES":
+      return { ...state, categoriesHiddenFromPrint: action.nextHiddenCategories};
 
     case 'API_ERROR':
       return { ...state, apiError: {

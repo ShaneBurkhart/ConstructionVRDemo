@@ -1,11 +1,11 @@
-const { Sequelize, Op } = require('sequelize');
+const { Sequelize, Op, QueryTypes } = require('sequelize');
 const got = require('got');
 const FileType = require('file-type');
 const AWS = require('aws-sdk')
 const request = require('request');
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
-const { attrMap } = require("../../common/constants.js");
+const { attrMap, finishCategoriesMap } = require("../../common/constants.js");
 const { uuid } = require('uuidv4');
 
 AWS.config.update({
@@ -14,8 +14,59 @@ AWS.config.update({
 });
 const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
 
+
 module.exports = (app) => {
-  
+  app.put("/api2/v2/finishes/search", m.authUser, async (req, res) => {
+    const searchQuery = req.query["q"] || "";
+    const { category } = req.body;
+
+    try {
+      if (!searchQuery) {
+        const results = await models.Finish.findAll({
+          attributes: [
+            'attributes',
+            [Sequelize.fn("COUNT", Sequelize.col("*")), "cardcount"]
+          ],
+          where: {
+            category: category,
+          },
+          order: Sequelize.literal('cardcount DESC'),
+          group: ['attributes'],
+          limit: 35,
+        });
+        return res.json({results})
+      } else {
+        const dbSearchQuery = Sequelize.Validator.escape(`%${searchQuery}%`);
+        const categoryAttributes = finishCategoriesMap[category].attr;
+        let postgresLiteralQuery = '(';
+        categoryAttributes.forEach((attr, i) => {
+          if (i === 0) {
+            postgresLiteralQuery+= `attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+          } else {
+            postgresLiteralQuery+= ` OR attributes->> '${attr}' ILIKE '${dbSearchQuery}'`
+          }
+        });
+        postgresLiteralQuery+= ')';
+
+        const results = await models.Finish.findAll({
+          attributes: [
+            [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
+          ],
+          where: {
+            category: category,
+            [Op.and]: Sequelize.literal(postgresLiteralQuery)
+          },
+          limit: 100,
+        });
+        return res.json({results})
+      }
+    } catch (error){
+      console.error(error)
+      res.status(422).send("Could not complete search request");
+    }
+
+  });
+
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
     
@@ -41,17 +92,17 @@ module.exports = (app) => {
   app.post("/api2/v2/finishes/:project_access_token", m.authUser, async (req, res) => {
     const projectAccessToken = req.params["project_access_token"];
     
-    const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
-    if (!project) return res.status(404).send("Project not found");
-
-    const { category, attributes } = req.body;
     try {
-      const formattedAttributes = {};
-      (Object.keys(attributes) || []).forEach(a => {
-        if (attrMap[a]) {
-          formattedAttributes[a] = attrMap[a].format(attributes[a]);
-        }
-      });
+      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      if (!project) return res.status(404).send("Project not found");
+
+      const { category, attributes } = req.body;
+        const formattedAttributes = {};
+        (Object.keys(attributes) || []).forEach(a => {
+          if (attrMap[a]) {
+            formattedAttributes[a] = attrMap[a].format(attributes[a]);
+          }
+        });
       
       const finishList = await models.Finish.findAll({ where: { ProjectId: project.id, category: category }});
       const newFinish = await models.Finish.create({
@@ -72,23 +123,24 @@ module.exports = (app) => {
     const finishId = req.params["finish_id"];
     if (!finishId) return res.status(400).send("Finish ID required");
     
-    const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
-    if (!project) return res.status(404).send("Project not found");
-
-    const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
-    if (!finish) return res.status(404).send("Finish not found");
-
-    const { category, attributes } = req.body;
-    
     try {
+      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      if (!project) return res.status(404).send("Project not found");
+
+      const finish = await models.Finish.findOne({ where: { id: finishId, ProjectId: project.id }});
+      if (!finish) return res.status(404).send("Finish not found");
+
+      const { category, attributes } = req.body;
+      if (finish.category !== category) return res.status(422).send("Cannot change categories once set");
+    
       const formattedAttributes = {};
       (Object.keys(attributes) || []).forEach(a => {
         if (attrMap[a]) {
           formattedAttributes[a] = attrMap[a].format(attributes[a])
         }
       });
+      
       const updatedFinish = await finish.update({
-        category,
         attributes: formattedAttributes,
       });
       return res.json(updatedFinish);

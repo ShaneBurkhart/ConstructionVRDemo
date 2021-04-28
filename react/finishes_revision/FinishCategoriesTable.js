@@ -1,11 +1,13 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'underscore';
 import FinishCategoryTable from './FinishCategoryTable';
-import { finishCategoriesMap } from '../../common/constants';
+import FloatingProjectButton from '../components/FloatingProjectButton';
+import { getInlineEditableAttrList } from '../../common/constants';
 
 function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
   const newestFinish = useSelector(state => state.newestFinish);
+  const projectName = useSelector(state => state.projectName);
 
   const [expandedCategories, setExpandedCategories] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
@@ -85,7 +87,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     if (!expandedCategories[prevCat]) expandCategory(prevCat);
     expandCard(prevCat, lastCard.id);
 
-    const lastAttr = "Details";
+    const editableAttrList = getInlineEditableAttrList(prevCat);
+    const lastAttr = editableAttrList[editableAttrList.length - 1];
     setFocusedEl([prevCat, lastCard.id, lastAttr]);
   }
 
@@ -97,7 +100,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
     if (!expandedCategories[nextCat]) expandCategory(nextCat);
     expandCard(nextCat, firstCard.id);
 
-    const firstAttr = finishCategoriesMap[nextCat].attr[0];
+    const editableAttrList = getInlineEditableAttrList(nextCat);
+    const firstAttr = editableAttrList[0];
     setFocusedEl([nextCat, firstCard.id, firstAttr]);
   }
 
@@ -110,15 +114,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
 
   
   return (
-    <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
-        <div className="controls" style={{ display: 'flex', justifyContent: 'flex-end', margin: "5px 0" }}>
-          {controls.map(([action, label], i) => (
-            <Fragment key={label}>
-              <a style={{margin: "0px 4px"}} onClick={action}>{label}</a>
-              {(i < controls.length - 1) && <span>{" "}-{" "}</span>}
-            </Fragment>
-          ))}
-        </div>
+    <>
+      <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
         {sortedCategories.map((category, i) => {
           const prevCat = i === 0 ? "" : sortedCategories[i - 1];
           const nextCat = i === (sortedCategories.length - 1) ? "" : sortedCategories[i + 1];
@@ -142,7 +139,9 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
           );
         })}
       </section>
+      <FloatingProjectButton name={projectName} options={controls} />
+    </>
   )
 }
 
-export default FinishCategoriesTable
+export default FinishCategoriesTable;
