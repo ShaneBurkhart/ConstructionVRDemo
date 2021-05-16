@@ -79,10 +79,11 @@ module.exports = (app) => {
 
       const projectId = project.id;
       const projectName = project.name;
+      const projectDocUrl = project.documentUrl || '';
 
       const lockedCategories = (categoryLocks || []).map(cl => cl.category);
   
-      return res.json({ finishes, projectId, projectName, lockedCategories });
+      return res.json({ finishes, projectId, projectName, projectDocUrl, lockedCategories });
     } catch(error){
       console.log(error);
       res.status(422).send("Could not retrieve project information")

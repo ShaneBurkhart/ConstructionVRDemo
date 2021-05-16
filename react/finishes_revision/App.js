@@ -17,7 +17,6 @@ const App = () => {
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const finishes = useSelector(state => state.finishes);
   const apiError = useSelector(state => state.apiError);
-  const projectName = useSelector(state => state.projectName);
 
   useEffect(() => {
     ActionCreators.updateDispatch(dispatch);
@@ -38,7 +37,7 @@ const App = () => {
     <main>
       {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} categoryList={categoryList} />}
       <div className={`${adminMode ? "admin-mode" : ""}`}>
-        <SiteHeader projectName={projectName} />
+        <SiteHeader adminMode={adminMode} />
         <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
       </div>
       <ToastMessage positive={false} message={apiError.message} />
