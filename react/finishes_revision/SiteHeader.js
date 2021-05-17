@@ -7,6 +7,8 @@ import ActionCreators from './action_creators';
 import ProjectDocumentModal from './modals/ProjectDocumentModal';
 import FocusEditableInput from '../components/FocusEditableInput';
 
+import styles from './SiteHeader.module.css';
+
 const SiteHeader = ({ adminMode }) => {
   const renderingsLink = window.hasOwnProperty("RENDERINGS_LINK") ? RENDERINGS_LINK : "";
   
@@ -15,10 +17,7 @@ const SiteHeader = ({ adminMode }) => {
   const projectDocUrl = useSelector(state => state.projectDocUrl);
 
   const [showProjectDocModal, setShowProjectDocModal] = useState(false);
-  const [showProjectDocEditIcon, setShowProjectDocEditIcon] = useState(false);
-  
   const toggleShowProjectDocModal = () => setShowProjectDocModal(!showProjectDocModal);
-  const toggleShowProjectDocEditIcon = () => setShowProjectDocEditIcon(!showProjectDocEditIcon);
   
   const changeProjectName = (newName) => {
     if (newName && newName !== projectName) ActionCreators.changeProjectName(projectId, newName);
@@ -35,25 +34,26 @@ const SiteHeader = ({ adminMode }) => {
               onUpdate={changeProjectName}
             />
           </h1>
-          <div style={{ marginLeft: '5%' }}>
-            {projectDocUrl && (
-              <>
-                <a href={projectDocUrl} style={{ cursor: 'pointer' }} onMouseEnter={toggleShowProjectDocEditIcon} onMouseLeave={toggleShowProjectDocEditIcon}>
-                  Construction Documents
-                </a>
-                {showProjectDocEditIcon && (
-                  <a onClick={toggleShowProjectDocModal} style={{ marginLeft: '1%', cursor: 'pointer' }}>
-                    <Icon name="upload" /> Upload a construction document
+          {adminMode && (
+            <div className={`${styles.documentLinkContainer} no-print`}>
+              {projectDocUrl && (
+                <>
+                  <a href={projectDocUrl} target="_blank" title="open the documents" style={{ cursor: 'pointer' }}>
+                    Construction Documents
                   </a>
-                )}
-              </>
-            )}
-            {!projectDocUrl && (
-              <a onClick={toggleShowProjectDocModal} style={{ marginLeft: '1%', cursor: 'pointer' }}>
-                <Icon name="upload" /> Upload a construction document
-              </a>
-            )}
-          </div>
+                  <a onClick={toggleShowProjectDocModal} title="edit documents" className={styles.editCurrentIcon}>
+                    <Icon name="cloud upload" />
+                  </a>
+                </>
+              )}
+              {!projectDocUrl && (
+                <a onClick={toggleShowProjectDocModal} title="click to add documents" style={{ cursor: 'pointer', display: 'flex', width: '100%' }}>
+                  <span style={{ marginRight: '5%' }}>Upload document</span>
+                  <Icon name="cloud upload" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
         <div className="ui tabular menu hide-print">
           <a className="item active">Finish Selections</a>

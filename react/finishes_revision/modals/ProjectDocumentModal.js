@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Loader, Dimmer } from 'semantic-ui-react';
+import { Modal, Button, Loader, Dimmer, Popup } from 'semantic-ui-react';
 
 import StyledDropzone from "../../components/StyledDropzone";
 
@@ -8,12 +8,23 @@ import ActionCreators from '../action_creators';
 import './ProjectDocumentModal.css';
 
 
-const ProjectDocumentModal = ({ onClose, projectDocUrl }) => {
+const ProjectDocumentModal = ({ onClose, docUrl }) => {
   const [loading, setLoading] = useState(false);
-  const [documentUrl, setDocumentUrl] = useState(projectDocUrl);
+  const [documentUrl, setDocumentUrl] = useState(docUrl);
 
   const onDelete = () => setDocumentUrl('');
-  const handleSubmit = () => {}
+  const onSubmit = () => {
+    setLoading(true);
+    const onSuccess = () => {
+      setLoading(false);
+      onClose();
+    }
+    const onError = () => {
+      setLoading(false);
+      onClose();
+    }
+    ActionCreators.addEditProjectDoc(documentUrl, onSuccess, onError);
+  }
   
   const onDrop = (acceptedFiles) => {
     if (!acceptedFiles.length) return;
@@ -42,17 +53,48 @@ const ProjectDocumentModal = ({ onClose, projectDocUrl }) => {
     );
   }
 
+  const renderPrimaryButton = () => {
+    if (docUrl && !documentUrl) {
+      return (
+        <Popup
+          on="click"
+          onClose={e => e.stopPropagation()}
+          content={
+            <div>
+              <p>The previous document will be deleted from this project</p>
+              <Button color="red" onClick={onSubmit}>Ok</Button>
+            </div>
+          }
+          trigger={
+            <Button color="green">Save</Button>
+          }
+        />
+      );
+    } else {
+      return (
+        <Button
+          onClick={onSubmit}
+          color="green"
+          disabled={docUrl === documentUrl}
+        >
+          Save
+        </Button>
+      )
+    }
+  }
+
   return (
     <Modal
       closeIcon
       open={true}
       onClose={onClose}
+      closeOnDimmerClick={false}
       className="project_document_modal"
       size="tiny"
     >
       <Modal.Header className="modalHeader">
-        {!projectDocUrl && <>Upload a document for this project</>}
-        {!!projectDocUrl && <>Current project document</>}
+        {!docUrl && <>Upload a document for this project</>}
+        {!!docUrl && <>Current project document</>}
       </Modal.Header>
       <Modal.Content>
         {!!documentUrl && (
@@ -61,7 +103,7 @@ const ProjectDocumentModal = ({ onClose, projectDocUrl }) => {
               <span>📎</span>
               <a href={documentUrl} target="_blank" style={{ marginLeft: 5 }}>{documentUrl}</a>
             </div>
-            <a href="#/" onClick={onDelete}>Remove</a>
+            <a href="#/" onClick={onDelete} style={{ marginTop: 10, display: 'inline-block' }}>Remove</a>
           </>
         )}
         {!documentUrl && (
@@ -74,13 +116,7 @@ const ProjectDocumentModal = ({ onClose, projectDocUrl }) => {
           <Button color='black' onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            color="green"
-            disabled={projectDocUrl === documentUrl}
-          >
-            Save
-          </Button>
+          {renderPrimaryButton()}
       </Modal.Actions>
       {loading && <Dimmer active inverted><Loader /></Dimmer>}
     </Modal>

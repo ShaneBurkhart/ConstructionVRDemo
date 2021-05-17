@@ -274,6 +274,28 @@ module.exports = (app) => {
     }
   });
 
+  app.put('/api2/v2/project/add_doc/:project_access_token', m.authUser, async (req, res) => {
+    const projectAccessToken = req.params["project_access_token"];
+    if (!req.body.hasOwnProperty('documentUrl')) return res.status(422).send("document url not received");
+    // receiving an empty string is valid, it will effectively delete the current doc url
+    const { documentUrl } = req.body;
+    if (typeof documentUrl !== 'string')  return res.status(422).send("a url string was expected, but not received");
+    
+    try {
+      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      if (!project) return res.status(404).send("Project not found");
+      
+      const refreshedProject = await project.update({ documentUrl });
+
+      const newDocumentUrl = refreshedProject.documentUrl;
+
+      return res.json({ projectDocUrl: newDocumentUrl });
+    } catch(error){
+      console.error(error);
+      return res.status(422).send("Could not complete update");
+    }
+  });
+
   app.post("/api2/v2/upload/from_url", m.authUser, async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).send("a web resource is required");

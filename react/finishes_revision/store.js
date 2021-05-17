@@ -44,6 +44,9 @@ const todos = (state = {}, action) => {
     
     case "UPDATE_PRINT_CATEGORIES":
       return { ...state, categoriesHiddenFromPrint: action.nextHiddenCategories};
+    
+    case "UPDATE_PROJECT_DOCUMENT":
+      return { ...state, projectDocUrl: action.projectDocUrl};
 
     case 'API_ERROR':
       return { ...state, apiError: {
