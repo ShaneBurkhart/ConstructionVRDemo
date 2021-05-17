@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     accessToken: DataTypes.STRING,
     adminAccessToken: DataTypes.STRING,
+    documentUrl: DataTypes.STRING,
     archived: DataTypes.BOOLEAN,
     v1: {
       type: DataTypes.BOOLEAN,

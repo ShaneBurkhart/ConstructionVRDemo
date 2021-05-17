@@ -78,7 +78,6 @@ class App extends React.Component {
   }
 
   onDragEndSelection = (result) => {
-    console.log(result);
     const { orderedSelectionIdsByCategoryId, filteredOrderedSelectionIdsByCategoryId, currentFilters } = this.props;
     const { source, destination } = result;
     if (!destination) return;

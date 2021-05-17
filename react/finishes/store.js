@@ -401,8 +401,6 @@ const moveOption = (state, action) => {
 }
 
 const todos = (state = {}, action) => {
-  console.log(action);
-
   switch (action.type) {
     case Actions.ADD_NEW_OPTION:
       return addNewOption(state, action);

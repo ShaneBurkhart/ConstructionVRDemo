@@ -18,8 +18,7 @@ const acceptStyle = {
 const rejectStyle = {
 };
 
-function StyledDropzone(props) {
-  const { onDrop, accept } = props;
+function StyledDropzone({ onDrop, accept, acceptMultiple=true }) {
   const {
     getRootProps,
     getInputProps,
@@ -44,7 +43,7 @@ function StyledDropzone(props) {
   return (
     <div className="image-placeholder">
       <div {...getRootProps({style})}>
-        <input {...getInputProps()} />
+        <input {...getInputProps()} multiple={acceptMultiple} />
         <p><Icon name="upload" /> Drop files here, or click to select.</p>
       </div>
     </div>

@@ -4,6 +4,7 @@ import thunk from 'redux-thunk';
 const _initialState = {
   projectId: null,
   projectName: "",
+  projectDocUrl: "",
   apiError: {},
   finishes: [],
   newestFinish: {},
@@ -18,8 +19,8 @@ let unchangedFinishes;
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      const { finishes, projectId, projectName, lockedCategories } = action.data;
-      return { ...state, finishes, projectId, projectName, lockedCategories };
+      const { finishes, projectId, projectName, projectDocUrl, lockedCategories } = action.data;
+      return { ...state, finishes, projectId, projectName, projectDocUrl, lockedCategories };
     
     case "NEW_FINISH":
       return { ...state, finishes: [...state.finishes, action.data], newestFinish: action.data };
@@ -43,6 +44,9 @@ const todos = (state = {}, action) => {
     
     case "UPDATE_PRINT_CATEGORIES":
       return { ...state, categoriesHiddenFromPrint: action.nextHiddenCategories};
+    
+    case "UPDATE_PROJECT_DOCUMENT":
+      return { ...state, projectDocUrl: action.projectDocUrl};
 
     case 'API_ERROR':
       return { ...state, apiError: {
