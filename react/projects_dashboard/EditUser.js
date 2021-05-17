@@ -41,10 +41,9 @@ const EditUser = ({ match }) => {
       id: user.id,
       firstName, lastName, username, email, role,
     }, (data) => {
-      console.log({data})
-      setRedirect(true)
+      setRedirect(true);
     }, (error) => {
-      setMessage(error.message)
+      setMessage(error.message);
     })
   }
 
