@@ -30,6 +30,9 @@ clean_npm_install:
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
+db_seed:
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:seed:all --seeders-path seeders
+
 wipe:
 	$(MAKE) clean
 	rm -rf data/pg
