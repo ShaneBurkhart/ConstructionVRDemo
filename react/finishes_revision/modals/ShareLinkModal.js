@@ -7,7 +7,7 @@ import styles from './ShareLinkModal.module.css';
 const ShareLinkModal = ({ onClose }) => {
   const [message, setMessage] = useState('');
   const [showMessage, setShowMessage] = useState(false);
-  const link = window.location.href;
+  const link = (window.location.href || "").split("#")[0];
 
   const handleHideMessage = () => setTimeout(() => setShowMessage(false), 600);
   
