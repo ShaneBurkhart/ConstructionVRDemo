@@ -18,6 +18,24 @@ const Middleware = {
   //   });
   // },
 
+  addProjectEditorUserToRequest: function addProjectEditorUserToRequest(req, res, next) {
+    const userId = req.session["tmp_user_id"];
+
+    if (userId) {
+      models.User.findOne({
+        where: { id: userId },
+      }).then(user => {
+        if (user) {
+          req.user = user;
+          res.locals.currentUser = user;
+        }
+        next();
+      });
+    } else {
+      next();
+    }
+  },
+
   addUserToRequest: function addUserToRequest(req, res, next) {
     const userId = req.session["user_id"];
 

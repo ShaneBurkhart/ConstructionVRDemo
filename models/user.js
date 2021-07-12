@@ -5,6 +5,7 @@ const { uuid } = require('uuidv4');
 const sendgrid = require("../util/sendgrid.js");
 
 const SITE_URL = process.env.SITE_URL;
+const ANON_EDITOR_EMAIL = "anon_editor@plansource.io"
 
 const SALT_ROUNDS = 10;
 
@@ -76,6 +77,24 @@ module.exports = (sequelize, DataTypes) => {
     if (!password || password.length < 8) return false;
     return true;
   };
+
+  User.getAnonEditor = function () {
+    return new Promise(function (resolve, reject) {
+      User.findOne({ where: { email: ANON_EDITOR_EMAIL } }).then(u => {
+        if (u) return resolve(u)
+        const user = User.build({
+          firstName: "Anonymous",
+          lastName: "Editor",
+          email: ANON_EDITOR_EMAIL,
+          username: "anon_editor",
+          activated: true,
+          role: "editor"
+        })
+        user.updatePassword(uuid());
+        user.save().then(_ => resolve(user));
+      })
+    })
+  }
 
   User.prototype.fullName = function() {
     return this.firstName + " " + this.lastName;

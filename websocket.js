@@ -34,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(sessionMiddleware);
 app.use(m.addUserToRequest);
+app.use(m.addProjectEditorUserToRequest);
 
 io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
