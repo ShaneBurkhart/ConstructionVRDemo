@@ -249,7 +249,7 @@ class FocusEditableInput extends React.Component {
                 name="pencil alternate"
                 style={{ fontSize: 14, minWidth: 14, alignSelf: 'center' }}
               />
-            ) : <div style={{ minWidth: 14, margin: 1 }} />}
+            ) : ""}
           </div>
         </div>
       );

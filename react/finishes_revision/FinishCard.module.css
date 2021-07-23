@@ -16,7 +16,6 @@
 }
 
 .detailsSection {
-  width: 72%;
   flex-grow: 2;
 }
 
@@ -73,7 +72,6 @@
 .imageSection {
   composes: flexEnd from '../universalStyles/flexStyles.module.css';
   align-items: center;
-  width: 25%;
   justify-self: flex-end;
 }
 
@@ -130,19 +128,15 @@
 
 @media all and (max-width: 850px){
   .detailsSection {
-    width: 65%;
   }
   .imageSection {
-    width: 34%;
   }
 }
 
 @media screen and (max-width: 1250px){
   .adminMode .detailsSection {
-    width: 65%;
   }
   .adminMode .imageSection {
-    width: 34%;
   }
 }
 
