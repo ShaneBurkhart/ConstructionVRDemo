@@ -37,7 +37,7 @@ const App = () => {
     <main>
       {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} categoryList={categoryList} />}
       <div className={`${adminMode ? "admin-mode" : ""}`}>
-        <SiteHeader adminMode={adminMode} />
+        <SiteHeader adminMode={adminMode} categoryList={categoryList} />
         <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
       </div>
       <ToastMessage positive={false} message={apiError.message} />
