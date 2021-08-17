@@ -56,7 +56,7 @@ end
 
 
 get '/' do
-  redirect "http://#{request.env["HTTP_HOST"]}/app"
+  redirect "http://#{ENV["SITE_URL"]}/app"
 end
 
 renderer_app_url_uuid = "83f75fdc-975b-4a12-a183-360a20038ac1"
