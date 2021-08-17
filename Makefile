@@ -23,8 +23,8 @@ npm_install:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
 
 clean_npm_install:
-	rm -rf node_modules
-	rm -rf package-lock.json
+	rm -rf packages/web/node_modules
+	rm -rf packages/web/package-lock.json
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
 
 db:
