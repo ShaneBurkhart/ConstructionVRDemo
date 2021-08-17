@@ -1,53 +1,94 @@
-web:
-    image: shaneburkhart/construction-vr-demo-web
-    links:
-        - pg
-        - redis
-    volumes:
-        - ./packages/web:/app
-    env_file:
-        - user.env
-    command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
+version: "3.9"
 
-websocket:
-    image: shaneburkhart/construction-vr-demo-web
-    links:
-        - pg
-        - redis
-    volumes:
-        - ./packages/web:/app
-    env_file:
-        - user.env
-    # command: "rerun --pattern common/* --pattern controllers/* --pattern websocket.js --background node websocket.js"
-    command: "npx nodemon -w websocket.js -w common/* -w controllers/* -w models/* -w util/* -w constants/*"
+services: 
+    web:
+        image: shaneburkhart/construction-vr-demo-web
+        networks: [ pg, redis, nginx ]
+        volumes:
+            - ./packages/web:/app
+        env_file:
+            - user.env
+        command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
 
-react_build:
-    image: shaneburkhart/construction-vr-demo-web
-    volumes:
-        - ./packages/web:/app
-    command: "npm run watch"
+    websocket:
+        image: shaneburkhart/construction-vr-demo-web
+        networks: [ pg, redis, nginx_websocket ]
+        volumes:
+            - ./packages/web:/app
+            - ./packages/lambda-queue:/lambda-queue
+        env_file:
+            - user.env
+        # command: "rerun --pattern common/* --pattern controllers/* --pattern websocket.js --background node websocket.js"
+        command: "npx nodemon -w websocket.js -w common/* -w controllers/* -w models/* -w util/* -w constants/*"
 
-pg:
-    image: postgres:10
-    # ports:
-        # - "5432:5432"
-    environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-        - POSTGRES_DB=mydb
-    volumes:
-        - ./data/pg:/var/lib/postgresql/data
+    react_build:
+        image: shaneburkhart/construction-vr-demo-web
+        volumes:
+            - ./packages/web:/app
+        command: "npm run watch"
 
-redis:
-    image: redis:3.2
-    command: "redis-server --save '' --appendonly no"
+    pg:
+        image: postgres:10
+        networks: [ pg ]
+        # ports:
+            # - "5432:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=mydb
+        volumes:
+            - ./data/pg:/var/lib/postgresql/data
 
-nginx:
-    image: nginx:1.17
-    ports:
-        - "3001:3000"
-    volumes:
-        - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
-    links:
-        - web
-        - websocket
+    redis:
+        image: redis:3.2
+        networks: [ redis ]
+        command: "redis-server --save '' --appendonly no"
+
+    nginx:
+        image: nginx:1.17
+        networks:
+            nginx: { aliases: [ web ] }
+            nginx_websocket: { aliases: [ websocket ] }
+        ports:
+            - "3001:3000"
+        volumes:
+            - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+
+    split_pdf:
+        image: shaneburkhart/construction-vr-demo-lambda
+        volumes: [ ./packages/lambda:/var/task ]
+        networks: [ split_pdf, nginx, lambda_queue_proxy ]
+        env_file: [ user.env ]
+        command: "split_pdf.split"
+
+    pdf_to_image:
+        image: shaneburkhart/construction-vr-demo-lambda
+        networks: [ pdf_to_image, lambda_queue_proxy ]
+        env_file: [ user.env ]
+        volumes: [ ./packages/lambda:/var/task ]
+        command: "pdf_to_image.to_image"
+
+    lambda_queue_processor:
+        image: shaneburkhart/construction-vr-demo-lambda-queue
+        volumes: [ ./packages/lambda-queue:/app ]
+        networks: [ split_pdf, pdf_to_image, redis ]
+        depends_on: [ redis ]
+        env_file: [ user.env ]
+        command: "node -e \"const queue = require('./queue.js'); queue.startProcessors();\""
+
+    lambda_queue_proxy:
+        image: shaneburkhart/construction-vr-demo-lambda-queue
+        volumes: [ ./packages/lambda-queue:/app ]
+        networks: [ redis, lambda_queue_proxy ]
+        depends_on: [ redis ]
+        env_file: [ user.env ]
+        command: "node -e \"const queue = require('./queue.js'); queue.startServer();\""
+
+networks:
+    nginx:
+    nginx_websocket:
+    lambda_queue_proxy:
+    redis:
+    pg:
+    split_pdf:
+    pdf_to_image:

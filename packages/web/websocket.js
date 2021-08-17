@@ -6,6 +6,8 @@ var io = require('socket.io')(http, {
 });
 const m = require("./controllers/middleware.js");
 
+const queue = require("lambda-queue")
+
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
 var models = require("./models/index.js");

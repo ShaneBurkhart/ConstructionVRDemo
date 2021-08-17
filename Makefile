@@ -6,6 +6,8 @@ all: run
 
 build:
 	docker build -t ${IMAGE_TAG}-web -f packages/web/Dockerfile ./packages/web
+	docker build -t ${IMAGE_TAG}-lambda -f packages/lambda/Dockerfile ./packages/lambda
+	docker build -t ${IMAGE_TAG}-lambda-queue -f packages/lambda-queue/Dockerfile ./packages/lambda-queue
 
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
@@ -21,11 +23,15 @@ build_js:
 
 npm_install:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm lambda_queue_processor npm install
 
 clean_npm_install:
 	rm -rf packages/web/node_modules
 	rm -rf packages/web/package-lock.json
+	rm -rf ./packages/lambda-queue/node_modules
+	rm -rf ./packages/lambda-queue/package-lock.json
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm websocket npm install
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm lambda_queue_processor npm install
 
 db:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
