@@ -1,0 +1,76 @@
+.finish-option {
+    overflow: hidden;
+    background-color: #ffffff;
+    padding: 5px 5px;
+    border: 2px solid #e0e0e0;
+    border-radius: 3px;
+    min-height: 70px;
+    margin-bottom: 5px;
+    display: flex;
+}
+
+.finish-option .half {
+    width: 50%;
+}
+
+.finish-option p {
+    margin-bottom: 3px;
+    word-wrap: break-word;
+    line-height: 1.5;
+}
+
+.finish-option .option-details p {
+    font-size: 14px;
+}
+
+.finish-option p.cell-heading {
+    line-height: 1.2;
+    font-weight: bold;
+}
+
+.finish-option p.cell-details {
+    line-height: 1.2;
+}
+
+.finish-option.short {
+    display: flex;
+}
+
+.finish-option.short .half {
+    width: 100%;
+}
+
+.finish-option.short .half.images {
+    text-align: right;
+    min-width: 205px;
+    width: auto;
+}
+
+.finish-option .notes p, .finish-option .notes a {
+    font-size: 14px;
+}
+
+.finish-option img {
+    max-width: 125px;
+    max-height: 125px;
+}
+
+.finish-option.short img {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.finish-option.short .notes {
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.admin-mode .finish-option {
+    cursor: pointer;
+}
+
+.admin-mode .finish-option:hover {
+    background-color: #f8f8f8;
+    border: 2px solid #999999;
+}
+

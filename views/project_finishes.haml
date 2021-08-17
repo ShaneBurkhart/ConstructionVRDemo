@@ -1,9 +1,0 @@
-= haml :_project_header, locals: { page: "finishes", project: project, access_token: access_token }
-
-#finishes-app
-
-:javascript
-  var PROJECT_ACCESS_TOKEN = "#{access_token}";
-  var PROJECT_NAME = "#{project['Name']}";
-
-%script(src="/dist/finishes_app_revision.js?v=04282003")

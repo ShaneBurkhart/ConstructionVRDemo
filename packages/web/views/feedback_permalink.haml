@@ -1,0 +1,34 @@
+.container
+  = @markdown_html
+
+:javascript
+  $(document).ready(function () {
+    // index => is_checked
+    var RECENTLY_CHECKED = {};
+    var _accessToken = "#{access_token}";
+    var _permalinkId = "#{@feedback_permalink.id}";
+
+    var updateChecked = _.debounce(sendUpdates, 300);
+
+    function sendUpdates() {
+      var checkedData = _.clone(RECENTLY_CHECKED);
+      RECENTLY_CHECKED = {};
+
+      $.ajax({
+        type: "POST",
+        url: "/project/" + _accessToken + "/feedbacks/permalinks/" + _permalinkId + "/update",
+        data: { updates: checkedData },
+        complete: function (xhr, status) {
+          if (Object.keys(RECENTLY_CHECKED).length) updateChecked();
+        }
+      });
+    }
+
+    $("input[type=checkbox]").click(function (e) {
+      var $this = $(this);
+      var index = $this.attr("id");
+
+      RECENTLY_CHECKED[index] = $this.is(":checked")
+      updateChecked();
+    });
+  });

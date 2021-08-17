@@ -1,0 +1,7 @@
+.git
+data
+lambda
+node_modules
+scripts/input
+scripts/output
+package-lock.json

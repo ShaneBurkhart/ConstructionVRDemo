@@ -1,0 +1,16 @@
+extends layout.pug
+
+block content
+  script.
+    var IS_SUPER_ADMIN = #{permissions.isSuperAdmin};
+    var IS_EDITOR = #{permissions.isEditor};
+    var PROJECT_ACCESS_TOKEN = "#{access_token}";
+    var PROJECT_EDIT_ACCESS_TOKEN = "#{currentUser ? edit_access_token : ''}";
+    var PROJECT_NAME = "#{projectName}";
+    var HAS_RENDERINGS = "#{hasRenderings}";
+    var RENDERINGS_LINK = "#{hasRenderings ? renderingsLink : ''}";
+
+  #finishes-app
+    h1(style="padding-left: 10px;") #{projectName}
+
+  script(src="/dist/finishes_app_revision.js?v=08012302")

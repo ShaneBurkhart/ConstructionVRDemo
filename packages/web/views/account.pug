@@ -1,0 +1,37 @@
+extends no_site_header_layout.pug
+
+block content
+    .small-container
+        if err
+            .ui.middle.aligned.center.aligned.grid
+                .column
+                    .ui
+                        p.ui.red.header= err
+        a(href='/app/dashboard').left.aligned Go Back
+        .ui.middle.aligned.center.aligned.grid
+            .column
+                form.ui.form.error(action="/app/account" method="post")
+                    .ui.segment
+                        if error
+                            .ui.error.message
+                                p= error
+
+                        .field
+                            label Email
+                            input(type="text" value=currentUser.email disabled)
+
+                        .field
+                            label Username
+                            input(type="text" value=currentUser.username disabled)
+
+                        .field
+                            label New Password
+                            input(type="password" name="new_password" placeholder="********")
+
+                        .field
+                            label Old Password (if updating password)
+                            input(type="password" name="old_password" placeholder="********")
+
+
+                        button.ui.fluid.large.teal.submit.button(type="submit") Update
+

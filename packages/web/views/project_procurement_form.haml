@@ -1,0 +1,193 @@
+%script(src="/script.js")
+
+.container
+  %h1= @procurement_form["Name"]
+  %p.italic= @procurement_form["Project Name"].first
+
+  %hr
+
+  %p.bold Jump To
+
+  %ul
+    %li
+      %a{ href: "#plans" } Plans &amp; Elevations
+    %li
+      %a{ href: "#ceiling-height" } Ceiling Height
+    %li
+      %a{ href: "#wall-color" } Wall Color
+    %li
+      %a{ href: "#trim" } Trim &amp; Moulding
+    %li
+      %a{ href: "#flooring" } Flooring
+    %li
+      %a{ href: "#doors" } Doors
+    %li
+      %a{ href: "#windows" } Window
+    %li
+      %a{ href: "#window-covering" } Window Covering
+    %li
+      %a{ href: "#lighting" } Lighting
+    %li
+      %a{ href: "#closets" } Closets
+    %li
+      %a{ href: "#bathroom-cabinets" } Bathroom Cabinets
+    %li
+      %a{ href: "#bathroom-counters" } Bathroom Counters
+    %li
+      %a{ href: "#bathroom-sinks" } Bathroom Sinks
+    %li
+      %a{ href: "#kitchen-cabinets" } Kitchen Cabinets
+    %li
+      %a{ href: "#kitchen-counters" } Kitchen Counters
+    %li
+      %a{ href: "#kitchen-sinks" } Kitchen Sinks
+    %li
+      %a{ href: "#appliances" } Appliances
+    %li
+      %a{ href: "#decorations" } Decorations
+
+  %hr
+
+  %h4.bold#plans Plans &amp; Elevations
+
+  - if @procurement_form["Plans"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Plans"] || "")
+
+  %hr
+
+  %h4.bold#ceiling-height What is the ceiling height?
+  - if @procurement_form["Ceiling Height"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Ceiling Height"] || "")
+
+  %hr
+
+  %h4.bold#wall-color What color should the walls be?
+  - if @procurement_form["Wall Color"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Wall Color"] || "")
+
+  %hr
+
+  %h4.bold#trim Trim &amp; Moulding styles, colors and locations.
+  - if @procurement_form["Trim"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Trim"] || "")
+
+  %hr
+
+  %h4.bold#flooring Flooring styles, colors and locations.
+  - if @procurement_form["Flooring"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Flooring"] || "")
+
+  %hr
+
+  %h4.bold#doors Door style and colors.
+  - if @procurement_form["Doors"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Doors"] || "")
+
+  %hr
+
+  %h4.bold#windows Window style, pane type, trim, sill &amp; colors.
+  - if @procurement_form["Windows"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Windows"] || "")
+
+  %hr
+
+  %h4.bold#window-covering Blinds/curtains style &amp; color.
+  - if @procurement_form["Window Covering"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Window Covering"] || "")
+
+  %hr
+
+  %h4.bold#lighting Light fixture style, color, &amp; lighting plan?
+  - if @procurement_form["Lighting"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Lighting"] || "")
+
+  %hr
+
+  %h4.bold#closets Closet shelving type, locations, &amp; color.
+  - if @procurement_form["Closets"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Closets"] || "")
+
+  %hr
+
+  %h4.bold#bathroom-cabinets Bathroom cabinet color.
+  - if @procurement_form["Bathroom Cabinets"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Bathroom Cabinets"] || "")
+
+  %hr
+
+  %h4.bold#bathroom-counters Bathroom countertop style.
+  - if @procurement_form["Bathroom Counters"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Bathroom Counters"] || "")
+
+  %hr
+
+  %h4.bold#bathroom-sinks Bathroom sink style.
+  - if @procurement_form["Bathroom Sink"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Bathroom Sink"] || "")
+
+  %hr
+
+  %h4.bold#kitchen-cabinets  Kitchen cabinet color.
+  - if @procurement_form["Kitchen Cabinets"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Kitchen Cabinets"] || "")
+
+  %hr
+
+  %h4.bold#kitchen-counters Kitchen countertop style &amp; color.
+  - if @procurement_form["Kitchen Counters"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Kitchen Counters"] || "")
+
+  %hr
+
+  %h4.bold#kitchen-sinks Kitchen sink style.
+  - if @procurement_form["Kitchen Sink"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Kitchen Sink"] || "")
+
+  %hr
+
+  %h4.bold#appliances Appliance style.
+  - if @procurement_form["Appliances"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Appliances"] || "")
+
+  %hr
+
+  %h4.bold#decorations General decoration style.
+  - if @procurement_form["Decorations"].nil?
+    %p Nothing was added to this section.
+  - else
+    = markdown.render(@procurement_form["Decorations"] || "")
+

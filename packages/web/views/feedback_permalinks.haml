@@ -1,0 +1,7 @@
+.container
+  %p
+    %a{ href: "/project/#{access_token}/feedbacks/permalinks/new" } Create Permalink
+
+  - @feedback_permalinks.each do |fp|
+    %p
+      %a{ href: "/project/#{access_token}/feedbacks/permalinks/#{fp.id}" }= fp["Created At"].strftime('%b %e, %Y')

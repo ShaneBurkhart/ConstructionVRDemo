@@ -1,7 +1,0 @@
-.ui.dimmer.modals.scrolling {
-    overflow: auto;
-}
-
-.ui.dimmer.modals.scrolling .modal.scrolling {
-    top: 0;
-}

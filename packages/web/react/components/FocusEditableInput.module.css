@@ -1,0 +1,11 @@
+.displayField {
+  margin-right: 5px;
+  flex-grow: 2;
+}
+.oneline {
+  margin-right: 10px;
+  flex-grow: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

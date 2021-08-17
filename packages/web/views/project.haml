@@ -1,0 +1,30 @@
+= haml :_project_header, locals: { page: "renderings", project: project, access_token: access_token }
+
+- if is_admin_mode
+  .admin-section
+    .xlarge-container
+      %a{ href: "/project/#{access_token}/feedbacks" } All Feedbacks
+
+.xlarge-container
+  #unit-previews
+    - units.each do |unit|
+      - next if !is_admin_mode && unit["Hidden?"]
+      .unit-preview{ data: { href: "/project/#{access_token}/unit/#{unit["Record ID"]}" } }
+        .image-wrapper
+          %img{ src: unit["Floor Plan Image URL"] }
+        .name
+          = unit["Name"]
+          - if unit["Hidden?"]
+            = "(Hidden)"
+
+:javascript
+  $(document).ready(function () {
+    var $unitPreviews = $(".unit-preview");
+
+    $unitPreviews.click(function (e) {
+      e.preventDefault();
+      var $this = $(this);
+      var unitHref = $this.data("href");
+      window.location.href = unitHref;
+    });
+  });

@@ -5,7 +5,7 @@ IMAGE_TAG=shaneburkhart/${NAME}
 all: run
 
 build:
-	docker build -t ${IMAGE_TAG} -f Dockerfile .
+	docker build -t ${IMAGE_TAG}-web -f packages/web/Dockerfile ./packages/web
 
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d

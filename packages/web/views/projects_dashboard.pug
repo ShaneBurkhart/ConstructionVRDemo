@@ -1,0 +1,14 @@
+extends ./layout.pug
+
+block title
+    | Dashboard -&nbsp;
+
+block content
+    script.
+      var USER_ID = "#{currentUser.id}";
+      var USERNAME = "#{currentUser.username}";
+      var IS_SUPER_ADMIN = #{currentUser.isSuperAdmin()};
+      var IS_EDITOR = #{currentUser.isEditor()};
+
+    #projects-dashboard-app
+    script(src="/dist/projects_dashboard_app.js?v=04282004")

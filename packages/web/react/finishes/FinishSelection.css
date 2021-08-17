@@ -1,0 +1,21 @@
+.admin-mode .selection {
+    cursor: pointer;
+}
+
+.admin-mode .selection:hover {
+    background-color: #f0f0f0;
+}
+
+.selection .options-cell {
+    padding: 5px 5px 0 0;
+    border: none;
+}
+
+.selection .cell-details .label:hover {
+    background-color: #ffffff;
+    cursor: pointer !important;
+}
+
+.selection .cell-details .label .dropdown:hover {
+    cursor: pointer !important;
+}

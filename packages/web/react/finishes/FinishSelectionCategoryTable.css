@@ -1,0 +1,33 @@
+.selections-category {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.selections-category .table {
+    background-color: #ffffff;
+}
+
+.selections-category .table .table-row {
+    border: 1px solid #bbb;
+}
+
+.selections-category header {
+    padding: 5px 15px;
+    border: 1px solid #bbb;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.selections-category h2 span.expand-collapse {
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.selections-category h2 {
+    cursor: pointer;
+}
+
+@media print {
+}

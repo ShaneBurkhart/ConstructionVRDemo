@@ -1,59 +1,42 @@
 web:
-    image: shaneburkhart/construction-vr-demo
+    image: shaneburkhart/construction-vr-demo-web
     links:
         - pg
         - redis
     volumes:
-        - .:/app
+        - ./packages/web:/app
     env_file:
         - user.env
     command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
 
 websocket:
-    image: shaneburkhart/construction-vr-demo
+    image: shaneburkhart/construction-vr-demo-web
     links:
         - pg
         - redis
     volumes:
-        - .:/app
+        - ./packages/web:/app
     env_file:
         - user.env
     # command: "rerun --pattern common/* --pattern controllers/* --pattern websocket.js --background node websocket.js"
     command: "npx nodemon -w websocket.js -w common/* -w controllers/* -w models/* -w util/* -w constants/*"
 
 react_build:
-    image: shaneburkhart/construction-vr-demo
+    image: shaneburkhart/construction-vr-demo-web
     volumes:
-        - .:/app
+        - ./packages/web:/app
     command: "npm run watch"
 
 pg:
     image: postgres:10
-    ports:
-        - "5432:5432"
+    # ports:
+        # - "5432:5432"
     environment:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=mydb
     volumes:
         - ./data/pg:/var/lib/postgresql/data
-        - .:/app
-
-testing_worker:
-    image: shaneburkhart/construction-vr-demo
-    volumes:
-        - .:/app
-    env_file:
-        - user.env
-    command: "ruby workers/skp_model_tester.rb"
-
-notification_worker:
-    image: shaneburkhart/construction-vr-demo
-    volumes:
-        - .:/app
-    env_file:
-        - user.env
-    command: "ruby workers/skp_rendering_notification.rb"
 
 redis:
     image: redis:3.2
@@ -62,7 +45,7 @@ redis:
 nginx:
     image: nginx:1.17
     ports:
-        - "3000:3000"
+        - "3001:3000"
     volumes:
         - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
     links:

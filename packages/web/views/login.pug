@@ -1,0 +1,26 @@
+extends no_site_header_layout.pug
+
+block content
+    .small-container
+        if err
+            .ui.middle.aligned.center.aligned.grid
+                .column
+                    .ui
+                        p.ui.red.header= err
+        .ui.middle.aligned.center.aligned.grid
+            .column
+                form.ui.large.form(action="/app/login" method="post")
+                    .ui.segment
+                        .ui.column.centered.grid
+                            p.large.ui.grey.header Login
+                        .field
+                            .ui.left.icon.input
+                                i.user.icon
+                                input(type="text" name="email" placeholder="Username or email address")
+                        .field
+                            .ui.left.icon.input
+                                i.lock.icon
+                                input(type="password" name="password" placeholder="Password")
+                        button.ui.fluid.large.teal.submit.button Login
+                .column
+                    a(href="/app/reset-password") Forgot your password?
