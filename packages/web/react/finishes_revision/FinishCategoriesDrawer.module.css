@@ -1,12 +1,3 @@
-.modalLink {
-  margin-top: 4%;
-  padding: 0 1%;
-}
-
-.modalLink:hover {
-  cursor: pointer;
-}
-
 .categoriesDrawer {
   position: fixed;
   top: 0;

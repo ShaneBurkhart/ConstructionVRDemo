@@ -1,0 +1,8 @@
+.documentLinkContainer {
+  margin-left: 5%;
+  display: flex;
+  min-width: 18rem;
+}
+
+@media print {
+}

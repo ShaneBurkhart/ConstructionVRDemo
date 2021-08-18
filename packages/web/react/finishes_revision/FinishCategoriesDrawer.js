@@ -2,23 +2,13 @@ import React, { useState } from 'react';
 import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
-import ShareLinkModal from './modals/ShareLinkModal';
-import PrintOptionsModal from './modals/PrintOptionsModal';
 
 import styles from './FinishCategoriesDrawer.module.css';
 
 const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
-  const [showShareLinkModal, setShowShareLinkModal] = useState(false);
-  const [showPrintOptionsModal, setShowPrintOptionsModal] = useState(false);
-  const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
-  const toggleShowShareLinkModal = () => setShowShareLinkModal(!showShareLinkModal);
-  const toggleShowPrintOptionsModal = () => setShowPrintOptionsModal(!showPrintOptionsModal);
 
-  const onSubmitPrintOptions = () => {
-    setShowPrintOptionsModal(false);
-    setTimeout(() => window.print(), 0);
-  }
+  const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
   
   return (
     <>
@@ -38,12 +28,6 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
             Add a New Finish
             <Icon name='plus' />
           </Button>
-          <div className={styles.modalLink}>
-            <a onClick={toggleShowShareLinkModal}>Get Share Link</a>
-          </div>
-          <div className={styles.modalLink}>
-            <a onClick={toggleShowPrintOptionsModal}>Print Options</a>
-          </div>
         </Segment>
         <Segment vertical className={styles.categoriesSection}>
           <Menu text vertical>
@@ -62,12 +46,6 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
       </div>
       {showAddNewOptionModal && (
         <AddEditFinishModal onClose={toggleShowAddNewOptionModal} />
-      )}
-      {showShareLinkModal && (
-        <ShareLinkModal onClose={toggleShowShareLinkModal} />
-      )}
-      {showPrintOptionsModal && (
-        <PrintOptionsModal onClose={toggleShowPrintOptionsModal} categoryList={categoryList} onSubmit={onSubmitPrintOptions} />
       )}
     </>
   );

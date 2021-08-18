@@ -1,17 +1,8 @@
-.documentLinkContainer {
-  margin-left: 5%;
-  display: flex;
-  min-width: 18rem;
-  align-items: baseline;
+.headerContent {
+  display: flex; 
+  align-items: center;
+  justify-content: space-between;
 }
-
-.editCurrentIcon {
-  margin-left: 5%;
-  cursor: pointer;
-  color: #6d6d6d;
-}
-
-.editCurrentIcon:hover {
-  color: #4183c4;
-  text-decoration: none;
+.headerContent h1 {
+  display: inline-block;
 }
