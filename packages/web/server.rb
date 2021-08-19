@@ -18,8 +18,8 @@ require './models/models.rb'
 require './models/db_models.rb'
 
 Aws.config.update({
-  region: ENV["REGION"],
-  credentials: Aws::Credentials.new(ENV["ACCESS_KEY_ID"], ENV["SECRET_ACCESS_KEY"])
+  region: ENV["AWS_REGION"],
+  credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
 })
 
 MARKDOWN = Redcarpet::Markdown.new(Redcarpet::Render::HTML, autolink: true)

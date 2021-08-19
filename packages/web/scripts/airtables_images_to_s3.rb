@@ -5,14 +5,14 @@ require 'aws-sdk-s3'
 require "./models/models.rb"
 
 S3_URL = "https://s3-us-west-2.amazonaws.com"
-REGION = ENV["REGION"]
+AWS_REGION = ENV["AWS_REGION"]
 BUCKET = ENV["BUCKET"]
 
 Aws.config.update({
-  region: REGION,
-  credentials: Aws::Credentials.new(ENV["ACCESS_KEY_ID"], ENV["SECRET_ACCESS_KEY"])
+  region: AWS_REGION,
+  credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
 })
-s3 = Aws::S3::Resource.new(region: REGION)
+s3 = Aws::S3::Resource.new(region: AWS_REGION)
 
 FLOOR_PLAN_IMAGES_KEY_PREFIX = "floor-plans"
 PANO_IMAGES_KEY_PREFIX = "panos"
