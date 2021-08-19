@@ -350,7 +350,7 @@ const finishCategoriesArr = [
     tag: "xEV",
     attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details","Images","Document",], 
   },
-  { name: "Metal Balconies",
+  { name: "xMetal Balconies",
     tag: "xMB",
     attr: ["Manufacturer","Product Number","Color","Style","Dimensions","Details",], 
   },
