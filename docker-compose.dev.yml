@@ -6,6 +6,7 @@ services:
         networks: [ pg, redis, nginx ]
         volumes:
             - ./packages/web:/app
+            - ./packages/tailwind:/tailwind
         env_file:
             - user.env
         command: "rerun --ignore react/* --ignore public/* --background ruby server.rb"
@@ -25,7 +26,14 @@ services:
         image: shaneburkhart/construction-vr-demo-web
         volumes:
             - ./packages/web:/app
+            - ./packages/tailwind:/tailwind
         command: "npm run watch"
+
+    tailwind:
+        image: shaneburkhart/construction-vr-demo-tailwind
+        volumes: [ ./packages/tailwind:/app, ./packages/web/react:/react ]
+        env_file: [ user.env ]
+        command: "npm start"
 
     pg:
         image: postgres:10
@@ -50,7 +58,7 @@ services:
             nginx: { aliases: [ web ] }
             nginx_websocket: { aliases: [ websocket ] }
         ports:
-            - "3001:3000"
+            - "3000:3000"
         volumes:
             - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
 

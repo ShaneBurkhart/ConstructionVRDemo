@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* theme() function used for calc() computations: https://tailwindcss.com/docs/functions-and-directives#theme */
+.content-area-with-sidemenu {
+  width: calc(100vw - theme('width.40'));
+}
+
+.content-area-with-sidedrawer {
+  width: calc(100% - theme('width.96'));
+  min-width: 500px;
+}
+@media screen and (max-width: 650px) {
+  .content-area-with-sidedrawer {
+    width: calc(100% - theme('width.96'));
+    min-width: 200px;
+  }
+}
+
+.side-drawer__wrapper {
+  top: 7.75rem;
+  height: calc(100vh - theme('height.24'));
+  @apply fixed right-0 z-10 p-5 overflow-y-scroll border-l border-gray-200 shadow-sm max-w-1/2-screen sm:w-96 bg-gray-50
+}
+
+.sidedrawer-body-height {
+  height: calc(100vh - theme('height.24') - theme('height.32'));
+}
+
+#datepicker_block .react-datepicker-wrapper {
+  @apply block
+}
+

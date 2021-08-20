@@ -10,3 +10,4 @@ package-lock.json
 public/dist
 .vscode/
 __pycache__
+packages/tailwind/dist
