@@ -58,7 +58,7 @@ const FilesPanel = (props) => {
                     <a target="_blank" href={url}>Open Document</a>
                 </td>
                 <td>
-                    <span>{createdAt}</span>
+                    <span>{new Date(createdAt).toLocaleDateString()} {new Date(createdAt).toLocaleTimeString()}</span>
                 </td>
               </tr>
             ))}

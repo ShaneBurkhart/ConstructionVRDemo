@@ -1,7 +1,8 @@
 .documentLinkContainer {
-  margin-left: 5%;
+  /* margin-left: 5%;
   display: flex;
-  min-width: 18rem;
+  min-width: 18rem; */
+  text-align: right;
 }
 
 @media print {
