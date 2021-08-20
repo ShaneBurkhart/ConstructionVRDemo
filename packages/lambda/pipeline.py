@@ -1,5 +1,7 @@
+import os
 import requests
 from threading import Thread
+import boto3
 
 JOB_QUEUE_SERVER_URL = "http://lambda_queue_proxy:3000"
 
@@ -11,10 +13,28 @@ headers = {
     'Content-Type': 'application/json',
 }
 
+queueToFunctionName = {
+    "pdf_to_image": os.environ["AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME"]
+}
+
 def start_job(queueName, data):
-    json = { 'name': queueName, 'data': data }
-    res = requests.post(JOB_QUEUE_SERVER_URL, json=json, headers=headers)
-    print(res.text)
+    if os.environ["NODE_ENV"] == 'production':
+        lam = boto3.resource('lambda')
+        lambda_client = boto3.client('lam')
+
+        functionName = queueToFunctionName[queueName]
+        payloadStr = json.dumps(data)
+        payloadBytesArr = bytes(payloadStr, encoding='utf8')
+
+        response = lambda_client.invoke(
+            FunctionName=functionName,
+            InvocationType="RequestResponse",
+            Payload=payloadBytesArr
+        )
+    else:
+        json = { 'name': queueName, 'data': data }
+        res = requests.post(JOB_QUEUE_SERVER_URL, json=json, headers=headers)
+        print(res.text)
 
 def start_pdf_to_image_job(s3Key, plansetId, pageIndex):
     # Send a request to the lambda process running our job
@@ -25,47 +45,5 @@ def start_pdf_to_image_job(s3Key, plansetId, pageIndex):
 
     # If production, use a thread
     # Thread(target=requests.post, args=(DEV_URL,), kwargs={ 'json': json, 'headers': headers }).start()
-
-    return True
-
-def start_image_crops(s3Key, plansetId, pageIndex, sheetWidth, sheetHeight):
-    # Send a request to the lambda process running our job
-    # In dev, that is a local docker container
-    # In prod, it is a lambda instance
-    num_json = {
-        's3Key': s3Key,
-        'plansetId': plansetId,
-        'pageIndex': pageIndex,
-        'cropType': 'num',
-        'sheetWidth': sheetWidth,
-        'sheetHeight': sheetHeight
-    }
-    start_job("crop_image", num_json)
-    
-    name_json = {
-        's3Key': s3Key,
-        'plansetId': plansetId,
-        'pageIndex': pageIndex,
-        'cropType': 'name',
-        'sheetWidth': sheetWidth,
-        'sheetHeight': sheetHeight
-    }
-    start_job("crop_image", name_json)
-
-    return True
-
-def start_image_text_recognition(s3Key, plansetId, pageIndex, cropType, sheetWidth, sheetHeight):
-    # Send a request to the lambda process running our job
-    # In dev, that is a local docker container
-    # In prod, it is a lambda instance
-    json = {
-        's3Key': s3Key, 
-        'plansetId': plansetId,
-        'pageIndex': pageIndex,
-        'cropType': cropType,
-        'sheetWidth': sheetWidth,
-        'sheetHeight': sheetHeight
-    }
-    start_job("image_text_recognition", json)
 
     return True

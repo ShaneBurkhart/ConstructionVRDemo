@@ -1,6 +1,10 @@
 .PHONY: db
+include user.env
+-include prod.env
+
 NAME=construction-vr-demo
 IMAGE_TAG=shaneburkhart/${NAME}
+LAMBDA_IMAGE_TAG=${IMAGE_TAG}-lambda
 
 all: run
 
@@ -104,3 +108,46 @@ prod:
 deploy_prod:
 	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
 
+AWS_CLI=docker run -t --rm --env-file prod.env amazon/aws-cli
+
+deploy_lambda:
+	# docker build -t ${IMAGE_TAG}-aws -f packages/aws/Dockerfile ./packages/aws
+	docker build -t ${LAMBDA_IMAGE_TAG} -f packages/lambda/Dockerfile ./packages/lambda
+	# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock ${IMAGE_TAG}-aws /app/deploy_lambda.sh
+
+	$(AWS_CLI) ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_ADDRESS}
+	$(AWS_CLI) ecr describe-repositories --repository-names ${AWS_ECR_REPO_NAME} || \
+		$(AWS_CLI) ecr create-repository --repository-name ${AWS_ECR_REPO_NAME} --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
+
+	docker tag ${LAMBDA_IMAGE_TAG}:latest ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest
+	docker push ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest
+
+	$(AWS_CLI) lambda get-function --function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} || \
+		$(AWS_CLI) lambda create-function \
+				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
+				--role ${AWS_LAMBDA_EXECUTION_ROLE} \
+				--code ImageUri=${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest \
+				--package-type Image \
+				--image-config Command=split_pdf.split
+
+	$(AWS_CLI) lambda update-function-configuration \
+				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
+				--image-config Command=split_pdf.split
+	$(AWS_CLI) lambda update-function-code \
+				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
+				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
+
+	$(AWS_CLI) lambda get-function --function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} || \
+		$(AWS_CLI) lambda create-function \
+				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
+				--role ${AWS_LAMBDA_EXECUTION_ROLE} \
+				--code ImageUri=${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest \
+				--package-type Image \
+				--image-config Command=pdf_to_image.to_image
+
+	$(AWS_CLI) lambda update-function-configuration \
+				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
+				--image-config Command=split_pdf.split
+	$(AWS_CLI) lambda update-function-code \
+				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
+				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 

@@ -50,7 +50,7 @@ services:
             nginx: { aliases: [ web ] }
             nginx_websocket: { aliases: [ websocket ] }
         ports:
-            - "3001:3000"
+            - "3000:3000"
         volumes:
             - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
 

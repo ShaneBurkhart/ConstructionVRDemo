@@ -6,7 +6,7 @@ from PIL import Image
 import boto3
 from botocore.exceptions import ClientError
 
-import pipeline
+bucket = os.environ["AWS_BUCKET"]
 
 def to_image(event, context):
     key = event['s3Key']
@@ -15,7 +15,7 @@ def to_image(event, context):
     s3 = boto3.resource('s3')
     s3_client = boto3.client('s3')
 
-    obj = s3.Object("gmi-plan-viewer-staging", key)
+    obj = s3.Object(bucket, key)
     memoryFile = obj.get()['Body'].read()
     images = convert_from_bytes(memoryFile)
 
@@ -29,10 +29,8 @@ def to_image(event, context):
 
     try:
         dest_key = key.replace('.pdf', '.png')
-        response = s3_client.upload_fileobj(buf, "gmi-plan-viewer-staging", dest_key, ExtraArgs={'ContentType': 'image/png', 'ACL':'public-read'})
+        response = s3_client.upload_fileobj(buf, bucket, dest_key, ExtraArgs={'ContentType': 'image/png', 'ACL':'public-read'})
     except ClientError as e:
         raise e
-
-    pipeline.start_image_crops(dest_key, planset_id, page_index, sheet_width, sheet_height)
 
     return True
