@@ -5,12 +5,11 @@ import { Icon, Button } from 'semantic-ui-react';
 
 import ActionCreators from './action_creators';
 
-import PrintOptionsLink from './PrintOptionsLink';
 import FocusEditableInput from '../components/FocusEditableInput';
 
 import styles from './SiteHeader.module.css';
 
-const SiteHeader = ({ adminMode, categoryList, toggleShareLinkModal, togglePrintOptionsModal }) => {
+const SiteHeader = ({ adminMode, toggleShareLinkModal, togglePrintOptionsModal }) => {
   const renderingsLink = window.hasOwnProperty("RENDERINGS_LINK") ? RENDERINGS_LINK : "";
   
   const projectId = useSelector(state => state.projectId);
@@ -37,18 +36,18 @@ const SiteHeader = ({ adminMode, categoryList, toggleShareLinkModal, togglePrint
             onClick={togglePrintOptionsModal}
             title="Open print options"
           />
-          <Button 
-            size="tiny" 
-            color="blue" 
-            onClick={toggleShareLinkModal} 
-            title="edit documents" 
-          >
-            Share
-          </Button>
+         {adminMode && (
+            <Button 
+              size="tiny" 
+              color="blue" 
+              onClick={toggleShareLinkModal} 
+              title="edit documents" 
+            >
+              Share
+            </Button>
+          )}
         </div>
       </div>
-
-      {!adminMode && <PrintOptionsLink categoryList={categoryList} />}
 
       <div className="ui tabular menu hide-print">
         <NavLink exact to={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes`} className="item" activeClassName="active">
