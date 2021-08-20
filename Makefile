@@ -108,12 +108,11 @@ prod:
 deploy_prod:
 	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
 
+
 AWS_CLI=docker run -t --rm --env-file prod.env amazon/aws-cli
 
 deploy_lambda:
-	# docker build -t ${IMAGE_TAG}-aws -f packages/aws/Dockerfile ./packages/aws
 	docker build -t ${LAMBDA_IMAGE_TAG} -f packages/lambda/Dockerfile ./packages/lambda
-	# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock ${IMAGE_TAG}-aws /app/deploy_lambda.sh
 
 	$(AWS_CLI) ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_ADDRESS}
 	$(AWS_CLI) ecr describe-repositories --repository-names ${AWS_ECR_REPO_NAME} || \
@@ -132,7 +131,10 @@ deploy_lambda:
 
 	$(AWS_CLI) lambda update-function-configuration \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
-				--image-config Command=split_pdf.split
+				--image-config Command=split_pdf.split \
+				--memory-size 512 \
+				--timeout 60 \
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=GMIsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=GMIpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=GMIcropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=GMIimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
@@ -147,7 +149,10 @@ deploy_lambda:
 
 	$(AWS_CLI) lambda update-function-configuration \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
-				--image-config Command=split_pdf.split
+				--image-config Command=pdf_to_image.to_image \
+				--memory-size 512 \
+				--timeout 60 \
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=GMIsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=GMIpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=GMIcropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=GMIimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
