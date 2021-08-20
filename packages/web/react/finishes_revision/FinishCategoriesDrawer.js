@@ -4,11 +4,10 @@ import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
 import AddEditFinishModal from './modals/AddEditFinishModal';
 
 import styles from './FinishCategoriesDrawer.module.css';
-//TODO: make hide/show btn clickable width full width
 
 const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
   
   const toggleDrawer = () => setOpen(!open);
@@ -62,11 +61,10 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
           </Menu>
         </Segment>
         {canClose && (
-          <span className={toggleBtnStyles.join(' ')}>
+          <span onClick={toggleDrawer} className={toggleBtnStyles.join(' ')}>
             <Button
               icon={<Icon name={`angle double ${open ? 'left' : 'right'}`} />}
               color="purple"
-              onClick={toggleDrawer}
             />
           </span>
         )}
