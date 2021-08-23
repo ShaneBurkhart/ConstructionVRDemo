@@ -17,6 +17,7 @@ services:
         volumes:
             - ./packages/web:/app
             - ./packages/lambda-queue:/lambda-queue
+            - ./packages/tailwind:/tailwind
         env_file:
             - user.env
         # command: "rerun --pattern common/* --pattern controllers/* --pattern websocket.js --background node websocket.js"
