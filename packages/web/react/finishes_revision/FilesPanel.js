@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import _ from 'underscore';
 import { useSelector } from 'react-redux';
 import { Button, Icon, Table, Grid, Header } from 'semantic-ui-react';
+import ActionCreators from './action_creators';
+
 
 import NewPlanModal from './modals/NewPlanModal';
 import EditPlanModal from './modals/EditPlanModal';
@@ -21,9 +23,9 @@ const FilesPanel = (props) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPlanHistory, setShowPlanHistory] = useState(false);
   const [showEditPlan, setShowEditPlan] = useState(false);
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
   const toggleNewPlanModal = () => setShowNewPlanModal(!showNewPlanModal);
-
   const showPlanHistoryModal = !!selectedPlan && showPlanHistory;
   const showEditPlanModal = !!selectedPlan && showEditPlan;
 
@@ -45,6 +47,15 @@ const FilesPanel = (props) => {
   const closeEditPlan = () => {
     setSelectedPlan(null);
     setShowEditPlan(false);
+  }
+
+  const toggleArchivePlan = planId => {
+    if (loading) return;
+    setLoading(true);
+    const onSuccess = () => setLoading(false);
+    const onError = () => setLoading(false);
+    
+    ActionCreators.toggleArchivePlan(planId, onSuccess, onError);
   }
   
   return (
@@ -94,7 +105,7 @@ const FilesPanel = (props) => {
                 </td>
                 <td>
                     <span style={{ marginLeft: 5 }}><a onClick={() => setEditPlan(p)}>Edit</a></span>
-                    <span style={{ marginLeft: 5 }}><a onClick={() => console.log('wip')}>Archive</a></span>
+                    <span style={{ marginLeft: 5 }}><a onClick={() => toggleArchivePlan(p.id)}>Archive</a></span>
                     {!!(p.PlanHistories || []).length && <span style={{ marginLeft: 5 }}><a onClick={() => setSelectedPlanHistory(p)}>Details</a></span>}
                 </td>
               </tr>
@@ -110,7 +121,6 @@ const FilesPanel = (props) => {
         <Table className="celled">
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell width={1}>#</Table.HeaderCell>
               <Table.HeaderCell width={4}>Name</Table.HeaderCell>
               <Table.HeaderCell width={4}>Updated At</Table.HeaderCell>
               <Table.HeaderCell>Download File</Table.HeaderCell>
@@ -120,9 +130,6 @@ const FilesPanel = (props) => {
           <Table.Body>
             {(archivedPlans || []).map((p, i) => (
               <tr className="project-row" key={p.id}>
-                <td>
-                    <span>{p.order + 1}</span>
-                </td>
                 <td className={styles.truncateCell}>
                     <span>{p.name || p.filename}</span>
                 </td>
@@ -133,7 +140,8 @@ const FilesPanel = (props) => {
                     <a target="_blank" href={p.url}>{p.filename || 'link'}</a>
                 </td>
                 <td>
-                    {!!(p.PlanHistories || []).length && <a onClick={togglePlanHistoryModal}>History</a>}
+                    <span style={{ marginLeft: 5 }}><a onClick={() => toggleArchivePlan(p.id)}>Re-activate</a></span>
+                    {!!(p.PlanHistories || []).length && <span style={{ marginLeft: 5 }}><a onClick={() => setSelectedPlanHistory(p)}>Details</a></span>}
                 </td>
               </tr>
             ))}
