@@ -52,6 +52,9 @@ const todos = (state = {}, action) => {
     case "NEW_PLAN":
       return { ...state, plans: [...state.plans, action.data] };
 
+    case "UPDATE_PLANS":
+      return { ...state, plans: action.data };
+
     case 'API_ERROR':
       return { ...state, apiError: {
         status: action.data ? action.data.status : 404,

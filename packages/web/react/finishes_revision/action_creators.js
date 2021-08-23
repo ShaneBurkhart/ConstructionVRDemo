@@ -167,21 +167,21 @@ const ActionCreator = {
     })
   },
 
-  // updatePlan: (planId, documentUrl, onSuccess, onError) => {
-  //   $.ajax({
-  //     type: "PUT",
-  //     url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}`,
-  //     data: { documentUrl },
-  //     success: ({ projectDocUrl }) => {
-  //       onSuccess();
-  //       _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
-  //     },
-  //     error: (error) => {
-  //       onError();
-  //       _dispatch({ type: "API_ERROR", data: error });
-  //     }
-  //   })
-  // },
+  updatePlan: (planId, planData, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}`,
+      data: planData,
+      success: (plans) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PLANS", data: plans })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
 
   // reorderPlan: (planId, newOrderNum, onSuccess, onError) => {
   //   $.ajax({

@@ -49,11 +49,11 @@ module.exports = (app) => {
     try {
       const project = await models.Project.findOne({
         where: { accessToken },
-        include: [{ model: models.Plan, include: [{ model: models.PlanHistory }] }],
+        include: [{ model: models.Plan }],
       });
-      if (!project) return res.status(404).send("Project not found");
+      if (!project) return res.status(404).send("Project resource not found");
 
-      const plan = (project.Plans || []).find(p => p.id === planId);
+      const plan = (project.Plans || []).find(p => p.id == planId);
       if (!plan) return res.status(404).send("Could not find file resource");
       
       if (!!name) {
@@ -65,7 +65,7 @@ module.exports = (app) => {
         if (!didUpdate) throw new Error("update method failed");
       }
 
-      const refreshedPlans = await project.getPlans();
+      const refreshedPlans = await project.getPlans({ include: [{ model: models.PlanHistory }]});
 
       return res.json(refreshedPlans);
     } catch(error){
