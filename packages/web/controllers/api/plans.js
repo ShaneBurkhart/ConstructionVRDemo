@@ -19,7 +19,7 @@ module.exports = (app) => {
     try {
       const project = await models.Project.findOne({
         where: { accessToken },
-        include: [{ model: models.Plan.scope("active") }],
+        include: [{ model: models.Plan.scope("active"), required: false }],
       });
 
       if (!project) return res.status(404).send("Project not found");
