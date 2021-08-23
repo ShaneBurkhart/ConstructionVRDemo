@@ -68,10 +68,13 @@ module.exports = (app) => {
   });
 
   app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
-    const projectAccessToken = req.params["project_access_token"];
+    const accessToken = req.params["project_access_token"];
     
     try {
-      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      const project = await models.Project.findOne({
+        where: { accessToken },
+        include: [{ model: models.Plan, include: [{ model: models.PlanHistory }] }],
+      });
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
@@ -80,10 +83,11 @@ module.exports = (app) => {
       const projectId = project.id;
       const projectName = project.name;
       const projectDocUrl = project.documentUrl || '';
+      const plans = project.Plans || [];
 
       const lockedCategories = (categoryLocks || []).map(cl => cl.category);
   
-      return res.json({ finishes, projectId, projectName, projectDocUrl, lockedCategories });
+      return res.json({ finishes, projectId, projectName, projectDocUrl, plans, lockedCategories });
     } catch(error){
       console.log(error);
       res.status(422).send("Could not retrieve project information")

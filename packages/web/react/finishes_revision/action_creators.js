@@ -151,14 +151,14 @@ const ActionCreator = {
     })
   },
 
-  addEditProjectDoc: (documentUrl, onSuccess, onError) => {
+  addNewPlan: (planData, onSuccess, onError) => {
     $.ajax({
-      type: "PUT",
-      url: `/api2/v2/project/add_doc/${PROJECT_ACCESS_TOKEN}`,
-      data: {documentUrl},
-      success: ({projectDocUrl}) => {
+      type: "POST",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}`,
+      data: planData,
+      success: ({ newPlan }) => {
         onSuccess();
-        _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
+        _dispatch({ type: "NEW_PLAN", newPlan });
       },
       error: (error) => {
         onError();
@@ -166,6 +166,38 @@ const ActionCreator = {
       }
     })
   },
+
+  // updatePlan: (planId, documentUrl, onSuccess, onError) => {
+  //   $.ajax({
+  //     type: "PUT",
+  //     url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}`,
+  //     data: { documentUrl },
+  //     success: ({ projectDocUrl }) => {
+  //       onSuccess();
+  //       _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
+  //     },
+  //     error: (error) => {
+  //       onError();
+  //       _dispatch({ type: "API_ERROR", data: error });
+  //     }
+  //   })
+  // },
+
+  // reorderPlan: (planId, newOrderNum, onSuccess, onError) => {
+  //   $.ajax({
+  //     type: "PUT",
+  //     url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}/order`,
+  //     data: { newOrderNum },
+  //     success: ({ projectDocUrl }) => {
+  //       onSuccess();
+  //       _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
+  //     },
+  //     error: (error) => {
+  //       onError();
+  //       _dispatch({ type: "API_ERROR", data: error });
+  //     }
+  //   })
+  // },
 
   lockCategory: (category, onSuccess, onError) => {
     $.ajax({

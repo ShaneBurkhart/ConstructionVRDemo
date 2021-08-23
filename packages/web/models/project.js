@@ -26,7 +26,11 @@ module.exports = (sequelize, DataTypes) => {
   Project.associate = function(models) {
     // associations can be defined here
     Project.hasMany(models.Category);
-    Project.hasMany(models.Plan);
+    Project.hasMany(models.Plan, {
+      scopes: {
+        active: { archived: false },
+      },
+    });
     Project.hasMany(models.CategoryLock);
     Project.hasMany(models.Selection);
     Project.hasMany(models.Option);

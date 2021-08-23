@@ -5,7 +5,11 @@ module.exports = (sequelize, DataTypes) => {
     filename: DataTypes.STRING,
     url: DataTypes.STRING,
     uploadedAt: DataTypes.DATE,
-  }, {});
+  }, {
+    defaultScope: {
+      order: [['uploadedAt', 'DESC']]
+    }
+  });
   PlanHistory.associate = function(models) {
     PlanHistory.belongsTo(models.Plan);
   };
