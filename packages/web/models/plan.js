@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   
   Plan.associate = function(models) {
     Plan.belongsTo(models.Project);
+    Plan.hasMany(models.Document);
     Plan.hasMany(models.PlanHistory);
   };
 
