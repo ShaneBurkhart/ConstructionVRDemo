@@ -1,3 +1,4 @@
+// TODO: delete (?) main purpose of this modal was moved to NewPlanModal
 import React, { useState } from 'react';
 import { Modal, Button, Loader, Dimmer, Popup } from 'semantic-ui-react';
 
