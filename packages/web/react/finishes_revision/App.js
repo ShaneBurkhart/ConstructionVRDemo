@@ -13,9 +13,9 @@ import PrintOptionsModal from './modals/PrintOptionsModal';
 
 import ToastMessage from '../components/ToastMessage';
 
+import "finishvision-tailwind";
 import "./App.css";
 
-import "finishvision-tailwind"
 
 const App = () => {
   const dispatch = useDispatch();
