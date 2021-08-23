@@ -57,5 +57,5 @@
 .categoriesSection {
   height: 100%;
   padding-right: 0 !important;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
