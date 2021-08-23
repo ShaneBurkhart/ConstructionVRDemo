@@ -158,7 +158,7 @@ const ActionCreator = {
       data: planData,
       success: ({ newPlan }) => {
         onSuccess();
-        _dispatch({ type: "NEW_PLAN", newPlan });
+        _dispatch({ type: "NEW_PLAN", data: newPlan });
       },
       error: (error) => {
         onError();

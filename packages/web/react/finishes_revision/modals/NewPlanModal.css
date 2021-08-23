@@ -1,0 +1,24 @@
+
+
+.newPlanModal .link {
+  background-color: #e2eeff;
+  padding: 1% 2%;
+  border-radius: 8px;
+}
+
+.newPlanModal .field .image-placeholder {
+  background-color: #fafafa;
+  padding: 5px 5px;
+  border: 2px dashed #ccc;
+  border-radius: 3px;
+  min-height: 35px;
+  margin-bottom: 5px;
+  text-align: center;
+  color: #cccccc;
+  cursor: pointer;
+}
+
+.newPlanModal .field .image-placeholder:hover {
+  color: #40A819;
+  border-color: #40A819;
+}

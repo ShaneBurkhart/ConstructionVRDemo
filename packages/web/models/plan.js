@@ -1,4 +1,6 @@
 'use strict';
+const { Op } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   const Plan = sequelize.define('Plan', {
     ProjectId: DataTypes.BIGINT,
@@ -11,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     scopes: {
       active: {
-        where: { archived: false },
+        where: { archived: { [Op.is]: false }},
       }, 
     }
   });
