@@ -1,3 +1,4 @@
+import os
 from io import StringIO, BytesIO
 from urllib.request import urlopen
 from PyPDF2 import PdfFileWriter, PdfFileReader
@@ -9,6 +10,7 @@ from botocore.exceptions import ClientError
 import server_hooks
 import pipeline
 
+bucket = os.environ["AWS_BUCKET"]
 
 def split(event, context):
     planset_id = event["plansetId"]
@@ -35,7 +37,7 @@ def split(event, context):
 
         try:
             key = "documents/{}_{}.pdf".format(planset_id, i)
-            response = s3_client.upload_fileobj(buf, "gmi-plan-viewer-staging", key, ExtraArgs={'ContentType': 'application/pdf', 'ACL':'public-read'})
+            response = s3_client.upload_fileobj(buf, bucket, key, ExtraArgs={'ContentType': 'application/pdf', 'ACL':'public-read'})
             # Kick off next job
             pipeline.start_pdf_to_image_job(key, planset_id, i)
         except ClientError as e:

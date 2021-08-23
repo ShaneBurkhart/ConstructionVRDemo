@@ -1,8 +1,16 @@
 const express = require("express");
 const fetch = require('node-fetch');
 const Queue = require('bee-queue');
+const AWS = require('aws-sdk');
 
-const QUEUES = ["split_pdf", "pdf_to_image"];
+const lambda = new AWS.Lambda();
+
+const QUEUE_TO_FUNCTION = {
+    'split_pdf': process.env.AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME,
+    'pdf_to_image': process.env.AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME
+}
+
+const QUEUES = Object.keys(QUEUE_TO_FUNCTION)
 const CONFIG = { redis: { host: 'redis' } };
 const _singleton = {};
 
@@ -15,10 +23,25 @@ QUEUES.forEach(q => {
     const camelCase = "start" + q.split("_").map(t=>(t.charAt(0).toUpperCase() + t.slice(1))).join("");
     const queue = _getQueue(q);
 
-    // CHECK FOR PROD OR DEVELOPMENT
     // DEV uses queues
-    // PROD uses aws sdk
-    exports[camelCase] = (data) => queue.createJob(data).save();
+    let handler = (data) => queue.createJob(data).save();
+
+    // CHECK FOR PROD OR DEVELOPMENT
+    if (process.env.NODE_ENV === "production") {
+        handler = (data) => {
+            // PROD uses aws sdk
+            const params = {
+                "FunctionName": QUEUE_TO_FUNCTION[q],
+                "InvocationType": "Event",
+                "Payload": JSON.stringify(data)
+            }      
+
+            // No need to wait since we designated async
+            lambda.invoke(params)
+        }
+    }
+
+    exports[camelCase] = handler
 });
 
 const _processJob = async (name, data) => {

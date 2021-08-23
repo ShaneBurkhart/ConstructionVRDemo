@@ -9,8 +9,8 @@ const { attrMap, finishCategoriesMap } = require("../../common/constants.js");
 const { uuid } = require('uuidv4');
 
 AWS.config.update({
-  region: process.env["REGION"],
-  credentials: new AWS.Credentials(process.env["ACCESS_KEY_ID"], process.env["SECRET_ACCESS_KEY"])
+  region: process.env["AWS_REGION"],
+  credentials: new AWS.Credentials(process.env["AWS_ACCESS_KEY_ID"], process.env["AWS_SECRET_ACCESS_KEY"])
 });
 const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
 

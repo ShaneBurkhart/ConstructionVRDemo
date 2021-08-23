@@ -15,6 +15,7 @@ import ToastMessage from '../components/ToastMessage';
 
 import "./App.css";
 
+import "finishvision-tailwind"
 
 const App = () => {
   const dispatch = useDispatch();

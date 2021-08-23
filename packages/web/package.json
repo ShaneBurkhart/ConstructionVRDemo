@@ -5,8 +5,8 @@
   "main": "websocket.js",
   "dependencies": {
     "@sendgrid/mail": "^7.4.2",
-    "lambda-queue": "file:../lambda-queue",
     "airtable": "^0.8.1",
+    "finishvision-tailwind": "file:../tailwind",
     "aws-sdk": "^2.875.0",
     "bcrypt": "^5.0.1",
     "connect-redis": "^4.0.4",
