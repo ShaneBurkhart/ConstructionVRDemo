@@ -12,7 +12,7 @@ AWS.config.update({
   region: process.env["AWS_REGION"],
   credentials: new AWS.Credentials(process.env["AWS_ACCESS_KEY_ID"], process.env["AWS_SECRET_ACCESS_KEY"])
 });
-const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
+const s3 = new AWS.S3({ params: { Bucket: process.env.AWS_BUCKET } });
 
 
 module.exports = (app) => {
@@ -314,7 +314,7 @@ module.exports = (app) => {
   
       request({ url, encoding: null }, (err, r, body) => {
         if (err) return res.status(422).json({ error: err })
-        const bucket = process.env.BUCKET;
+        const bucket = process.env.AWS_BUCKET;
         const imageURL = `https://${bucket}.s3-us-west-2.amazonaws.com/${filename}`;
 
         s3.putObject({
