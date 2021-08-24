@@ -12,24 +12,21 @@ module.exports = {
             type: Sequelize.INTEGER
           },
           ProjectId: {
-            type: Sequelize.BIGINT,
+            type: Sequelize.BIGINT
+          },
+          DocumentId: {
+            type: Sequelize.INTEGER
           },
           name: {
-            type: Sequelize.STRING,
-          },
-          filename: {
-            type: Sequelize.STRING,
-          },
-          url: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
           },
           order: {
             allowNull: false,
-            type: Sequelize.INTEGER,
+            type: Sequelize.INTEGER
           },
           archived: {
             defaultValue: false,
-            type: Sequelize.BOOLEAN,
+            type: Sequelize.BOOLEAN
           },
           uploadedAt: {
             allowNull: false,
@@ -52,16 +49,10 @@ module.exports = {
             type: Sequelize.INTEGER
           },
           PlanId: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.INTEGER
           },
-          name: {
-            type: Sequelize.STRING,
-          },
-          filename: {
-            type: Sequelize.STRING,
-          },
-          url: {
-            type: Sequelize.STRING,
+          DocumentId: {
+            type: Sequelize.INTEGER
           },
           uploadedAt: {
             allowNull: false,

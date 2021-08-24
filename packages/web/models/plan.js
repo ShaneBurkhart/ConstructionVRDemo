@@ -4,9 +4,8 @@ const { Op } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   const Plan = sequelize.define('Plan', {
     ProjectId: DataTypes.BIGINT,
+    DocumentId: DataTypes.INTEGER,
     name: DataTypes.STRING,
-    filename: DataTypes.STRING,
-    url: DataTypes.STRING,
     order: DataTypes.INTEGER,
     uploadedAt: DataTypes.DATE,
     archived: DataTypes.BOOLEAN,
@@ -20,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   
   Plan.associate = function(models) {
     Plan.belongsTo(models.Project);
-    Plan.hasMany(models.Document);
+    Plan.hasOne(models.Document);
     Plan.hasMany(models.PlanHistory);
   };
 

@@ -24,9 +24,6 @@ module.exports = {
       pageCount: {
         type: Sequelize.INTEGER,
       },
-      sheetsIndexesCompleted: {
-        type: Sequelize.JSONB,
-      },
       startedPipelineAt: {
         type: Sequelize.DATE
       },

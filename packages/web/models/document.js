@@ -14,12 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     filename: DataTypes.STRING,
     pageCount: DataTypes.INTEGER,
-    sheetsIndexesCompleted: DataTypes.JSONB,
     startedPipelineAt: DataTypes.DATE
   }, {});
   Document.associate = function(models) {
     // associations can be defined here
-    // Document.hasMany(models.Sheet) //TODO: bring in sheet w/ pipeline
+    Document.hasMany(models.Sheet)
   };
 
   Document.beforeValidate(doc => {

@@ -2,8 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const PlanHistory = sequelize.define('PlanHistory', {
     PlanId: DataTypes.INTEGER,
-    filename: DataTypes.STRING,
-    url: DataTypes.STRING,
+    DocumentId: DataType.INTEGER,
     uploadedAt: DataTypes.DATE,
   }, {
     defaultScope: {
@@ -12,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   PlanHistory.associate = function(models) {
     PlanHistory.belongsTo(models.Plan);
+    PlanHistory.hasOne(models.Document);
   };
   return PlanHistory;
 };
