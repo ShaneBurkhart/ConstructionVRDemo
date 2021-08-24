@@ -14,7 +14,7 @@ RUN npm install
 
 ADD . /app/
 
-RUN npm run build
+# RUN npm run build
 
 EXPOSE 4567
 
