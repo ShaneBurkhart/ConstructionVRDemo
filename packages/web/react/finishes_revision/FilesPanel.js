@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import _ from 'underscore';
 import { useSelector } from 'react-redux';
-import { Button, Icon, Table, Grid, Header } from 'semantic-ui-react';
+import { Button, Icon, Table, Grid, Header, Dimmer, Loader, } from 'semantic-ui-react';
 import ActionCreators from './action_creators';
 
 
+import { ActivePlansTable, ArchivedPlansTable } from './FilesPanelTables';
 import NewPlanModal from './modals/NewPlanModal';
 import EditPlanModal from './modals/EditPlanModal';
 import PlanHistoryModal from './modals/PlanHistoryModal';
@@ -57,7 +58,16 @@ const FilesPanel = (props) => {
     
     ActionCreators.toggleArchivePlan(planId, onSuccess, onError);
   }
-  
+
+  const handleReorderPlans = ({ planId, newOrderNum }) => {
+    if (loading) return;
+    setLoading(true);
+    const onSuccess = () => setLoading(false);
+    const onError = () => setLoading(false);
+
+    ActionCreators.reorderPlan(planId, newOrderNum, onSuccess, onError);
+  }
+
   return (
     <>
       <section className="xlarge-container">
@@ -78,76 +88,24 @@ const FilesPanel = (props) => {
             <Header as='h2'>Project Documents</Header>
           </Grid.Column>
         </Grid>
-        <Table className="celled">
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell width={1}>#</Table.HeaderCell>
-              <Table.HeaderCell width={4}>Name</Table.HeaderCell>
-              <Table.HeaderCell width={4}>Updated At</Table.HeaderCell>
-              <Table.HeaderCell>Download File</Table.HeaderCell>
-              <Table.HeaderCell>Controls</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {(activePlans || []).map((p, i) => (
-              <tr className="project-row" key={p.id}>
-                <td>
-                    <span>{p.order + 1}</span>
-                </td>
-                <td className={styles.truncateCell}>
-                    <span>{p.name || p.filename}</span>
-                </td>
-                <td>
-                    <span>{new Date(p.updatedAt).toLocaleDateString()} {new Date(p.updatedAt).toLocaleTimeString()}</span>
-                </td>
-                <td className={styles.truncateCell}>
-                    <a target="_blank" href={p.url}>{p.filename || 'link'}</a>
-                </td>
-                <td>
-                    <span style={{ marginLeft: 5 }}><a onClick={() => setEditPlan(p)}>Edit</a></span>
-                    <span style={{ marginLeft: 5 }}><a onClick={() => toggleArchivePlan(p.id)}>Archive</a></span>
-                    {!!(p.PlanHistories || []).length && <span style={{ marginLeft: 5 }}><a onClick={() => setSelectedPlanHistory(p)}>Details</a></span>}
-                </td>
-              </tr>
-            ))}
-            {!(activePlans || []).length && <tr><td style={{ whiteSpace: 'nowrap' }}>No documents</td></tr>}
-          </Table.Body>
-        </Table>
+        <ActivePlansTable
+          plans={activePlans}
+          handleReorderPlans={handleReorderPlans}
+          toggleArchivePlan={toggleArchivePlan}
+          setEditPlan={setEditPlan}
+          setShowHistory={setSelectedPlanHistory}
+        />
         <Grid>
           <Grid.Column width={8}>
             <Header as='h2'>Archived Documents</Header>
           </Grid.Column>
         </Grid>
-        <Table className="celled">
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell width={4}>Name</Table.HeaderCell>
-              <Table.HeaderCell width={4}>Updated At</Table.HeaderCell>
-              <Table.HeaderCell>Download File</Table.HeaderCell>
-              <Table.HeaderCell>History</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {(archivedPlans || []).map((p, i) => (
-              <tr className="project-row" key={p.id}>
-                <td className={styles.truncateCell}>
-                    <span>{p.name || p.filename}</span>
-                </td>
-                <td>
-                    <span>{new Date(p.updatedAt).toLocaleDateString()} {new Date(p.updatedAt).toLocaleTimeString()}</span>
-                </td>
-                <td className={styles.truncateCell}>
-                    <a target="_blank" href={p.url}>{p.filename || 'link'}</a>
-                </td>
-                <td>
-                    <span style={{ marginLeft: 5 }}><a onClick={() => toggleArchivePlan(p.id)}>Re-activate</a></span>
-                    {!!(p.PlanHistories || []).length && <span style={{ marginLeft: 5 }}><a onClick={() => setSelectedPlanHistory(p)}>Details</a></span>}
-                </td>
-              </tr>
-            ))}
-            {!(archivedPlans || []).length && <tr><td style={{ whiteSpace: 'nowrap' }}>No archived documents</td></tr>}
-          </Table.Body>
-        </Table>
+        <ArchivedPlansTable
+          plans={archivedPlans}
+          toggleArchivePlan={toggleArchivePlan}
+          setShowHistory={setSelectedPlanHistory}
+        />
+        {loading && <Dimmer active inverted><Loader /></Dimmer>}
       </section>
       {showNewPlanModal && <NewPlanModal onClose={toggleNewPlanModal} />}
       {showEditPlanModal && <EditPlanModal onClose={closeEditPlan} plan={selectedPlan} />}

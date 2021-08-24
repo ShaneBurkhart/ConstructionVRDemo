@@ -198,21 +198,21 @@ const ActionCreator = {
     })
   },
 
-  // reorderPlan: (planId, newOrderNum, onSuccess, onError) => {
-  //   $.ajax({
-  //     type: "PUT",
-  //     url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}/order`,
-  //     data: { newOrderNum },
-  //     success: ({ projectDocUrl }) => {
-  //       onSuccess();
-  //       _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
-  //     },
-  //     error: (error) => {
-  //       onError();
-  //       _dispatch({ type: "API_ERROR", data: error });
-  //     }
-  //   })
-  // },
+  reorderPlan: (planId, newOrderNum, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}/order`,
+      data: { newOrderNum },
+      success: (plans) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PLANS", data: plans })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
 
   lockCategory: (category, onSuccess, onError) => {
     $.ajax({

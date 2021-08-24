@@ -119,4 +119,54 @@ module.exports = (app) => {
       return res.status(422).send("Could not update plan");
     }
   });
+
+  app.put("/api2/v2/plans/:project_access_token/:plan_id/order", m.authUser, async (req, res) => {
+    const accessToken = req.params["project_access_token"];
+    const planId = req.params["plan_id"];
+    const { newOrderNum=null } = req.body;
+    
+    if (newOrderNum === null) return res.status(422).send("Required information not provided");
+    if (isNaN(Number(newOrderNum))) return res.status(400).send("A valid order number was not received");
+  
+    let transaction;
+    try {
+      transaction = await models.sequelize.transaction();
+      
+      const project = await models.Project.findOne({
+        where: { accessToken },
+        include: [{ model: models.Plan.scope("active") }],
+        order: [
+          [ { model: models.Plan }, 'order', 'ASC' ],
+        ],
+      });
+      
+      if (!project) return res.status(404).send("Project not found");
+
+      const plans = project.Plans || [];
+      const plan = plans.find(p => p.id == planId);
+      if (!plan) return res.status(404).send("Could not find file resource");
+  
+      let controlledNewOrderNum = newOrderNum;
+      if (newOrderNum < 0) controlledNewOrderNum = 0;
+      if (newOrderNum > plans.length) controlledNewOrderNum = plans.length;
+      
+      const nextPlans = plans.filter(p => p.id !== plan.id);
+  
+      nextPlans.splice(controlledNewOrderNum, 0, plan);
+  
+      for (let i = 0; i < plans.length; i++){
+        await nextPlans[i].update({ order: i }, { transaction });
+      }
+  
+      await transaction.commit();
+
+      const refreshedPlans = await project.getPlans({ include: [{ model: models.PlanHistory }]});
+
+      return res.json(refreshedPlans);
+    } catch (error) {
+      if (transaction) await transaction.rollback();
+      console.log(error);
+      res.status(422).send("Could not successfully update plan orders");
+    }
+  });
 }
