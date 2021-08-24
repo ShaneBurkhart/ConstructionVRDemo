@@ -11,3 +11,4 @@ public/dist
 .vscode/
 __pycache__
 packages/tailwind/dist
+packages/web/public/dist
