@@ -7,7 +7,7 @@ const lambda = new AWS.Lambda();
 
 const QUEUE_TO_FUNCTION = {
     'split_pdf': process.env.AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME,
-    'pdf_to_image': process.env.AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME
+    'pdf_to_image': process.env.AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME,
 }
 
 const QUEUES = Object.keys(QUEUE_TO_FUNCTION)
@@ -37,7 +37,9 @@ QUEUES.forEach(q => {
             }      
 
             // No need to wait since we designated async
-            lambda.invoke(params)
+            const result = lambda.invoke(params, (err, data) => {
+                if (err) console.log('LAMBDA ERROR', err)
+            })
         }
     }
 

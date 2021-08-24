@@ -7,32 +7,41 @@ headers = {
 
 def get_host():
     if os.environ["NODE_ENV"] == 'production':
-        return "https://{}".format(os.environ["SITE_URL"])
+        return "{}".format(os.u["SITE_URL"])
     else:
         return "http://nginx:3000"
+    
+def get_webhook_url():
+    return "{}/api/_webhooks/documents".format(get_host())
 
-def notify_split_pdf_completion(planset_id):
-    # Send a request to the server w auth tokens and such
-    # Our server will kick off the next lambda job
-    # For preliminary testing, we will kick it off in here
-    res = requests.put("{}/api/plansets/{}/complete".format(get_host(), planset_id))
-    print(res.text)
-    return True
-
-def notify_page_count(planset_id, page_count):
-    json = { 'page_count': page_count }
-    res = requests.put("{}/api/plansets/{}/page_count".format(get_host(), planset_id), json=json, headers=headers)
-    print(res.text)
-    return True
-
-def notify_create_sheet(planset_id, page_index, detected_text, crop_type, sheet_width, sheet_height):
-    json = {
-        'page_index': page_index, 
-        'detected_text': detected_text,
-        'crop_type': crop_type,
-        'sheet_width': sheet_width, 
-        'sheet_height': sheet_height
+def notify_split_pdf_completion(object_id):
+    json = { 
+        'type': "SPLIT_PDF_COMPLETED", 
+        'data': { 'objectId': object_id } 
     }
-    res = requests.post("{}/api/plansets/{}/sheets".format(get_host(), planset_id), json=json)
+    res = requests.post(get_webhook_url(), json=json, headers=headers)
+    print(res.text)
+    return True
+
+def notify_page_count(object_id, page_count):
+    json = { 
+        'type': "PAGE_COUNT", 
+        'data': { 'objectId': object_id, 'pageCount': page_count } 
+    }
+    res = requests.post(get_webhook_url(), json=json, headers=headers)
+    print(res.text)
+    return True
+
+def notify_sheet_to_image_completion(object_id, page_index, sheet_width, sheet_height):
+    json = {
+        'type': "SHEET_TO_IMAGE_COMPLETED", 
+        'data': {
+            'objectId': object_id,
+            'pageIndex': page_index, 
+            'sheetWidth': sheet_width, 
+            'sheetHeight': sheet_height
+        }
+    }
+    res = requests.post(get_webhook_url(), json=json, headers=headers)
     print(res.text)
     return True

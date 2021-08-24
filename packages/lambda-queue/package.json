@@ -16,13 +16,11 @@
   },
   "scripts": {},
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ShaneBurkhart/GMI-PlanGrid.git"
+    "type": "git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ShaneBurkhart/GMI-PlanGrid.git/issues"
   },
   "homepage": "/",
   "browserslist": {
