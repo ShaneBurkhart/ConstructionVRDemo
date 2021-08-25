@@ -95,7 +95,7 @@ const FilePanel = (props) => {
           setEditPlan={setEditPlan}
           setShowHistory={setSelectedPlanHistory}
         />
-        <Grid>
+        <Grid style={{ marginTop: 20 }}>
           <Grid.Column width={8}>
             <Header as='h2'>Archived Documents</Header>
           </Grid.Column>

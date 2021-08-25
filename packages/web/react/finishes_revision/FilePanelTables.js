@@ -1,56 +1,25 @@
 import React from 'react';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { Icon } from 'semantic-ui-react';
+import { DotsVerticalIcon } from '@heroicons/react/outline';
 
-const Cell = ({ children, width="100%" }) => (
-  <span className="className='flex items-center w-full px-4 text-sm text-gray-500 truncate" style={{ width, minWidth: width, maxWidth: width }}>
-    {children}
-  </span>
-);
-
-const Row = ({ children }) => (
-  <div className={`flex w-full px-4 py-3`}>
-    {children}
-  </div>
-);
-
-export const Table = ({ children, columnHeaderDetails=[] }) => (
-  <div className="relative table w-full border border-gray-200 divide-y divide-gray-200 rounded">
-    <div className="flex items-center w-full px-4 text-sm capitalize bg-blueGray-50 h-14">
-      {columnHeaderDetails.map((col, i) => {
-        return (
-          <Cell
-            key={col.key}
-            width={col.width}
-            role="columnheader"
-            aria-colindex={i}
-          >
-            {col.displayName}
-          </Cell>
-        );
-      })}
-    </div>
-    {children}
-  </div>
-);
 
 const DraggableRow = React.forwardRef(
   ({provided, snapshot, children}, ref) => (
-    <div
-      className={`flex w-full px-4 py-3 bg-white ${snapshot.isDragging ? 'bg-blue-50' : ''} `}
+    <tr
+      className={snapshot.isDragging ? 'bg-blue-50' : ''}
       ref={ref}
       {...provided.draggableProps}
     >
       {provided.dragHandleProps && (
-        <div className="flex items-center px-1" width="40px">
-          <div {...provided.dragHandleProps} className="flex justify-center text-gray-400 rounded group hover:bg-blue-50" style={{ fontSize: '.9rem' }}>
-            <Icon name="vertical ellipsis" className="cursor-pointer group-hover:text-blue-600" />
-            <Icon name="vertical ellipsis" style={{ marginLeft: -12 }} className="cursor-pointer group-hover:text-blue-600" />
+        <td>
+          <div {...provided.dragHandleProps} className="flex justify-center text-gray-400 rounded group hover:bg-blue-50">
+            <DotsVerticalIcon className="w-5 h-4 group-hover:text-blue-600" />
+            <DotsVerticalIcon className="w-5 h-4 -ml-3.5 group-hover:text-blue-600" />
           </div>
-        </div>
+        </td>
       )}
       {children}
-    </div>
+    </tr>
   )
 );
 
@@ -63,24 +32,24 @@ export const ActivePlansTable = ({
 }) => {
   const adminMode = IS_SUPER_ADMIN;
 
-  const columnController = [
-    { key: "order", displayName: "#", width: '50px' },
-    { key: "name", displayName: "Name", width: '300px' },
-    { key: "uploadedAt", displayName: "Uploaded At", width: '300px' },
-    { key: "url", displayName: "Download File", width: '300px' },
-  ];
+  // const columnController = [
+  //   { key: "order", displayName: "#", width: '50px' },
+  //   { key: "name", displayName: "Name", width: '300px' },
+  //   { key: "uploadedAt", displayName: "Uploaded At", width: '300px' },
+  //   { key: "url", displayName: "Download File", width: '300px' },
+  // ];
   
-  const controlsColumn = { key: '_controls', displayName: "Controls", width: '350px' };
-  const headerColumnController = [...columnController, controlsColumn];
+  // const controlsColumn = { key: '_controls', displayName: "Controls", width: '350px' };
+  // const headerColumnController = [...columnController, controlsColumn];
   
-  const dragHandleColumnController = { key: '_drag', displayName: "", width: '40px' };
-  if (adminMode && plans.length > 1) headerColumnController.unshift(dragHandleColumnController);
+  // const dragHandleColumnController = { key: '_drag', displayName: "", width: '40px' };
+  // if (adminMode && plans.length > 1) headerColumnController.unshift(dragHandleColumnController);
   
-  const formattedCells = {
-    order: (plan) => <>{plan.order + 1}</>,
-    updatedAt: (plan) => <>{new Date(plan.uploadedAt).toLocaleDateString()} {new Date(plan.uploadedAt).toLocaleTimeString()}</>,
-    url: (plan) => <a target="_blank" href={plan.url} className="text-blue-600 cursor-pointer">{plan.filename}</a>,
-  }
+  // const formattedCells = {
+  //   order: (plan) => <>{plan.order + 1}</>,
+  //   updatedAt: (plan) => <>{new Date(plan.uploadedAt).toLocaleDateString()} {new Date(plan.uploadedAt).toLocaleTimeString()}</>,
+  //   url: (plan) => <a target="_blank" href={plan.url} className="text-blue-600 cursor-pointer">{plan.filename}</a>,
+  // }
   
 
   const onDragEnd = ({ source, destination, draggableId }) => {
@@ -91,51 +60,97 @@ export const ActivePlansTable = ({
   }
   
   return (
-    <div className={`flex w-full`}>
-      <section className="w-full py-5 overflow-x-auto">
-        <Table columnHeaderDetails={headerColumnController}>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="plans" type="PLAN">
-              {(provided, _snapshot) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-gray-200">
-                  {(plans || []).map((plan, idx) => (
-                    <Draggable
-                      key={plan.id}
-                      draggableId={`${plan.id}`}
-                      index={idx}
-                      isDragDisabled={plans.length < 2}
-                      type="PLAN"
-                    >
-                      {(provided, snapshot) => (
-                        <DraggableRow provided={provided} snapshot={snapshot} ref={provided.innerRef}>
-                          {columnController.map(col => {
-                            const content = formattedCells[col.key] ? formattedCells[col.key](plan) : plan[col.key];
-                            return  (
-                              <Cell key={col.key} width={col.width}>
-                                <span className="block truncate">{content}</span>
-                              </Cell>
-                            );
-                          })}
-                          <Cell>
-                            <span><a className="text-blue-600 cursor-pointer" onClick={() => setEditPlan(plan)}>Edit</a></span>
-                            <span><a className="text-blue-600 cursor-pointer" onClick={() => toggleArchivePlan(plan.id)}>Archive</a></span>
-                            {!!(plan.PlanHistories || []).length && <span><a className="text-blue-600 cursor-pointer" onClick={() => setShowHistory(plan)}>History</a></span>}
-                          </Cell>
-                        </DraggableRow>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-          {!(plans || []).length && (
-            <Row className="text-sm text-gray-600 bg-white">You have not added any files</Row>
-          )}
-        </Table>
-      </section>
-    </div>
+      // <section className="w-full py-5 overflow-x-auto">
+        <div className="flex flex-col mt-10">
+          <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <div className="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className=" bg-gray-50">
+                    <tr>
+                      <th/>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        #
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Uploaded At
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                      >
+                        Download Files
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        <span>Controls</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  {!(plans || []).length && (
+                    <tbody className="bg-white divide-y divide-gray-200 ">
+                      <tr className="text-sm text-gray-600 bg-white"><td>You have not added any files</td></tr>
+                    </tbody>
+                  )}
+                  {!!(plans || []).length && (
+                    <DragDropContext onDragEnd={onDragEnd}>
+                      <Droppable droppableId="plans" type="PLAN">
+                        {(provided, _snapshot) => (
+                          <tbody ref={provided.innerRef} {...provided.droppableProps} className="divide-y divide-gray-200 ">
+                            {(plans || []).map((plan, idx) => (
+                              <Draggable
+                                key={plan.id}
+                                draggableId={`${plan.id}`}
+                                index={idx}
+                                isDragDisabled={plans.length < 2}
+                                type="PLAN"
+                              >
+                                {(provided, snapshot) => (
+                                  <DraggableRow provided={provided} snapshot={snapshot} ref={provided.innerRef}>
+                                    <td className="w-4 px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{plan.order + 1}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{plan.name}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{plan.uploadedAt}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{plan.role}</td>
+                                    <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                                      {!!(plan.PlanHistories || []).length && (
+                                        <a onClick={() => setShowHistory(plan)} className="mr-2 text-indigo-600 hover:text-indigo-900">
+                                          History
+                                        </a>
+                                      )}
+                                      <a onClick={() => setEditPlan(plan)} className="mr-2 text-indigo-600 hover:text-indigo-900">
+                                        Edit
+                                      </a>
+                                      <a onClick={() => toggleArchivePlan(plan.id)} className="text-indigo-600 hover:text-indigo-900">
+                                        Archive
+                                      </a>
+                                    </td>
+                                  </DraggableRow>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </tbody>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+                  )}
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      // </section>
   );
 };
 
@@ -143,34 +158,68 @@ export const ArchivedPlansTable = ({
   plans=[],
   toggleArchivePlan,
 }) => {
-  const columnController = [
-    { key: "name", displayName: "Name", width: '300px' },
-    { key: "uploadedAt", displayName: "Uploaded At", width: '300px' },
-    { key: "url", displayName: "Download File", width: '200px' },
-  ];
-  const controlsColumn = { key: '_controls', displayName: "Controls", width: '200px' }
+  // const columnController = [
+  //   { key: "name", displayName: "Name", width: '300px' },
+  //   { key: "uploadedAt", displayName: "Uploaded At", width: '300px' },
+  //   { key: "url", displayName: "Download File", width: '200px' },
+  // ];
+  // const controlsColumn = { key: '_controls', displayName: "Controls", width: '200px' }
   
   return (
-    <div className={`flex w-full mt-10`}>
-      <section className="w-full py-5 overflow-x-auto">
-        <Table columnHeaderDetails={[...columnController, controlsColumn]}>
-          {(plans || []).map(plan => (
-            <Row key={plan.id} className="bg-white">
-              {columnController.map(col => (
-                <Cell key={col.key} width={col.width} className="text-sm text-gray-500">
-                  <span className="block truncate">{plan[col.key]}</span>
-                </Cell>
-              ))}
-              <Cell width={controlsColumn.width}>
-                <a className="text-blue-600 cursor-pointer" onClick={() => toggleArchivePlan(plan.id)}>Re-activate</a>
-              </Cell>
-            </Row>
-          ))}
-          {!(plans || []).length && (
-            <Row className="text-sm text-gray-600 bg-white">There are no archived files</Row>
-          )}
-        </Table>
-      </section>
+    <div className="flex w-full mt-10">
+      <div className="flex flex-col">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div className="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Uploaded At
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Download Link
+                    </th>
+
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">Re-Activate</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {!(plans || []).length && (
+                    <tr className="text-sm text-gray-600 bg-white"><td>There are no archived files</td></tr>
+                  )}
+                  {plans.map((plan) => (
+                    <tr key={plan.id}>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{plan.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{plan.uploadedAt}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{plan.name}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                        <a onClick={() => toggleArchivePlan(plan.id)} className="text-indigo-600 hover:text-indigo-900">
+                          Re-activate
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
