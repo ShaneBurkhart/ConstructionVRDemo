@@ -1,5 +1,4 @@
-user.env
-prod.env
+*.env
 .DS_Store
 output/
 data/
