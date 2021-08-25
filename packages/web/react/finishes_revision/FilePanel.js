@@ -13,8 +13,8 @@ import PlanHistoryModal from './modals/PlanHistoryModal';
 import styles from "./FilePanel.module.css";
 
 
-const FilePanel = (props) => {
-  // const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
+const FilePanel = () => {
+  const adminMode = IS_SUPER_ADMIN;
   // const projectDocUrl = useSelector(state => state.projectDocUrl); //TODO: write script to migrate to Document/Plan
   const plans = useSelector(state => state.plans) || [];
   const activePlans = _.sortBy(plans.filter(p => !p.archived), 'order');
@@ -71,18 +71,20 @@ const FilePanel = (props) => {
   return (
     <>
       <section className="xlarge-container">
-        <div className={`${styles.documentLinkContainer} no-print`}>
-          <Button
-            icon
-            labelPosition='right'
-            color="green"
-            size="tiny"
-            onClick={toggleNewPlanModal}
-          >
-            Add New
-            <Icon name='plus' />
-          </Button>
-        </div>
+        {adminMode && (
+          <div className={`${styles.documentLinkContainer} no-print`}>
+            <Button
+              icon
+              labelPosition='right'
+              color="green"
+              size="tiny"
+              onClick={toggleNewPlanModal}
+            >
+              Add New
+              <Icon name='plus' />
+            </Button>
+          </div>
+        )}
         <Grid>
           <Grid.Column width={8}>
             <Header as='h2'>Project Documents</Header>
