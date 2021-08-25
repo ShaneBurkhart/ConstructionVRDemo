@@ -59,10 +59,7 @@ module.exports = (app) => {
     try {
       const project = await models.Project.findOne({
         where: { accessToken },
-        include: [{ model: models.Plan }],
-        order: [
-          [ { model: models.Plan}, 'order', 'ASC' ],
-        ]
+        include: [{ model: models.Plan }]
       });
       if (!project) return res.status(404).send("Project resource not found");
 

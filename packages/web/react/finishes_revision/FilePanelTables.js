@@ -20,7 +20,7 @@ const DraggableRow = React.forwardRef(
       {...provided.draggableProps}
     >
       {provided.dragHandleProps && (
-        <td className="px-1 py-2">
+        <td className="p-2">
           <div {...provided.dragHandleProps} className="flex justify-center py-1 text-gray-400 rounded group hover:bg-blue-50">
             <DotsVerticalIcon className="w-5 h-4 group-hover:text-blue-600" />
             <DotsVerticalIcon className="w-5 h-4 -ml-3.5 group-hover:text-blue-600" />

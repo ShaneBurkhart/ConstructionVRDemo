@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       }, {
         model: models.Document
       }],
+      order: [[{ model: models.PlanHistory }, 'uploadedAt', 'DESC']]
     })
   }
   

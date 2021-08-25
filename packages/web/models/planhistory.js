@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     PlanHistory.addScope('defaultScope', {
       include: [{
         model: models.Document
-      }],
-      order: [['uploadedAt', 'DESC']]
+      }]
     })
   }
   return PlanHistory;
