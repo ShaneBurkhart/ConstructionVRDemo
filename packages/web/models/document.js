@@ -1,11 +1,11 @@
 'use strict';
 const ShortUniqueId = require('short-unique-id');
 const uid = new ShortUniqueId();
+const queue = require("lambda-queue");
+
 
 module.exports = (sequelize, DataTypes) => {
   const Document = sequelize.define('Document', {
-    PlanId: DataTypes.INTEGER,
-    PlanHistoryId: DataTypes.INTEGER,
     uuid: {
       allowNull: false, 
       type: DataTypes.STRING,
@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false, 
       type: DataTypes.STRING,
     },
+    filetype: DataTypes.STRING,
     filename: DataTypes.STRING,
     pageCount: DataTypes.INTEGER,
     startedPipelineAt: DataTypes.DATE
@@ -21,12 +22,27 @@ module.exports = (sequelize, DataTypes) => {
   Document.associate = function(models) {
     // associations can be defined here
     Document.hasMany(models.Sheet)
-    Document.belongsTo(models.Plan)
-    Document.belongsTo(models.PlanHistory)
+    Document.hasOne(models.Plan)
+    Document.hasOne(models.PlanHistory)
   };
+
+  Document.loadScopes = function(models) {
+    Document.addScope('defaultScope', {
+      include: [{
+        model: models.Sheet
+      }],
+    })
+  }
 
   Document.beforeValidate(doc => {
     doc.uuid = uid()
+  });
+
+  Document.afterCreate(doc => {
+    queue.startSplitPdf({
+      's3Key': encodeURIComponent(doc.s3Url),
+      'objectId': doc.uuid
+    });
   });
 
   return Document;

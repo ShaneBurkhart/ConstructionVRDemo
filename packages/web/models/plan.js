@@ -1,10 +1,10 @@
 'use strict';
 const { Op } = require('sequelize');
-const queue = require("lambda-queue");
 
 module.exports = (sequelize, DataTypes) => {
   const Plan = sequelize.define('Plan', {
     ProjectId: DataTypes.BIGINT,
+    DocumentId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     order: DataTypes.INTEGER,
     uploadedAt: DataTypes.DATE,
@@ -16,10 +16,20 @@ module.exports = (sequelize, DataTypes) => {
       }, 
     }
   });
+
+  Plan.loadScopes = function(models) {
+    Plan.addScope('defaultScope', {
+      include: [{
+        model: models.PlanHistory
+      }, {
+        model: models.Document
+      }],
+    })
+  }
   
   Plan.associate = function(models) {
     Plan.belongsTo(models.Project);
-    Plan.hasOne(models.Document);
+    Plan.belongsTo(models.Document);
     Plan.hasMany(models.PlanHistory);
   };
 
@@ -28,36 +38,27 @@ module.exports = (sequelize, DataTypes) => {
     try {
       transaction = await sequelize.transaction();
 
+      //TODO: update w/ didFail plans defaults
       const planHistory = await this.createPlanHistory({
         uploadedAt: this.uploadedAt,
+        DocumentId: this.DocumentId,
       }, { transaction });
       
-      const document = await this.getDocument();
-      if (!document) throw new Error("previous document not found");
-      
-      await document.update({
-        PlanId: null,
-        PlanHistoryId: planHistory.id,
-      }, { transaction });
-      
-      const newDocument = await this.createDocument({
+      const newDocument = await sequelize.models.Document.create({
         s3Url,
         filename,
+        //TODO: filetype
         startedPipelineAt: Date.now(),
       }, { transaction });
       
       if (!newDocument) throw new Error("new document was not created");
 
       await this.update({
+        DocumentId: newDocument.id,
         uploadedAt: Date.now(),
       }, { transaction });
 
       await transaction.commit();
-
-      queue.startSplitPdf({
-        's3Key': encodeURIComponent(document.s3Url),
-        'objectId': document.uuid
-      });
       
       return true;
     } catch (error) {

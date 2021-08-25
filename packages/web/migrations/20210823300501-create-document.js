@@ -9,18 +9,15 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      PlanId: {
-        type: Sequelize.INTEGER
-      },
-      PlanHistoryId: {
-        type: Sequelize.INTEGER
-      },
       uuid: {
         allowNull: false,
         unique: true,
         type: Sequelize.STRING
       },
       filename: {
+        type: Sequelize.STRING
+      },
+      filetype: {
         type: Sequelize.STRING
       },
       s3Url: {

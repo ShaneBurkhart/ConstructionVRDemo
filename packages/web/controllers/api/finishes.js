@@ -76,22 +76,7 @@ module.exports = (app) => {
       
       const finishes = await project.getFinishes();
       const categoryLocks = await project.getCategoryLocks();
-      const plans = await project.getPlans({ //TODO: associations via defaultScopes? and/or move to eager loading
-        include: [
-          {
-            model: models.Document,
-            include: [{ model: models.Sheet }]
-          },
-          {
-            model: models.PlanHistory,
-            required: false,
-            include: [{
-              model: models.Document,
-              include: [{ model: models.Sheet }]
-            }]
-          }
-        ],
-      })
+      const plans = await project.getPlans();
 
       const projectId = project.id;
       const projectName = project.name;

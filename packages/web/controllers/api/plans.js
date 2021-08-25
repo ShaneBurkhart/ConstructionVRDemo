@@ -6,7 +6,7 @@ module.exports = (app) => {
   app.post("/api2/v2/plans/:project_access_token", m.authUser, async (req, res) => {
     let transaction;
     const accessToken = req.params["project_access_token"];
-    const { filename, s3Url, name } = req.body;
+    const { filename, s3Url, name } = req.body; //TODO: filetype
     if (!s3Url || !filename) return res.status(422).send("Required file data was not received.");
     
     try { 
@@ -18,31 +18,26 @@ module.exports = (app) => {
       if (!project) return res.status(404).send("Project not found");
       
       transaction = await models.sequelize.transaction();
+
+      const document = await models.Document.create({
+        s3Url,
+        filename,
+        startedPipelineAt: Date.now()
+      }, { transaction });
+
+      if (!document) throw new Error("could not create document");
       
       const order = (project.Plans || []).length;
       const plan = await project.createPlan({
+        DocumentId: document.id,
         name: name || filename,
         order,
         uploadedAt: Date.now(),
       }, { transaction });
 
-
       if (!plan) throw new Error("could not create resource");
-      
-      const document = await plan.createDocument({
-        s3Url,
-        filename,
-        startedPipelineAt: Date.now(),
-      }, { transaction });
-      
-      if (!document) throw new Error("could not create document");
 
       await transaction.commit();
-
-      queue.startSplitPdf({
-        's3Key': encodeURIComponent(document.s3Url),
-        'objectId': document.uuid
-      });
 
       await plan.reload({ include: [{ model: models.Document }, { model: models.PlanHistory, required: false }]});
 
@@ -83,21 +78,7 @@ module.exports = (app) => {
         if (!didUpdate) throw new Error("update method failed");
       }
 
-      const refreshedPlans = await project.getPlans({
-        include: [
-          {
-            model: models.PlanHistory,
-            include: [{
-              model: models.Document,
-              include: [{ model: models.Sheet, required: false }]
-            }],
-          },
-          {
-            model: models.Document,
-            include: [{ model: models.Sheet, required: false }]
-          }
-        ]
-      });
+      const refreshedPlans = await project.getPlans();
 
       return res.json(refreshedPlans);
     } catch(error){
@@ -138,9 +119,10 @@ module.exports = (app) => {
         }
       }
       
-      const refreshedPlans = await project.getPlans({ include: [{ model: models.PlanHistory }]});
-      
       await transaction.commit();
+
+      const refreshedPlans = await project.getPlans();
+      
       return res.json(refreshedPlans);
     } catch(error){
       if (transaction) await transaction.rollback();
@@ -189,7 +171,7 @@ module.exports = (app) => {
   
       await transaction.commit();
 
-      const refreshedPlans = await project.getPlans({ include: [{ model: models.PlanHistory }]});
+      const refreshedPlans = await project.getPlans();
 
       return res.json(refreshedPlans);
     } catch (error) {
