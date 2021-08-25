@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import _ from 'underscore';
 import { useSelector } from 'react-redux';
-import { Button, Icon, Table, Grid, Header, Dimmer, Loader, } from 'semantic-ui-react';
+import { Button, Icon, Header, Grid, Dimmer, Loader, } from 'semantic-ui-react';
 import ActionCreators from './action_creators';
 
 
@@ -15,7 +15,7 @@ import styles from "./FilePanel.module.css";
 
 const FilePanel = (props) => {
   // const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
-  // const projectDocUrl = useSelector(state => state.projectDocUrl); //TODO: where to migrate this data?
+  // const projectDocUrl = useSelector(state => state.projectDocUrl); //TODO: write script to migrate to Document/Plan
   const plans = useSelector(state => state.plans) || [];
   const activePlans = _.sortBy(plans.filter(p => !p.archived), 'order');
   const archivedPlans = plans.filter(p => !!p.archived);

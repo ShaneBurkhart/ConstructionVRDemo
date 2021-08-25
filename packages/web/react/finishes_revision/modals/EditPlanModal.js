@@ -10,11 +10,11 @@ import './NewPlanModal.css';
 
 const EditPlanModal = ({ onClose, plan }) => {
   const [loading, setLoading] = useState(false);
-  const [url, setUrl] = useState(plan.url);
+  const [s3Url, setS3Url] = useState(plan.s3Url);
   const [filename, setFilename] = useState(plan.filename);
 
   const onRemove = () => {
-    setUrl('');
+    setS3Url('');
     setFilename('');
   };
   
@@ -23,7 +23,7 @@ const EditPlanModal = ({ onClose, plan }) => {
     const onSuccess = () => onClose();
     const onError = () => onClose();
     
-    ActionCreators.updatePlan(plan.id, { url, filename }, onSuccess, onError);
+    ActionCreators.updatePlan(plan.id, { s3Url, filename }, onSuccess, onError);
   }
   
   const onDrop = (acceptedFiles) => {
@@ -42,7 +42,7 @@ const EditPlanModal = ({ onClose, plan }) => {
           data.presignedURL,
           function onUploadFileSuccess() {
             setFilename(file.name || '');
-            setUrl(data.awsURL);
+            setS3Url(data.awsURL);
             setLoading(false);
           },
           function onUploadFileError() {
@@ -69,16 +69,16 @@ const EditPlanModal = ({ onClose, plan }) => {
         Add a New Document to {plan.name}
       </Modal.Header>
       <Modal.Content>
-        {!!url && (
+        {!!s3Url && (
           <>
             <div className="link">
               <Icon name="paperclip" style={{ color: 'grey' }} />
-              <a href={url} target="_blank" style={{ marginLeft: 5 }}>{filename || url}</a>
+              <a href={s3Url} target="_blank" style={{ marginLeft: 5 }}>{filename || s3Url}</a>
             </div>
             <a href="#/" onClick={onRemove} style={{ marginTop: 10, display: 'inline-block' }}>Remove</a>
           </>
         )}
-        {!url && (
+        {!s3Url && (
           <div className="field">
             <StyledDropzone  onDrop={onDrop} accept={null} acceptMultiple={false} />
           </div>
@@ -91,7 +91,7 @@ const EditPlanModal = ({ onClose, plan }) => {
         <Button
           color="green"
           onClick={onSubmit}
-          disabled={loading || !url}
+          disabled={loading || !s3Url}
         >
           Add a New Document
         </Button>

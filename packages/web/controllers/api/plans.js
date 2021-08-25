@@ -1,15 +1,6 @@
-// const { Sequelize, Op, QueryTypes } = require('sequelize');
-// const AWS = require('aws-sdk')
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
 const queue = require("lambda-queue");
-
-// AWS.config.update({
-//   region: process.env["REGION"],
-//   credentials: new AWS.Credentials(process.env["ACCESS_KEY_ID"], process.env["SECRET_ACCESS_KEY"])
-// });
-// const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
-
 
 module.exports = (app) => {  
   app.post("/api2/v2/plans/:project_access_token", m.authUser, async (req, res) => {
@@ -45,13 +36,14 @@ module.exports = (app) => {
       }, { transaction });
       
       if (!document) throw new Error("could not create document");
-      
+
+      await transaction.commit();
+
       queue.startSplitPdf({
         's3Key': encodeURIComponent(document.s3Url),
         'objectId': document.uuid
       });
 
-      await transaction.commit();
       await plan.reload({ include: [{ model: models.Document }, { model: models.PlanHistory, required: false }]});
 
       if (!plan) throw new Error("could not complete creation of document");
@@ -67,7 +59,7 @@ module.exports = (app) => {
   app.put("/api2/v2/plans/:project_access_token/:plan_id", m.authUser, async (req, res) => {
     const accessToken = req.params["project_access_token"];
     const planId = req.params["plan_id"];
-    const { filename, url, name } = req.body;
+    const { filename, s3Url, name } = req.body;
     
     try {
       const project = await models.Project.findOne({
@@ -86,12 +78,26 @@ module.exports = (app) => {
         await plan.update({ name });
       }
 
-      if (!!url) {
-        const didUpdate = await plan.updateHistory(url, filename);
+      if (!!s3Url) {
+        const didUpdate = await plan.updateHistory(s3Url, filename);
         if (!didUpdate) throw new Error("update method failed");
       }
 
-      const refreshedPlans = await project.getPlans({ include: [{ model: models.PlanHistory }]});
+      const refreshedPlans = await project.getPlans({
+        include: [
+          {
+            model: models.PlanHistory,
+            include: [{
+              model: models.Document,
+              include: [{ model: models.Sheet, required: false }]
+            }],
+          },
+          {
+            model: models.Document,
+            include: [{ model: models.Sheet, required: false }]
+          }
+        ]
+      });
 
       return res.json(refreshedPlans);
     } catch(error){
