@@ -2,14 +2,10 @@ import React from 'react';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { DotsVerticalIcon } from '@heroicons/react/outline';
 
-const dateOptions = {
-  weekday: "short",
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "numeric",
-}
+import FocusEditableInput from '../components/FocusEditableInput';
+
+
+const dateOptions = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "numeric" }
 
 
 const DraggableRow = React.forwardRef(
@@ -35,6 +31,7 @@ const DraggableRow = React.forwardRef(
 export const ActivePlansTable = ({
   plans=[],
   handleReorderPlans,
+  handleEditPlanName,
   toggleArchivePlan,
   setEditPlan,
   setShowHistory,
@@ -115,7 +112,11 @@ export const ActivePlansTable = ({
                                   {p.order + 1}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                  {p.name}
+                                  <FocusEditableInput
+                                    editable={adminMode}
+                                    value={p.name}
+                                    onUpdate={(newName) => handleEditPlanName(p.id, newName)}
+                                  />
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                   {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
@@ -131,13 +132,13 @@ export const ActivePlansTable = ({
                                       <a onClick={() => setEditPlan(p)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
                                         Edit
                                       </a>
-                                      <a onClick={() => toggleArchivePlan(p.id)} className="text-indigo-600 cursor-pointer hover:text-indigo-900">
+                                      <a onClick={() => toggleArchivePlan(p.id)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
                                         Archive
                                       </a>
                                     </>
                                   )}
                                   {!!(p.PlanHistories || []).length && (
-                                    <a onClick={() => setShowHistory(p)} className="ml-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
+                                    <a onClick={() => setShowHistory(p)} className="text-indigo-600 cursor-pointer hover:text-indigo-900">
                                       History
                                     </a>
                                   )}

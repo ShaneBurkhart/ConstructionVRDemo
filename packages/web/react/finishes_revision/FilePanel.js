@@ -68,6 +68,16 @@ const FilePanel = () => {
     ActionCreators.reorderPlan(planId, newOrderNum, onSuccess, onError);
   }
 
+  const editPlanName = (planId, name) => {
+    if (loading) return;
+    setLoading(true);
+    const onSuccess = () => setLoading(false);
+    const onError = () => setLoading(false);
+    
+    ActionCreators.updatePlan(planId, { name }, onSuccess, onError);
+  }
+
+
   return (
     <>
       <section className="xlarge-container">
@@ -95,6 +105,7 @@ const FilePanel = () => {
           handleReorderPlans={handleReorderPlans}
           toggleArchivePlan={toggleArchivePlan}
           setEditPlan={setEditPlan}
+          handleEditPlanName={editPlanName}
           setShowHistory={setSelectedPlanHistory}
         />
         <Grid style={{ marginTop: 20 }}>
