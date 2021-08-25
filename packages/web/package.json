@@ -4,6 +4,7 @@
   "description": "",
   "main": "websocket.js",
   "dependencies": {
+    "@heroicons/react": "^1.0.4",
     "@sendgrid/mail": "^7.4.2",
     "airtable": "^0.8.1",
     "aws-sdk": "^2.875.0",
