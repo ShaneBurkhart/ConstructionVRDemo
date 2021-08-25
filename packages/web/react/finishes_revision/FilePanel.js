@@ -5,15 +5,15 @@ import { Button, Icon, Table, Grid, Header, Dimmer, Loader, } from 'semantic-ui-
 import ActionCreators from './action_creators';
 
 
-import { ActivePlansTable, ArchivedPlansTable } from './FilesPanelTables';
+import { ActivePlansTable, ArchivedPlansTable } from './FilePanelTables';
 import NewPlanModal from './modals/NewPlanModal';
 import EditPlanModal from './modals/EditPlanModal';
 import PlanHistoryModal from './modals/PlanHistoryModal';
 
-import styles from "./FilesPanel.module.css";
+import styles from "./FilePanel.module.css";
 
 
-const FilesPanel = (props) => {
+const FilePanel = (props) => {
   // const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   // const projectDocUrl = useSelector(state => state.projectDocUrl); //TODO: where to migrate this data?
   const plans = useSelector(state => state.plans) || [];
@@ -114,4 +114,4 @@ const FilesPanel = (props) => {
   );
 }
 
-export default FilesPanel;
+export default FilePanel;

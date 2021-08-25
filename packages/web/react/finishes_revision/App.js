@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import ActionCreators from './action_creators';
 import { finishCategoriesArr } from '../../common/constants';
 
-import FilesPanel from './FilesPanel';
+import FilePanel from './FilePanel';
 import SiteHeader from './SiteHeader';
 import FinishCategoriesTable from './FinishCategoriesTable';
 import FinishCategoriesDrawer from './FinishCategoriesDrawer';
@@ -63,7 +63,7 @@ const App = () => {
             <Route exact path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes`}>
               <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
             </Route>
-            <Route path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`} component={FilesPanel} />
+            <Route path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`} component={FilePanel} />
           </Switch>
         </Router>
       </div>
