@@ -20,7 +20,7 @@ body {
   padding-left: 300px;
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1200px) {
   .admin-mode {
     padding-left: 0;
   }

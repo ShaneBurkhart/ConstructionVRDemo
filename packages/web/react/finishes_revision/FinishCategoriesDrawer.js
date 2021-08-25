@@ -18,7 +18,7 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
     window.addEventListener("resize", onResize);
   }, []);
 
-  const canClose = windowWidth < 900;
+  const canClose = windowWidth < 1201;
   const show = !canClose || open;
 
   const drawerStyles = [styles.categoriesDrawer];
