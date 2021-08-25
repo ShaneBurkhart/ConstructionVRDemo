@@ -1,3 +1,4 @@
+// This file is an example brought in from SnappyPDF --> implementation is found ./plans.js
 const models = require("../models")
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();

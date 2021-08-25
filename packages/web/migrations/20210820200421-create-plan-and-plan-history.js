@@ -51,9 +51,6 @@ module.exports = {
           PlanId: {
             type: Sequelize.INTEGER
           },
-          DocumentId: {
-            type: Sequelize.INTEGER
-          },
           uploadedAt: {
             allowNull: false,
             type: Sequelize.DATE

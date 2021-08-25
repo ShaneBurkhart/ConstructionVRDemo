@@ -2,6 +2,7 @@
 // const AWS = require('aws-sdk')
 const m = require("../middleware.js");
 const models = require("../../models/index.js");
+const queue = require("lambda-queue");
 
 // AWS.config.update({
 //   region: process.env["REGION"],
@@ -12,30 +13,52 @@ const models = require("../../models/index.js");
 
 module.exports = (app) => {  
   app.post("/api2/v2/plans/:project_access_token", m.authUser, async (req, res) => {
+    let transaction;
     const accessToken = req.params["project_access_token"];
-    const { filename, url, name } = req.body;
-    if (!url || !filename) return res.status(422).send("a url and filename are required");
+    const { filename, s3Url, name } = req.body;
+    if (!s3Url || !filename) return res.status(422).send("Required file data was not received.");
     
-    try {
+    try { 
       const project = await models.Project.findOne({
         where: { accessToken },
         include: [{ model: models.Plan.scope("active"), required: false }],
       });
-
+      
       if (!project) return res.status(404).send("Project not found");
       
+      transaction = await models.sequelize.transaction();
+      
       const order = (project.Plans || []).length;
-
-      const newPlan = await project.createPlan({
+      const plan = await project.createPlan({
         name: name || filename,
-        url,
-        filename,
         order,
         uploadedAt: Date.now(),
+      }, { transaction });
+
+
+      if (!plan) throw new Error("could not create resource");
+      
+      const document = await plan.createDocument({
+        s3Url,
+        filename,
+        startedPipelineAt: Date.now(),
+      }, { transaction });
+      
+      if (!document) throw new Error("could not create document");
+      
+      queue.startSplitPdf({
+        's3Key': encodeURIComponent(document.s3Url),
+        'objectId': document.uuid
       });
 
-      res.json({ newPlan });
+      await transaction.commit();
+      await plan.reload({ include: [{ model: models.Document }, { model: models.PlanHistory, required: false }]});
+
+      if (!plan) throw new Error("could not complete creation of document");
+      
+      res.json({ newPlan: plan });
     } catch(error){
+      if (transaction) await transaction.rollback();
       console.error(error);
       return res.status(422).send("Could not create new file");
     }
@@ -169,4 +192,38 @@ module.exports = (app) => {
       res.status(422).send("Could not successfully update plan orders");
     }
   });
+
+  // pipelineWebhooks
+  app.post("/api2/_webhooks/documents", async (req, res) => {
+    const { type, data } = req.body
+
+    console.log("FORM", req.body)
+
+    switch (type) {
+      case "SPLIT_PDF_COMPLETED":
+        // Nothing to do 
+        break
+      case "PAGE_COUNT":
+        await models.Document.update({ pageCount: data.pageCount }, { where: { uuid: data.objectId }})
+        break
+      case "SHEET_TO_IMAGE_COMPLETED":
+        const doc = await models.Document.findOne({ where: { uuid: data.objectId }, include: models.Sheet })
+        if (!doc) return res.status(422).send("")
+
+        const sheets = doc.Sheets || []
+        const pageIndex = data.pageIndex
+        const sheet = sheets.find(s => s.index === pageIndex)
+        if (sheet) return res.status(422).send("")
+
+        await doc.createSheet({ index: pageIndex, width: data.sheetWidth, height: data.sheetHeight, DocumentUuid: doc.uuid })
+        break
+
+      default: 
+        console.log("Invalid event type to webhook", type)
+        res.status(422).send("Invalid type for webhook event")
+    }
+
+    res.send("Completed")
+  });
+
 }

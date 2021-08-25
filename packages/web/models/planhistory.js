@@ -2,7 +2,6 @@
 module.exports = (sequelize, DataTypes) => {
   const PlanHistory = sequelize.define('PlanHistory', {
     PlanId: DataTypes.INTEGER,
-    DocumentId: DataType.INTEGER,
     uploadedAt: DataTypes.DATE,
   }, {
     defaultScope: {

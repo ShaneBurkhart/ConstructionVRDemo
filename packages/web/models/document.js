@@ -4,6 +4,8 @@ const uid = new ShortUniqueId();
 
 module.exports = (sequelize, DataTypes) => {
   const Document = sequelize.define('Document', {
+    PlanId: DataTypes.INTEGER,
+    PlanHistoryId: DataTypes.INTEGER,
     uuid: {
       allowNull: false, 
       type: DataTypes.STRING,
@@ -19,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
   Document.associate = function(models) {
     // associations can be defined here
     Document.hasMany(models.Sheet)
+    Document.belongsTo(models.Plan)
+    Document.belongsTo(models.PlanHistory)
   };
 
   Document.beforeValidate(doc => {

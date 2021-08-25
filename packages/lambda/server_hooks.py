@@ -12,7 +12,7 @@ def get_host():
         return "http://nginx:3000"
     
 def get_webhook_url():
-    return "{}/api/_webhooks/documents".format(get_host())
+    return "{}/api2/_webhooks/documents".format(get_host())
 
 def notify_split_pdf_completion(object_id):
     json = { 

@@ -4,7 +4,6 @@ const { Op } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   const Plan = sequelize.define('Plan', {
     ProjectId: DataTypes.BIGINT,
-    DocumentId: DataTypes.INTEGER,
     name: DataTypes.STRING,
     order: DataTypes.INTEGER,
     uploadedAt: DataTypes.DATE,

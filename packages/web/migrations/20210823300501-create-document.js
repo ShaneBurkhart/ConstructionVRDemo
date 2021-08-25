@@ -9,10 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      PlanId: {
+        type: Sequelize.INTEGER
+      },
+      PlanHistoryId: {
+        type: Sequelize.INTEGER
+      },
       uuid: {
         allowNull: false,
         unique: true,
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       filename: {
         type: Sequelize.STRING
@@ -22,7 +28,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       pageCount: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
       startedPipelineAt: {
         type: Sequelize.DATE

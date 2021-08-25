@@ -67,23 +67,35 @@ module.exports = (app) => {
 
   });
 
-  app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
-    const accessToken = req.params["project_access_token"];
+  app.get("/api2/v2/finishes/:project_access_token", async (req, res) => { //TODO: should this route be moved since it calls plans and finishes?
+    const accessToken = req.params["project_access_token"]; 
     
     try {
-      const project = await models.Project.findOne({
-        where: { accessToken },
-        include: [{ model: models.Plan, include: [{ model: models.PlanHistory }] }],
-      });
+      const project = await models.Project.findOne({ where: { accessToken } });
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
       const categoryLocks = await project.getCategoryLocks();
+      const plans = await project.getPlans({ //TODO: associations via defaultScopes? and/or move to eager loading
+        include: [
+          {
+            model: models.Document,
+            include: [{ model: models.Sheet }]
+          },
+          {
+            model: models.PlanHistory,
+            required: false,
+            include: [{
+              model: models.Document,
+              include: [{ model: models.Sheet }]
+            }]
+          }
+        ],
+      })
 
       const projectId = project.id;
       const projectName = project.name;
       const projectDocUrl = project.documentUrl || '';
-      const plans = project.Plans || [];
 
       const lockedCategories = (categoryLocks || []).map(cl => cl.category);
   
