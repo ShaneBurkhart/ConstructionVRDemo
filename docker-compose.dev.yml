@@ -72,7 +72,7 @@ services:
 
     pdf_to_image:
         image: shaneburkhart/construction-vr-demo-lambda
-        networks: [ pdf_to_image, lambda_queue_proxy ]
+        networks: [ pdf_to_image, nginx, lambda_queue_proxy ]
         env_file: [ user.env ]
         volumes: [ ./packages/lambda:/var/task ]
         command: "pdf_to_image.to_image"

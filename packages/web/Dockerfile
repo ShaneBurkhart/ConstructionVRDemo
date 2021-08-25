@@ -14,8 +14,6 @@ RUN npm install
 
 ADD . /app/
 
-RUN npm run build
-
 EXPOSE 4567
 
 CMD ["ruby", "server.rb"]

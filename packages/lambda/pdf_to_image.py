@@ -32,7 +32,7 @@ def to_image(event, context):
 
     try:
         dest_key = key.replace('.pdf', '.png')
-        response = s3_client.upload_fileobj(buf, bucket, dest_key, ExtraArgs={'ContentType': 'image/png', 'ACL':'public-read'})
+        response = s3_client.upload_fileobj(buf, bucket, dest_key, ExtraArgs={'CacheControl': 'max-age=31536000', 'ContentType': 'image/png', 'ACL':'public-read'})
     except ClientError as e:
         raise e
 
