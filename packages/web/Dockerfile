@@ -1,3 +1,5 @@
+FROM shaneburkhart/construction-vr-demo-tailwind
+
 FROM ruby
 MAINTAINER Shane Burkhart <shaneburkhart@gmail.com>
 
@@ -9,6 +11,7 @@ RUN apt-get update && apt-get install -y nodejs
 ADD Gemfile /app/Gemfile
 RUN bundle install
 
+COPY --from=0 /app /tailwind
 ADD package.json /app/package.json
 RUN npm install
 
