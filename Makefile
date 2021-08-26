@@ -17,6 +17,11 @@ build:
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
 
+restart:
+	$(MAKE) clean
+	$(MAKE) run
+	$(MAKE) logs
+
 c:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
