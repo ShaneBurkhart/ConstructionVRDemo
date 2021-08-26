@@ -26,7 +26,7 @@ def start_job(queueName, data):
 
         response = lambda_client.invoke(
             FunctionName=functionName,
-            InvocationType="RequestResponse",
+            InvocationType="Event",
             Payload=payloadBytesArr
         )
     else:
