@@ -79,7 +79,7 @@ export const ActivePlansTable = ({
                     Download
                   </th>
                   <th scope="col" className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                    <span>Controls</span>
+                    Controls
                   </th>
                 </tr>
               </thead>
@@ -111,19 +111,23 @@ export const ActivePlansTable = ({
                                   {p.order + 1}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                  <FocusEditableInput
-                                    editable={adminMode}
-                                    value={p.name}
-                                    onUpdate={(newName) => handleEditPlanName(p.id, newName)}
-                                  />
+                                  <div className="truncate" style={{ width: 225 }}>
+                                    <FocusEditableInput
+                                      editable={adminMode}
+                                      value={p.name}
+                                      onUpdate={(newName) => handleEditPlanName(p.id, newName)}
+                                    />
+                                  </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                   {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                  <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
-                                    {(p.Document || {}).filename}
-                                  </a>
+                                  <div class="truncate" style={{ maxWidth: 200 }}>
+                                    <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
+                                      {(p.Document || {}).filename}
+                                    </a>
+                                  </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                   {adminMode && (
@@ -211,15 +215,19 @@ export const ArchivedPlansTable = ({
                 {(plans || []).map(p => (
                   <tr key={p.id}>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      {p.name}
+                      <div class="truncate" style={{ width: 225 }}>
+                        {p.name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                       {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
-                        {(p.Document || {}).filename}
-                      </a>
+                      <div class="truncate" style={{ maxWidth: 200 }}>
+                        <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
+                          {(p.Document || {}).filename}
+                        </a>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                       {adminMode && (

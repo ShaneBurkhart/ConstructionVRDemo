@@ -239,7 +239,7 @@ class FocusEditableInput extends React.Component {
           style={{ minWidth: 60 }}
         >
           <div style={{ display: 'flex' }}>
-            <div className={`${oneLine ? styles.oneline : ''} ${styles.displayField}`}>
+            <div className={`${oneLine ? styles.oneline : ''} ${styles.displayField} truncate`}>
               {this.getDisplayVal(val)}
             </div>
             {editable && hovering ? (
