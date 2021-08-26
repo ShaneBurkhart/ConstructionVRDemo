@@ -6,7 +6,7 @@ require "./models/models.rb"
 
 S3_URL = "https://s3-us-west-2.amazonaws.com"
 AWS_REGION = ENV["AWS_REGION"]
-BUCKET = ENV["BUCKET"]
+BUCKET = ENV["AWS_BUCKET"]
 
 Aws.config.update({
   region: AWS_REGION,
