@@ -7,7 +7,7 @@ headers = {
 
 def get_host():
     if os.environ["NODE_ENV"] == 'production':
-        return "{}".format(os.u["SITE_URL"])
+        return "{}".format(os.environ["SITE_URL"])
     else:
         return "http://nginx:3000"
     
