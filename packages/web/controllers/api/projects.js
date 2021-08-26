@@ -14,9 +14,8 @@ module.exports = (app) => {
     try {
       const users = await models.User.findAll();
       const roles = models.User.rawAttributes.role.values;
-  
-      const projectsAllInfo = await models.Project.findAll({ where: { accessToken: { [Op.not]: null } } });
-      const projects = projectsAllInfo.filter(prop => prop !== "adminAccessToken");
+      const projects = await models.Project.scope("withoutAdminToken").findAll({ where: { accessToken: { [Op.not]: null } } });
+      
       res.json({ users, roles, projects });
     } catch (err) {
       return res.status(422).send("Could not load projects");

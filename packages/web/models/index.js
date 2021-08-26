@@ -31,6 +31,12 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].loadScopes) {
+    db[modelName].loadScopes(db);
+  }
+});
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

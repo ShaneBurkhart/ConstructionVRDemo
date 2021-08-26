@@ -14,10 +14,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       defaultValue: Date.now(),
     },
-  }, {});
+  }, {
+    scopes: {
+      withoutAdminToken: {
+        attributes: {
+          exclude: [ 'adminAccessToken' ],
+        },
+      },
+    }
+  });
   Project.associate = function(models) {
     // associations can be defined here
     Project.hasMany(models.Category);
+    Project.hasMany(models.Plan);
     Project.hasMany(models.CategoryLock);
     Project.hasMany(models.Selection);
     Project.hasMany(models.Option);

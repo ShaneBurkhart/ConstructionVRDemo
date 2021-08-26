@@ -4,6 +4,7 @@
   padding: 2px;
   border: 1px solid #bbb;
   background-color: white;
+  overflow: hidden;
 }
 
 .draggingState {

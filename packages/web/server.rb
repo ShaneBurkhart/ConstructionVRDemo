@@ -144,7 +144,7 @@ post '/api/temp_upload/presign' do
   key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
   signer = Aws::S3::Presigner.new
   url = signer.presigned_url(:put_object, {
-    bucket: ENV["BUCKET"],
+    bucket: ENV["AWS_BUCKET"],
     key: key,
     content_type: params["mime"],
     acl: "public-read"
@@ -153,7 +153,7 @@ post '/api/temp_upload/presign' do
   content_type "application/json"
   {
     presignedURL: url,
-    awsURL: "https://#{ENV["BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
+    awsURL: "https://#{ENV["AWS_BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
   }.to_json
 end
 
@@ -162,7 +162,7 @@ post "/api/presign/#{renderer_uploader_presign}" do
   key = "tmp/#{SecureRandom.uuid}_#{params['filename']}"
   signer = Aws::S3::Presigner.new
   url = signer.presigned_url(:put_object, {
-    bucket: ENV["BUCKET"],
+    bucket: ENV["AWS_BUCKET"],
     key: key,
     content_type: params["mime"],
     acl: "public-read"
@@ -171,7 +171,7 @@ post "/api/presign/#{renderer_uploader_presign}" do
   content_type "application/json"
   {
     presignedURL: url,
-    awsURL: "https://#{ENV["BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
+    awsURL: "https://#{ENV["AWS_BUCKET"]}.s3-us-west-2.amazonaws.com/#{key}"
   }.to_json
 end
 

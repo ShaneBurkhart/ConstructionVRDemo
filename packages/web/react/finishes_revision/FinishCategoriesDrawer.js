@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
-import ShareLinkModal from './modals/ShareLinkModal';
-import PrintOptionsModal from './modals/PrintOptionsModal';
 
 import styles from './FinishCategoriesDrawer.module.css';
 
 const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [open, setOpen] = useState(false);
   const [showAddNewOptionModal, setShowAddNewOptionModal] = useState(false);
-  const [showShareLinkModal, setShowShareLinkModal] = useState(false);
-  const [showPrintOptionsModal, setShowPrintOptionsModal] = useState(false);
+  
+  const toggleDrawer = () => setOpen(!open);
   const toggleShowAddNewOptionModal = () => setShowAddNewOptionModal(!showAddNewOptionModal);
-  const toggleShowShareLinkModal = () => setShowShareLinkModal(!showShareLinkModal);
-  const toggleShowPrintOptionsModal = () => setShowPrintOptionsModal(!showPrintOptionsModal);
+  
+  useEffect(() => {
+    const onResize = (e) => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", onResize);
+  }, []);
 
-  const onSubmitPrintOptions = () => {
-    setShowPrintOptionsModal(false);
-    setTimeout(() => window.print(), 0);
-  }
+  const canClose = windowWidth < 1201;
+  const show = !canClose || open;
+
+  const drawerStyles = [styles.categoriesDrawer];
+  const toggleBtnStyles = [styles.drawerButtons];
+  if (canClose) toggleBtnStyles.push(styles.boxShadow);
+  if (canClose && open) drawerStyles.push(styles.boxShadow);
+  if (!show) [drawerStyles, toggleBtnStyles].forEach(s => s.push(styles.close));
   
   return (
     <>
-      <div className={`${styles.categoriesDrawer} hide-print`}>
+      <div className={`${drawerStyles.join(' ')} hide-print`}>
         <Segment vertical>
           <a href="/" title="go to project dashboard">
             <img src="/logo.png" />
@@ -38,12 +45,6 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
             Add a New Finish
             <Icon name='plus' />
           </Button>
-          <div className={styles.modalLink}>
-            <a onClick={toggleShowShareLinkModal}>Get Share Link</a>
-          </div>
-          <div className={styles.modalLink}>
-            <a onClick={toggleShowPrintOptionsModal}>Print Options</a>
-          </div>
         </Segment>
         <Segment vertical className={styles.categoriesSection}>
           <Menu text vertical>
@@ -59,15 +60,17 @@ const FinishCategoriesDrawer = ({ activeCategoryMap, categoryList }) => {
             ))}
           </Menu>
         </Segment>
+        {canClose && (
+          <span onClick={toggleDrawer} className={toggleBtnStyles.join(' ')}>
+            <Button
+              icon={<Icon name={`angle double ${open ? 'left' : 'right'}`} />}
+              color="purple"
+            />
+          </span>
+        )}
       </div>
       {showAddNewOptionModal && (
         <AddEditFinishModal onClose={toggleShowAddNewOptionModal} />
-      )}
-      {showShareLinkModal && (
-        <ShareLinkModal onClose={toggleShowShareLinkModal} />
-      )}
-      {showPrintOptionsModal && (
-        <PrintOptionsModal onClose={toggleShowPrintOptionsModal} categoryList={categoryList} onSubmit={onSubmitPrintOptions} />
       )}
     </>
   );

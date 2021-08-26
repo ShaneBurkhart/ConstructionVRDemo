@@ -1,8 +1,23 @@
+.headerContent {
+  display: flex; 
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 635px) {
+  .headerContent {
+    flex-wrap: wrap;
+  }
+}
+
+.headerContent h1 {
+  display: inline-block;
+  font-size: 38px;
+  font-weight: bold;
+}
 .documentLinkContainer {
-  margin-left: 5%;
   display: flex;
-  min-width: 18rem;
-  align-items: baseline;
+  min-width: 15rem;
 }
 
 .editCurrentIcon {

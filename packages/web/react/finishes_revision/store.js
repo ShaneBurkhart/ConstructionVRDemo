@@ -6,6 +6,7 @@ const _initialState = {
   projectName: "",
   projectDocUrl: "",
   apiError: {},
+  plans: [],
   finishes: [],
   newestFinish: {},
   finishLibrary: [],
@@ -19,8 +20,8 @@ let unchangedFinishes;
 const todos = (state = {}, action) => {
   switch (action.type) {
     case "LOAD":
-      const { finishes, projectId, projectName, projectDocUrl, lockedCategories } = action.data;
-      return { ...state, finishes, projectId, projectName, projectDocUrl, lockedCategories };
+      const { finishes, projectId, projectName, projectDocUrl, lockedCategories, plans } = action.data;
+      return { ...state, finishes, projectId, projectName, projectDocUrl, lockedCategories, plans };
     
     case "NEW_FINISH":
       return { ...state, finishes: [...state.finishes, action.data], newestFinish: action.data };
@@ -47,6 +48,12 @@ const todos = (state = {}, action) => {
     
     case "UPDATE_PROJECT_DOCUMENT":
       return { ...state, projectDocUrl: action.projectDocUrl};
+         
+    case "NEW_PLAN":
+      return { ...state, plans: [...state.plans, action.data] };
+
+    case "UPDATE_PLANS":
+      return { ...state, plans: action.data };
 
     case 'API_ERROR':
       return { ...state, apiError: {

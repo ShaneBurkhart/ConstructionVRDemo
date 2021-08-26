@@ -6,14 +6,14 @@ AWS.config.update({
   region: process.env["AWS_REGION"],
   credentials: new AWS.Credentials(process.env["AWS_ACCESS_KEY_ID"], process.env["AWS_SECRET_ACCESS_KEY"])
 });
-const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
+const s3 = new AWS.S3({ params: { Bucket: process.env.AWS_BUCKET } });
 
 module.exports = (app) => {
   app.post("/api2/v2/uploads/presigned_url", m.authUser, (req, res) => {
     const filename = req.body.filename;
     const mime = req.body.mime;
 
-    const myBucket = process.env.BUCKET;
+    const myBucket = process.env.AWS_BUCKET;
     const myKey = `tmp/${uuid()}_${filename}`;
     const signedUrlExpireSeconds = 60 * 5;
     try {

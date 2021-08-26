@@ -12,7 +12,7 @@ const getPermissions = user => ({
 })
 
 module.exports = (app) => {
-  app.get("/app/project/:access_token/finishes", async (req, res) => {
+  app.get(["/app/project/:access_token/finishes", "/app/project/:access_token/finishes/*"], async (req, res) => {
     const { access_token } = req.params;
     const { edit_access_token } = req.query;
 

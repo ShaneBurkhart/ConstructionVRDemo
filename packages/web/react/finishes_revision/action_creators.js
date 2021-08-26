@@ -167,6 +167,69 @@ const ActionCreator = {
     })
   },
 
+  addNewPlan: (planData, onSuccess, onError) => {
+    $.ajax({
+      type: "POST",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}`,
+      data: planData,
+      success: ({ newPlan }) => {
+        onSuccess();
+        _dispatch({ type: "NEW_PLAN", data: newPlan });
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  updatePlan: (planId, planData, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}`,
+      data: planData,
+      success: (plans) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PLANS", data: plans })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  toggleArchivePlan: (planId, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}/archive`,
+      success: (plans) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PLANS", data: plans })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
+  reorderPlan: (planId, newOrderNum, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/plans/${PROJECT_ACCESS_TOKEN}/${planId}/order`,
+      data: { newOrderNum },
+      success: (plans) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PLANS", data: plans })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
   lockCategory: (category, onSuccess, onError) => {
     $.ajax({
       type: "POST",

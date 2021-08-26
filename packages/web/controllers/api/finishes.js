@@ -12,7 +12,7 @@ AWS.config.update({
   region: process.env["AWS_REGION"],
   credentials: new AWS.Credentials(process.env["AWS_ACCESS_KEY_ID"], process.env["AWS_SECRET_ACCESS_KEY"])
 });
-const s3 = new AWS.S3({ params: { Bucket: process.env.BUCKET } });
+const s3 = new AWS.S3({ params: { Bucket: process.env.AWS_BUCKET } });
 
 
 module.exports = (app) => {
@@ -67,15 +67,16 @@ module.exports = (app) => {
 
   });
 
-  app.get("/api2/v2/finishes/:project_access_token", async (req, res) => {
-    const projectAccessToken = req.params["project_access_token"];
+  app.get("/api2/v2/finishes/:project_access_token", async (req, res) => { //TODO: should this route be moved since it calls plans and finishes?
+    const accessToken = req.params["project_access_token"]; 
     
     try {
-      const project = await models.Project.findOne({ where: { accessToken: projectAccessToken } });
+      const project = await models.Project.findOne({ where: { accessToken } });
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
       const categoryLocks = await project.getCategoryLocks();
+      const plans = await project.getPlans();
 
       const projectId = project.id;
       const projectName = project.name;
@@ -83,7 +84,7 @@ module.exports = (app) => {
 
       const lockedCategories = (categoryLocks || []).map(cl => cl.category);
   
-      return res.json({ finishes, projectId, projectName, projectDocUrl, lockedCategories });
+      return res.json({ finishes, projectId, projectName, projectDocUrl, plans, lockedCategories });
     } catch(error){
       console.log(error);
       res.status(422).send("Could not retrieve project information")
@@ -310,7 +311,7 @@ module.exports = (app) => {
   
       request({ url, encoding: null }, (err, r, body) => {
         if (err) return res.status(422).json({ error: err })
-        const bucket = process.env.BUCKET;
+        const bucket = process.env.AWS_BUCKET;
         const imageURL = `https://${bucket}.s3-us-west-2.amazonaws.com/${filename}`;
 
         s3.putObject({

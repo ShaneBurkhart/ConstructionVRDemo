@@ -2,7 +2,8 @@
   width: 100%;
 }
 
-img {
+/* TODO: change to className and test */
+img { 
   padding: 1px;
   max-width: 175px;
   max-height: 175px;
