@@ -122,7 +122,7 @@ export const ActivePlansTable = ({
                                   {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                  <a className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" href={(p.Document || {}).url} target="_blank">
+                                  <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
                                     {(p.Document || {}).filename}
                                   </a>
                                 </td>
@@ -218,7 +218,7 @@ export const ArchivedPlansTable = ({
                       {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      <a className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" href={(p.Document || {}).url} target="_blank">
+                      <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
                         {(p.Document || {}).filename}
                       </a>
                     </td>
