@@ -17,6 +17,11 @@ build:
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
 
+restart:
+	$(MAKE) clean
+	$(MAKE) run
+	$(MAKE) logs
+
 c:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
 
@@ -105,6 +110,7 @@ prod:
 	git checkout master
 	git pull origin master
 	$(MAKE) build
+	$(MAKE) deploy_lambda
 	$(MAKE) prod_clean
 	$(MAKE) prod_run
 	$(MAKE) prod_db
@@ -139,7 +145,7 @@ deploy_lambda:
 				--image-config Command=split_pdf.split \
 				--memory-size 512 \
 				--timeout 60 \
-				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=GMIsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=GMIpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=GMIcropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=GMIimageTextRecognition}
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
@@ -157,7 +163,7 @@ deploy_lambda:
 				--image-config Command=pdf_to_image.to_image \
 				--memory-size 512 \
 				--timeout 60 \
-				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=GMIsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=GMIpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=GMIcropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=GMIimageTextRecognition}
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
