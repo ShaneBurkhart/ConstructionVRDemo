@@ -9,3 +9,18 @@
   font-size: 38px;
   font-weight: bold;
 }
+.documentLinkContainer {
+  display: flex;
+  min-width: 15rem;
+}
+
+.editCurrentIcon {
+  margin-left: 5%;
+  cursor: pointer;
+  color: #6d6d6d;
+}
+
+.editCurrentIcon:hover {
+  color: #4183c4;
+  text-decoration: none;
+}

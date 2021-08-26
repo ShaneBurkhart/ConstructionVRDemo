@@ -151,6 +151,22 @@ const ActionCreator = {
     })
   },
 
+  addEditProjectDoc: (documentUrl, onSuccess, onError) => {
+    $.ajax({
+      type: "PUT",
+      url: `/api2/v2/project/add_doc/${PROJECT_ACCESS_TOKEN}`,
+      data: {documentUrl},
+      success: ({projectDocUrl}) => {
+        onSuccess();
+        _dispatch({ type: "UPDATE_PROJECT_DOCUMENT", projectDocUrl })
+      },
+      error: (error) => {
+        onError();
+        _dispatch({ type: "API_ERROR", data: error });
+      }
+    })
+  },
+
   addNewPlan: (planData, onSuccess, onError) => {
     $.ajax({
       type: "POST",
