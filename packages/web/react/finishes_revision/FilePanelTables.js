@@ -37,7 +37,6 @@ export const ActivePlansTable = ({
   setShowHistory,
 }) => {
   const adminMode = IS_SUPER_ADMIN;
-  const showDragHandles = adminMode && plans.length > 1;
 
   const onDragEnd = ({ source, destination, draggableId }) => {
     if (!destination) return;
@@ -54,7 +53,7 @@ export const ActivePlansTable = ({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className=" bg-gray-50">
                 <tr>
-                  {showDragHandles && <th/>}
+                  {adminMode && <th/>}
                   <th
                     scope="col"
                     className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
@@ -86,8 +85,8 @@ export const ActivePlansTable = ({
               </thead>
               {!(plans || []).length && (
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <tr className="text-sm text-gray-600 bg-white">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-500 whitespace-nowrap">
+                  <tr className="text-gray-600 bg-white">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-500 whitespace-nowrap max-w-0">
                       You have not added any files
                     </td>
                   </tr>
@@ -103,7 +102,7 @@ export const ActivePlansTable = ({
                             key={p.id}
                             draggableId={`${p.id}`}
                             index={idx}
-                            isDragDisabled={!showDragHandles}
+                            isDragDisabled={!adminMode}
                             type="PLAN"
                           >
                             {(provided, snapshot) => (
@@ -203,7 +202,7 @@ export const ArchivedPlansTable = ({
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {!(plans || []).length && (
-                  <tr className="text-sm text-gray-600 bg-white">
+                  <tr className="text-gray-600 bg-white">
                     <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                       There are no archived files
                     </td>
