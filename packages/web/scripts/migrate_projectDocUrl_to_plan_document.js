@@ -20,7 +20,7 @@ async function wait(ms) {
     if (documentUrl) {
       const document = await models.Document.create({
         s3Url: documentUrl,
-        filename: documentUrl, //TODO: can I get the filename?
+        filename: documentUrl, //TODO: can I get the filename? 
         //TODO: filetype (?)
         startedPipelineAt: Date.now(),
       });
@@ -28,7 +28,7 @@ async function wait(ms) {
       const order = (project.Plans || []).length;
       await project.createPlan({
         DocumentId: document.id,
-        name: documentUrl,
+        name: 'Construction Document',
         order,
         uploadedAt: Date.now(),
       });
