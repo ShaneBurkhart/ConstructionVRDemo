@@ -52,8 +52,8 @@ const App = () => {
   const planHistories = plans.filter(p => !!(p.PlanHistories || []).length).map(p => p.PlanHistories).flat();
   const planDocs = [
     ...plans.filter(p => !!p.Document).map(p => ({ PlanId: p.id, ...p.Document })),
-    ...planHistories.filter(p => !!p.Document).map(p => ({ PlanId: p.PlanId, ...p.Document }))
-  ]
+    ...planHistories.filter(p => !!p.Document).map(p => ({ PlanId: p.PlanId, isHistory: true, ...p.Document }))
+  ];
   
   return (
     <main>
