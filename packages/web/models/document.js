@@ -39,10 +39,12 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Document.afterCreate(doc => {
-    queue.startSplitPdf({
-      's3Key': encodeURIComponent(doc.s3Url),
-      'objectId': doc.uuid
-    });
+    if (doc.s3Url.endsWith('.pdf')) {
+      queue.startSplitPdf({
+        's3Key': encodeURIComponent(doc.s3Url),
+        'objectId': doc.uuid
+      });
+    }
   });
 
   return Document;
