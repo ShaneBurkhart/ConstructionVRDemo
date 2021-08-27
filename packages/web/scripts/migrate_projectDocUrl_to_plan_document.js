@@ -18,9 +18,10 @@ async function wait(ms) {
     const { documentUrl } = project;
     
     if (documentUrl) {
+      const filename = s3Url.substring(str.indexOf("_") + 1);
       const document = await models.Document.create({
         s3Url: documentUrl,
-        filename: documentUrl, //TODO: can I get the filename? 
+        filename,
         //TODO: filetype (?)
         startedPipelineAt: Date.now(),
       });
