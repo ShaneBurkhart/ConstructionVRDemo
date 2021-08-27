@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { Segment, Menu, Icon, Button } from 'semantic-ui-react';
-// import { ArchiveIcon } from '@heroicons/react/solid';
 
 
 import AddEditFinishModal from './modals/AddEditFinishModal';
@@ -101,11 +100,11 @@ const SideDrawer = ({ activeCategoryMap, categoryList, planDocs, plans }) => {
               key={d.uuid}
               name={d.filename}
               href={`/app/document/${d.uuid}`}
+              target="_blank"
               className="border border-b border-gray-100"
               content={
                 <div className="max-w-full truncate">
-                  {/* <span className="font-medium">{d.isHistory && <ArchiveIcon className="w-4 h-4 mr-1"/>} {planNames[d.PlanId]}</span> */}
-                  <div className="flex font-medium">{planNames[d.PlanId]} {d.isHistory && ` - (in history)`}</div>
+                  <div className="flex font-medium">{planNames[d.PlanId]} {d.isHistory && <div className="ml-2 text-sm italic text-gray-400 font-extralight">(history)</div>}</div>
                   <div className="mt-1 text-sm font-light">{new Date(d.createdAt).toLocaleDateString('en', dateOptions)}</div> 
                 </div>
               }
