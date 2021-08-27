@@ -158,7 +158,7 @@ const FinishCard = ({
 
   const cardContents = (
     <>
-      <div className={styles.detailsSection}>
+      <div className={`${styles.detailsSection} truncate`}>
         <div className={styles.detailsHeadingContainer}>
           <span className={styles.cellHeading}>
             {`${tag}${orderNumber+1}`}
