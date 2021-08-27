@@ -123,6 +123,30 @@ const ActionCreator = {
     });
   },
 
+  uploadLargeFile: (file, presignedURL, callback, errorCallback, onProgress) => {
+    $.ajax({
+      xhr: function() {
+        var xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener("progress", function(evt) {
+          if (evt.lengthComputable) {
+              var percentComplete = (evt.loaded / evt.total) * 100;
+              onProgress(Math.round(percentComplete))
+          }
+        }, false);
+        return xhr;
+      },
+      type: "PUT",
+      url: presignedURL,
+      data: file,
+      dataType: "text",
+      cache : false,
+      contentType : file.type,
+      processData : false,
+      success: callback,
+      error: errorCallback
+    });
+  },
+
   uploadFromUrl: (url, onSuccess, onError) => {
     $.ajax({
       type: "POST",
