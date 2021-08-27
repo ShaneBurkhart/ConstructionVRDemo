@@ -10,9 +10,9 @@ all: run
 
 build:
 	docker build -t ${IMAGE_TAG}-tailwind -f packages/tailwind/Dockerfile ./packages/tailwind
-	docker build -t ${IMAGE_TAG}-web -f packages/web/Dockerfile ./packages/web
 	docker build -t ${IMAGE_TAG}-lambda -f packages/lambda/Dockerfile ./packages/lambda
 	docker build -t ${IMAGE_TAG}-lambda-queue -f packages/lambda-queue/Dockerfile ./packages/lambda-queue
+	docker build -t ${IMAGE_TAG}-web -f packages/web/Dockerfile ./packages/web
 
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d

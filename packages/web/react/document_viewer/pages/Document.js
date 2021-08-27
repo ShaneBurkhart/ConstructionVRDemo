@@ -26,6 +26,8 @@ const Document = (props) => {
       url: `/api2/v2/documents/${documentUuid}`,
       dataType: "json",
       success: (doc) => {
+				window.document.title = doc.Plan.name;
+
         setDocument(doc);
 				if (!doc.startedPipelineAt || thirtySecondsDidPass(doc.startedPipelineAt)){
 					return setLoading(false);

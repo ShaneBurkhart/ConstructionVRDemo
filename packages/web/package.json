@@ -16,6 +16,7 @@
     "file-loader": "^5.0.2",
     "file-type": "^16.3.0",
     "finishvision-tailwind": "file:../tailwind",
+    "got": "^11.8.2",
     "lambda-queue": "file:../lambda-queue",
     "pg": "^8.0.0",
     "pg-hstore": "^2.3.3",
@@ -55,8 +56,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "watch": "webpack --watch"
+    "build": "npx webpack",
+    "watch": "npx webpack --watch"
   },
   "repository": {
     "type": "git",
