@@ -6,7 +6,8 @@ module.exports = {
     finishes_app: "./react/finishes/index.js",
     renderer_uploader_app: "./react/renderer_uploader/index.js",
     finishes_app_revision: "./react/finishes_revision/index.js",
-    projects_dashboard_app: "./react/projects_dashboard/index.js"
+    projects_dashboard_app: "./react/projects_dashboard/index.js",
+    document_viewer_app: "./react/document_viewer/index.js"
   },
   // entry: "./react/index.js",
   mode: "development",

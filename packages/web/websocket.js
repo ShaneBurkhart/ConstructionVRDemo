@@ -45,6 +45,7 @@ io.use(function(socket, next) {
 require("./controllers/auth.js")(app);
 require("./controllers/users.js")(app);
 require("./controllers/dashboard.js")(app);
+require("./controllers/documentViewer.js")(app);
 require("./controllers/finishes.js")(app);
 
 // APIs
