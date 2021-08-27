@@ -54,6 +54,7 @@ require("./controllers/api/projects.js")(app);
 require("./controllers/api/finishes.js")(app);
 require("./controllers/api/uploads.js")(app);
 require("./controllers/api/plans.js")(app);
+require("./controllers/api/documents.js")(app);
 
 
 app.get("/api2/finishes/options/search", function (req, res) {

@@ -11,6 +11,7 @@ const Home = (props) => {
 
 	return (
 		<>
+			<div>Document Viewer</div>
 			<div className="relative h-screen overflow-hidden bg-gray-50">
 				<div className="hidden sm:block sm:absolute sm:inset-y-0 sm:h-full sm:w-full" aria-hidden="true">
 					<div className="relative h-full mx-auto max-w-7xl">

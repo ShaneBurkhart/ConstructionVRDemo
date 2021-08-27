@@ -15,17 +15,18 @@ const Document = (props) => {
 	// console.log(loading, progress, document)
 
 	const checkDocument = () => {
-		// getDocumentRequest.sendRequest(null, doc => {
-		// 	setDocument(doc)	
-
-		// 	if (!doc.pageCount || (doc.Sheets || []).length !== doc.pageCount) {
-		// 		setTimeout(checkDocument, 1000)
-		// 	} else {
-		// 		setLoading(false)
-		// 	}
-		// }, err => {
-		// 	alert(err)
-		// })
+		$.ajax({
+      type: "GET",
+      url: `/api2/v2/documents/${documentUuid}`,
+      dataType: "json",
+      success: (document) => {
+				console.log({document})
+        setDocument(document);
+      },
+      error: (error) => {
+        alert(error);
+      }
+    })
 	}
 
 	useEffect(() => { checkDocument() }, [])

@@ -13,8 +13,8 @@ const App = () => {
   return (
     <Suspense fallback={<FullPageLoadingSpinner />}>
       <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/d/:documentUuid" component={Document} />
+        <Route exact path="/app/document" component={Home} />
+        <Route path="/app/document/:documentUuid" component={Document} />
         <Route component={NoRoute} />
       </Switch>
     </Suspense>

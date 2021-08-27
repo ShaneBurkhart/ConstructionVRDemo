@@ -124,7 +124,7 @@ export const ActivePlansTable = ({
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                   <div className="truncate" style={{ maxWidth: 200 }}>
-                                    <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
+                                    <a href={`/app/document/${(p.Document || {}).uuid}`} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
                                       {(p.Document || {}).filename}
                                     </a>
                                   </div>
@@ -224,7 +224,7 @@ export const ArchivedPlansTable = ({
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                       <div className="truncate" style={{ maxWidth: 200 }}>
-                        <a href={(p.Document || {}).s3Url} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
+                        <a href={`/app/document/${(p.Document || {}).uuid}`} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
                           {(p.Document || {}).filename}
                         </a>
                       </div>
