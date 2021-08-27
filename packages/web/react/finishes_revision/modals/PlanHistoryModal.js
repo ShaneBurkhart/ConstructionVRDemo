@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, Button, Loader, Dimmer, Header } from 'semantic-ui-react';
+import React from 'react';
+import { Modal, Button, Header } from 'semantic-ui-react';
 import { ArrowCircleDownIcon } from '@heroicons/react/solid';
 
 import './NewPlanModal.css';
@@ -41,7 +41,7 @@ const PlanHistoryModal = ({ onClose, plan }) => {
                     <ArrowCircleDownIcon className="w-5 h-5 text-blue-600"/>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <a href={doc.s3Url} title={doc.filename} className="focus:outline-none" target="_blank">
+                    <a href={`/app/document/${doc.uuid}`} title={`open ${doc.filename} in viewer`} className="focus:outline-none" target="_blank">
                       {/* Extend touch target to entire panel */}
                       <span className="absolute inset-0" aria-hidden="true" />
                       <p className="text-sm font-medium text-gray-900">{doc.filename || doc.s3Url}</p>

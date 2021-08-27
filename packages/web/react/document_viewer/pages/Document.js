@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import Header from '../components/Header';
+
 const Document = (props) => {
 	const { documentUuid } = useParams()
 	const [loading, setLoading] = useState(true)
@@ -10,37 +12,42 @@ const Document = (props) => {
 	const sheets = (document || {}).Sheets || []
 	sheets.sort((a, b) => a.index < b.index ? -1 : (a.index > b.index ? 1 : 0))
 
-	// const getDocumentRequest = bouncer.get("/api/documents/" + documentUuid)
-
-	// console.log(loading, progress, document)
-
 	const checkDocument = () => {
 		$.ajax({
       type: "GET",
       url: `/api2/v2/documents/${documentUuid}`,
       dataType: "json",
       success: (document) => {
-				console.log({document})
         setDocument(document);
       },
       error: (error) => {
-        alert(error);
+				console.error(error)
+        alert('could not retrieve document');
       }
     })
 	}
 
 	useEffect(() => { checkDocument() }, [])
 
+	if (!document) return (
+		<Header pageTitle="Loading Document..." />
+	)
+
 	return (
 		<>
-			Document {documentUuid}
+			<Header pageTitle={`Document ${document.filename}`} s3Url={document.s3Url}/>
+			{!sheets.length && (
+				<div className="p-2">
+					Document cannot be displayed in viewer.
+				</div>
+			)}
 			{sheets.map(sheet => {
 				return (
 					<img key={sheet.index} src={sheet.fullImgUrl} />
 				)
 			})}
 		</>
-	)
+	);
 }
 
 export default Document
