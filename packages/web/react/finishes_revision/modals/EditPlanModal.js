@@ -66,7 +66,7 @@ const EditPlanModal = ({ onClose, plan }) => {
       size="small"
     >
       <Modal.Header>
-        Add a New Document to {plan.name}
+        Update Document for {plan.name}
       </Modal.Header>
       <Modal.Content>
         {!!s3Url && (
@@ -93,7 +93,7 @@ const EditPlanModal = ({ onClose, plan }) => {
           onClick={onSubmit}
           disabled={loading || !s3Url}
         >
-          Add a New Document
+          Update Document
         </Button>
       </Modal.Actions>
       {loading && <Dimmer active inverted><Loader /></Dimmer>}
