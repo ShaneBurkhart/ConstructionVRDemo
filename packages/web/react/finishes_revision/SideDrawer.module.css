@@ -1,4 +1,4 @@
-.categoriesDrawer {
+.sideDrawer {
   position: fixed;
   top: 0;
   left: 0;
@@ -13,16 +13,16 @@
   transition: left 200ms ease-out;
 }
 
-.categoriesDrawer.boxShadow {
+.sideDrawer.boxShadow {
   box-shadow: 3px 0px 8px 0px #00000014
 }
 
-.categoriesDrawer.close {
+.sideDrawer.close {
   left: -300px;
   transition: left 200ms ease-out;
 }
 
-.categoriesDrawer > div {
+.sideDrawer > div {
   padding-left: 10px !important;
   padding-right: 10px !important;
 }

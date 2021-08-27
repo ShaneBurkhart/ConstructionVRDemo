@@ -7,7 +7,7 @@ import { finishCategoriesArr } from '../../common/constants';
 import FilePanel from './FilePanel';
 import SiteHeader from './SiteHeader';
 import FinishCategoriesTable from './FinishCategoriesTable';
-import FinishCategoriesDrawer from './FinishCategoriesDrawer';
+import SideDrawer from './SideDrawer';
 import ShareLinkModal from './modals/ShareLinkModal';
 import PrintOptionsModal from './modals/PrintOptionsModal';
 
@@ -20,6 +20,7 @@ import "./App.css";
 const App = () => {
   const dispatch = useDispatch();
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
+  const plans = useSelector(state => state.plans);
   const finishes = useSelector(state => state.finishes);
   const apiError = useSelector(state => state.apiError);
 
@@ -47,12 +48,25 @@ const App = () => {
   });
 
   const categoryList = finishCategoriesArr.map(({name}) => name).filter(c => Object.keys(activeCategoryMap).includes(c));
-
+  
+  const planHistories = plans.filter(p => !!(p.PlanHistories || []).length).map(p => p.PlanHistories).flat();
+  const planDocs = [
+    ...plans.filter(p => !!p.Document).map(p => ({ PlanId: p.id, ...p.Document })),
+    ...planHistories.filter(p => !!p.Document).map(p => ({ PlanId: p.PlanId, ...p.Document }))
+  ]
+  
   return (
     <main>
-      {adminMode && <FinishCategoriesDrawer activeCategoryMap={activeCategoryMap} categoryList={categoryList} />}
-      <div className={`${adminMode ? "admin-mode" : ""}`}>
-        <Router>
+      <Router>
+        {adminMode && (
+          <SideDrawer
+            plans={plans}
+            planDocs={planDocs}
+            categoryList={categoryList}
+            activeCategoryMap={activeCategoryMap}
+          />
+        )}
+        <div className={`${adminMode ? "admin-mode" : ""}`}>
           <SiteHeader
             adminMode={adminMode}
             categoryList={categoryList}
@@ -65,8 +79,8 @@ const App = () => {
             </Route>
             <Route path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`} component={FilePanel} />
           </Switch>
-        </Router>
-      </div>
+        </div>
+      </Router>
       {showShareLinkModal && (
         <ShareLinkModal onClose={toggleShareLinkModal} />
       )}
