@@ -133,7 +133,7 @@ export const ActivePlansTable = ({
                                   {adminMode && (
                                     <>
                                       <a onClick={() => setEditPlan(p)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
-                                        Edit
+                                        Update
                                       </a>
                                       <a onClick={() => toggleArchivePlan(p.id)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
                                         Archive

@@ -22,7 +22,6 @@ module.exports = (app) => {
       const document = await models.Document.create({
         s3Url,
         filename,
-        startedPipelineAt: Date.now()
       }, { transaction });
 
       if (!document) throw new Error("could not create document");
