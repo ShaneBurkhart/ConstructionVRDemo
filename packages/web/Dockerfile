@@ -1,4 +1,8 @@
 FROM shaneburkhart/construction-vr-demo-tailwind
+ADD ./react /react
+RUN npm run build
+
+FROM shaneburkhart/construction-vr-demo-lambda-queue
 
 FROM ruby
 MAINTAINER Shane Burkhart <shaneburkhart@gmail.com>
@@ -12,10 +16,13 @@ ADD Gemfile /app/Gemfile
 RUN bundle install
 
 COPY --from=0 /app /tailwind
+COPY --from=1 /app /lambda-queue
 ADD package.json /app/package.json
 RUN npm install
 
 ADD . /app/
+
+RUN npm run build
 
 EXPOSE 4567
 

@@ -25,7 +25,10 @@ module.exports = (app) => {
         ACL: "public-read",
         Expires: signedUrlExpireSeconds
       }, (err, url) => {
-        if (err) return res.status(422).send("Could not complete configuration for upload");
+        if (err) {
+          console.log(err)
+          return res.status(422).send("Could not complete configuration for upload");
+        }
         
         const encodedKey = encodeURIComponent(myKey)
         res.json({
