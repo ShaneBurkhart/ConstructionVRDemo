@@ -6,6 +6,8 @@ NAME=construction-vr-demo
 IMAGE_TAG=shaneburkhart/${NAME}
 LAMBDA_IMAGE_TAG=${IMAGE_TAG}-lambda
 
+C?=web
+
 all: run
 
 build:
@@ -23,7 +25,7 @@ restart:
 	$(MAKE) logs
 
 c:
-	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm web /bin/bash
+	docker-compose -f docker-compose.dev.yml -p ${NAME} run --rm ${C} /bin/bash
 
 c_node:
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web node -i -e "const models = require('./models/index.js')"

@@ -34,6 +34,7 @@ services:
         image: shaneburkhart/construction-vr-demo-tailwind
         volumes: [ ./packages/tailwind:/app, ./packages/web/react:/react ]
         env_file: [ user.env ]
+        tty: true
         command: "npm start"
 
     pg:
