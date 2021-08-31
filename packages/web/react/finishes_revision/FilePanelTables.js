@@ -64,7 +64,7 @@ export const ActivePlansTable = ({
   }
   
   return (
-    <>
+    <div>
       <div className="xs:flex xs:items-center xs:justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="p-0 text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
@@ -207,7 +207,7 @@ export const ActivePlansTable = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -218,80 +218,85 @@ export const ArchivedPlansTable = ({
 }) => {
   const adminMode = IS_SUPER_ADMIN;
   return (
-    <div className="flex flex-col w-full mt-10">
-      <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          <div className="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                  >
-                    Uploaded
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                  >
-                    Download
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
-                  >
-                    Controls
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {!(plans || []).length && (
-                  <tr className="text-gray-600 bg-white">
-                    <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                      There are no archived files
-                    </td>
+    <div className="mt-10">
+      <h2 className="p-0 text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+        Archived Documents
+      </h2>
+      <div className="flex flex-col w-full mt-8">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div className="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Uploaded
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Download
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                    >
+                      Controls
+                    </th>
                   </tr>
-                )}
-                {(plans || []).map(p => (
-                  <tr key={p.id}>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      <div className="truncate" style={{ width: 225 }}>
-                        {p.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                      <div className="truncate" style={{ maxWidth: 200 }}>
-                        <a href={`/app/document/${(p.Document || {}).uuid}`} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
-                          {(p.Document || {}).filename}
-                        </a>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                      {adminMode && (
-                        <a onClick={() => toggleArchivePlan(p.id)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
-                          Re-activate
-                        </a>
-                      )}
-                      {!!(p.PlanHistories || []).length && (
-                        <a onClick={() => setShowHistory(p)} className="text-indigo-600 cursor-pointer hover:text-indigo-900">
-                          History
-                        </a>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {!(plans || []).length && (
+                    <tr className="text-gray-600 bg-white">
+                      <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        There are no archived files
+                      </td>
+                    </tr>
+                  )}
+                  {(plans || []).map(p => (
+                    <tr key={p.id}>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        <div className="truncate" style={{ width: 225 }}>
+                          {p.name}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {new Date(p.uploadedAt).toLocaleDateString('en', dateOptions)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        <div className="truncate" style={{ maxWidth: 200 }}>
+                          <a href={`/app/document/${(p.Document || {}).uuid}`} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900" target="_blank">
+                            {(p.Document || {}).filename}
+                          </a>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                        {adminMode && (
+                          <a onClick={() => toggleArchivePlan(p.id)} className="mr-2 text-indigo-600 cursor-pointer hover:text-indigo-900">
+                            Re-activate
+                          </a>
+                        )}
+                        {!!(p.PlanHistories || []).length && (
+                          <a onClick={() => setShowHistory(p)} className="text-indigo-600 cursor-pointer hover:text-indigo-900">
+                            History
+                          </a>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import _ from 'underscore';
 import { useSelector } from 'react-redux';
-import { Button, Icon, Header, Grid, Dimmer, Loader, } from 'semantic-ui-react';
+import { Dimmer, Loader } from 'semantic-ui-react';
 import ActionCreators from './action_creators';
 
 
@@ -9,12 +9,11 @@ import { ActivePlansTable, ArchivedPlansTable } from './FilePanelTables';
 import EditPlanModal from './modals/EditPlanModal';
 import PlanHistoryModal from './modals/PlanHistoryModal';
 
-import styles from "./FilePanel.module.css";
+// import styles from "./FilePanel.module.css";
 
 
 const FilePanel = () => {
-  const adminMode = IS_SUPER_ADMIN;
-  // const projectDocUrl = useSelector(state => state.projectDocUrl); //TODO: write script to migrate to Document/Plan
+  const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const plans = useSelector(state => state.plans) || [];
   const activePlans = _.sortBy(plans.filter(p => !p.archived), 'order');
   const archivedPlans = plans.filter(p => !!p.archived);
@@ -86,16 +85,13 @@ const FilePanel = () => {
           handleEditPlanName={editPlanName}
           setShowHistory={setSelectedPlanHistory}
         />
-        {/* <Grid style={{ marginTop: 20 }}>
-          <Grid.Column width={8}>
-            <Header as='h2'>Archived Documents</Header>
-          </Grid.Column>
-        </Grid> */}
-        {/* <ArchivedPlansTable
-          plans={archivedPlans}
-          toggleArchivePlan={toggleArchivePlan}
-          setShowHistory={setSelectedPlanHistory}
-        /> */}
+        {adminMode && (
+          <ArchivedPlansTable
+            plans={archivedPlans}
+            toggleArchivePlan={toggleArchivePlan}
+            setShowHistory={setSelectedPlanHistory}
+          />
+        )}
         {loading && <Dimmer active inverted><Loader /></Dimmer>}
       </section>
       {showEditPlanModal && <EditPlanModal onClose={closeEditPlan} plan={selectedPlan} />}
