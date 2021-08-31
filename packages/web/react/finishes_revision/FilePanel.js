@@ -91,11 +91,11 @@ const FilePanel = () => {
           handleEditPlanName={editPlanName}
           setShowHistory={setSelectedPlanHistory}
         />
-        <Grid style={{ marginTop: 20 }}>
+        {/* <Grid style={{ marginTop: 20 }}>
           <Grid.Column width={8}>
             <Header as='h2'>Archived Documents</Header>
           </Grid.Column>
-        </Grid>
+        </Grid> */}
         {/* <ArchivedPlansTable
           plans={archivedPlans}
           toggleArchivePlan={toggleArchivePlan}
