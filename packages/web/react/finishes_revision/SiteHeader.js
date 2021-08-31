@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { NavLink } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { Icon, Button } from 'semantic-ui-react';
@@ -10,6 +11,7 @@ import FocusEditableInput from '../components/FocusEditableInput';
 import styles from './SiteHeader.module.css';
 
 const SiteHeader = ({ adminMode, toggleShareLinkModal, togglePrintOptionsModal }) => {
+  const isFilePanel = useRouteMatch(`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`);
   const renderingsLink = window.hasOwnProperty("RENDERINGS_LINK") ? RENDERINGS_LINK : "";
   
   const projectId = useSelector(state => state.projectId);
@@ -31,12 +33,14 @@ const SiteHeader = ({ adminMode, toggleShareLinkModal, togglePrintOptionsModal }
             />
           </h1>
           <div className="flex items-center no-print">
-            <Button
-              icon={<Icon name="print" style={{ fontSize: '1rem' }} />}
-              size="tiny"
-              onClick={togglePrintOptionsModal}
-              title="Open print options"
-            />
+            {!isFilePanel && (
+              <Button
+                icon={<Icon name="print" style={{ fontSize: '1rem' }} />}
+                size="tiny"
+                onClick={togglePrintOptionsModal}
+                title="Open print options"
+              />
+            )}
             {adminMode && (
               <Button 
                 size="tiny" 
