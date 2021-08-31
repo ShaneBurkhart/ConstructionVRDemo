@@ -19,7 +19,7 @@ def split(event, context):
     remoteFile = urlopen(url).read()
     memoryFile = BytesIO(remoteFile)
 
-    input_pdf = PdfFileReader(memoryFile)
+    input_pdf = PdfFileReader(memoryFile, strict=False)
 
     page_count = input_pdf.getNumPages()
 

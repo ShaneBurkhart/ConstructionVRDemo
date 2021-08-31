@@ -112,7 +112,7 @@ prod:
 	git checkout master
 	git pull origin master
 	$(MAKE) build
-	$(MAKE) deploy_lambda
+	# $(MAKE) deploy_lambda
 	$(MAKE) prod_clean
 	$(MAKE) prod_run
 	$(MAKE) prod_db

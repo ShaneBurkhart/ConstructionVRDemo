@@ -96,11 +96,11 @@ const FilePanel = () => {
             <Header as='h2'>Archived Documents</Header>
           </Grid.Column>
         </Grid>
-        <ArchivedPlansTable
+        {/* <ArchivedPlansTable
           plans={archivedPlans}
           toggleArchivePlan={toggleArchivePlan}
           setShowHistory={setSelectedPlanHistory}
-        />
+        /> */}
         {loading && <Dimmer active inverted><Loader /></Dimmer>}
       </section>
       {showEditPlanModal && <EditPlanModal onClose={closeEditPlan} plan={selectedPlan} />}
