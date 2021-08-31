@@ -78,11 +78,6 @@ const FilePanel = () => {
   return (
     <>
       <section className="xlarge-container">
-        <Grid>
-          <Grid.Column width={8}>
-            <Header as='h2'>Project Documents</Header>
-          </Grid.Column>
-        </Grid>
         <ActivePlansTable
           plans={activePlans}
           handleReorderPlans={handleReorderPlans}
