@@ -13,7 +13,14 @@ const CustomInputWrapper = ({ children }) => (
   </div>
 );
 
-function FinishCategoriesTable({ finishes, categoryList, adminMode, searchQuery, setSearchQuery }) {
+function FinishCategoriesTable({
+  finishes,
+  categoryList,
+  adminMode,
+  searchQuery,
+  setSearchQuery,
+  noSearchResults,
+}) {
   const newestFinish = useSelector(state => state.newestFinish);
   const projectName = useSelector(state => state.projectName);
 
@@ -118,7 +125,7 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode, searchQuery,
     [collapseAllCategories, "Collapse All Categories"],
     [expandAllDetails, "Expand All Details"],
     [collapseAllDetails, "Collapse All Details"],
-  ]
+  ];
 
   
   return (
@@ -137,6 +144,12 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode, searchQuery,
             <SearchIcon className="w-4 h-4 text-gray-400" />
           </CustomInputWrapper>
         </div>
+        {noSearchResults && (
+          <div className="px-4 py-2">                  
+            <div className="font-medium tracking-wide">No finishes match search term "{searchQuery}"</div>
+            <a className="block mt-2 text-blue-800 cursor-pointer" onClick={() => setSearchQuery('')}>Clear Search</a>
+          </div>
+        )}
         {sortedCategories.map((category, i) => {
           const prevCat = i === 0 ? "" : sortedCategories[i - 1];
           const nextCat = i === (sortedCategories.length - 1) ? "" : sortedCategories[i + 1];

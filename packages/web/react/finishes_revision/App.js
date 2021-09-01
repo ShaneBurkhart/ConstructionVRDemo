@@ -16,12 +16,11 @@ import ToastMessage from '../components/ToastMessage';
 import "finishvision-tailwind";
 import "./App.css";
 
-
 const App = () => {
   const dispatch = useDispatch();
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const plans = useSelector(state => state.plans);
-  const _finishes = useSelector(state => state.finishes);
+  const _finishes = useSelector(state => state.finishes) || [];
   const apiError = useSelector(state => state.apiError);
 
   const [showShareLinkModal, setShowShareLinkModal] = useState(false);
@@ -40,11 +39,13 @@ const App = () => {
     ActionCreators.load();
   }, []);
 
-  let finishes = _finishes || [];
+  let finishes = _finishes;
   const q = searchQuery.trim().toLowerCase();
   if (!!q) {
     finishes = finishes.filter(f => f.displayName.toLowerCase().includes(q));
   }
+
+  const noSearchResults = !!_finishes.length && !finishes.length;
 
   const activeCategoryMap = {};
   finishes.forEach(({category}) => {
@@ -54,7 +55,7 @@ const App = () => {
     }
   });
 
-  const categoryList = finishCategoriesArr.map(({name}) => name).filter(c => Object.keys(activeCategoryMap).includes(c));
+  const categoryList = finishCategoriesArr.map(c => c.name).filter(c => Object.keys(activeCategoryMap).includes(c));
   
   const planHistories = plans.filter(p => !!(p.PlanHistories || []).length).map(p => p.PlanHistories).flat();
   const planDocs = [
@@ -68,9 +69,12 @@ const App = () => {
         {adminMode && (
           <SideDrawer
             plans={plans}
+            searchQuery={searchQuery}
             planDocs={planDocs}
             categoryList={categoryList}
             activeCategoryMap={activeCategoryMap}
+            noSearchResults={noSearchResults}
+            clearSearchQuery={() => setSearchQuery('')}
           />
         )}
         <div className={`${adminMode ? "admin-mode" : ""}`}>
@@ -88,6 +92,7 @@ const App = () => {
                 adminMode={adminMode}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+                noSearchResults={noSearchResults}
               />
             </Route>
             <Route path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`} component={FilePanel} />
