@@ -29,7 +29,7 @@ const FinishCard = ({
   expandSiblingCard,
 }) => {
   const isAdmin = IS_SUPER_ADMIN || IS_EDITOR;
-  const { id, orderNumber, attributes, category } = finishDetails;
+  const { id, orderNumber, attributes, category, displayName } = finishDetails;
   const tag = finishCategoriesMap[category].tag;
 
 
@@ -151,11 +151,6 @@ const FinishCard = ({
   
   const imgArr = attributes["Images"] || [];
 
-  const displayName = attrList
-      .filter(a => attributes[a] && !attrMap[a].excludeFromName)
-        .map(a => attributes[a])
-          .join(", ");
-
   const cardContents = (
     <>
       <div className={`${styles.detailsSection} truncate`}>
@@ -164,7 +159,7 @@ const FinishCard = ({
             {`${tag}${orderNumber+1}`}
           </span>
           <div className={`${styles.cellHeading} ${styles.cardName}`}>
-            <span>{displayName}</span>
+            <span>{displayName || ''}</span>
           </div>
         </div>
         <div className={styles.detailsTableContainer}>

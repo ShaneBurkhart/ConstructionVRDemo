@@ -4,8 +4,16 @@ import _ from 'underscore';
 import FinishCategoryTable from './FinishCategoryTable';
 import FloatingProjectButton from '../components/FloatingProjectButton';
 import { getInlineEditableAttrList } from '../../common/constants';
+import { SearchIcon } from '@heroicons/react/outline';
 
-function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
+
+const CustomInputWrapper = ({ children }) => (
+  <div className="relative flex items-center p-1 px-2 py-0 mt-2 leading-6 border border-gray-400 rounded xs:mt-0 max-w-max focus-within:ring-blue-600 focus-within:ring-1 focus-within:ring-offset-0 focus-within:border-blue-600 focus-within:ring-offset-white">
+    {children}
+  </div>
+);
+
+function FinishCategoriesTable({ finishes, categoryList, adminMode, searchQuery, setSearchQuery }) {
   const newestFinish = useSelector(state => state.newestFinish);
   const projectName = useSelector(state => state.projectName);
 
@@ -76,8 +84,8 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
 
   const sortedCategories = categoryList || [];
   const getSortedCategoryCards = category => (finishes || [])
-      .filter(f => f.category === category)
-        .sort((a,b) => a.orderNumber - b.orderNumber);
+    .filter(f => f.category === category)
+    .sort((a,b) => a.orderNumber - b.orderNumber);
 
   const tabToPrevCategory = (prevCat) => {
     if (!prevCat) return;
@@ -116,6 +124,19 @@ function FinishCategoriesTable({ finishes, categoryList, adminMode }) {
   return (
     <>
       <section className={`xlarge-container ${adminMode ? 'admin-mode' : ''}`}>
+        <div className="flex justify-end w-full mb-6">
+          <CustomInputWrapper>
+            <input 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)} 
+              style={{ width: 250 }}
+              className="leading-5 text-black placeholder-gray-400 bg-transparent border-none focus:border-none focus:ring-0 focus:ring-offset-0"
+              type="search" 
+              placeholder="Search finishes..."
+            /> 
+            <SearchIcon className="w-4 h-4 text-gray-400" />
+          </CustomInputWrapper>
+        </div>
         {sortedCategories.map((category, i) => {
           const prevCat = i === 0 ? "" : sortedCategories[i - 1];
           const nextCat = i === (sortedCategories.length - 1) ? "" : sortedCategories[i + 1];

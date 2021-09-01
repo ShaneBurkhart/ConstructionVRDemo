@@ -21,11 +21,12 @@ const App = () => {
   const dispatch = useDispatch();
   const adminMode = IS_SUPER_ADMIN || IS_EDITOR;
   const plans = useSelector(state => state.plans);
-  const finishes = useSelector(state => state.finishes);
+  const _finishes = useSelector(state => state.finishes);
   const apiError = useSelector(state => state.apiError);
 
   const [showShareLinkModal, setShowShareLinkModal] = useState(false);
   const [showPrintOptionsModal, setShowPrintOptionsModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const toggleShareLinkModal = () => setShowShareLinkModal(!showShareLinkModal);
   const togglePrintOptionsModal = () => setShowPrintOptionsModal(!showPrintOptionsModal);
 
@@ -38,6 +39,12 @@ const App = () => {
     ActionCreators.updateDispatch(dispatch);
     ActionCreators.load();
   }, []);
+
+  let finishes = _finishes || [];
+  const q = searchQuery.trim().toLowerCase();
+  if (!!q) {
+    finishes = finishes.filter(f => f.displayName.toLowerCase().includes(q));
+  }
 
   const activeCategoryMap = {};
   finishes.forEach(({category}) => {
@@ -75,7 +82,13 @@ const App = () => {
           />
           <Switch>
             <Route exact path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes`}>
-              <FinishCategoriesTable finishes={finishes} categoryList={categoryList} adminMode={adminMode} />
+              <FinishCategoriesTable
+                finishes={finishes}
+                categoryList={categoryList}
+                adminMode={adminMode}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+              />
             </Route>
             <Route path={`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`} component={FilePanel} />
           </Switch>
