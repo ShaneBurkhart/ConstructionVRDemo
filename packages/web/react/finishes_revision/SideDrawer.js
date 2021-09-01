@@ -9,12 +9,13 @@ import NewPlanModal from './modals/NewPlanModal';
 import styles from './SideDrawer.module.css';
 
 const SideDrawer = ({
-  activeCategoryMap,
-  categoryList,
-  planDocs, plans,
+  plans,
+  planDocs,
   searchQuery,
+  categoryList,
   noSearchResults,
   clearSearchQuery,
+  activeCategoryMap,
 }) => {
   const isFilePanel = useRouteMatch(`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`)
   
