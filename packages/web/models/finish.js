@@ -1,5 +1,8 @@
 'use strict';
-const { finishCategoriesMap, attrMap } = require('../common/constants')
+const { Op } = require('sequelize');
+const { finishCategoriesMap, attrMap } = require('../common/constants');
+const activeCategories = Object.keys(finishCategoriesMap);
+
 module.exports = (sequelize, DataTypes) => {
   const Finish = sequelize.define('Finish', {
     ProjectId: DataTypes.BIGINT,
@@ -17,7 +20,11 @@ module.exports = (sequelize, DataTypes) => {
           .join(", ");
       }
     }
-  }, {});
+  }, {
+    defaultScope: {
+      where: { category: { [Op.in]: activeCategories }}
+    }
+  });
   Finish.associate = function(models) {
     Finish.belongsTo(models.Project);
   };
