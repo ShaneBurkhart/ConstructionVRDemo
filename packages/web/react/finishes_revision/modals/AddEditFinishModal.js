@@ -234,7 +234,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       open={true}
       onClose={onClose}
     >
-      <Modal.Header style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Modal.Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>     
           {isLibraryView && 'Search finishes from all projects'}
           {!isLibraryView && (

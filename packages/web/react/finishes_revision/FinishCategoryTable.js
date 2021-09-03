@@ -71,7 +71,7 @@ const FinishCategoriesTable = ({
   return (
       <div id={category} className={`${styles.categoryContainer} ${(isHiddenFromPrint || !count) ? "hide-print" : "break-after"}`}>
         <header>
-          <h2 onClick={toggleExpandCategory}>
+          <h2 className="mb-2 text-2xl" onClick={toggleExpandCategory}>
             <Icon className="hide-print" name={expandedCategory ? "angle down" : "angle up"} />
             {category}
             <span className={`${styles.expandCollapseText} hide-print`}>
@@ -81,12 +81,12 @@ const FinishCategoriesTable = ({
             </span>
           </h2>
           {adminMode && (
-            <h2 className="hide-print" style={{ width: 200, textAlign: "right" }}>
+            <div className="hide-print" style={{ width: 200, textAlign: "right" }}>
               {!isCategoryLocked && <Button icon="unlock alternate" title="click to lock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
               {IS_SUPER_ADMIN && isCategoryLocked && <Button icon="lock" title="click to unlock order of finishes" onClick={toggleLockCategory} disabled={loadingLockedState} />}
               <Button icon="plus" title="add a new finish in this category" onClick={toggleShowAddNewModal} />
               <Button icon="expand arrows alternate" title="expand all finish details" onClick={handleExpandAllCards} />
-            </h2>
+            </div>
           )}
         </header>
         <DragDropContext onDragEnd={onDragEnd}>
