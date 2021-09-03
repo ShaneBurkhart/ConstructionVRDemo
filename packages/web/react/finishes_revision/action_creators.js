@@ -294,11 +294,12 @@ const ActionCreator = {
     $.ajax({
       type: "PUT",
       url: `/api2/v2/finishes/search?q=${encodeURIComponent(query)}`,
-      data: data,
+      data: JSON.stringify(data),
+      contentType: "application/json",
       success: (data) => {
         const results = data.results || [];
         onSuccess();
-        _dispatch({ type: "UPDATE_FINISH_LIBRARY", data: results.map(r => r.attributes) })
+        _dispatch({ type: "UPDATE_FINISH_LIBRARY", data: results.map(r => ({...r.attributes, id: r.id})) })
       },
       error: (error) => {
         onError();

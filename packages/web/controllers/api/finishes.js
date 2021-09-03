@@ -18,26 +18,38 @@ const s3 = new AWS.S3({ params: { Bucket: process.env.AWS_BUCKET } });
 module.exports = (app) => {
   app.put("/api2/v2/finishes/search", m.authUser, async (req, res) => {
     const searchQuery = req.query["q"] || "";
-    const { category } = req.body;
+    const { category, includeArchived } = req.body;
+    
+    const sqlExcludeArchived = {
+      ProjectId: {
+        [Op.in]: Sequelize.literal(`(SELECT "Projects"."id" FROM "Projects" WHERE "Projects"."archived" IS false)`)
+      }
+    }
 
     try {
       if (!searchQuery) {
+        const whereOpAnd = [{ category }];
+        if (!includeArchived) whereOpAnd.push(sqlExcludeArchived);
+
         const results = await models.Finish.findAll({
           attributes: [
-            'attributes',
-            [Sequelize.fn("COUNT", Sequelize.col("*")), "cardcount"]
+            [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
+            [Sequelize.fn("MAX", Sequelize.col("id")), "id"],
+            [Sequelize.fn("COUNT", Sequelize.col("*")), "cardcount"],
           ],
           where: {
-            category: category,
+            [Op.and]: [...whereOpAnd]
           },
           order: Sequelize.literal('cardcount DESC'),
           group: ['attributes'],
           limit: 35,
         });
-        return res.json({results})
+
+        return res.json({ results });
       } else {
         const dbSearchQuery = Sequelize.Validator.escape(`%${searchQuery}%`);
         const categoryAttributes = finishCategoriesMap[category].attr;
+        
         let postgresLiteralQuery = '(';
         categoryAttributes.forEach((attr, i) => {
           if (i === 0) {
@@ -48,17 +60,22 @@ module.exports = (app) => {
         });
         postgresLiteralQuery+= ')';
 
+        const whereOpAnd = [{ category }, Sequelize.literal(postgresLiteralQuery)];
+        if (!includeArchived) whereOpAnd.push(sqlExcludeArchived);
+
         const results = await models.Finish.findAll({
           attributes: [
             [Sequelize.fn("DISTINCT", Sequelize.col("attributes")), "attributes"],
+            [Sequelize.fn("MAX", Sequelize.col("id")), "id"],
           ],
           where: {
-            category: category,
-            [Op.and]: Sequelize.literal(postgresLiteralQuery)
+            [Op.and]: [...whereOpAnd]
           },
+          group: ['attributes'],
           limit: 100,
         });
-        return res.json({results})
+
+        return res.json({ results });
       }
     } catch (error){
       console.error(error)
