@@ -290,11 +290,11 @@ const ActionCreator = {
     _dispatch({ type: "UPDATE_PRINT_CATEGORIES", nextHiddenCategories })
   },
 
-  searchFinishLibrary: (query, category, onSuccess, onError) => {
+  searchFinishLibrary: (query, data, onSuccess, onError) => {
     $.ajax({
       type: "PUT",
       url: `/api2/v2/finishes/search?q=${encodeURIComponent(query)}`,
-      data: {category},
+      data: data,
       success: (data) => {
         const results = data.results || [];
         onSuccess();

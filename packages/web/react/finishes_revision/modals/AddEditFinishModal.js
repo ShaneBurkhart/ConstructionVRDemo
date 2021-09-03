@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'underscore';
-import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup } from 'semantic-ui-react';
+import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup, Checkbox } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
 import { finishCategoriesMap, getAttrGridRows, attrMap } from '../../../common/constants.js';
@@ -22,6 +22,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [selectedCategory, setSelectedCategory] = useState(initCategory);
   const [attrRows, setAttrRows] = useState(initAttrGridRows);
   const [isLibraryView, setIsLibraryView] = useState(false);
+  const [includeArchived, setIncludeArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [attributeValues, setAttributeValues] = useState(attributes);
@@ -33,10 +34,10 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const handleSearch = (_e, {value}) => {
     setLibraryLoading(true);
     setSearchQuery(value);
-    const onSuccess = () => { setLibraryLoading(false) };
-    const onError = () => { setLibraryLoading(false) };
+    const onSuccess = () => setLibraryLoading(false);
+    const onError = () => setLibraryLoading(false);
     const debounceSearch = _.debounce((q) => {
-      ActionCreators.searchFinishLibrary(q, selectedCategory, onSuccess, onError);
+      ActionCreators.searchFinishLibrary(q, {category: selectedCategory, includeArchived }, onSuccess, onError);
     }, 500);
     debounceSearch(value);
   }
@@ -128,6 +129,11 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     setSelectedCategory(categoryName);
     const attrList = finishCategoriesMap[categoryName].attr;
     setAttrRows(getAttrGridRows(attrList));
+    if (isLibraryView) {
+      setLibraryLoading(true);
+      const cb = () => setLibraryLoading(false);
+      ActionCreators.searchFinishLibrary(searchQuery, {category: categoryName, includeArchived}, cb, cb)
+    };
   }
 
   const handleSubmit = () => {
@@ -203,11 +209,11 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromLibraryDetails);
 
   const getDisplayName = (libraryObj) => {
-    const attrList = selectedCategory ? finishCategoriesMap[selectedCategory].attr : [];
+    const attrList = (finishCategoriesMap[selectedCategory] || {}).attr || [];
     return attrList
       .filter(a => libraryObj[a] && !attrMap[a].excludeFromName)
-        .map(a => libraryObj[a])
-          .join(", ");
+      .map(a => libraryObj[a])
+      .join(", ");
   }
 
   return (
@@ -230,6 +236,14 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       <Modal.Content>
         <Form>
           <Grid>
+            {isLibraryView && (
+              <div>
+                <p className="max-w-md my-3 text-base text-gray-800 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                  Search finishes from all projects
+                </p>
+                <Checkbox className="block" label="Include archived projects" checked={includeArchived} onChange={() => setIncludeArchived(!includeArchived)} />
+              </div>
+            )}
             <Grid.Row style={{ overflow: "visible" }}>
               <Grid.Column width={16}>
                 <CategoryDropdown
@@ -253,9 +267,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                           <Button color="green" onClick={handleSetLibraryView}>Continue to Library</Button>
                         </div>
                       }
-                      trigger={
-                          <Button color="blue">Fill from library</Button>
-                      }
+                      trigger={<Button color="blue">Fill from library</Button>}
                     />}
                   {_.isEmpty(attributeValues) && <Button color="blue" onClick={handleSetLibraryView}>Fill from library</Button>}
                 </Grid.Column>
