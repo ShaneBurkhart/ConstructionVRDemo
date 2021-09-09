@@ -49,7 +49,10 @@ const Document = () => {
 
 	useEffect(() => {
 		const cache = lscache.get(documentUuid);
-		if (cache) setDocument(cache);
+		if (cache) {
+			setDocument(cache);
+			setLoading(false)
+		}
 		checkDocument();
 	}, []);
 
