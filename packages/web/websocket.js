@@ -5,6 +5,7 @@ var io = require('socket.io')(http, {
   path: "/d30c4db9-008a-42ce-bbc2-3ec95d8c2c45",
 });
 const m = require("./controllers/middleware.js");
+var bodyParser = require('body-parser');
 
 // const queue = require("lambda-queue")
 
@@ -33,6 +34,7 @@ app.set('view engine', 'pug')
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(sessionMiddleware);
 app.use(m.addUserToRequest);

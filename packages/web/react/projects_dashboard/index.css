@@ -1,22 +1,3 @@
-.dashboard-create-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 200;
-}
-
-.project-controls-link:not(:last-child) {
-  margin-right: 20px;
-}
-
-.project-controls-link:hover {
-  cursor: pointer;
-}
-
-.grid.ui {
-  margin-top: 4%;
-}
-
-.grid.ui:first-child {
-  margin-top: 0%;
+.project-controls:hover {
+  text-decoration: underline;
 }

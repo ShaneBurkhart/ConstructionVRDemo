@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import store from './store';
 
 import 'semantic-ui-css/semantic.min.css';
+import "finishvision-tailwind";
 import './index.css';
 
 import App from './App';

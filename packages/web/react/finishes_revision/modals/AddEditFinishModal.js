@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import _ from 'underscore';
-import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup } from 'semantic-ui-react';
+import { Grid, Dimmer, Loader, Form, Button, Modal, Input, Popup, Checkbox, Icon } from 'semantic-ui-react';
 
 import useEvent from '../../hooks/useEvent';
 import { finishCategoriesMap, getAttrGridRows, attrMap } from '../../../common/constants.js';
@@ -22,6 +22,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const [selectedCategory, setSelectedCategory] = useState(initCategory);
   const [attrRows, setAttrRows] = useState(initAttrGridRows);
   const [isLibraryView, setIsLibraryView] = useState(false);
+  const [includeArchived, setIncludeArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [attributeValues, setAttributeValues] = useState(attributes);
@@ -33,10 +34,10 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const handleSearch = (_e, {value}) => {
     setLibraryLoading(true);
     setSearchQuery(value);
-    const onSuccess = () => { setLibraryLoading(false) };
-    const onError = () => { setLibraryLoading(false) };
+    const onSuccess = () => setLibraryLoading(false);
+    const onError = () => setLibraryLoading(false);
     const debounceSearch = _.debounce((q) => {
-      ActionCreators.searchFinishLibrary(q, selectedCategory, onSuccess, onError);
+      ActionCreators.searchFinishLibrary(q, {category: selectedCategory, includeArchived }, onSuccess, onError);
     }, 500);
     debounceSearch(value);
   }
@@ -128,6 +129,22 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
     setSelectedCategory(categoryName);
     const attrList = finishCategoriesMap[categoryName].attr;
     setAttrRows(getAttrGridRows(attrList));
+    if (isLibraryView) {
+      setLibraryLoading(true);
+      const cb = () => setLibraryLoading(false);
+      
+      ActionCreators.searchFinishLibrary(searchQuery, {category: categoryName, includeArchived}, cb, cb)
+    };
+  }
+
+  const handleToggleIncludeArchived = () => {
+    const nextIncludeArchived = !includeArchived;
+    setIncludeArchived(nextIncludeArchived);
+    
+    setLibraryLoading(true);
+    const cb = () => setLibraryLoading(false);
+    
+    ActionCreators.searchFinishLibrary(searchQuery, { category: selectedCategory, includeArchived: nextIncludeArchived }, cb, cb)
   }
 
   const handleSubmit = () => {
@@ -203,11 +220,11 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
   const filteredCategoryAttributes = selectedCategory && finishCategoriesMap[selectedCategory].attr.filter(a => !attrMap[a].excludeFromLibraryDetails);
 
   const getDisplayName = (libraryObj) => {
-    const attrList = selectedCategory ? finishCategoriesMap[selectedCategory].attr : [];
+    const attrList = (finishCategoriesMap[selectedCategory] || {}).attr || [];
     return attrList
       .filter(a => libraryObj[a] && !attrMap[a].excludeFromName)
-        .map(a => libraryObj[a])
-          .join(", ");
+      .map(a => libraryObj[a])
+      .join(", ");
   }
 
   return (
@@ -217,12 +234,17 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
       open={true}
       onClose={onClose}
     >
-      <Modal.Header style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span>{isNew ? "Add New Finish" : "Edit Finish"}</span>
+      <Modal.Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>     
+          {isLibraryView && 'Search finishes from all projects'}
+          {!isLibraryView && (
+            isNew ? "Add New Finish" : "Edit Finish"
+          )}
+        </span>
         <Button
           onClick={handleSubmit}
           color="green"
-          disabled={loading || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
+          disabled={loading || isLibraryView || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
         >
           Save
         </Button>
@@ -253,9 +275,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                           <Button color="green" onClick={handleSetLibraryView}>Continue to Library</Button>
                         </div>
                       }
-                      trigger={
-                          <Button color="blue">Fill from library</Button>
-                      }
+                      trigger={<Button color="blue">Fill from library</Button>}
                     />}
                   {_.isEmpty(attributeValues) && <Button color="blue" onClick={handleSetLibraryView}>Fill from library</Button>}
                 </Grid.Column>
@@ -266,10 +286,10 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                 <Input placeholder='Search...' onChange={handleSearch} value={searchQuery}>
                   <input autoFocus />
                 </Input>
-                <Button style={{ marginLeft: 10 }} onClick={() => setIsLibraryView(false)}>Cancel</Button>
+                <Checkbox className="ml-2" label="Include archived projects" checked={includeArchived} onChange={handleToggleIncludeArchived} />
                 <div className={styles.searchResults}>
                   {(finishLibrary || []).map(f => (
-                      <Grid.Row key={Object.values(f).join("")}>
+                      <Grid.Row key={f.id}>
                         <article
                           className={styles.finishCard}
                           onClick={() => {
@@ -298,7 +318,7 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
                         </article>
                       </Grid.Row>
                   ))}
-                  {!finishLibrary.length && searchQuery && <div>No results...</div> }
+                  {!finishLibrary.length && <div>No current matches</div> }
                   {libraryLoading && <Dimmer active inverted><Loader /></Dimmer>}
                 </div>
               </section>
@@ -316,16 +336,26 @@ const AddEditFinishModal = ({ onClose, preselectedCategory='', finishDetails={} 
         </Form>
       </Modal.Content>
       <Modal.Actions>
-        <Button color='black' onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          color="green"
-          disabled={loading || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
-        >
-          Save
-        </Button>
+        {isLibraryView && (
+          <Button color="purple" onClick={() => setIsLibraryView(false)}>
+            <Icon name="angle double left"/>
+            Go Back
+          </Button>
+        )}
+        {!isLibraryView && (
+          <>
+            <Button color='black' onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              color="green"
+              disabled={loading || !selectedCategory || _.isEmpty(attributeValues) || Object.values(attributeValueErrors).includes(true)}
+            >
+              Save
+            </Button>
+          </>
+        )}
       </Modal.Actions>
       {loading && <Dimmer active inverted><Loader /></Dimmer>}
     </Modal>

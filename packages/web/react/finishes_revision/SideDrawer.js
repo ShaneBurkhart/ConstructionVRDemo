@@ -8,7 +8,15 @@ import NewPlanModal from './modals/NewPlanModal';
 
 import styles from './SideDrawer.module.css';
 
-const SideDrawer = ({ activeCategoryMap, categoryList, planDocs, plans }) => {
+const SideDrawer = ({
+  plans,
+  planDocs,
+  searchQuery,
+  categoryList,
+  noSearchResults,
+  clearSearchQuery,
+  activeCategoryMap,
+}) => {
   const isFilePanel = useRouteMatch(`/app/project/${PROJECT_ACCESS_TOKEN}/finishes/files`)
   
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -48,14 +56,28 @@ const SideDrawer = ({ activeCategoryMap, categoryList, planDocs, plans }) => {
           <Icon name='plus' />
         </Button>
       </Segment>
+      {!!searchQuery && (
+        <Segment vertical>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800">
+            search: "{searchQuery}"
+          </span>
+        </Segment>
+      )}
       <Segment vertical className={styles.categoriesSection}>
         <Menu text vertical>
           <Menu.Item header>Click to Jump to Category</Menu.Item>
-          {!(categoryList || []).length && (
+          {!(categoryList || []).length && 
             <Menu.Item>
-              No categories have been added yet.
+              {noSearchResults ? (
+                <>
+                  <div>Search query found no results</div>
+                  <a className="block mt-2 text-blue-800 cursor-pointer" onClick={clearSearchQuery}>Clear Search</a>
+                </>
+              ) : (
+                <>No categories have been added yet.</>
+              )}
             </Menu.Item>
-          )}
+          }
           {(categoryList || []).map(category => (
             <Menu.Item
               key={category}

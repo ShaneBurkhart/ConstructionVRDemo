@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import ActionCreators from './action_creators';
+import { SearchIcon } from '@heroicons/react/outline';
 
 import { Grid, Table, Header, Button, Icon } from "semantic-ui-react";
 
@@ -8,6 +9,12 @@ import ToastMessage from '../components/ToastMessage';
 import CreateProjectModal from './CreateProjectModal';
 import CopyProjectModal from './CopyProjectModal';
 import ConfirmModal from './ConfirmModal';
+
+const CustomInputWrapper = ({ children }) => (
+  <div className="relative flex items-center p-1 px-2 py-0 mt-2 leading-6 border border-gray-400 rounded xs:mt-0 max-w-max focus-within:ring-blue-600 focus-within:ring-1 focus-within:ring-offset-0 focus-within:border-blue-600 focus-within:ring-offset-white">
+    {children}
+  </div>
+);
 
 
 const Dashboard = () => {
@@ -64,15 +71,38 @@ const Dashboard = () => {
     }
   }
 
-  const ProjectGrid = ({ title, projectList, archived=false }) => {
+  const ProjectGrid = ({ title, projects, archived=false, search=false, className='' }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    let filteredProjects = [...(projects || [])];
+    const q = searchQuery.trim().toLowerCase();
+    if (!!q) {
+      filteredProjects = projects.filter(p => p.name.toLowerCase().includes(q) || (p.Document || {}).filename?.toLowerCase().includes(q));
+    }
+
     return (
-      <>
-        <Grid>
-          <Grid.Column width={8}>
-              <Header as='h2'>{title}</Header>
+      <div className={className}>
+        <Grid stackable>
+          <Grid.Column width={12}>
+            <Header as='h2'>{title}</Header>
           </Grid.Column>
+          {search && (
+            <Grid.Column width={4}>
+              <CustomInputWrapper>
+                <input 
+                  onChange={e => setSearchQuery(e.target.value)} 
+                  style={{ width: 230 }}
+                  className="leading-5 text-black placeholder-gray-400 bg-transparent border-none focus:border-none focus:ring-0 focus:ring-offset-0"
+                  type="search" 
+                  name="search" 
+                  placeholder="Search projects"
+                /> 
+                <SearchIcon className="w-4 h-4 text-gray-400" />
+              </CustomInputWrapper>
+            </Grid.Column>
+          )}
         </Grid>
-        <Table className="celled">
+        <Table celled>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell width={10}>Project</Table.HeaderCell>
@@ -81,50 +111,60 @@ const Dashboard = () => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {projectList.map(({ id, accessToken, name, v1 }) => (
+            {filteredProjects.map(({ id, accessToken, name, v1 }) => (
                 <tr className="project-row" key={accessToken}>
                   <td>
                       <a href={`/app/project/${accessToken}/finishes`} onClick={() => updateSeenAt(id)}>{name}</a>
                   </td>
                   {isAdmin && !archived &&  (
                     <td> 
-                      <a className="project-controls-link" onClick={() => openCopyModal(id, name)}>Copy</a>
-                      <a className="project-controls-link" onClick={() => openConfirmModal(id, name, 'archive')}>Archive</a>
+                      <a className="mr-4 text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openCopyModal(id, name)}>Copy</a>
+                      <a className="text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'archive')}>Archive</a>
                     </td>
                   )}
                   {isAdmin && !!archived && (
                     <td> 
-                      <a className="project-controls-link" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
+                      <a className="text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
                     </td>
                   )}
                   <td>
-                      {v1 && <Icon name="check" color="grey" />}
+                    {v1 && <Icon name="check" color="grey" />}
                   </td>
                 </tr>
             ))}
           </Table.Body>
         </Table>
-      </>
-    )
+      </div>
+    );
   }
 
   return (
-    <section style={{ position: 'relative' }}>
-      {isAdmin && <Button onClick={toggleShowCreateProjectModal} className="dashboard-create-btn">Create New Project</Button>}
-      <div className="ui grid centered">
+    <section>
+      {isAdmin && (
+        <div className="flex justify-end w-full my-2">
+          <Button onClick={toggleShowCreateProjectModal}>
+            Create New Project
+          </Button>
+        </div>
+      )}
+      <div className="grid ui centered">
         <div className="column">
           <ProjectGrid
             title={"Recently Viewed Projects"}
-            projectList={filterProjects('recent')}
+            projects={filterProjects('recent')}
+            className="mt-6"
           />
           <ProjectGrid
             title={"Active Projects"}
-            projectList={filterProjects('active')}
+            projects={filterProjects('active')}
+            search
+            className="mt-12"
           />
           <ProjectGrid
             title={"Archived Projects"}
-            projectList={filterProjects('archived')}
-            archived={true}
+            projects={filterProjects('archived')}
+            archived
+            className="mt-12"
           />
         </div>
 
