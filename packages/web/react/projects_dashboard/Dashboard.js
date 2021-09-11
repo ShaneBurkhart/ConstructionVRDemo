@@ -114,17 +114,17 @@ const Dashboard = () => {
             {filteredProjects.map(({ id, accessToken, name, v1 }) => (
                 <tr className="project-row" key={accessToken}>
                   <td>
-                      <a href={`/app/project/${accessToken}/finishes`} onClick={() => updateSeenAt(id)}>{name}</a>
+                      <a className="py-2 text-blue-600 project-controls hover:text-blue-800" href={`/app/project/${accessToken}/finishes`} onClick={() => updateSeenAt(id)}>{name}</a>
                   </td>
                   {isAdmin && !archived &&  (
                     <td> 
-                      <a className="mr-4 text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openCopyModal(id, name)}>Copy</a>
-                      <a className="text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'archive')}>Archive</a>
+                      <a className="py-2 mr-4 text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openCopyModal(id, name)}>Copy</a>
+                      <a className="py-2 text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'archive')}>Archive</a>
                     </td>
                   )}
                   {isAdmin && !!archived && (
                     <td> 
-                      <a className="text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
+                      <a className="py-2 text-blue-600 cursor-pointer project-controls hover:text-blue-800" onClick={() => openConfirmModal(id, name, 'reactivate')}>Re-Activate</a>
                     </td>
                   )}
                   <td>
