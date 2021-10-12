@@ -9,14 +9,14 @@ from botocore.exceptions import ClientError
 
 import server_hooks
 
-bucket = os.environ["AWS_BUCKET"]
-
 def to_image(event, context):
     key = event['s3Key']
     object_id = event['objectId']
     page_index = event['pageIndex']
     s3 = boto3.resource('s3')
     s3_client = boto3.client('s3')
+
+    bucket = os.environ["AWS_BUCKET"]
 
     obj = s3.Object(bucket, key)
     memoryFile = obj.get()['Body'].read()
