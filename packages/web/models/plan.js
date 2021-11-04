@@ -62,7 +62,6 @@ module.exports = (sequelize, DataTypes) => {
       }, { transaction });
 
       await transaction.commit();
-      await newDocument.save();
       
       return true;
     } catch (error) {
