@@ -12,8 +12,9 @@ const s3 = new AWS.S3({ params: { Bucket: process.env.AWS_BUCKET } });
 module.exports = (app) => {
   app.get("/api2/v2/documents/:documentUuid", async (req, res) => {
 		const { documentUuid } = req.params;
-		const document = await models.Document.findOne({ where: { uuid: documentUuid }, include: [models.Plan] });
+		const document = await models.Document.scope('withSheets').findOne({ where: { uuid: documentUuid }, include: [models.Plan] });
 		if (!document) return res.status(422).send("Document not found");
+		
 		res.json(document);
 	});
 

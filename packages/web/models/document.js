@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   Document.loadScopes = function(models) {
-    Document.addScope('defaultScope', {
+    Document.addScope('withSheets', {
       include: [{
         model: models.Sheet
       }],

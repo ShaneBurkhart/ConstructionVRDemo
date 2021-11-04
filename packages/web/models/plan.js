@@ -18,14 +18,16 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Plan.loadScopes = function(models) {
-    Plan.addScope('defaultScope', {
-      include: [{
-        model: models.PlanHistory
-      }, {
-        model: models.Document
-      }],
-      order: [[{ model: models.PlanHistory }, 'uploadedAt', 'DESC']]
-    })
+    Plan.addScope('withPlanHistoryAndDocs', {
+      include: [
+        {
+          model: models.PlanHistory,
+          include: [ { model: models.Document } ],
+        },
+        { model: models.Document },
+      ],
+      order: [ [{ model: models.PlanHistory }, 'uploadedAt', 'DESC'] ]
+    });
   }
   
   Plan.associate = function(models) {
@@ -60,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       }, { transaction });
 
       await transaction.commit();
+      await newDocument.save();
       
       return true;
     } catch (error) {

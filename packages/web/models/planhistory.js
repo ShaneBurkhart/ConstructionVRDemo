@@ -11,12 +11,5 @@ module.exports = (sequelize, DataTypes) => {
     PlanHistory.belongsTo(models.Document);
   };
 
-  PlanHistory.loadScopes = function(models) {
-    PlanHistory.addScope('defaultScope', {
-      include: [{
-        model: models.Document
-      }]
-    })
-  }
   return PlanHistory;
 };

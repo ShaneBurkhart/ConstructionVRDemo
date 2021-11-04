@@ -88,12 +88,15 @@ module.exports = (app) => {
     const accessToken = req.params["project_access_token"]; 
     
     try {
-      const project = await models.Project.findOne({ where: { accessToken } });
+      const project = await models.Project.findOne({
+        where: { accessToken },
+        include: [{ model: models.Plan.scope('withPlanHistoryAndDocs') }]
+      });
       if (!project) return res.status(404).send("Project not found");
       
       const finishes = await project.getFinishes();
       const categoryLocks = await project.getCategoryLocks();
-      const plans = await project.getPlans();
+      const plans = project.Plans || [];
 
       const projectId = project.id;
       const projectName = project.name;
