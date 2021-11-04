@@ -58,7 +58,7 @@ module.exports = (app) => {
     try {
       const project = await models.Project.findOne({
         where: { accessToken },
-        include: [{ model: models.Plan }]
+        include: [{ model: models.Plan.scope('withPlanHistoryAndDocs') }]
       });
       if (!project) return res.status(404).send("Project resource not found");
 
@@ -74,7 +74,11 @@ module.exports = (app) => {
         if (!didUpdate) throw new Error("update method failed");
       }
 
-      const refreshedPlans = await project.getPlans();
+      await project.reload({
+        include: [{ model: models.Plan.scope('withPlanHistoryAndDocs') }]
+      });
+
+      const refreshedPlans = project.Plans || [];
 
       return res.json(refreshedPlans);
     } catch(error){
@@ -84,9 +88,10 @@ module.exports = (app) => {
   });
   
   app.put("/api2/v2/plans/:project_access_token/:plan_id/archive", m.authUser, async (req, res) => {
-    let transaction;
     const accessToken = req.params["project_access_token"];
     const planId = req.params["plan_id"];
+    
+    let transaction;
     
     try {
       transaction = await models.sequelize.transaction();
@@ -95,6 +100,7 @@ module.exports = (app) => {
         where: { accessToken },
         include: [{ model: models.Plan }],
       });
+
       if (!project) return res.status(404).send("Project not found");
 
       const plan = (project.Plans || []).find(p => p.id == planId);
@@ -116,9 +122,14 @@ module.exports = (app) => {
       }
       
       await transaction.commit();
-
-      const refreshedPlans = await project.getPlans();
       
+      await project.reload({
+        include: [{ model: models.Plan.scope('withPlanHistoryAndDocs') }]
+      });
+      
+      const refreshedPlans = project.Plans || [];
+
+
       return res.json(refreshedPlans);
     } catch(error){
       if (transaction) await transaction.rollback();
@@ -166,8 +177,12 @@ module.exports = (app) => {
       }
   
       await transaction.commit();
+      
+      await project.reload({
+        include: [{ model: models.Plan.scope('withPlanHistoryAndDocs') }]
+      });
 
-      const refreshedPlans = await project.getPlans();
+      const refreshedPlans = project.Plans || [];
 
       return res.json(refreshedPlans);
     } catch (error) {

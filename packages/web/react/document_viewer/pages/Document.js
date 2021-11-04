@@ -27,7 +27,7 @@ const Document = () => {
       url: `/api2/v2/documents/${documentUuid}`,
       dataType: "json",
       success: (doc) => {
-				window.document.title = doc.Plan.name;
+				window.document.title = doc.Plan?.name || 'Plan History Document'; //TODO: Plan comes in as null if sheet is from PlanHistory
         setDocument(doc);
 				if (!doc.startedPipelineAt || thirtySecondsDidPass(doc.startedPipelineAt)){
 					lscache.set(documentUuid, doc, THIRTY_DAYS);
