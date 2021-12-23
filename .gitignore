@@ -11,3 +11,4 @@ public/dist
 __pycache__
 packages/tailwind/dist
 packages/web/public/dist
+.next/
