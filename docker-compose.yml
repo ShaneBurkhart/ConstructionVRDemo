@@ -1,5 +1,5 @@
 web:
-    image: shaneburkhart/construction-vr-demo-web
+    image: shaneburkhart/finish-vision-demo-web
     links:
         - pg
         - redis
@@ -9,7 +9,7 @@ web:
     command: "ruby server.rb"
 
 websocket:
-    image: shaneburkhart/construction-vr-demo-web
+    image: shaneburkhart/finish-vision-demo-web
     links:
         - pg
         - redis

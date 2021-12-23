@@ -40,7 +40,7 @@ $(document).ready(function () {
     })
   });
 
-  var s3 = new AWS.S3({ params: { Bucket: "construction-vr" } });
+  var s3 = new AWS.S3({ params: { Bucket: "finish-vision" } });
 
   var viewer, view;
   var _currentPano = null;

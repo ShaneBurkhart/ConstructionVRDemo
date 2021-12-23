@@ -4,7 +4,7 @@ FROM shaneburkhart/finish-vision-tailwind
 
 FROM shaneburkhart/finish-vision-lambda-queue
 
-FROM node:17-alpine
+FROM node:17
 MAINTAINER Shane Burkhart <shaneburkhart@gmail.com>
 
 WORKDIR /app

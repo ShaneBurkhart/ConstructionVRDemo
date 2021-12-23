@@ -360,13 +360,13 @@ get '/api/project/:ps_access_token/renderings' do
       description: (u["Details"] || "").gsub("|", "; "),
       updated_at: u.current_version[0]["Created At"],
       floor_plan_url: u["Floor Plan Image URL"],
-      url: "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
+      url: "http://finish-vision.shaneburkhart.com/project/#{project['Access Token']}/unit/#{u.id}",
     }
   end
 
   finishes_url = nil
   if !project["Finish Selections Table Name"].nil?
-    finishes_url = "http://construction-vr.shaneburkhart.com/project/#{project['Access Token']}/finishes"
+    finishes_url = "http://finish-vision.shaneburkhart.com/project/#{project['Access Token']}/finishes"
   end
 
   return {

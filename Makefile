@@ -2,7 +2,7 @@
 include user.env
 -include prod.env
 
-NAME=construction-vr-demo
+NAME=finish-vision
 IMAGE_TAG=shaneburkhart/${NAME}
 LAMBDA_IMAGE_TAG=${IMAGE_TAG}-lambda
 
@@ -15,6 +15,7 @@ build:
 	docker build -t ${IMAGE_TAG}-lambda -f packages/lambda/Dockerfile ./packages/lambda
 	docker build -t ${IMAGE_TAG}-lambda-queue -f packages/lambda-queue/Dockerfile ./packages/lambda-queue
 	docker build -t ${IMAGE_TAG}-web -f packages/web/Dockerfile ./packages/web
+	docker build -t ${IMAGE_TAG}-next -f packages/next/Dockerfile ./packages/next
 
 run:
 	docker-compose -f docker-compose.dev.yml -p ${NAME} up -d
@@ -119,7 +120,7 @@ prod:
 	$(MAKE) prod_run
 
 deploy_prod:
-	ssh -A ubuntu@construction-vr.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
+	ssh -A ubuntu@finish-vision.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
 
 
 AWS_CLI=docker run -t --rm --env-file prod.env amazon/aws-cli
@@ -146,7 +147,7 @@ deploy_lambda:
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
 				--image-config Command=split_pdf.split \
 				--memory-size 512 \
-				--timeout 60 \
+				--timeout 180 \
 				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
@@ -164,7 +165,7 @@ deploy_lambda:
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
 				--image-config Command=pdf_to_image.to_image \
 				--memory-size 512 \
-				--timeout 60 \
+				--timeout 180 \
 				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \

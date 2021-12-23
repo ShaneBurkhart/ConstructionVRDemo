@@ -38,33 +38,36 @@ module.exports = (app) => {
         res.locals.currentUser = tmpUser
       }
       
-      const getRecordIdAndVersion = new Promise((resolve, reject) => {
-        base('projects').select({
-          maxRecords: 1,
-          filterByFormula: `{Access Token} = "${project.accessToken}"`
-        }).eachPage(function page(records, _fetchNextPage){
-          resolve({
-            recordId: records[0].fields["Record ID"],
-            isV1: records[0].fields["Is V1?"],
-            hasRenderings: records[0].fields.hasOwnProperty("Units")
-          });
-        }, function done(err){
-          if (err) reject("Could not find resource");
-        })
-      });
+      // const getRecordIdAndVersion = new Promise((resolve, reject) => {
+      //   base('projects').select({
+      //     maxRecords: 1,
+      //     filterByFormula: `{Access Token} = "${project.accessToken}"`
+      //   }).eachPage(function page(records, _fetchNextPage){
+      //     if (!records.length) return reject("Could not find resource");
 
-      const { recordId, isV1, hasRenderings } = await getRecordIdAndVersion;
-      if (!recordId) return res.status(422).send("Could not locate resource");
+      //     resolve({
+      //       recordId: records[0].fields["Record ID"],
+      //       isV1: records[0].fields["Is V1?"],
+      //       hasRenderings: records[0].fields.hasOwnProperty("Units")
+      //     });
+      //   }, function done(err){
+      //     if (err) reject("Could not find resource");
+      //   })
+      // });
+
+      // const { recordId, isV1, hasRenderings } = await getRecordIdAndVersion;
+      // if (!recordId) return res.status(422).send("Could not locate resource");
+      const hasRenderings = false;
 
       const permissions = getPermissions(req.user);
       const isAdmin = permissions.isSuperAdmin || permissions.isEditor;
 
-      if (isV1) {
-        // LEGACY APP - SEND TO SERVER.RB
-        const finishesPath = `/project/${project.accessToken}/finishes`;
-        if (isAdmin) return res.redirect(`/admin/login/${project.adminAccessToken}?redirect_to=${encodeURIComponent(finishesPath)}`);
-        return res.redirect(finishesPath);
-      };
+      // if (isV1) {
+      //   // LEGACY APP - SEND TO SERVER.RB
+      //   const finishesPath = `/project/${project.accessToken}/finishes`;
+      //   if (isAdmin) return res.redirect(`/admin/login/${project.adminAccessToken}?redirect_to=${encodeURIComponent(finishesPath)}`);
+      //   return res.redirect(finishesPath);
+      // };
 
       const renderingsLink = isAdmin ? `/admin/login/${project.adminAccessToken}` : `/project/${project.accessToken}`;
       const projectName = project.name;

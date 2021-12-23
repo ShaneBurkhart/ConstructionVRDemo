@@ -1,8 +1,8 @@
-FROM shaneburkhart/construction-vr-demo-tailwind
+FROM shaneburkhart/finish-vision-tailwind
 ADD ./react /react
 RUN npm run build
 
-FROM shaneburkhart/construction-vr-demo-lambda-queue
+FROM shaneburkhart/finish-vision-lambda-queue
 
 FROM ruby
 MAINTAINER Shane Burkhart <shaneburkhart@gmail.com>
