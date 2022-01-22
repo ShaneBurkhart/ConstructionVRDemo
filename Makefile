@@ -109,21 +109,36 @@ prod_run:
 prod_db:
 	docker-compose -f docker-compose.yml -p ${NAME} run --rm web npx sequelize-cli db:migrate
 
+prod_pg:
+	echo "Enter 'postgres'..."
+	docker-compose -f docker-compose.yml  -p ${NAME} run --rm pg psql -h pg -d mydb -U postgres --password
+
+prod_db_seed:
+	docker-compose -f docker-compose.yml -p ${NAME} run --rm web npx sequelize-cli db:seed:all --seeders-path seeders
+
 prod:
-	git checkout master
-	git pull origin master
-	$(MAKE) build
+	# git checkout master
+	# git pull origin master
+	# $(MAKE) build
 	# $(MAKE) deploy_lambda
 	$(MAKE) prod_clean
 	$(MAKE) prod_run
 	$(MAKE) prod_db
 	$(MAKE) prod_run
 
+prod_logs:
+	docker-compose -f docker-compose.yml -p ${NAME} logs -f
+
+prod_restart:
+	$(MAKE) prod_clean
+	$(MAKE) prod_run
+	$(MAKE) prod_logs
+
 deploy_prod:
 	ssh -A ubuntu@finish-vision.shaneburkhart.com "cd ~/ConstructionVRDemo-Prod; make prod;"
 
 
-AWS_CLI=docker run -t --rm --env-file prod.env amazon/aws-cli
+AWS_CLI=docker run -t --rm --env-file deploy.env amazon/aws-cli
 
 deploy_lambda:
 	docker build -t ${LAMBDA_IMAGE_TAG} -f packages/lambda/Dockerfile ./packages/lambda
@@ -143,12 +158,17 @@ deploy_lambda:
 				--package-type Image \
 				--image-config Command=split_pdf.split
 
+	sleep 30
+
 	$(AWS_CLI) lambda update-function-configuration \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
 				--image-config Command=split_pdf.split \
 				--memory-size 512 \
 				--timeout 180 \
-				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME},AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME}}
+
+	sleep 60
+
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 
@@ -161,12 +181,17 @@ deploy_lambda:
 				--package-type Image \
 				--image-config Command=pdf_to_image.to_image
 
+	sleep 30 
+
 	$(AWS_CLI) lambda update-function-configuration \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
 				--image-config Command=pdf_to_image.to_image \
 				--memory-size 512 \
 				--timeout 180 \
-				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=FinishVisionsplitPDF,AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisionpdfToImage,AWS_CROP_IMAGE_LAMBDA_FUNCTION_NAME=FinishVisioncropImage,AWS_IMAGE_TEXT_RECOGNITION_LAMBDA_FUNCTION_NAME=FinishVisionimageTextRecognition}
+				--environment Variables={SITE_URL=${SITE_URL},AWS_BUCKET=${AWS_BUCKET},NODE_ENV=${NODE_ENV},AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME=${AWS_SPLIT_PDF_LAMBDA_FUNCTION_NAME},AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME=${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME}}
+
+	sleep 60
+
 	$(AWS_CLI) lambda update-function-code \
 				--function-name ${AWS_PDF_TO_IMAGE_LAMBDA_FUNCTION_NAME} \
 				--image-uri ${AWS_ECR_ADDRESS}/${AWS_ECR_REPO_NAME}:latest 

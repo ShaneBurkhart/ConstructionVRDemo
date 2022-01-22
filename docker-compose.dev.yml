@@ -1,14 +1,12 @@
 version: "3.9"
 
 services: 
-    next:
-        image: shaneburkhart/finish-vision-next
+    websocket:
+        image: shaneburkhart/finish-vision-web
         networks: [ pg, redis, next ]
         volumes:
             - ./packages/next:/app
             - ./packages/tailwind:/tailwind
-        ports:
-            - "3000:3000"
         env_file:
             - user.env
         command: "npm run dev"
@@ -67,10 +65,19 @@ services:
         env_file: [ user.env ]
         command: "node -e \"const queue = require('./queue.js'); queue.startServer();\""
 
-networks:
-    next:
-    lambda_queue_proxy:
-    redis:
-    pg:
-    split_pdf:
-    pdf_to_image:
+    nginx:
+        image: nginx:1.17
+        ports:
+            - "3000:3000"
+        restart: always
+        volumes:
+            - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+        networks: [ next ]
+
+    networks:
+        next:
+        lambda_queue_proxy:
+        redis:
+        pg:
+        split_pdf:
+        pdf_to_image:

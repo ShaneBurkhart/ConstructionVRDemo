@@ -9,13 +9,15 @@ var bodyParser = require('body-parser');
 
 // const queue = require("lambda-queue")
 
+app.use(express.static('public'))
+
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
 var models = require("./models/index.js");
 
-var Airtable = require('airtable');
-Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
-var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
+// var Airtable = require('airtable');
+// Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
+// var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
 
 var Actions = require("./common/actions.js");
 
@@ -58,6 +60,9 @@ require("./controllers/api/uploads.js")(app);
 require("./controllers/api/plans.js")(app);
 require("./controllers/api/documents.js")(app);
 
+app.get(["/"], function (req, res) {
+  res.redirect("/app")
+})
 
 app.get("/api2/finishes/options/search", function (req, res) {
   const adminMode = !!req.session["is_admin"];

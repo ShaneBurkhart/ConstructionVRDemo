@@ -58,7 +58,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx webpack",
-    "watch": "npx webpack --watch"
+    "watch": "npx webpack --watch",
+    "prod": "node websocket.js"
   },
   "repository": {
     "type": "git",

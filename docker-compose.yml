@@ -1,47 +1,29 @@
-web:
-    image: shaneburkhart/finish-vision-demo-web
-    links:
-        - pg
-        - redis
-    env_file:
-        - user.env
-    restart: always
-    command: "ruby server.rb"
+version: "3.9"
 
-websocket:
-    image: shaneburkhart/finish-vision-demo-web
-    links:
-        - pg
-        - redis
-    env_file:
-        - user.env
-    restart: always
-    command: "node websocket.js"
+services: 
+    web:
+        image: shaneburkhart/finish-vision-web
+        ports: [ "127.0.0.1:3000:3000" ] 
+        networks: [ pg, redis ]
+        env_file:
+            - user.env
+        command: "npm run prod"
 
-pg:
-    image: postgres:10
-    environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-        - POSTGRES_DB=mydb
-    ports:
-        - "5432:5432"
-    restart: always
-    volumes:
-        - ./data/pg:/var/lib/postgresql/data
+    pg:
+        image: postgres:10
+        networks: [ pg ]
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=mydb
+        volumes:
+            - ./data/pg:/var/lib/postgresql/data
 
-redis:
-    image: redis:3.2
-    restart: always
-    command: "redis-server --save '' --appendonly no"
+    redis:
+        image: redis:3.2
+        networks: [ redis ]
+        command: "redis-server --save '' --appendonly no"
 
-nginx:
-    image: nginx:1.17
-    ports:
-        - "3001:80"
-    restart: always
-    volumes:
-        - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    links:
-        - web
-        - websocket
+networks:
+    redis:
+    pg:
