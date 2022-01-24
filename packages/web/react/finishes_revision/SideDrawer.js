@@ -142,7 +142,7 @@ const SideDrawer = ({
     <>
       <div className={`${drawerStyles.join(' ')} hide-print`}>
         <Segment vertical>
-          <a href="/" title="go to project dashboard">
+          <a href="https://finishvision.com" title="go to FinishVision">
             <img src="/logo.png" />
           </a>
         </Segment>

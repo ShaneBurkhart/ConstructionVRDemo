@@ -49,7 +49,7 @@ const Header = () => {
     <div className={styles.siteHeader}>
       <div className="fluid-container">
         <div className={styles.leftNav}>
-          <a className={styles.tall} href="/" title="main dashboard">
+          <a className={styles.tall} href="https://finishvision.com" title="main dashboard">
             <img
               className="logo"
               style={{ maxWidth: 165, objectFit: "contain" }}

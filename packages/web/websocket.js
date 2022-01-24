@@ -7,6 +7,8 @@ var io = require('socket.io')(http, {
 const m = require("./controllers/middleware.js");
 var bodyParser = require('body-parser');
 
+const axios = require('axios')
+
 // const queue = require("lambda-queue")
 
 app.use(express.static('public'))
@@ -37,6 +39,7 @@ app.set('view engine', 'pug')
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(require('cookie-parser')());
 
 app.use(sessionMiddleware);
 app.use(m.addUserToRequest);
@@ -60,8 +63,37 @@ require("./controllers/api/uploads.js")(app);
 require("./controllers/api/plans.js")(app);
 require("./controllers/api/documents.js")(app);
 
+const SHARE_LINKS = [
+  "https://demo.finishvision.com/app/project/fa633cc4-ccdd-46a2-b911-497cc5a19a93/finishes?edit_access_token=f59d0c85-4a88-4b88-8716-c1786c6554c3",
+  "https://demo.finishvision.com/app/project/0d355f1e-5753-407e-ad58-1f686fc6b398/finishes?edit_access_token=8efd5f40-728e-4502-9c98-911bb4255724",
+  "https://demo.finishvision.com/app/project/47c8ff33-1d93-4ae2-8a09-b77f1c657c0b/finishes?edit_access_token=fc2c5efb-5b58-4de9-8f71-e4c103ac8763",
+  "https://demo.finishvision.com/app/project/6117b75d-55f5-4fb9-955d-41ea741ec082/finishes?edit_access_token=cc291c8e-9053-4cb3-ae02-51817b338d92",
+  "https://demo.finishvision.com/app/project/7146da73-ee97-41a8-b79a-42905b30e3eb/finishes?edit_access_token=729ab3b2-8246-4970-b0bd-122208ad16f9",
+  "https://demo.finishvision.com/app/project/aca09fdd-20c7-42bf-bb2b-4aada6ecf25d/finishes?edit_access_token=94a7f99b-47df-4a76-9c4e-39dcc1c458c2",
+  "https://demo.finishvision.com/app/project/0ccdb5a3-c4b7-414c-b8e2-a81d60ecb498/finishes?edit_access_token=db24a929-3dd5-4cad-b001-f61dbb303abc",
+  "https://demo.finishvision.com/app/project/053a376e-1fab-4f82-af81-cbc03df73f60/finishes?edit_access_token=c2b32ec4-9039-456c-b2e7-ddc07758c85c",
+  "https://demo.finishvision.com/app/project/38d0ca23-2010-4cc7-9b6f-cac13a98abfb/finishes?edit_access_token=c73776aa-4bdd-4cfd-8141-fd998ac921f6",
+  "https://demo.finishvision.com/app/project/261ce90f-f5ec-43e1-9520-d355d483c18b/finishes?edit_access_token=d3263806-e551-435f-a542-c2da547bfab9"
+]
+
 app.get(["/"], function (req, res) {
-  res.redirect("/app")
+  const link = SHARE_LINKS[Math.floor(Math.random() * SHARE_LINKS.length)]
+
+  const existingCookie = req.cookies.demoLink;
+  if (existingCookie) return res.redirect(existingCookie);
+
+  res.cookie('demoLink', link, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true })
+  res.redirect(link)
+})
+
+app.post("/signup", function (req, res) {
+  const { firstName, lastName, email, website } = req.body; 
+  // Send slack message to a channel
+  axios.post(process.env.SLACK_FINISH_VISION_CHANNEL_WEBHOOK, {
+    text: 'New signup:\n' + firstName + ' ' + lastName + ' (' + email + ')\n' + website
+  })
+
+  res.redirect("https://finishvision.com/sign-up-thank-you");
 })
 
 app.get("/api2/finishes/options/search", function (req, res) {

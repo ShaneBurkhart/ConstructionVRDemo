@@ -6,6 +6,8 @@
   "dependencies": {
     "@heroicons/react": "^1.0.4",
     "@sendgrid/mail": "^7.4.2",
+    "cookie-parser": "1.4.6",
+    "axios": "0.25.0",
     "airtable": "^0.8.1",
     "amazon-s3-uri": "^0.1.1",
     "aws-sdk": "^2.875.0",

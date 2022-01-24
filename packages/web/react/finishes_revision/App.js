@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import ActionCreators from './action_creators';
 import { finishCategoriesArr } from '../../common/constants';
 
+import Disclaimer from './Disclaimer';
 import FilePanel from './FilePanel';
 import SiteHeader from './SiteHeader';
 import FinishCategoriesTable from './FinishCategoriesTable';
@@ -78,6 +79,8 @@ const App = () => {
           />
         )}
         <div className={`${adminMode ? "admin-mode" : ""}`}>
+          <Disclaimer />
+
           <SiteHeader
             adminMode={adminMode}
             categoryList={categoryList}

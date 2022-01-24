@@ -73,7 +73,7 @@ class FinishCategoriesDrawer extends React.Component {
     return (
       <div className="categories-drawer hide-print">
         <Segment vertical>
-          <a href="/" title="go to projects dashboard">
+          <a href="https://finishvision.com" title="go to projects dashboard">
             <img src="/logo.png" />
           </a>
         </Segment>
