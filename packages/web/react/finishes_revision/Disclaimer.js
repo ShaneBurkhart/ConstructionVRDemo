@@ -6,7 +6,7 @@ export default function Disclaimer() {
 		<div className="xlarge-container">
 			<Message warning>
 				<Message.Header>Welcome! This is a project.</Message.Header>
-				<p>You can edit anything that you want, this page is reset every night. Others will visit this page so be kind and respectful please. <a style={{ textDecoration: "underline" }} href="https://finishvision.com/sign-up">Click here to signup for a trial.</a></p>
+				<p>You can edit anything that you want, this page is reset every night. Others will visit this page so be kind and respectful please. <br /><a style={{ textDecoration: "underline" }} href="https://finishvision.com/sign-up">Click here to signup for a trial.</a></p>
 			</Message>
 		</div>
 	)
