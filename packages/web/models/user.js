@@ -129,7 +129,9 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.prototype.getSignUpLink = function () {
-    return SITE_URL + "/app/invite-user-link/" + this.emailSignupToken;
+    const link = SITE_URL + "/app/invite-user-link/" + this.emailSignupToken;
+    console.log("Signup link", link)
+    return link
   }
 
   User.prototype.canEditProject = async function(project) {

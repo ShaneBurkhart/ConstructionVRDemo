@@ -2,8 +2,8 @@ version: "3.9"
 
 services: 
     web:
-        image: shaneburkhart/finish-vision-web
-        ports: [ "127.0.0.1:3000:3000" ] 
+        image: shaneburkhart/finish-vision-show-web
+        ports: [ "127.0.0.1:3001:3000" ] 
         networks: [ pg, redis ]
         env_file:
             - user.env

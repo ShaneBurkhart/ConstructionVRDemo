@@ -77,13 +77,7 @@ const SHARE_LINKS = [
 ]
 
 app.get(["/"], function (req, res) {
-  const link = SHARE_LINKS[Math.floor(Math.random() * SHARE_LINKS.length)]
-
-  const existingCookie = req.cookies.demoLink;
-  if (existingCookie) return res.redirect(existingCookie);
-
-  res.cookie('demoLink', link, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true })
-  res.redirect(link)
+  res.redirect("/app")
 })
 
 app.post("/signup", function (req, res) {

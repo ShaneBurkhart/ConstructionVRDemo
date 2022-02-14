@@ -79,8 +79,6 @@ const App = () => {
           />
         )}
         <div className={`${adminMode ? "admin-mode" : ""}`}>
-          <Disclaimer />
-
           <SiteHeader
             adminMode={adminMode}
             categoryList={categoryList}
