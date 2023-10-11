@@ -27,6 +27,7 @@ module.exports = (app) => {
         adminAccessToken: uuid()
       });
   
+
       const { id, name, accessToken, adminAccessToken, last_seen_at, archived, v1 } = newProject;
       if (!id) return res.status(422).send("Could not add new project");
     

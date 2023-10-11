@@ -5,7 +5,7 @@ services:
         image: shaneburkhart/finish-vision-web
         networks: [ pg, redis, next ]
         volumes:
-            - ./packages/next:/app
+            - ./packages/web:/app
             - ./packages/tailwind:/tailwind
         env_file:
             - user.env
@@ -74,10 +74,10 @@ services:
             - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
         networks: [ next ]
 
-    networks:
-        next:
-        lambda_queue_proxy:
-        redis:
-        pg:
-        split_pdf:
-        pdf_to_image:
+networks:
+    next:
+    lambda_queue_proxy:
+    redis:
+    pg:
+    split_pdf:
+    pdf_to_image:

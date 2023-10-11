@@ -58,6 +58,7 @@
     "webpack-cli": "^3.3.10"
   },
   "scripts": {
+    "dev": "npx nodemon --watch controllers websocket.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx webpack",
     "watch": "npx webpack --watch",
