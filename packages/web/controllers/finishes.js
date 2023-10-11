@@ -2,10 +2,6 @@ const m = require("./middleware.js");
 const r = require("../util/redirects.js");
 const models = require("../models/index.js");
 
-const Airtable = require('airtable');
-Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY });
-const base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
-
 const getPermissions = user => ({
   isSuperAdmin: user ? user.isSuperAdmin() : false,
   isEditor: user ? user.isEditor() : false,
@@ -38,23 +34,8 @@ module.exports = (app) => {
         res.locals.currentUser = tmpUser
       }
       
-      const getRecordIdAndVersion = new Promise((resolve, reject) => {
-        base('projects').select({
-          maxRecords: 1,
-          filterByFormula: `{Access Token} = "${project.accessToken}"`
-        }).eachPage(function page(records, _fetchNextPage){
-          resolve({
-            recordId: records[0].fields["Record ID"],
-            isV1: records[0].fields["Is V1?"],
-            hasRenderings: records[0].fields.hasOwnProperty("Units")
-          });
-        }, function done(err){
-          if (err) reject("Could not find resource");
-        })
-      });
-
-      const { recordId, isV1, hasRenderings } = await getRecordIdAndVersion;
-      if (!recordId) return res.status(422).send("Could not locate resource");
+      const isV1 = project.v1;
+      const hasRenderings = false;
 
       const permissions = getPermissions(req.user);
       const isAdmin = permissions.isSuperAdmin || permissions.isEditor;

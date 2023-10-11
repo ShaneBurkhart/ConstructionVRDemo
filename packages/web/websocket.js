@@ -13,10 +13,6 @@ const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize('postgres://postgres:postgres@pg:5432/mydb')
 var models = require("./models/index.js");
 
-var Airtable = require('airtable');
-Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY })
-var base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
-
 var Actions = require("./common/actions.js");
 
 const redis = require('redis')
