@@ -2,10 +2,6 @@ const m = require("./middleware.js");
 const r = require("../util/redirects.js");
 const models = require("../models/index.js");
 
-const Airtable = require('airtable');
-Airtable.configure({ apiKey: process.env.AIRTABLES_API_KEY });
-const base = Airtable.base(process.env.RENDERING_AIRTABLE_APP_ID);
-
 const getPermissions = user => ({
   isSuperAdmin: user ? user.isSuperAdmin() : false,
   isEditor: user ? user.isEditor() : false,

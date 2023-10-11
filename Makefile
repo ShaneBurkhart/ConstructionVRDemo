@@ -2,7 +2,7 @@
 include user.env
 -include prod.env
 
-NAME=finish-vision
+NAME=finish-vision-demo
 IMAGE_TAG=shaneburkhart/${NAME}
 LAMBDA_IMAGE_TAG=${IMAGE_TAG}-lambda
 
